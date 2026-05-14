@@ -1459,36 +1459,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Acessar Pro Grátis →</span></button>
       </div>
 
-      <!-- ELITE PLAN -->
-      <div class="plan-card" style="border-color:rgba(196,132,252,0.3);background:linear-gradient(135deg,rgba(196,132,252,0.03),var(--surface))">
-        <div class="plan-header">
-          <div>
-            <div class="plan-icon">⚫</div>
-            <div class="plan-name" style="background:linear-gradient(135deg,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-family:'Syne',sans-serif;font-size:18px;font-weight:700">Elite</div>
-            <div class="plan-tagline">Para quem não pode correr riscos</div>
-          </div>
-          <div class="plan-price">
-            <div class="plan-value" style="color:#c084fc">R$97</div>
-            <div class="plan-period">/mês</div>
-          </div>
-        </div>
-        <div class="plan-features">
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Pro</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Monitoramento contínuo ao longo do ano</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos de novos riscos detectados</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório mensal de score fiscal</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico temporal com evolução de risco</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Acesso prioritário a contador parceiro</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte direto via WhatsApp</div>
-        </div>
-        <button class="btn-plan" style="background:linear-gradient(135deg,#c084fc,#818cf8);color:#000;border:none;min-height:52px" onclick="openCheckout('elite')">
-          Assinar Elite — R$97/mês →
-        </button>
-        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
-          🔒 Ideal para autônomos de alta renda, MEI e investidores
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -1718,11 +1688,6 @@ const plans = {
     icon: '🛡️', name: 'Plano Pro', desc: 'Análises ilimitadas + múltiplos extratos + histórico',
     price: 'R$29,90', period: '/mês',
     successMsg: 'Bem-vindo ao Pro! Acesso completo liberado — análises ilimitadas e múltiplos extratos disponíveis agora.'
-  },
-  elite: {
-    icon: '⚫', name: 'Plano Elite', desc: 'Monitoramento contínuo + relatórios mensais + contador parceiro',
-    price: 'R$97', period: '/mês',
-    successMsg: 'Bem-vindo ao Elite! Seu CPF está agora sob monitoramento contínuo. Em breve você receberá o contato do seu contador parceiro.'
   }
 };
 
