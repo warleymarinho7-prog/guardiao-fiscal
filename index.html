@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Syne:wght@700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 :root {
@@ -40,7 +40,7 @@
 body {
   background: var(--bg);
   color: var(--text2);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 15px;
   line-height: 1.72;
   min-height: 100vh;
@@ -107,7 +107,7 @@ nav {
   background: none;
   border: none;
   color: var(--muted);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 14px;
   font-weight: 500;
   padding: 8px 16px;
@@ -122,7 +122,7 @@ nav {
   background: rgba(56,189,248,0.08);
   border: 1px solid rgba(56,189,248,0.2);
   color: var(--green);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 13px;
   font-weight: 600;
   padding: 9px 18px;
@@ -141,8 +141,8 @@ nav {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 72px 32px 48px;
-  max-width: 640px;
+  padding: 96px 40px 72px;
+  max-width: 680px;
   margin: 0 auto;
 }
 
@@ -150,7 +150,7 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -216,11 +216,11 @@ nav {
 
 .tabs {
   display: flex;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 5px;
-  margin-bottom: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 6px;
+  margin-bottom: 28px;
   gap: 4px;
 }
 
@@ -255,10 +255,10 @@ nav {
 
 .panel {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.05) inset;
 }
 
 .panel-header {
@@ -267,7 +267,7 @@ nav {
 }
 
 .panel-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 1px;
@@ -287,11 +287,11 @@ nav {
 .step-dot.active { background: var(--green); box-shadow: none; }
 
 .q-body { padding: 32px 28px 24px; }
-.q-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
+.q-num { font-family:'Manrope',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
 .q-title { font-family:'Syne',sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
 .q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
 
-.options { display:flex; flex-direction:column; gap:8px; }
+.options { display:flex; flex-direction:column; gap:10px; }
 
 .opt {
   display:flex; align-items:center; gap:14px;
@@ -317,10 +317,10 @@ nav {
 
 .opt-text { flex:1; }
 .opt-label { font-size:15px; font-weight:500; line-height:1.4; color:var(--text); }
-.opt-desc { font-size:13px; color:var(--muted2); margin-top:4px; line-height:1.5; }
+.opt-desc { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.55; font-weight:400; }
 
 .risk-pill {
-  font-size:10px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:600;
+  font-size:10px; font-family:'Manrope',sans-serif; font-weight:600;
   letter-spacing:0.2px; padding:3px 9px; border-radius:6px; flex-shrink:0;
 }
 .rp-green { background:rgba(16,185,129,0.1); color:#6ee7b7; }
@@ -328,8 +328,8 @@ nav {
 .rp-red { background:rgba(248,113,113,0.1); color:#fca5a5; }
 
 .panel-footer {
-  padding:20px 28px 24px;
-  border-top:1px solid var(--border);
+  padding:22px 28px 28px;
+  border-top:1px solid rgba(255,255,255,0.05);
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
 
@@ -337,7 +337,7 @@ nav {
   padding:13px 20px;
   background:transparent; border:1px solid var(--border);
   border-radius:12px; color:var(--muted2);
-  font-family:'Plus Jakarta Sans',sans-serif; font-size:14px;
+  font-family:'Manrope',sans-serif; font-size:14px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-back:hover { color:var(--text); border-color:var(--border2); }
@@ -377,12 +377,12 @@ nav {
 .result-sublabel { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:18px; }
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
 .result-level { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1.2px; margin-bottom:6px; }
-.result-desc { font-size:15px; color:var(--muted2); margin-bottom:28px; line-height:1.6; }
+.result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
 .score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
 .score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
 .score-label { font-size:11px; color:var(--muted); font-family:'Syne',sans-serif; }
 
-.alerts { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
 .alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
 .alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
 .alert-red { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.12); }
@@ -405,9 +405,9 @@ nav {
 }
 
 .upgrade-card {
-  padding:18px;
-  border-radius:16px;
-  border:1px solid var(--border);
+  padding:20px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.06);
   background:var(--surface2);
   cursor:pointer;
   transition:all 0.2s ease;
@@ -448,7 +448,7 @@ nav {
   width:100%; padding:12px;
   background:transparent; border:1px solid var(--border);
   border-radius:10px; color:var(--muted);
-  font-family:'Plus Jakarta Sans',sans-serif; font-size:13px;
+  font-family:'Manrope',sans-serif; font-size:13px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-restart:hover { color:var(--text); border-color:var(--border2); }
@@ -613,8 +613,8 @@ nav {
 }
 
 .page-title {
-  font-family:'Syne',sans-serif; font-size:clamp(28px,4vw,42px);
-  font-weight:800; letter-spacing:-1.5px; text-align:center; margin-bottom:12px;
+  font-family:'Syne',sans-serif; font-size:clamp(30px,4vw,46px);
+  font-weight:800; letter-spacing:-2px; text-align:center; margin-bottom:16px;
   color:var(--text);
 }
 .page-sub { font-size:16px; color:var(--muted2); text-align:center; margin-bottom:44px; line-height:1.7; max-width:500px; margin-left:auto; margin-right:auto; }
@@ -655,11 +655,12 @@ nav {
 .plan-period { font-size:11px; color:var(--muted); margin-top:2px; }
 .plan-free { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
 
-.plan-features { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.plan-features { display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
 .plan-feat {
   display:flex; align-items:flex-start; gap:12px;
-  font-size:14px; color:var(--muted2); line-height:1.5;
-  padding: 2px 0;
+  font-size:14px; color:var(--muted2); line-height:1.6;
+  padding: 3px 0;
+  font-weight:400;
 }
 .feat-icon { font-size:14px; flex-shrink:0; }
 .feat-ok { color:var(--text); }
@@ -768,7 +769,7 @@ nav {
 
 /* form */
 .form-label {
-  font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:600;
+  font-family:'Manrope',sans-serif; font-size:12px; font-weight:600;
   letter-spacing:0.3px; color:var(--muted2);
   display:block; margin-bottom:8px;
 }
@@ -969,7 +970,7 @@ nav {
 .p-dbg-bd{display:none;padding:14px 22px;border-top:1px solid var(--border)}
 .p-dbg-bd.open{display:block}
 pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
-.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Manrope',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
 @media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}.p-sv{font-size:19px}}
 
@@ -1768,7 +1769,7 @@ function openCheckout(plan) {
       <div class="os-name">${p.name}</div>
       <div class="os-desc">${p.desc}</div>
     </div>
-    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-weight:400"> ${p.period}</span></div>
+    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Manrope',sans-serif;font-weight:400"> ${p.period}</span></div>
   `;
 
   // parcelamento só no Pro
