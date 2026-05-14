@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 :root {
   --bg: #080e1a;
@@ -1691,7 +1691,7 @@ function initProFreeMode() {
 function openCheckout(plan) {
   // MODO PRO GRATUITO — bypass do checkout
   if (PRO_FREE_MODE) {
-    if (window._eConsolidated) {
+    if (_eConsolidated) {
       // já tem análise feita — desbloqueia resultado direto
       closeCheckoutDirect();
       eUnlockResult();
@@ -1777,7 +1777,7 @@ function goToSuccess() {
   document.getElementById('successMsg').textContent = plans[currentPlan].successMsg;
   document.getElementById('checkoutModal').scrollTop = 0;
   // se veio do fluxo de extrato, desbloqueia o resultado após pagamento
-  if(window._eConsolidated) {
+  if(_eConsolidated) {
     setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1200);
   }
 }
@@ -2088,6 +2088,8 @@ const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
 let eFiles=[];
 let eAllTxns=[];
 let eActiveBankTab='all';
+let _eConsolidated=null;
+let _eSources=null;
 
 const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
 const fmtDate=d=>d?d.toLocaleDateString('pt-BR'):'—';
@@ -2213,6 +2215,17 @@ function eConsolidate(results){
   return{score,totalCredits,pixTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,alerts,all:allC};
 }
 
+
+// ── sanitizador XSS ──────────────────────────────────────
+function sanitize(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 // ── UI extrato ──
 function eDov(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
 function eDlv(){document.getElementById('dz').classList.remove('drag')}
@@ -2236,7 +2249,7 @@ function eRenderFileList(){
   document.getElementById('fileList').innerHTML=eFiles.map((f,i)=>`
     <div class="file-item ${f.status==='ok'?'ok':f.status==='err'?'err':''}">
       <span class="file-ico">${f.status==='loading'?'⏳':f.status==='err'?'❌':'📄'}</span>
-      <div class="file-info"><div class="file-name">${f.name}</div><div class="file-bank">${f.detected?f.detected.bank:'Detectando...'}</div></div>
+      <div class="file-info"><div class="file-name">${sanitize(f.name)}</div><div class="file-bank">${f.detected?sanitize(f.detected.bank):'Detectando...'}</div></div>
       <span class="file-status ${f.status==='ok'?'fs-ok':f.status==='err'?'fs-err':'fs-load'}">${f.status==='ok'?'PRONTO':f.status==='err'?'ERRO':'...'}</span>
       <span class="file-rm" onclick="eRemoveFile(${i})">✕</span>
     </div>`).join('');
@@ -2297,14 +2310,14 @@ async function eRunAll(){
   document.getElementById('s3sub').textContent=`${results.length} extrato(s) analisado(s) — desbloqueie para ver`;
   s3.scrollIntoView({behavior:'smooth',block:'start'});
   // store results for after payment
-  window._eConsolidated=consolidated;
-  window._eSources=results;
+  _eConsolidated=consolidated;
+  _eSources=results;
 }
 
 function eUnlockResult(){
   document.getElementById('paywallBlock').style.display='none';
   document.getElementById('realResultBlock').style.display='block';
-  const c=window._eConsolidated,sources=window._eSources;
+  const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
   let emoji,level,color;
   if(c.score<=25){emoji='🟢';level='BAIXO RISCO';color='#00d96e';}
@@ -2350,7 +2363,7 @@ function eRenderTxns(filter){
   document.getElementById('pTxnList').innerHTML=list.map(t=>{
     const dc=t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
     const cls=t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
-    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${t.desc||'—'}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${t.flag}</span>`:''}<span class="ptbank">${t.bank}</span></div>`;
+    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${t.flag}</span>`:''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
   }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>';
 }
 function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
