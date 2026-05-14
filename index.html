@@ -2117,7 +2117,14 @@ function eDetectFormat(c,fn){
   if(ext==='pdf')return{format:'pdf',bank:'PDF'};
   if(ext==='ofx'||ext==='qfx'||h.includes('<OFX')||h.includes('OFXHEADER'))return{format:'ofx',bank:eDetectBankOFX(c)};
   if(l.includes('"date"')&&l.includes('"title"')&&l.includes('"amount"'))return{format:'nubank_cartao',bank:'Nubank (cartão)'};
-  if((l.includes('lançamento')||l.includes('lancamento'))&&l.includes('valor'))return{format:'nubank_conta',bank:'Nubank (conta)'};
+  // Nubank conta — múltiplos formatos de cabeçalho
+  const isNubankConta=(
+    ((l.includes('lançamento')||l.includes('lancamento'))&&l.includes('valor'))||
+    (l.includes('data')&&l.includes('valor')&&l.includes('identificador'))||
+    (l.includes('data')&&l.includes('descrição')&&l.includes('valor')&&!l.includes(';'))||
+    (l.includes('data')&&l.includes('description')&&l.includes('amount')&&l.includes('identifier'))
+  )&&!l.includes('"date"')&&!l.includes('"title"');
+  if(isNubankConta)return{format:'nubank_conta',bank:'Nubank (conta)'};
   if(l.includes('banco inter')||(l.includes('histórico')&&l.includes(';')))return{format:'inter',bank:'Banco Inter'};
   if(l.includes('data;histórico')||l.includes('data;historico'))return{format:'bb',bank:'Banco do Brasil'};
   return{format:'generic',bank:'CSV genérico'};
@@ -2142,7 +2149,24 @@ function eSplitCSV(line,sep=','){
 }
 function eDetectSep(l){const s={',':0,';':0,'\t':0};for(const c of l)if(s[c]!==undefined)s[c]++;return Object.keys(s).reduce((a,b)=>s[a]>s[b]?a:b);}
 function eParseNubankCartao(lines){return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<3)return null;const date=eParseDate(c[0]),desc=(c[1]||'').trim(),value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
-function eParseNubankConta(lines){return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<4)return null;const date=eParseDate(c[0]),desc=(c[2]||c[1]||'').trim(),value=eParseBRL(c[c.length-1]);return date?{date,desc,value}:null;}).filter(Boolean);}
+function eParseNubankConta(lines){
+  if(lines.length<2)return[];
+  // detecta colunas pelo cabeçalho
+  const hdr=eSplitCSV(lines[0]).map(c=>c.toLowerCase().replace(/['"]/g,'').trim());
+  const iDate=hdr.findIndex(h=>h.includes('data')||h==='date');
+  const iDesc=hdr.findIndex(h=>h.includes('descri')||h.includes('description')||h.includes('histórico')||h.includes('historico'));
+  const iVal =hdr.findIndex(h=>h==='valor'||h==='value'||h==='amount'||h.includes('valor'));
+  const iId  =hdr.findIndex(h=>h.includes('identif'));
+  return lines.slice(1).filter(l=>l.trim()).map(l=>{
+    const c=eSplitCSV(l);
+    if(c.length<2)return null;
+    // usa índices detectados ou fallback posicional
+    const date=eParseDate(c[iDate>=0?iDate:0]);
+    const desc=(iDesc>=0?c[iDesc]:(iId>=0?c[iId]:c[1]||'')).replace(/['"]/g,'').trim();
+    const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-1]);
+    return date&&desc?{date,desc,value}:null;
+  }).filter(Boolean);
+}
 function eParseInter(lines){let s=0;for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i+1;break}}const sep=eDetectSep(lines[s]||lines[0]||'');return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(sep).map(x=>x.replace(/"/g,'').trim());if(c.length<3)return null;const date=eParseDate(c[0]),desc=c[1]||'',value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
 function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'',cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
 function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;let m;while((m=re.exec(content))!==null){const b=m[1],date=eParseDate(eGetTag(b,'DTPOSTED')),value=parseFloat(eGetTag(b,'TRNAMT')||'0'),desc=(eGetTag(b,'MEMO')||eGetTag(b,'NAME')||'Sem descrição').trim();if(date)txns.push({date,desc,value});}if(txns.length>0)return txns;const lines=content.split('\n');let cur={};for(const line of lines){const t=line.trim();if(t==='<STMTTRN>'){cur={};continue}if(t==='</STMTTRN>'){if(cur.date&&cur.value!==undefined)txns.push({...cur});cur={};continue}const mm=t.match(/^<([A-Z]+)>(.+)$/);if(mm){const[,tg,v]=mm;if(tg==='DTPOSTED')cur.date=eParseDate(v);if(tg==='TRNAMT')cur.value=parseFloat(v)||0;if((tg==='MEMO'||tg==='NAME')&&!cur.desc)cur.desc=v.trim();}}return txns;}
@@ -2286,7 +2310,12 @@ async function eRunAll(){
     try{
       let txns=[];
       if(f.type==='pdf'){const text=await eParsePDF(f.content);txns=eParsePDFText(text);if(txns.length===0){eShowErr(`Não foi possível extrair de "${f.name}". Tente CSV ou OFX.`);continue;}f.detected.bank=`PDF (${txns.length} transações)`;}
-      else{const lines=f.content.split('\n');const fmt=f.detected.format;if(fmt==='nubank_cartao')txns=eParseNubankCartao(lines);else if(fmt==='nubank_conta')txns=eParseNubankConta(lines);else if(fmt==='inter')txns=eParseInter(lines);else if(fmt==='bb')txns=eParseBB(lines);else if(fmt==='ofx')txns=eParseOFX(f.content);else txns=eParseGeneric(lines);}
+      else{const lines=f.content.split('\n');const fmt=f.detected.format;if(fmt==='nubank_cartao')txns=eParseNubankCartao(lines);
+        else if(fmt==='nubank_conta'){txns=eParseNubankConta(lines);if(txns.length===0)txns=eParseGeneric(lines);}
+        else if(fmt==='inter')txns=eParseInter(lines);
+        else if(fmt==='bb')txns=eParseBB(lines);
+        else if(fmt==='ofx')txns=eParseOFX(f.content);
+        else txns=eParseGeneric(lines);}
       if(txns.length===0){eShowErr(`Nenhuma transação em "${f.name}".`);continue;}
       const r=eAnalyzeSingle(txns,f.detected.bank);
       if(r)results.push(r);
