@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MargemCerta — Diagnóstico de Lucro para Marketplace</title>
+<meta name="description" content="Descubra em segundos se você está vendendo com lucro real ou pagando para trabalhar."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0f0f8;--muted:#8888aa;
+  --green:#22d97a;--green-bg:rgba(34,217,122,0.1);--green-border:rgba(34,217,122,0.3);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);--amber-border:rgba(245,166,35,0.3);
+  --red:#ff4d6d;--red-bg:rgba(255,77,109,0.1);--red-border:rgba(255,77,109,0.3);
+  --accent:#6c63ff;--accent2:#a78bfa;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Syne',sans-serif;line-height:1.2}
+input,select{font-family:'DM Sans',sans-serif;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:9px 13px;font-size:14px;width:100%;outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--accent)}
+input[type=number]::-webkit-inner-spin-button{opacity:.4}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;outline:none;transition:all .2s}
+.header{border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.96);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800;font-size:15px;color:#fff}
+.logo-text{font-family:'Syne';font-weight:700;font-size:16px}
+.badge-beta{font-size:11px;color:var(--muted);background:var(--bg3);padding:3px 10px;border-radius:20px;border:1px solid var(--border)}
+.hero{text-align:center;padding:44px 24px 28px}
+.hero h1{font-size:clamp(24px,4vw,42px);font-weight:800;letter-spacing:-.03em;margin-bottom:10px}
+.hero p{color:var(--muted);font-size:15px;max-width:460px;margin:0 auto}
+.tabs{display:flex;justify-content:center;gap:6px;padding:0 24px 20px}
+.tab{padding:7px 18px;border-radius:20px;font-size:13px;font-weight:500;transition:all .2s;cursor:pointer}
+.tab.active{background:var(--accent);color:#fff;border:none}
+.tab.inactive{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+.container{max-width:880px;margin:0 auto;padding:0 20px 60px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--bg2);border-radius:14px;border:1px solid var(--border);padding:18px}
+.card-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.grid2-inner{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field{margin-bottom:10px}
+.mkt-btn{flex:1;padding:9px 6px;border-radius:9px;font-size:12px;font-weight:500}
+.mkt-btn.active{background:var(--accent);color:#fff}
+.mkt-btn.inactive{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+.mkt-desc{font-size:11px;color:var(--muted);margin-top:6px}
+.save-btn{width:100%;padding:11px;border-radius:11px;font-size:13px;font-weight:500;background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.save-btn:hover{background:var(--bg2)}
+.save-btn:disabled{opacity:.4;cursor:not-allowed}
+.status-card{border-radius:14px;padding:20px;border:1px solid}
+.status-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric p:first-child{font-size:11px;color:var(--muted);margin-bottom:3px}
+.metric p:last-child{font-size:28px;font-weight:700;font-family:'Syne'}
+.diag-item{display:flex;gap:9px;align-items:flex-start;padding:9px 13px;border-radius:9px;margin-bottom:8px;border:1px solid}
+.diag-item span{font-size:13px;line-height:1.5}
+.bar-row{margin-bottom:9px}
+.bar-row .bar-labels{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.bar-row .bar-labels span:first-child{color:var(--muted)}
+.bar-track{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.sim-btn{padding:8px 10px;border-radius:9px;font-size:12px;font-weight:500;text-align:left}
+.sim-btn.active{background:var(--accent);color:#fff}
+.sim-btn.inactive{background:var(--bg3);color:var(--muted);border:1px solid var(--border)}
+.sim-result{padding:13px 15px;border-radius:10px;border:1px solid}
+.sim-metrics{display:flex;gap:16px;margin-top:6px}
+.sim-metric p:first-child{font-size:10px;color:var(--muted)}
+.sim-metric p:last-child{font-size:18px;font-weight:700;font-family:'Syne'}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;gap:10px;text-align:center}
+.empty-state .icon{font-size:44px}
+.empty-state h3{font-size:15px;font-weight:600}
+.empty-state p{color:var(--muted);font-size:13px;max-width:220px}
+.hist-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;gap:10px}
+.hist-item:last-child{border-bottom:none}
+.hist-left{display:flex;align-items:center;gap:8px}
+.hist-name{font-size:13px}
+.hist-mkt{font-size:11px;color:var(--muted)}
+.hist-empty{color:var(--muted);font-size:13px;text-align:center;padding:32px 0}
+.clear-btn{font-size:11px;color:var(--red);background:transparent;border:1px solid var(--red-border);border-radius:7px;padding:3px 10px}
+.hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);color:var(--muted);font-size:11px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease forwards}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">M</div>
+    <span class="logo-text">Margem<span style="color:var(--accent2)">Certa</span></span>
+  </div>
+  <span class="badge-beta">Beta gratuito</span>
+</div>
+
+<div class="hero">
+  <h1>Você está vendendo com <span style="color:var(--green)">lucro real</span><br>ou <span style="color:var(--red)">pagando para trabalhar?</span></h1>
+  <p>Diagnóstico completo de margem para Mercado Livre e Shopee — em segundos, sem planilha.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('calc')" id="tab-calc">Diagnóstico</button>
+  <button class="tab inactive" onclick="showTab('hist')" id="tab-hist">Histórico (<span id="hist-count">0</span>)</button>
+</div>
+
+<div class="container">
+  <div id="view-calc">
+    <div class="grid2">
+      <!-- INPUTS -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <!-- Marketplace -->
+        <div class="card">
+          <div class="card-label">Marketplace</div>
+          <div style="display:flex;gap:7px">
+            <button class="mkt-btn active" id="btn-ml" onclick="setMkt('ml')">Mercado Livre</button>
+            <button class="mkt-btn inactive" id="btn-shopee" onclick="setMkt('shopee')">Shopee</button>
+            <button class="mkt-btn inactive" id="btn-manual" onclick="setMkt('manual')">Manual</button>
+          </div>
+          <p class="mkt-desc" id="mkt-desc">Taxa padrão ML (categoria geral)</p>
+        </div>
+
+        <!-- Dados do produto -->
+        <div class="card">
+          <div class="card-label">Dados do produto</div>
+          <div class="field"><label>Nome do produto (opcional)</label><input type="text" id="nome" placeholder="Ex: Tênis Nike Air Max"/></div>
+          <div class="grid2-inner">
+            <div class="field"><label>Custo do produto (R$)</label><input type="number" id="custo" min="0" step="0.01" placeholder="0,00" oninput="autoCalc()"/></div>
+            <div class="field"><label>Preço de venda (R$)</label><input type="number" id="preco" min="0" step="0.01" placeholder="0,00" oninput="autoCalc()"/></div>
+          </div>
+        </div>
+
+        <!-- Taxas -->
+        <div class="card">
+          <div class="card-label">Taxas e custos</div>
+          <div class="grid2-inner">
+            <div class="field"><label>Taxa marketplace (%)</label><input type="number" id="taxa" min="0" step="0.1" placeholder="14" oninput="autoCalc()"/></div>
+            <div class="field"><label>Taxa fixa (R$)</label><input type="number" id="taxafixa" min="0" step="0.01" placeholder="6" oninput="autoCalc()"/></div>
+            <div class="field"><label>Frete (R$)</label><input type="number" id="frete" min="0" step="0.01" placeholder="0" oninput="autoCalc()"/></div>
+            <div class="field"><label>Imposto (%)</label><input type="number" id="imposto" min="0" step="0.1" placeholder="6" oninput="autoCalc()"/></div>
+            <div class="field"><label>Investimento Ads (R$)</label><input type="number" id="ads" min="0" step="0.01" placeholder="0" oninput="autoCalc()"/></div>
+            <div class="field"><label>Devoluções esperadas</label><input type="number" id="dev" min="0" step="1" placeholder="0" oninput="autoCalc()"/></div>
+          </div>
+        </div>
+
+        <button class="save-btn" id="save-btn" onclick="salvar()" disabled>Salvar no histórico</button>
+      </div>
+
+      <!-- RESULTADO -->
+      <div style="display:flex;flex-direction:column;gap:14px" id="resultado-col">
+        <div class="card empty-state" id="empty-state">
+          <div class="icon">📊</div>
+          <h3>Preencha os dados ao lado</h3>
+          <p>O diagnóstico aparece aqui automaticamente assim que você digitar custo e preço.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-hist" style="display:none">
+    <div class="card">
+      <div class="hist-header">
+        <span style="font-family:'Syne';font-weight:600;font-size:15px">Histórico local</span>
+        <button class="clear-btn" onclick="limparHist()">Limpar</button>
+      </div>
+      <div id="hist-list"><p class="hist-empty">Nenhum produto salvo ainda.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">MargemCerta — Diagnóstico de lucro para marketplace • Beta gratuito</div>
+
+<script>
+const PRESETS={
+  ml:{taxa:14,taxafixa:6,desc:'Taxa padrão ML (categoria geral)'},
+  shopee:{taxa:20,taxafixa:4,desc:'Taxa padrão Shopee (atualizada mar/2025)'},
+  manual:{taxa:0,taxafixa:0,desc:'Configure manualmente'}
+};
+let mkt='ml', resultado=null, simAtivo=null, historico=[];
+
+try{historico=JSON.parse(localStorage.getItem('mc_hist')||'[]')}catch{}
+atualizarHistCount();
+
+function brl(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function pct(v){return v.toFixed(1)+'%'}
+function getStatus(l,m){if(l<0)return'red';if(m<8)return'amber';return'green'}
+const SC={
+  green:{bg:'var(--green-bg)',border:'var(--green-border)',text:'var(--green)'},
+  amber:{bg:'var(--amber-bg)',border:'var(--amber-border)',text:'var(--amber)'},
+  red:{bg:'var(--red-bg)',border:'var(--red-border)',text:'var(--red)'}
+};
+
+function setMkt(m){
+  mkt=m;
+  ['ml','shopee','manual'].forEach(k=>{
+    document.getElementById('btn-'+k).className='mkt-btn '+(k===m?'active':'inactive');
+  });
+  document.getElementById('taxa').value=PRESETS[m].taxa||'';
+  document.getElementById('taxafixa').value=PRESETS[m].taxafixa||'';
+  document.getElementById('mkt-desc').textContent=PRESETS[m].desc;
+  autoCalc();
+}
+
+function calcular(o){
+  const p=parseFloat(o.preco)||0,c=parseFloat(o.custo)||0,t=parseFloat(o.taxa)||0,
+    tf=parseFloat(o.taxafixa)||0,fr=parseFloat(o.frete)||0,im=parseFloat(o.imposto)||0,
+    ad=parseFloat(o.ads)||0,dv=parseInt(o.dev)||0;
+  const taxaVal=p*(t/100),impostoVal=p*(im/100);
+  const lucro=p-c-taxaVal-tf-fr-impostoVal-ad;
+  const margem=p>0?(lucro/p)*100:0;
+  const adsPctLucro=lucro>0?(ad/lucro)*100:ad>0?999:0;
+  const lucroComDev=lucro-dv*(fr*2+c*0.1);
+  const roasMin=p>0&&ad>0?(p/ad).toFixed(1):null;
+  return{lucro,margem,adsPctLucro,lucroComDev,roasMin,p,c,t,tf,fr,im,ad,dv,taxaVal,impostoVal};
+}
+
+function vals(){
+  return{
+    preco:document.getElementById('preco').value,
+    custo:document.getElementById('custo').value,
+    taxa:document.getElementById('taxa').value,
+    taxafixa:document.getElementById('taxafixa').value,
+    frete:document.getElementById('frete').value,
+    imposto:document.getElementById('imposto').value,
+    ads:document.getElementById('ads').value,
+    dev:document.getElementById('dev').value,
+  };
+}
+
+function autoCalc(){
+  const v=vals();
+  if(!v.preco||!v.custo){
+    document.getElementById('resultado-col').innerHTML='<div class="card empty-state" id="empty-state"><div class="icon">📊</div><h3>Preencha os dados ao lado</h3><p>O diagnóstico aparece aqui automaticamente assim que você digitar custo e preço.</p></div>';
+    document.getElementById('save-btn').disabled=true;
+    resultado=null;simAtivo=null;
+    return;
+  }
+  resultado=calcular(v);
+  renderResultado(resultado,null);
+  document.getElementById('save-btn').disabled=false;
+}
+
+function renderResultado(r,sim){
+  const s=getStatus(r.lucro,r.margem);
+  const col=document.getElementById('resultado-col');
+
+  let diagHTML='';
+  if(r.lucro<0)diagHTML+=diag('red',`Prejuízo de ${brl(Math.abs(r.lucro))} por venda — você está pagando para trabalhar.`);
+  else if(r.margem<5)diagHTML+=diag('red',`Margem crítica de ${pct(r.margem)} — qualquer imprevisto gera prejuízo.`);
+  else if(r.margem<10)diagHTML+=diag('amber',`Margem de ${pct(r.margem)} é apertada — pouca margem de segurança.`);
+  else diagHTML+=diag('green',`Margem saudável de ${pct(r.margem)} — operação sustentável.`);
+  if(r.ad>0&&r.adsPctLucro>40&&r.lucro>0)diagHTML+=diag('amber',`Ads consome ${pct(r.adsPctLucro)} do lucro — verifique se o ROAS justifica.`);
+  if(r.ad>0&&r.adsPctLucro>=999)diagHTML+=diag('red','Ads está maior que o lucro — campanha está gerando prejuízo.');
+  if(r.dv>0&&r.lucroComDev<0&&r.lucro>0)diagHTML+=diag('red',`Com ${r.dv} devolução(ões), seu lucro vira prejuízo de ${brl(Math.abs(r.lucroComDev))}.`);
+  if(r.roasMin)diagHTML+=diag('green',`ROAS mínimo seguro: ${r.roasMin}x — abaixo disso você perde dinheiro.`);
+
+  let barsHTML='';
+  [{l:'Custo do produto',v:r.c},{l:'Taxa marketplace',v:r.taxaVal},{l:'Taxa fixa',v:r.tf},{l:'Frete',v:r.fr},{l:'Imposto',v:r.impostoVal},{l:'Ads',v:r.ad}]
+    .filter(x=>x.v>0).forEach(x=>{
+      const p2=r.p>0?Math.min(x.v/r.p*100,100):0;
+      barsHTML+=`<div class="bar-row"><div class="bar-labels"><span>${x.l}</span><span>${brl(x.v)} (${pct(r.p>0?x.v/r.p*100:0)})</span></div><div class="bar-track"><div class="bar-fill" style="width:${p2}%"></div></div></div>`;
+    });
+
+  const simBtns=['cupom','ads2x','frete5','preco10','devolucao'].map(id=>{
+    const labels={cupom:'E se: Cupom 10%?',ads2x:'E se: Ads dobrar?',frete5:'E se: Frete +R$5?',preco10:'E se: Preço -R$10?',devolucao:'E se: +1 devolução?'};
+    const active=simAtivo===id;
+    return`<button class="sim-btn ${active?'active':'inactive'}" onclick="simular('${id}')">${labels[id]}</button>`;
+  }).join('');
+
+  let simResultHTML='<p style="font-size:12px;color:var(--muted)">Clique em um cenário para simular.</p>';
+  if(sim){
+    const ss=getStatus(sim.lucro,sim.margem);
+    const diff=sim.lucro-resultado.lucro;
+    const diffColor=diff>=0?'var(--green)':'var(--red)';
+    simResultHTML=`<div class="sim-result fade-in" style="background:${SC[ss].bg};border-color:${SC[ss].border}">
+      <p style="font-size:11px;color:var(--muted);margin-bottom:6px">Cenário: ${sim.desc}</p>
+      <div class="sim-metrics">
+        <div class="sim-metric"><p>Novo lucro</p><p style="color:${SC[ss].text}">${sim.lucro>=0?'+':''}${brl(sim.lucro)}</p></div>
+        <div class="sim-metric"><p>Variação</p><p style="color:${diffColor}">${diff>=0?'+':''}${brl(diff)}</p></div>
+        <div class="sim-metric"><p>Nova margem</p><p style="color:${SC[ss].text}">${pct(sim.margem)}</p></div>
+      </div></div>`;
+  }
+
+  col.innerHTML=`
+    <div class="status-card fade-in" style="background:${SC[s].bg};border-color:${SC[s].border}">
+      <div class="status-label"><span class="dot" style="background:${SC[s].text}"></span><span style="color:${SC[s].text}">${s==='green'?'Operação saudável':s==='amber'?'Atenção necessária':'Prejuízo detectado'}</span></div>
+      <div class="metric-grid">
+        <div class="metric"><p>Lucro líquido</p><p style="color:${SC[s].text}">${r.lucro>=0?'+':''}${brl(r.lucro)}</p></div>
+        <div class="metric"><p>Margem real</p><p style="color:${SC[s].text}">${pct(r.margem)}</p></div>
+      </div>
+    </div>
+    <div class="card fade-in"><div class="card-label">Diagnóstico</div>${diagHTML}</div>
+    <div class="card fade-in"><div class="card-label">Onde vai cada real</div>${barsHTML}</div>
+    <div class="card fade-in"><div class="card-label">Simular cenários</div><div class="sim-grid">${simBtns}</div>${simResultHTML}</div>
+  `;
+}
+
+function diag(type,text){
+  return`<div class="diag-item" style="background:${SC[type].bg};border-color:${SC[type].border}"><span class="dot" style="background:${SC[type].text};margin-top:4px"></span><span>${text}</span></div>`;
+}
+
+function simular(tipo){
+  if(!resultado)return;
+  const v=vals();
+  let o={...v},desc='';
+  if(tipo==='cupom'){o.preco=resultado.p*0.9;desc='Cupom de 10%'}
+  if(tipo==='ads2x'){o.ads=resultado.ad*2;desc='Ads dobrado'}
+  if(tipo==='frete5'){o.frete=resultado.fr+5;desc='Frete +R$5'}
+  if(tipo==='preco10'){o.preco=resultado.p-10;desc='Preço -R$10'}
+  if(tipo==='devolucao'){o.dev=(resultado.dv||0)+1;desc='+1 devolução'}
+  simAtivo=tipo;
+  const sim={...calcular(o),desc};
+  renderResultado(resultado,sim);
+}
+
+function salvar(){
+  if(!resultado)return;
+  const v=vals();
+  const item={
+    id:Date.now(),
+    nome:document.getElementById('nome').value||'Produto '+(historico.length+1),
+    marketplace:['Mercado Livre','Shopee','Manual'][['ml','shopee','manual'].indexOf(mkt)],
+    data:new Date().toLocaleDateString('pt-BR'),
+    inputs:v,mkt,
+    resultado:{lucro:resultado.lucro,margem:resultado.margem}
+  };
+  historico=[item,...historico].slice(0,20);
+  localStorage.setItem('mc_hist',JSON.stringify(historico));
+  atualizarHistCount();
+  renderHist();
+  const btn=document.getElementById('save-btn');
+  btn.textContent='Salvo!';
+  setTimeout(()=>{btn.textContent='Salvar no histórico'},1500);
+}
+
+function atualizarHistCount(){document.getElementById('hist-count').textContent=historico.length}
+
+function renderHist(){
+  const list=document.getElementById('hist-list');
+  if(!historico.length){list.innerHTML='<p class="hist-empty">Nenhum produto salvo ainda. Calcule e clique em "Salvar no histórico".</p>';return}
+  const SC2={green:'var(--green)',amber:'var(--amber)',red:'var(--red)'};
+  list.innerHTML=historico.map(item=>{
+    const s=getStatus(item.resultado.lucro,item.resultado.margem);
+    return`<div class="hist-item" onclick="carregarItem(${item.id})">
+      <div class="hist-left"><span class="dot" style="background:${SC2[s]}"></span><div><div class="hist-name">${item.nome}</div><div class="hist-mkt">${item.marketplace} • ${item.data}</div></div></div>
+      <span style="font-size:13px;font-weight:500;color:${SC2[s]}">${item.resultado.lucro>=0?'+':''}${brl(item.resultado.lucro)}</span>
+    </div>`;
+  }).join('');
+}
+
+function carregarItem(id){
+  const item=historico.find(h=>h.id===id);
+  if(!item)return;
+  document.getElementById('nome').value=item.nome;
+  Object.entries(item.inputs).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v});
+  setMkt(item.mkt||'ml');
+  showTab('calc');
+  autoCalc();
+}
+
+function limparHist(){
+  historico=[];
+  localStorage.removeItem('mc_hist');
+  atualizarHistCount();
+  renderHist();
+}
+
+function showTab(t){
+  document.getElementById('view-calc').style.display=t==='calc'?'block':'none';
+  document.getElementById('view-hist').style.display=t==='hist'?'block':'none';
+  document.getElementById('tab-calc').className='tab '+(t==='calc'?'active':'inactive');
+  document.getElementById('tab-hist').className='tab '+(t==='hist'?'active':'inactive');
+  if(t==='hist')renderHist();
+}
+
+setMkt('ml');
+</script>
+</body>
+</html>
