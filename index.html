@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'%3E%3Cpath d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.18' stroke='%2338bdf8' stroke-width='1.2'/%3E%3Cpath d='M40 12 L69 23 L69 50 Q69 68 40 78 Q11 68 11 50 L11 23 Z' fill='%230b1120'/%3E%3Crect x='23' y='44' width='9' height='20' rx='2.5' fill='%2338bdf8' opacity='0.4'/%3E%3Crect x='36' y='34' width='9' height='30' rx='2.5' fill='%2338bdf8' opacity='0.7'/%3E%3Crect x='49' y='24' width='9' height='40' rx='2.5' fill='%2338bdf8'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Syne:wght@700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
@@ -1091,6 +1092,16 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   text-align:center; font-size:11px; color:var(--muted);
   margin-top:20px; line-height:1.7; padding:0 8px;
 }
+
+/* ===== LOGO SVG ===== */
+.logo-svg { width: 34px; height: 34px; flex-shrink: 0; }
+.logo-wordmark { display: flex; flex-direction: column; line-height: 1.05; }
+.logo-top { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); letter-spacing: -0.2px; }
+.logo-bottom { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: var(--green); letter-spacing: -0.2px; }
+@media (min-width: 768px) {
+  .logo-svg { width: 38px; height: 38px; }
+  .logo-top, .logo-bottom { font-size: 16px; }
+}
 </style>
 </head>
 <body>
@@ -1098,8 +1109,19 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <!-- ===== NAV ===== -->
 <nav>
   <div class="logo" onclick="showPage('home')">
-    <div class="logo-shield">🛡️</div>
-    Guardião <span>&nbsp;Fiscal</span>
+    <svg class="logo-svg" viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="rgba(14,165,233,0.13)" stroke="#38bdf8" stroke-width="1.2"/>
+      <path d="M40 12 L69 23 L69 50 Q69 68 40 78 Q11 68 11 50 L11 23 Z" fill="#0b1120"/>
+      <rect x="23" y="44" width="9" height="20" rx="2.5" fill="#38bdf8" opacity="0.4"/>
+      <rect x="36" y="34" width="9" height="30" rx="2.5" fill="#38bdf8" opacity="0.72"/>
+      <rect x="49" y="24" width="9" height="40" rx="2.5" fill="#38bdf8"/>
+      <line x1="40" y1="12" x2="69" y2="23" stroke="#38bdf8" stroke-width="0.8" opacity="0.35"/>
+      <line x1="40" y1="12" x2="11" y2="23" stroke="#38bdf8" stroke-width="0.8" opacity="0.35"/>
+    </svg>
+    <div class="logo-wordmark">
+      <span class="logo-top">Guardião</span>
+      <span class="logo-bottom">Fiscal</span>
+    </div>
   </div>
   <div class="nav-links">
     <button class="nav-link" onclick="showPage('home')">Simulador</button>
