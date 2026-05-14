@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://nnhbxyuggmcemqwzdxbg.supabase.co; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://nnhbxyuggmcemqwzdxbg.supabase.co; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.mercadopago.com; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com; worker-src blob:; form-action https://www.mercadopago.com.br https://www.mercadopago.com;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
@@ -1552,93 +1552,33 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
     </div>
 
-    <!-- STEP 2: Pagamento -->
+    <!-- STEP 2: Pagamento — Mercado Pago -->
     <div class="modal-step" id="stepPay">
-      <div class="modal-title" id="checkoutTitle">Pagamento</div>
-      <div class="modal-sub" id="checkoutSub">Escolha como prefere pagar.</div>
+      <div class="modal-title" id="checkoutTitle">Pagamento seguro</div>
+      <div class="modal-sub" id="checkoutSub">Você será redirecionado ao checkout do Mercado Pago.<br>Pix, cartão de crédito e boleto disponíveis.</div>
 
-      <div class="payment-tabs">
-        <div class="ptab active" onclick="switchPtab('pix')">🟢 Pix</div>
-        <div class="ptab" onclick="switchPtab('cartao')">💳 Cartão</div>
-        <div class="ptab" onclick="switchPtab('boleto')">📄 Boleto</div>
-      </div>
-
-      <!-- PIX -->
-      <div class="ptab-content active" id="pt-pix">
-        <div class="pix-block">
-          <div class="pix-title">Pague via Pix</div>
-          <div style="font-size:44px;margin:10px 0">📱</div>
-          <div class="pix-key" id="pixKeyDisplay" style="cursor:pointer" onclick="copyPixKey()" title="Clique para copiar">guardiaofiscal@pagamento.com</div>
-          <div class="pix-note" id="pixNote">Copie a chave Pix, abra o app do seu banco, faça o pagamento e volte aqui.</div>
-        </div>
-
-        <!-- estado 1: antes de copiar -->
-        <div id="pixStep1">
-          <button class="btn-pay" style="margin-bottom:8px;background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.3)" onclick="copyPixKey()">
-            📋 Copiar chave Pix
-          </button>
-          <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px">
-            Após copiar, abra o app do banco e realize o pagamento
+      <!-- bloco central MP -->
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;margin:4px 0 16px;text-align:center">
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:28px">🔒</span>
+          <div style="text-align:left">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text)">Mercado Pago</div>
+            <div style="font-size:11px;color:var(--muted)">Checkout seguro · SSL · PCI DSS</div>
           </div>
         </div>
-
-        <!-- estado 2: após copiar, pergunta se já pagou -->
-        <div id="pixStep2" style="display:none">
-          <div style="background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted2);margin-bottom:12px;text-align:center">
-            ✅ Chave copiada — agora faça o pagamento no app do seu banco e retorne aqui
-          </div>
-          <button class="btn-pay" style="margin-bottom:8px" onclick="goToSuccess()">
-            Já fiz o pagamento →
-          </button>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.7;margin-bottom:18px">
+          💳 Cartão de crédito (parcelado)<br>
+          🟢 Pix (aprovação imediata)<br>
+          📄 Boleto bancário (1 dia útil)
         </div>
-
-        <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
+        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+        <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
+          <span id="btnMpTxt">Ir para o pagamento →</span>
+        </button>
       </div>
 
-      <!-- CARTÃO -->
-      <div class="ptab-content" id="pt-cartao">
-        <div class="form-group">
-          <label class="form-label">Número do cartão</label>
-          <input class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCard(this)">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Validade</label>
-            <input class="form-input" placeholder="MM/AA" maxlength="5" oninput="formatExpiry(this)">
-          </div>
-          <div class="form-group">
-            <label class="form-label">CVV</label>
-            <input class="form-input" placeholder="000" maxlength="3" type="password">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Nome no cartão</label>
-          <input class="form-input" placeholder="Como aparece no cartão">
-        </div>
-        <div id="parcelasWrap" style="display:none;margin-bottom:14px">
-          <label class="form-label">Parcelamento</label>
-          <select class="form-input" style="appearance:auto;cursor:pointer">
-            <option>1x de R$29,90 sem juros</option>
-            <option>2x de R$15,45 sem juros</option>
-            <option>3x de R$10,30 sem juros</option>
-          </select>
-        </div>
-        <button class="btn-pay" style="margin-bottom:8px" onclick="goToSuccess()">Pagar agora →</button>
-        <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
-      </div>
-
-      <!-- BOLETO -->
-      <div class="ptab-content" id="pt-boleto">
-        <div class="pix-block" style="background:rgba(255,193,7,0.05);border-color:rgba(255,193,7,0.2);">
-          <div class="pix-title">Boleto bancário</div>
-          <div style="font-size:40px;margin:12px 0">📋</div>
-          <div class="pix-note" style="margin-bottom:0">Vence em 1 dia útil. Acesso liberado após compensação (até 2 dias úteis).<br><br>O boleto será enviado para o e-mail cadastrado.</div>
-        </div>
-        <button class="btn-pay" style="margin-bottom:8px" onclick="goToSuccess()">Gerar boleto →</button>
-        <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
-      </div>
-
-      <div class="security-note" style="margin-top:12px">🔒 Pagamento seguro · SSL · Dados criptografados</div>
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
+      <div class="security-note" style="margin-top:12px">🔒 Seus dados de pagamento nunca passam pelos nossos servidores</div>
     </div>
 
     <!-- STEP 3: Sucesso -->
@@ -1831,16 +1771,108 @@ function openCheckout(plan) {
     <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Manrope',sans-serif;font-weight:400"> ${p.period}</span></div>
   `;
 
-  // parcelamento só no Pro
-  document.getElementById('parcelasWrap').style.display = plan === 'pro' ? 'block' : 'none';
-
   // reset para step 1
   setCheckoutStep(1);
-  resetPixState();
-  switchPtab('pix');
   document.getElementById('checkoutOverlay').classList.add('show');
   document.getElementById('checkoutModal').scrollTop = 0;
 }
+
+// ── MERCADO PAGO — CHECKOUT REAL ──────────────────────────────────────────
+
+async function goToMercadoPago() {
+  const btn = document.getElementById('btnMpTxt');
+  const errEl = document.getElementById('mpPayErr');
+  errEl.style.display = 'none';
+  btn.textContent = 'Gerando link de pagamento...';
+  document.getElementById('btnMpPay').disabled = true;
+
+  try {
+    // Pega o token de sessão atual do usuário
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const res = await fetch(
+      `${SUPA_URL}/functions/v1/create-mp-preference`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ plan: currentPlan }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? `Erro ${res.status}`);
+    }
+
+    const { init_point } = await res.json();
+    if (!init_point) throw new Error('Link de pagamento inválido.');
+
+    // Redireciona para o checkout do Mercado Pago
+    window.location.href = init_point;
+
+  } catch (e) {
+    errEl.textContent = e.message || 'Erro inesperado. Tente novamente.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Ir para o pagamento →';
+    document.getElementById('btnMpPay').disabled = false;
+  }
+}
+
+// Chamada no DOMContentLoaded — trata retorno do MP via query string
+async function handleMpReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const mp = params.get('mp');
+  if (!mp) return;
+
+  // Limpa a query string da URL sem reload
+  history.replaceState({}, '', window.location.pathname);
+
+  if (mp === 'success') {
+    // Aguarda webhook processar (até ~3s) e busca plano atualizado
+    await new Promise(r => setTimeout(r, 2500));
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('plano')
+        .eq('id', session.user.id)
+        .single();
+
+      const planoAtualizado = profile?.plano;
+
+      // Mostra modal de sucesso
+      const planKey = planoAtualizado ?? 'pro';
+      currentPlan = planKey === 'avulso' ? 'avulso' : 'pro';
+      setCheckoutStep(3);
+      document.getElementById('successMsg').textContent =
+        plans[currentPlan]?.successMsg ?? 'Pagamento confirmado! Seu acesso está liberado.';
+      document.getElementById('checkoutOverlay').classList.add('show');
+
+      if (_eConsolidated) {
+        setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1500);
+      }
+    }
+  } else if (mp === 'failure') {
+    // Mostra modal de erro de pagamento
+    openCheckout(currentPlan || 'pro');
+    setTimeout(() => {
+      const errEl = document.getElementById('mpPayErr');
+      if (errEl) {
+        errEl.textContent = 'Pagamento não aprovado. Tente novamente ou escolha outra forma de pagamento.';
+        errEl.style.display = 'block';
+        setCheckoutStep(2);
+      }
+    }, 100);
+  }
+  // pending: não faz nada, usuário verá o acesso liberado quando webhook chegar
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 
 function setCheckoutStep(n) {
   // steps content
@@ -1919,48 +1951,7 @@ function closeCheckoutDirect() {
   document.getElementById('checkoutOverlay').classList.remove('show');
 }
 
-function switchPtab(tab) {
-  document.querySelectorAll('.ptab').forEach((el,i) => {
-    el.classList.toggle('active', ['pix','cartao','boleto'][i] === tab);
-  });
-  document.querySelectorAll('.ptab-content').forEach(el => el.classList.remove('active'));
-  document.getElementById('pt-' + tab).classList.add('active');
-  if (tab === 'pix') resetPixState();
-}
-
-function copyPixKey() {
-  const key = 'guardiaofiscal@pagamento.com';
-  navigator.clipboard.writeText(key).catch(() => {});
-  // visual feedback on key
-  const keyEl = document.getElementById('pixKeyDisplay');
-  keyEl.textContent = '✓ Chave copiada!';
-  keyEl.style.color = 'var(--green)';
-  setTimeout(() => {
-    keyEl.textContent = key;
-    keyEl.style.color = '';
-  }, 2000);
-  // show "já paguei" button
-  document.getElementById('pixStep1').style.display = 'none';
-  document.getElementById('pixStep2').style.display = 'block';
-}
-
-function resetPixState() {
-  document.getElementById('pixStep1').style.display = 'block';
-  document.getElementById('pixStep2').style.display = 'none';
-  document.getElementById('pixKeyDisplay').textContent = 'guardiaofiscal@pagamento.com';
-  document.getElementById('pixKeyDisplay').style.color = '';
-}
-
-function formatCard(el) {
-  let v = el.value.replace(/\D/g,'').substring(0,16);
-  el.value = v.replace(/(.{4})/g,'$1 ').trim();
-}
-
-function formatExpiry(el) {
-  let v = el.value.replace(/\D/g,'');
-  if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
-  el.value = v;
-}
+// switchPtab, formatCard, formatExpiry, copyPixKey removidos — checkout delegado ao Mercado Pago
 
 // ╔══════════════════════════════════════════════════╗
 // ║         MÓDULO DE SEGURANÇA — GUARDIÃO FISCAL   ║
@@ -2041,6 +2032,9 @@ let _currentUser = null;
   sb.auth.onAuthStateChange((_event, session) => {
     setUser(session ? session.user : null);
   });
+
+  // Trata retorno do checkout do Mercado Pago
+  handleMpReturn();
 })();
 
 function setUser(user) {
