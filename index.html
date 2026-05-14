@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Syne:wght@700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   /* Azul-petróleo profundo — referência Nubank/Linear */
@@ -1107,7 +1108,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="nav-links">
     <button class="nav-link" onclick="showPage('home')">Simulador</button>
     <button class="nav-link" onclick="showPage('planos')">Planos</button>
-    <button class="nav-btn-login" onclick="openLogin()">Entrar</button>
+    <div id="navAuthArea">
+      <button class="nav-btn-login" onclick="openLogin()">Entrar</button>
+    </div>
   </div>
 </nav>
 
@@ -1200,21 +1203,41 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div class="ext-card-header">
           <div class="ext-step-num" id="s1num">1</div>
           <div class="ext-step-info">
-            <div class="ext-step-title">Crie sua conta gratuita</div>
+            <div class="ext-step-title" id="extStep1Title">Crie sua conta gratuita</div>
             <div class="ext-step-sub">Para salvar sua análise e acessar depois</div>
           </div>
         </div>
         <div class="ext-card-body">
-          <div class="form-group">
-            <label class="form-label">E-mail</label>
-            <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com">
+          <!-- tabs login/cadastro -->
+          <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:16px">
+            <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
+            <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
           </div>
-          <div class="form-group">
-            <label class="form-label">Senha</label>
-            <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres">
+          <!-- cadastro pane -->
+          <div id="extCadPane">
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Senha</label>
+              <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres">
+            </div>
           </div>
+          <!-- login pane -->
+          <div id="extLogPane" style="display:none">
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input class="form-input" type="email" id="extLoginEmail" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Senha</label>
+              <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha">
+            </div>
+          </div>
+          <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
           <button class="btn-next on" style="width:100%;margin-top:4px" onclick="extStep1Done()">
-            Criar conta e continuar →
+            <span id="extAuthBtnTxt">Criar conta e continuar →</span>
           </button>
           <div class="security-note" style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
             🔒 Gratuito — sem cobrança neste passo
@@ -1632,29 +1655,56 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="modal" id="loginModal">
     <button class="modal-close" onclick="closeLoginDirect()">✕</button>
 
-    <div class="modal-title">Entrar na sua conta</div>
-    <div class="modal-sub">Acesse suas análises e histórico fiscal.</div>
-
-    <div class="form-group">
-      <label class="form-label">E-mail</label>
-      <input class="form-input" type="email" placeholder="seu@email.com">
+    <!-- tabs -->
+    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
+      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Senha</label>
-      <input class="form-input" type="password" placeholder="Sua senha">
+
+    <!-- LOGIN -->
+    <div id="authLoginPane">
+      <div class="modal-title">Entrar na sua conta</div>
+      <div class="modal-sub">Acesse suas análises e histórico fiscal.</div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" id="loginSenha" placeholder="Sua senha">
+      </div>
+      <div id="loginErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+      <button class="btn-pay" style="margin-bottom:14px" onclick="doLogin()">
+        <span id="loginBtnTxt">Entrar →</span>
+      </button>
+      <div class="security-note" style="margin-top:8px;text-align:center">
+        Não tem conta? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('cadastro')">Criar conta grátis →</span>
+      </div>
     </div>
-    <button class="btn-pay" style="margin-bottom:14px">Entrar →</button>
 
-    <div class="divider">ou</div>
-
-    <button class="btn-plan btn-plan-avulso" style="width:100%;padding:13px;border-radius:10px;margin-bottom:10px" onclick="closeLoginDirect(); openCheckout('avulso')">
-      Comprar análise avulsa — R$47,90
-    </button>
-    <button class="btn-plan btn-plan-pro" style="width:100%;padding:13px;border-radius:10px" onclick="closeLoginDirect(); openCheckout('pro')">
-      Assinar Pro — R$29,90/mês
-    </button>
-
-    <div class="security-note" style="margin-top:16px">Não tem conta? <span style="color:var(--green);cursor:pointer" onclick="closeLoginDirect();openCheckout('pro')">Assine um plano →</span></div>
+    <!-- CADASTRO -->
+    <div id="authCadastroPane" style="display:none">
+      <div class="modal-title">Criar conta gratuita</div>
+      <div class="modal-sub">Salve suas análises e acesse de qualquer lugar.</div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Nome</label>
+        <input class="form-input" type="text" id="cadNome" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" id="cadEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" id="cadSenha" placeholder="Mínimo 8 caracteres">
+      </div>
+      <div id="cadErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+      <div id="cadOk" style="display:none;color:var(--accent);font-size:13px;margin-bottom:10px;text-align:center;padding:10px;background:rgba(16,185,129,0.08);border-radius:8px"></div>
+      <button class="btn-pay" onclick="doCadastro()">
+        <span id="cadBtnTxt">Criar conta →</span>
+      </button>
+      <div class="security-note" style="margin-top:10px;text-align:center">🔒 Gratuito — sem cobrança</div>
+    </div>
   </div>
 </div>
 
@@ -1806,7 +1856,7 @@ function setCheckoutStep(n) {
   });
 }
 
-function goToPay() {
+async function goToPay() {
   const name = document.getElementById('coName').value.trim();
   const email = document.getElementById('coEmail').value.trim();
   const senha = document.getElementById('coSenha').value;
@@ -1816,6 +1866,17 @@ function goToPay() {
   if (!email.includes('@')) { shake('coEmail'); return; }
   if (senha.length < 8) { shake('coSenha'); return; }
   if (senha !== senha2) { shake('coSenha2'); return; }
+
+  // Cria conta no Supabase se ainda não logado
+  if (!_currentUser) {
+    const btn = document.querySelector('#stepAccount .btn-pay');
+    if (btn) btn.textContent = 'Criando conta...';
+    const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome: name } } });
+    if (btn) btn.textContent = 'Continuar para pagamento →';
+    if (error && !error.message.includes('already registered')) {
+      shake('coEmail'); return;
+    }
+  }
 
   setCheckoutStep(2);
   document.getElementById('checkoutModal').scrollTop = 0;
@@ -1891,6 +1952,163 @@ function formatExpiry(el) {
   let v = el.value.replace(/\D/g,'');
   if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
   el.value = v;
+}
+
+// ===== SUPABASE =====
+const SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
+const SUPA_KEY  = 'sb_publishable_qFSRCbgCxCG-Iiwj8zxk9Q_o8YEa3tP';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let _currentUser = null;
+
+// Inicializa sessão ao carregar
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) setUser(session.user);
+
+  sb.auth.onAuthStateChange((_event, session) => {
+    setUser(session ? session.user : null);
+  });
+})();
+
+function setUser(user) {
+  _currentUser = user;
+  const area = document.getElementById('navAuthArea');
+  if (user) {
+    const name = user.user_metadata?.nome || user.email.split('@')[0];
+    area.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;color:var(--muted2);font-family:'Manrope',sans-serif">${name}</span>
+        <button class="nav-btn-login" onclick="doLogout()" style="background:rgba(255,100,100,0.08);border-color:rgba(255,100,100,0.2);color:#f87171">Sair</button>
+      </div>`;
+    // Se estava no step 1 do extrato, avança automático
+    autoSkipExtStep1(user.email);
+  } else {
+    area.innerHTML = `<button class="nav-btn-login" onclick="openLogin()">Entrar</button>`;
+  }
+}
+
+function autoSkipExtStep1(email) {
+  const s1 = document.getElementById('extStep1');
+  if (!s1 || s1.style.opacity === '0.6') return;
+  s1.style.opacity = '0.6';
+  if (s1.querySelector('.ext-card-body')) s1.querySelector('.ext-card-body').style.display = 'none';
+  document.getElementById('s1num').classList.add('done');
+  document.getElementById('s1num').textContent = '✓';
+  s1.querySelector('.ext-step-sub').textContent = email;
+  const s2 = document.getElementById('extStep2');
+  s2.style.opacity = '1';
+  s2.style.pointerEvents = 'auto';
+  document.getElementById('s2num').classList.remove('locked');
+  document.getElementById('s2num').textContent = '2';
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+// ===== LOGIN MODAL =====
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('authLoginPane').style.display   = isLogin ? 'block' : 'none';
+  document.getElementById('authCadastroPane').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tabLoginBtn').style.background   = isLogin ? 'var(--surface)' : 'transparent';
+  document.getElementById('tabLoginBtn').style.color        = isLogin ? 'var(--text)' : 'var(--muted)';
+  document.getElementById('tabCadastroBtn').style.background = isLogin ? 'transparent' : 'var(--surface)';
+  document.getElementById('tabCadastroBtn').style.color      = isLogin ? 'var(--muted)' : 'var(--text)';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha  = document.getElementById('loginSenha').value;
+  const err    = document.getElementById('loginErr');
+  const btn    = document.getElementById('loginBtnTxt');
+  err.style.display = 'none';
+  if (!email.includes('@') || senha.length < 6) { err.textContent='E-mail ou senha inválidos.'; err.style.display='block'; return; }
+  btn.textContent = 'Entrando...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+  btn.textContent = 'Entrar →';
+  if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+  closeLoginDirect();
+}
+
+async function doCadastro() {
+  const nome  = document.getElementById('cadNome').value.trim();
+  const email = document.getElementById('cadEmail').value.trim();
+  const senha = document.getElementById('cadSenha').value;
+  const err   = document.getElementById('cadErr');
+  const ok    = document.getElementById('cadOk');
+  const btn   = document.getElementById('cadBtnTxt');
+  err.style.display='none'; ok.style.display='none';
+  if (!nome)                    { err.textContent='Informe seu nome.'; err.style.display='block'; return; }
+  if (!email.includes('@'))     { err.textContent='E-mail inválido.'; err.style.display='block'; return; }
+  if (senha.length < 8)         { err.textContent='Senha mínima de 8 caracteres.'; err.style.display='block'; return; }
+  btn.textContent = 'Criando conta...';
+  const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome } } });
+  btn.textContent = 'Criar conta →';
+  if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+  ok.textContent = '✓ Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
+  ok.style.display = 'block';
+}
+
+// ===== EXTRATO STEP 1 AUTH =====
+let _extTab = 'cad'; // 'cad' | 'log'
+
+function extSwitchTab(tab) {
+  _extTab = tab;
+  const isCad = tab === 'cad';
+  document.getElementById('extCadPane').style.display = isCad ? 'block' : 'none';
+  document.getElementById('extLogPane').style.display = isCad ? 'none' : 'block';
+  document.getElementById('extTabCad').style.background = isCad ? 'var(--surface)' : 'transparent';
+  document.getElementById('extTabCad').style.color      = isCad ? 'var(--text)' : 'var(--muted)';
+  document.getElementById('extTabLog').style.background = isCad ? 'transparent' : 'var(--surface)';
+  document.getElementById('extTabLog').style.color      = isCad ? 'var(--muted)' : 'var(--text)';
+  document.getElementById('extAuthBtnTxt').textContent  = isCad ? 'Criar conta e continuar →' : 'Entrar e continuar →';
+}
+
+async function extStep1Done() {
+  // Se já logado, avança direto
+  if (_currentUser) { autoSkipExtStep1(_currentUser.email); return; }
+
+  const err = document.getElementById('extAuthErr');
+  const btn = document.getElementById('extAuthBtnTxt');
+  err.style.display = 'none';
+
+  if (_extTab === 'cad') {
+    const email = document.getElementById('extEmail').value.trim();
+    const senha = document.getElementById('extSenha').value;
+    if (!email.includes('@') || senha.length < 8) { err.textContent='E-mail inválido ou senha com menos de 8 caracteres.'; err.style.display='block'; return; }
+    btn.textContent = 'Criando conta...';
+    const { data, error } = await sb.auth.signUp({ email, password: senha });
+    btn.textContent = 'Criar conta e continuar →';
+    if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+    // Supabase pode logar direto ou pedir confirmação
+    if (data.session) {
+      autoSkipExtStep1(email);
+    } else {
+      err.style.color = 'var(--accent)';
+      err.textContent = '✓ Conta criada! Confirme seu e-mail e volte para continuar.';
+      err.style.display = 'block';
+    }
+  } else {
+    const email = document.getElementById('extLoginEmail').value.trim();
+    const senha = document.getElementById('extLoginSenha').value;
+    if (!email.includes('@') || senha.length < 6) { err.textContent='E-mail ou senha inválidos.'; err.style.display='block'; return; }
+    btn.textContent = 'Entrando...';
+    const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+    btn.textContent = 'Entrar e continuar →';
+    if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+    autoSkipExtStep1(email);
+  }
+}
+
+function traduzErro(msg) {
+  if (msg.includes('Invalid login')) return 'E-mail ou senha incorretos.';
+  if (msg.includes('Email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
+  if (msg.includes('already registered')) return 'Este e-mail já está cadastrado. Tente entrar.';
+  if (msg.includes('Password should')) return 'Senha muito curta — mínimo 8 caracteres.';
+  return msg;
 }
 
 // ===== LOGIN =====
@@ -2470,27 +2688,8 @@ function eResetAll(){
   eShowErr('');
 }
 
-// extrato step 1
-function extStep1Done(){
-  const email=document.getElementById('extEmail').value;
-  const senha=document.getElementById('extSenha').value;
-  if(!email.includes('@')||senha.length<6){
-    document.getElementById('extEmail').style.borderColor='rgba(255,71,87,0.5)';
-    setTimeout(()=>document.getElementById('extEmail').style.borderColor='',1500);
-    return;
-  }
-  const s1=document.getElementById('extStep1');
-  s1.style.opacity='0.6';
-  s1.querySelector('.ext-card-body').style.display='none';
-  document.getElementById('s1num').classList.add('done');
-  document.getElementById('s1num').textContent='✓';
-  s1.querySelector('.ext-step-sub').textContent=email;
-  const s2=document.getElementById('extStep2');
-  s2.style.opacity='1';
-  s2.style.pointerEvents='auto';
-  document.getElementById('s2num').classList.remove('locked');
-  document.getElementById('s2num').textContent='2';
-}
+// extrato step 1 — handled by Supabase auth above
+
 
 </script>
 </body>
