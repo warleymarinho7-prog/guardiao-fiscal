@@ -2747,7 +2747,9 @@ function eAddFile(file){
         const bad=(c.match(/\uFFFD/g)||[]).length;
         if(bad>20&&idx<enc.length-1){idx++;tryNext();return;}
         if(c.length > MAX_TEXT_CHARS){eShowErr(`"${sanitize(file.name)}" tem conteúdo excessivo.`);entry.status='err';eRenderFileList();return;}
-        c=sanitizeFileContent(c);
+        // OFX/QFX usam tags XML como estrutura — não sanitizar (removeria os dados)
+        const isOFX=ext==='ofx'||ext==='qfx'||c.substring(0,500).toUpperCase().includes('OFXHEADER');
+        if(!isOFX) c=sanitizeFileContent(c);
         entry.content=c;entry.type='text';entry.detected=eDetectFormat(c,file.name);entry.status='ok';
         eRenderFileList();eUpdateActionBar();
       };
