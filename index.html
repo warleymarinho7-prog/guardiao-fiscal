@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://nnhbxyuggmcemqwzdxbg.supabase.co; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.mercadopago.com; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob:; form-action https://www.mercadopago.com.br https://www.mercadopago.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob: 'self'; form-action https://www.mercadopago.com.br https://www.mercadopago.com https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
@@ -2522,6 +2522,8 @@ function eParseDate(s){
   if((m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/)))return new Date(+m[3],+m[2]-1,+m[1]);
   if((m=s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
   if((m=s.match(/^(\d{4})(\d{2})(\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
+  // DD/MM sem ano — assume ano atual
+  if((m=s.match(/^(\d{2})[\/\-](\d{2})$/)))return new Date(new Date().getFullYear(),+m[2]-1,+m[1]);
   return null;
 }
 function eDetectFormat(c,fn){
@@ -2539,7 +2541,7 @@ function eDetectFormat(c,fn){
     (l.includes('data')&&l.includes('description')&&l.includes('amount')&&l.includes('identifier'))
   )&&!l.includes('"date"')&&!l.includes('"title"');
   if(isNubankConta)return{format:'nubank_conta',bank:'Nubank (conta)'};
-  if(l.includes('banco inter')||(l.includes('histórico')&&l.includes(';')))return{format:'inter',bank:'Banco Inter'};
+  if(l.includes('banco inter')||l.includes('extrato conta corrente')||(l.includes('histórico')&&l.includes(';')&&l.includes('descrição')))return{format:'inter',bank:'Banco Inter'};
   if(l.includes('data;histórico')||l.includes('data;historico'))return{format:'bb',bank:'Banco do Brasil'};
   return{format:'generic',bank:'CSV genérico'};
 }
@@ -2580,13 +2582,51 @@ function eParseNubankConta(lines){
     return date&&desc?{date,desc,value}:null;
   }).filter(Boolean);
 }
-function eParseInter(lines){let s=0;for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i+1;break}}const sep=eDetectSep(lines[s]||lines[0]||'');return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(sep).map(x=>x.replace(/"/g,'').trim());if(c.length<3)return null;const date=eParseDate(c[0]),desc=c[1]||'',value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
+function eParseInter(lines){
+  // acha a linha do cabeçalho (contém 'data' e 'histórico' ou 'historico')
+  let s=0;
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i].toLowerCase();
+    if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i;break;}
+  }
+  const sep=eDetectSep(lines[s]||';');
+  const hdr=lines[s].split(sep).map(c=>c.replace(/['"]/g,'').trim().toLowerCase());
+  const iDt  =hdr.findIndex(h=>h.includes('data'));
+  const iHist=hdr.findIndex(h=>h.includes('hist'));
+  const iDesc=hdr.findIndex(h=>h.includes('descri'));
+  const iVal =hdr.findIndex(h=>h==='valor'||h.includes('valor'));
+  return lines.slice(s+1).filter(l=>l.trim()).map(l=>{
+    const c=l.split(sep).map(x=>x.replace(/['"]/g,'').trim());
+    if(c.length<3)return null;
+    const date=eParseDate(c[iDt>=0?iDt:0]);
+    // combina histórico + descrição para melhor contexto
+    const hist=iHist>=0?c[iHist]:'';
+    const desc=iDesc>=0?c[iDesc]:c[1]||'';
+    const label=[hist,desc].filter(Boolean).join(' — ').trim()||desc||hist;
+    const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-1]);
+    return date&&label?{date,desc:label,value}:null;
+  }).filter(Boolean);
+}
 function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'',cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
 function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;let m;while((m=re.exec(content))!==null){const b=m[1],date=eParseDate(eGetTag(b,'DTPOSTED')),value=parseFloat(eGetTag(b,'TRNAMT')||'0'),desc=(eGetTag(b,'MEMO')||eGetTag(b,'NAME')||'Sem descrição').trim();if(date)txns.push({date,desc,value});}if(txns.length>0)return txns;const lines=content.split('\n');let cur={};for(const line of lines){const t=line.trim();if(t==='<STMTTRN>'){cur={};continue}if(t==='</STMTTRN>'){if(cur.date&&cur.value!==undefined)txns.push({...cur});cur={};continue}const mm=t.match(/^<([A-Z]+)>(.+)$/);if(mm){const[,tg,v]=mm;if(tg==='DTPOSTED')cur.date=eParseDate(v);if(tg==='TRNAMT')cur.value=parseFloat(v)||0;if((tg==='MEMO'||tg==='NAME')&&!cur.desc)cur.desc=v.trim();}}return txns;}
 function eGetTag(str,name){const r=new RegExp(`<${name}>([^<]+)`,'i');const m=str.match(r);return m?m[1].trim():null;}
 function eParseGeneric(lines){if(lines.length<2)return[];const sep=eDetectSep(lines[0]);const hdr=eSplitCSV(lines[0],sep).map(c=>c.toLowerCase().replace(/"/g,'').trim());const ci=h=>{for(const n of h){const i=hdr.findIndex(x=>x.includes(n));if(i>=0)return i;}return -1;};const iDt=ci(['data','date','dt lançamento','dt mov']);const iDsc=ci(['descrição','descricao','histórico','historico','memo','title','nome','name']);const iVl=ci(['valor','value','amount','vlr']);const iCr=ci(['crédito','credito','créd']);const iDb=ci(['débito','debito','déb']);return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l,sep);if(c.length<2)return null;const date=iDt>=0?eParseDate(c[iDt]):eParseDate(c[0]);const desc=iDsc>=0?c[iDsc].replace(/"/g,'').trim():c[1]?.trim()||'';let value=0;if(iVl>=0)value=eParseBRL(c[iVl]);else if(iCr>=0&&iDb>=0){const cr=eParseBRL(c[iCr]||''),db=eParseBRL(c[iDb]||'');value=cr>0?cr:-Math.abs(db);}else for(let j=c.length-1;j>=0;j--){const v=eParseBRL(c[j]);if(!isNaN(v)&&v!==0){value=v;break}}return desc?{date,desc,value}:null;}).filter(Boolean);}
-async function eParsePDF(buffer){const pdf=await pdfjsLib.getDocument({data:buffer}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();let lastY=null,line='';for(const item of tc.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}line+=(item.str||'')+' ';lastY=y;}if(line.trim())text+=line.trim()+'\n';}return text;}
-function eParsePDFText(text){const lines=text.split('\n').filter(l=>l.trim());const txns=[];const re=/(\d{2}[\/\-]\d{2}[\/\-]\d{4})\s+(.+?)\s+([\-\+]?\s*\d[\d.,]+)\s*$/;for(const line of lines){const m=line.match(re);if(!m)continue;const date=eParseDate(m[1]),desc=m[2].trim(),value=eParseBRL(m[3].replace(/\s/g,''));if(date&&desc)txns.push({date,desc,value});}return txns.length>0?txns:eParseGeneric(lines);}
+async function eParsePDF(buffer){const copy=buffer.slice(0);const pdf=await pdfjsLib.getDocument({data:copy}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();let lastY=null,line='';for(const item of tc.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}line+=(item.str||'')+' ';lastY=y;}if(line.trim())text+=line.trim()+'\n';}return text;}
+function eParsePDFText(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  const txns=[];
+  // regex aceita DD/MM/YYYY ou DD/MM
+  const re=/(\d{2}[\/\-]\d{2}(?:[\/\-]\d{4})?)\s+(.+?)\s+([\-\+]?\s*\d[\d.,]+(?:\.\d{3})*(?:,\d{2})?)\s*(?:[\d.,]+)?\s*$/;
+  const skip=/saldo anterior|saldo final|data\s+descri|período|agência|conta\s*:|cliente/i;
+  for(const line of lines){
+    if(skip.test(line))continue;
+    const m=line.match(re);
+    if(!m)continue;
+    const date=eParseDate(m[1]),desc=m[2].trim(),value=eParseBRL(m[3].replace(/\s/g,''));
+    if(date&&desc&&value!==0)txns.push({date,desc,value});
+  }
+  return txns.length>0?txns:eParseGeneric(lines);
+}
 
 const E_FORMAL=['salário','salario','holerite','folha pgto','pagamento folha','fgts','inss','irrf','pro-labore','pró-labore','beneficio','benefício','aposentadoria','pensão','pensao','rendimento prev','resgate prev'];
 const E_INVEST=['btc','bitcoin','cripto','crypto','ethereum','xrp','usdt','binance','foxbit','mercado bitcoin','novadax','tesouro direto','tesouro selic','tesouro ipca','dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca','resgate rdb','resgate fundo'];
