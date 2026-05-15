@@ -8,7 +8,7 @@
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Syne:wght@700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -45,7 +45,7 @@
 body {
   background: var(--bg);
   color: var(--text2);
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   line-height: 1.72;
   min-height: 100vh;
@@ -74,7 +74,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
+  padding: 12px 16px;
   background: rgba(11,17,32,0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -85,7 +85,7 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
   font-size: 16px;
   cursor: pointer;
@@ -96,7 +96,7 @@ nav {
 .logo span { color: var(--green); }
 
 .nav-links {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 6px;
 }
@@ -105,7 +105,7 @@ nav {
   background: none;
   border: none;
   color: var(--muted);
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 500;
   padding: 8px 16px;
@@ -120,7 +120,7 @@ nav {
   background: rgba(56,189,248,0.08);
   border: 1px solid rgba(56,189,248,0.2);
   color: var(--green);
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
   padding: 9px 18px;
@@ -139,7 +139,7 @@ nav {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 96px 40px 72px;
+  padding: 80px 20px 48px;
   max-width: 680px;
   margin: 0 auto;
 }
@@ -148,7 +148,7 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -173,15 +173,15 @@ nav {
 }
 
 .hero h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(28px,5.5vw,42px);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(24px,6vw,42px);
   font-weight: 800;
-  line-height: 1.18;
-  letter-spacing: -1.8px;
-  margin-bottom: 18px;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
 }
 .hero h1 em { font-style: normal; color: var(--green); opacity: 0.9; }
-.hero p { font-size: 16px; color: var(--muted2); line-height: 1.75; max-width: 440px; margin: 0 auto 32px; letter-spacing: 0.01em; }
+.hero p { font-size: 15px; color: var(--muted2); line-height: 1.75; max-width: 440px; margin: 0 auto 28px; letter-spacing: 0.01em; }
 
 .hero-badges {
   display: flex;
@@ -207,7 +207,7 @@ nav {
 .sim-wrap {
   max-width: 540px;
   margin: 0 auto;
-  padding: 0 16px 64px;
+  padding: 0 12px 64px;
   position: relative;
   z-index: 1;
 }
@@ -227,7 +227,7 @@ nav {
   padding: 11px;
   border-radius: 12px;
   border: none;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -265,7 +265,7 @@ nav {
 }
 
 .panel-label {
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 1px;
@@ -285,8 +285,8 @@ nav {
 .step-dot.active { background: var(--green); box-shadow: none; }
 
 .q-body { padding: 32px 28px 24px; }
-.q-num { font-family:'Manrope',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
-.q-title { font-family:'Syne',sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
+.q-num { font-family:'Inter',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
+.q-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
 .q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
 
 .options { display:flex; flex-direction:column; gap:10px; }
@@ -318,7 +318,7 @@ nav {
 .opt-desc { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.55; font-weight:400; }
 
 .risk-pill {
-  font-size:10px; font-family:'Manrope',sans-serif; font-weight:600;
+  font-size:10px; font-family:'Inter',sans-serif; font-weight:600;
   letter-spacing:0.2px; padding:3px 9px; border-radius:6px; flex-shrink:0;
 }
 .rp-green { background:rgba(16,185,129,0.1); color:#6ee7b7; }
@@ -335,7 +335,7 @@ nav {
   padding:13px 20px;
   background:transparent; border:1px solid var(--border);
   border-radius:12px; color:var(--muted2);
-  font-family:'Manrope',sans-serif; font-size:14px;
+  font-family:'Inter',sans-serif; font-size:14px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-back:hover { color:var(--text); border-color:var(--border2); }
@@ -344,7 +344,7 @@ nav {
 .btn-next {
   flex:1; padding:14px;
   background:var(--green); border:none; border-radius:11px;
-  color:#000; font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+  color:#000; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   opacity:0.35; pointer-events:none;
   min-height: 48px;
@@ -372,13 +372,13 @@ nav {
   width:280px; height:280px; border-radius:50%;
   filter:blur(80px); opacity:0.1; pointer-events:none;
 }
-.result-sublabel { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:18px; }
+.result-sublabel { font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:18px; }
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
-.result-level { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1.2px; margin-bottom:6px; }
+.result-level { font-family:'Plus Jakarta Sans',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1.2px; margin-bottom:6px; }
 .result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
 .score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
 .score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
-.score-label { font-size:11px; color:var(--muted); font-family:'Syne',sans-serif; }
+.score-label { font-size:11px; color:var(--muted); font-family:'Plus Jakarta Sans',sans-serif; }
 
 .alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
 .alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
@@ -394,7 +394,7 @@ nav {
 }
 
 .upgrade-label {
-  font-family:'Syne',sans-serif; font-size:10px; font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:600;
   letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:14px;
 }
 
@@ -427,15 +427,15 @@ nav {
 .uc-icon-pro { background:rgba(0,230,118,0.1); }
 
 .uc-info { flex:1; }
-.uc-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
+.uc-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
 .uc-desc { font-size:11px; color:var(--muted2); line-height:1.4; }
 
 .uc-price { text-align:right; flex-shrink:0; }
-.uc-value { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--green); }
+.uc-value { font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:800; color:var(--green); }
 .uc-period { font-size:10px; color:var(--muted); }
 
 .best-tag {
-  font-size:9px; font-family:'Syne',sans-serif; font-weight:700;
+  font-size:9px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700;
   background:var(--green); color:#000;
   padding:2px 7px; border-radius:4px; letter-spacing:0.5px;
   margin-bottom:4px; display:inline-block;
@@ -446,10 +446,20 @@ nav {
   width:100%; padding:12px;
   background:transparent; border:1px solid var(--border);
   border-radius:10px; color:var(--muted);
-  font-family:'Manrope',sans-serif; font-size:13px;
+  font-family:'Inter',sans-serif; font-size:13px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-restart:hover { color:var(--text); border-color:var(--border2); }
+.alert-paywall{background:rgba(56,189,248,0.06);border:1px dashed rgba(56,189,248,0.3);border-radius:14px;padding:20px 18px;text-align:center;margin-top:8px}
+.apw-lock{font-size:28px;margin-bottom:8px}
+.apw-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.apw-desc{font-size:13px;color:var(--muted2);line-height:1.65;margin-bottom:16px;max-width:340px;margin-left:auto;margin-right:auto}
+.apw-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:#000;cursor:pointer;margin-bottom:8px;transition:opacity .2s}
+.apw-btn:hover{opacity:.88}
+.apw-or{font-size:11px;color:var(--muted);margin:6px 0}
+.apw-btn-sec{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s}
+.apw-btn-sec:hover{border-color:var(--green);color:var(--green)}
+.alert-item strong{font-weight:600;display:block;margin-bottom:2px;color:var(--text)}
 
 /* ===== EXTRATO FLOW ===== */
 .ext-flow { display:flex; flex-direction:column; gap:14px; }
@@ -471,14 +481,14 @@ nav {
   width:28px; height:28px; border-radius:8px;
   background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.2);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--green);
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:700; color:var(--green);
   flex-shrink:0;
 }
 .ext-step-num.done { background:var(--green); color:#000; }
 .ext-step-num.locked { background:rgba(90,112,144,0.1); border-color:var(--border); color:var(--muted); }
 
 .ext-step-info { flex:1; }
-.ext-step-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+.ext-step-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; }
 .ext-step-sub { font-size:12px; color:var(--muted2); margin-top:2px; }
 
 .ext-card-body { padding:20px 22px; }
@@ -498,7 +508,7 @@ nav {
 .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
 
 .upload-icon { font-size:32px; margin-bottom:10px; display:block; }
-.upload-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
+.upload-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
 .upload-sub { font-size:12px; color:var(--muted2); line-height:1.6; }
 
 .banks-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; justify-content:center; }
@@ -540,7 +550,7 @@ nav {
   90% { width:92%; }
   100% { width:100%; }
 }
-.analyzing-label { font-size:12px; color:var(--muted2); font-family:'Syne',sans-serif; }
+.analyzing-label { font-size:12px; color:var(--muted2); font-family:'Plus Jakarta Sans',sans-serif; }
 
 /* PAYWALL result */
 .paywall-result {
@@ -568,7 +578,7 @@ nav {
 }
 .preview-row:last-child { border:none; }
 .preview-label { color:var(--muted2); }
-.preview-val { font-family:'Syne',sans-serif; font-weight:700; }
+.preview-val { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; }
 .preview-val.red { color:var(--red); }
 .preview-val.yellow { color:var(--yellow); }
 .preview-val.green { color:var(--green); }
@@ -582,7 +592,7 @@ nav {
 
 .lock-icon { font-size:28px; margin-bottom:8px; }
 .paywall-msg {
-  font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700;
   text-align:center; margin-bottom:4px;
 }
 .paywall-sub { font-size:12px; color:var(--muted2); text-align:center; margin-bottom:16px; line-height:1.5; }
@@ -592,14 +602,14 @@ nav {
   width:100%; padding:13px;
   background:rgba(255,193,7,0.12); border:1px solid rgba(255,193,7,0.3);
   border-radius:10px; color:var(--yellow);
-  font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-unlock-avulso:hover { background:rgba(255,193,7,0.2); }
 .btn-unlock-pro {
   width:100%; padding:13px;
   background:var(--green); border:none; border-radius:10px;
-  color:#000; font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  color:#000; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-unlock-pro:hover { background:#00f088; }
@@ -611,7 +621,7 @@ nav {
 }
 
 .page-title {
-  font-family:'Syne',sans-serif; font-size:clamp(30px,4vw,46px);
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(30px,4vw,46px);
   font-weight:800; letter-spacing:-2px; text-align:center; margin-bottom:16px;
   color:var(--text);
 }
@@ -638,20 +648,20 @@ nav {
 .plan-popular {
   position:absolute; top:-11px; left:50%; transform:translateX(-50%);
   background:var(--green); color:#000;
-  font-family:'Syne',sans-serif; font-size:10px; font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:700;
   letter-spacing:1px; padding:3px 14px; border-radius:20px;
   white-space:nowrap;
 }
 
 .plan-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
 .plan-icon { font-size:32px; margin-bottom:8px; display:block; }
-.plan-name { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; }
+.plan-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; }
 .plan-tagline { font-size:12px; color:var(--muted2); margin-top:2px; }
 
 .plan-price { text-align:right; }
-.plan-value { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--green); line-height:1; letter-spacing:-1px; }
+.plan-value { font-family:'Plus Jakarta Sans',sans-serif; font-size:32px; font-weight:800; color:var(--green); line-height:1; letter-spacing:-1px; }
 .plan-period { font-size:11px; color:var(--muted); margin-top:2px; }
-.plan-free { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
+.plan-free { font-family:'Plus Jakarta Sans',sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
 
 .plan-features { display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
 .plan-feat {
@@ -666,7 +676,7 @@ nav {
 .btn-plan {
   width:100%; padding:16px;
   border-radius:16px;
-  font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700;
   cursor:pointer; transition:all 0.25s ease; border:none;
   min-height: 56px;
   letter-spacing:0.01em;
@@ -684,12 +694,12 @@ nav {
   width:28px; height:28px; border-radius:50%;
   background:var(--surface2); border:1px solid var(--border2);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:700;
   color:var(--muted); transition:all 0.3s;
 }
 .co-step.active .co-step-num { background:var(--green); border-color:var(--green); color:#000; }
 .co-step.done .co-step-num { background:rgba(0,230,118,0.15); border-color:rgba(0,230,118,0.4); color:var(--green); }
-.co-step-label { font-size:10px; color:var(--muted); font-family:'Syne',sans-serif; font-weight:600; white-space:nowrap; }
+.co-step-label { font-size:10px; color:var(--muted); font-family:'Plus Jakarta Sans',sans-serif; font-weight:600; white-space:nowrap; }
 .co-step.active .co-step-label { color:var(--text); }
 .co-step.done .co-step-label { color:var(--green); }
 .co-step-line { flex:1; height:1px; background:var(--border); margin-bottom:14px; }
@@ -745,7 +755,7 @@ nav {
 .modal-step { display:none; }
 .modal-step.active { display:block; }
 
-.modal-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.modal-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
 .modal-sub { font-size:13px; color:var(--muted2); margin-bottom:24px; line-height:1.6; }
 
 /* Order summary */
@@ -761,13 +771,13 @@ nav {
 }
 .os-icon { font-size:24px; }
 .os-info { flex:1; }
-.os-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+.os-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; }
 .os-desc { font-size:12px; color:var(--muted2); margin-top:2px; }
-.os-price { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--green); }
+.os-price { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; color:var(--green); }
 
 /* form */
 .form-label {
-  font-family:'Manrope',sans-serif; font-size:12px; font-weight:600;
+  font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
   letter-spacing:0.3px; color:var(--muted2);
   display:block; margin-bottom:8px;
 }
@@ -796,7 +806,7 @@ nav {
   text-align:center;
   margin-bottom:16px;
 }
-.pix-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
+.pix-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
 .pix-key {
   background:var(--surface2); border:1px solid var(--border);
   border-radius:8px; padding:10px 14px;
@@ -812,7 +822,7 @@ nav {
   flex:1; padding:10px;
   background:var(--surface2); border:1px solid var(--border);
   border-radius:9px; cursor:pointer; transition:all 0.2s;
-  font-family:'Syne',sans-serif; font-size:11px; font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:600;
   color:var(--muted); text-align:center;
 }
 .ptab.active { border-color:rgba(0,230,118,0.4); color:var(--green); background:rgba(0,230,118,0.06); }
@@ -823,7 +833,7 @@ nav {
 .btn-pay {
   width:100%; padding:16px;
   background:var(--green); border:none; border-radius:14px;
-  color:#fff; font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+  color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700;
   cursor:pointer; transition:all 0.2s; margin-top:4px;
   min-height: 54px;
   letter-spacing:0.01em;
@@ -839,7 +849,7 @@ nav {
 /* success step */
 .success-block { text-align:center; padding:16px 0; }
 .success-icon { font-size:52px; display:block; margin-bottom:16px; }
-.success-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
+.success-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
 .success-sub { font-size:13px; color:var(--muted2); line-height:1.7; margin-bottom:24px; }
 
 .divider {
@@ -851,7 +861,7 @@ nav {
 }
 
 /* ===== LOGIN MODAL ===== */
-.login-modal-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.login-modal-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
 
 /* ===== ANIMATIONS ===== */
 /* ===== PARSER V3 — MULTI-EXTRATO ===== */
@@ -860,7 +870,7 @@ nav {
 .drop-zone:hover,.drop-zone.drag{border-color:rgba(0,217,110,0.5);background:rgba(0,217,110,0.03)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .dz-ico{font-size:36px;margin-bottom:10px;display:block}
-.dz-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.dz-ttl{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
 .dz-sub{font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.6}
 .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
 .chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
@@ -886,7 +896,7 @@ nav {
 .file-rm{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 8px;
   border-radius:6px;transition:all 0.15s;border:1px solid transparent;flex-shrink:0}
 .file-rm:hover{color:var(--red);border-color:rgba(240,79,96,0.3)}
-.file-status{font-size:10px;font-family:'Syne',sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.file-status{font-size:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
 .fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
 .fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
 .fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
@@ -895,7 +905,7 @@ nav {
 .prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
 .act-msg{font-size:12px;color:var(--muted2);flex:1}
 .btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:9px;
-  color:#000;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  color:#000;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;
   cursor:pointer;transition:all 0.2s;white-space:nowrap;opacity:0.35;pointer-events:none}
 .btn-go.on{opacity:1;pointer-events:all}
 .btn-go.on:hover{background:#00f088}
@@ -906,26 +916,26 @@ nav {
 /* resultado parser */
 .ov-top{padding:24px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
 .ov-emoji{font-size:44px}
-.ov-level{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.ov-level{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
 .ov-sub{font-size:13px;color:var(--muted2);margin-top:2px}
 .p-score-wrap{padding:16px 22px;border-bottom:1px solid var(--border)}
 .p-score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .p-score-lbl{font-size:13px;color:var(--muted2)}
-.p-score-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.p-score-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800}
 .p-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
 .p-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
 .p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
 .p-stat{padding:14px 18px;background:var(--surface)}
-.p-sl{font-size:10px;font-family:'Syne',sans-serif;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
-.p-sv{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.p-sl{font-size:10px;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.p-sv{font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:700}
 .p-sn{font-size:11px;color:var(--muted2);margin-top:2px}
 .sources{padding:16px 22px;border-bottom:1px solid var(--border)}
-.src-ttl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.src-ttl{font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
 .src-list{display:flex;flex-direction:column;gap:7px}
 .src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:9px;font-size:13px}
 .src-bank{flex:1;font-weight:500}
 .src-txns{font-size:11px;color:var(--muted2)}
-.src-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green)}
+.src-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--green)}
 .src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .p-alerts{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
 .pal{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5}
@@ -937,14 +947,14 @@ nav {
 .p-blu{background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.15)}
 .bank-tabs{display:flex;gap:1px;background:var(--border);overflow-x:auto;border-bottom:1px solid var(--border)}
 .bank-tabs::-webkit-scrollbar{height:0}
-.btab{padding:11px 16px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;
+.btab{padding:11px 16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;
   color:var(--muted);background:var(--surface);cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;flex-shrink:0}
 .btab.on{color:var(--green);background:var(--surface2)}
 .p-txn-wrap{padding:16px 22px}
 .p-txn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.p-txn-ttl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.p-txn-ttl{font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
 .p-flt{display:flex;gap:5px}
-.pfb{font-size:11px;font-family:'Syne',sans-serif;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
+.pfb{font-size:11px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
 .pfb.on{background:rgba(240,79,96,0.12);border-color:rgba(240,79,96,0.3);color:var(--red)}
 .p-txn-list{display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto}
 .p-txn-list::-webkit-scrollbar{width:3px}
@@ -957,18 +967,18 @@ nav {
 .ptinfo{flex:1;min-width:0}
 .ptd{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptt{font-size:10px;color:var(--muted2)}
-.ptv{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;white-space:nowrap}
+.ptv{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;white-space:nowrap}
 .ptv.p{color:var(--green)}.ptv.n{color:var(--muted2)}
-.ptf{font-size:9px;font-family:'Syne',sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ptf{font-size:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
 .ptf.r{background:rgba(240,79,96,0.15);color:var(--red)}
 .ptf.y{background:rgba(245,166,35,0.15);color:var(--yellow)}
 .ptbank{font-size:9px;color:var(--muted);white-space:nowrap}
 .p-dbg-hd{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.p-dbg-ttl{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);font-weight:600}
+.p-dbg-ttl{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--muted);font-weight:600}
 .p-dbg-bd{display:none;padding:14px 22px;border-top:1px solid var(--border)}
 .p-dbg-bd.open{display:block}
 pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
-.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Manrope',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
 @media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}.p-sv{font-size:19px}}
 
@@ -984,6 +994,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
   /* Nav mais espaçosa */
   nav { padding: 16px 48px; }
+  .nav-links { display: flex; }
   .nav-link { font-size: 14px; padding: 8px 16px; }
   .nav-btn-login { font-size: 13px; padding: 9px 20px; }
   .logo { font-size: 18px; }
@@ -1120,13 +1131,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <!-- ===== HOME PAGE ===== -->
 <div class="page active" id="page-home">
   <div class="hero">
-    <div class="hero-tag">Simulador gratuito de risco fiscal</div>
-    <h1>Você sabe se está<br><em>seguro com a Receita?</em></h1>
-    <p>Responda perguntas sobre seu comportamento financeiro e descubra se sua declaração tem risco real de malha fina.</p>
+    <div class="hero-tag">Análise fiscal preventiva · Gratuito</div>
+    <h1>Sua movimentação bancária<br><em>está compatível com o IR?</em></h1>
+    <p>O Guardião Fiscal cruza seus extratos com os critérios do e-Financeira e identifica inconsistências antes que a Receita Federal as encontre.</p>
     <div class="hero-badges">
-      <span class="badge">✅ Sem cadastro</span>
-      <span class="badge">⚡ 2 minutos</span>
-      <span class="badge">🔒 Seus dados ficam no dispositivo</span>
+      <span class="badge">🔒 Processamento 100% local</span>
+      <span class="badge">⚡ Resultado em 2 minutos</span>
+      <span class="badge">✅ Sem compartilhar dados</span>
     </div>
   </div>
 
@@ -1213,8 +1224,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div class="ext-card-body">
           <!-- tabs login/cadastro -->
           <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:16px">
-            <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
-            <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
+            <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
+            <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
           </div>
           <!-- cadastro pane -->
           <div id="extCadPane">
@@ -1322,7 +1333,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               </div>
             </div>
             <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px">
-              <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">O que você verá ao desbloquear</div>
+              <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">O que você verá ao desbloquear</div>
               <div style="display:flex;flex-direction:column;gap:8px">
                 <div style="display:flex;gap:10px;font-size:13px;color:var(--muted2)"><span>📊</span><span>Score de risco consolidado de todos os bancos</span></div>
                 <div style="display:flex;gap:10px;font-size:13px;color:var(--muted2)"><span>⚠️</span><span>Alertas por categoria fiscal com valores exatos</span></div>
@@ -1361,11 +1372,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               </div>
               <div class="p-txn-list" id="pTxnList"></div>
             </div>
-            <div class="p-dbg-hd" onclick="eToggleDbg()">
+            <div class="p-dbg-hd" onclick="eToggleDbg()" id="pDbgHd" style="display:none">
               <span class="p-dbg-ttl">🔧 Debug — dados do parser</span>
               <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
             </div>
-            <div class="p-dbg-bd" id="pDbgBd"><pre id="pDbgPre"></pre></div>
+            <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
             <div style="padding:4px 0 0">
               <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
             </div>
@@ -1381,7 +1392,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- metodologia -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.7">
             O Guardião Fiscal utiliza os mesmos critérios que a Receita Federal aplica no sistema <strong style="color:var(--text)">e-Financeira</strong> — programa que obriga bancos a reportar movimentações de pessoas físicas. A análise cruza padrões comportamentais com os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
           </div>
@@ -1389,7 +1400,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- LGPD -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.7">
             <strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</strong>.
           </div>
@@ -1409,8 +1420,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <!-- ===== PLANOS PAGE ===== -->
 <div class="page" id="page-planos">
   <div class="plans-page">
-    <div class="page-title">Escolha seu plano</div>
-    <div class="page-sub">Comece grátis. Monitore continuamente. Nunca seja pego de surpresa.</div>
+    <div class="page-title">Proteção fiscal contínua</div>
+    <div class="page-sub">Identifique riscos antes da Receita. Monitore o ano inteiro. Declare com segurança.</div>
 
     <div class="plans-grid">
 
@@ -1420,7 +1431,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div>
             <div class="plan-icon">✦</div>
             <div class="plan-name">Gratuito</div>
-            <div class="plan-tagline">Para quem quer uma primeira visão</div>
+            <div class="plan-tagline">Diagnóstico inicial sem compromisso</div>
           </div>
           <div class="plan-price">
             <div class="plan-free">R$0</div>
@@ -1444,7 +1455,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div>
             <div class="plan-icon">📄</div>
             <div class="plan-name">Análise Avulsa</div>
-            <div class="plan-tagline">Para quem quer analisar uma vez só</div>
+            <div class="plan-tagline">Análise completa quando precisar</div>
           </div>
           <div class="plan-price">
             <div class="plan-value">R$47,90</div>
@@ -1472,7 +1483,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div>
             <div class="plan-icon">🛡️</div>
             <div class="plan-name">Pro</div>
-            <div class="plan-tagline">Para quem quer proteção contínua</div>
+            <div class="plan-tagline">Monitoramento fiscal o ano todo</div>
           </div>
           <div class="plan-price">
             <div class="plan-value">R$29,90</div>
@@ -1546,7 +1557,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
 
       <div class="divider">já tem conta?</div>
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
         Entrar com e-mail e senha
       </button>
       <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
@@ -1562,7 +1573,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:14px">
           <span style="font-size:28px">🔒</span>
           <div style="text-align:left">
-            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text)">Mercado Pago</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;color:var(--text)">Mercado Pago</div>
             <div style="font-size:11px;color:var(--muted)">Checkout seguro · SSL · PCI DSS</div>
           </div>
         </div>
@@ -1577,7 +1588,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </button>
       </div>
 
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
       <div class="security-note" style="margin-top:12px">🔒 Seus dados de pagamento nunca passam pelos nossos servidores</div>
     </div>
 
@@ -1602,8 +1613,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- tabs -->
     <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
-      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
-      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
+      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
     </div>
 
     <!-- LOGIN -->
@@ -1668,8 +1679,15 @@ function switchSimTab(tab) {
   document.getElementById('simExtrato').style.display = isPerguntas ? 'none' : 'block';
   document.getElementById('tabQ').classList.toggle('active', isPerguntas);
   document.getElementById('tabE').classList.toggle('active', !isPerguntas);
-  // quando abre extrato, rola até o step 1 (ou step 2 se já logado)
+  // quando abre extrato, garante desbloqueio se já logado
   if (!isPerguntas) {
+    if (_currentUser) {
+      // força desbloqueio imediato do step2
+      const s2 = document.getElementById('extStep2');
+      if (s2 && (s2.style.opacity === '0.45' || s2.style.pointerEvents === 'none')) {
+        autoSkipExtStep1(_currentUser.email);
+      }
+    }
     const s1 = document.getElementById('extStep1');
     const s2 = document.getElementById('extStep2');
     const target = (s1 && s1.style.display !== 'none' && s1.style.opacity !== '0.6') ? s1 : s2;
@@ -1713,7 +1731,7 @@ function initProFreeMode() {
     const banner = document.createElement('div');
     banner.id = 'proFreeBanner';
     banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
-    banner.innerHTML = '<div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
+    banner.innerHTML = '<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
     plansWrap.insertBefore(banner, plansWrap.firstChild);
   }
   // Atualiza badge aba extrato
@@ -1768,7 +1786,7 @@ function openCheckout(plan) {
       <div class="os-name">${p.name}</div>
       <div class="os-desc">${p.desc}</div>
     </div>
-    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Manrope',sans-serif;font-weight:400"> ${p.period}</span></div>
+    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:400"> ${p.period}</span></div>
   `;
 
   // reset para step 1
@@ -2042,13 +2060,14 @@ function setUser(user) {
   const area = document.getElementById('navAuthArea');
   if (user) {
     const rawName = user.user_metadata?.nome || user.email.split('@')[0];
-    const name = sanitizeText(rawName);
+    const firstName = rawName.split(' ')[0]; // só primeiro nome
     const nameEl = document.createElement('span');
-    nameEl.style.cssText = 'font-size:13px;color:var(--muted2);font-family:\'Manrope\',sans-serif';
-    nameEl.textContent = rawName; // textContent é seguro — sem parse HTML
+    nameEl.style.cssText = 'font-size:13px;color:var(--muted2);font-family:\'Inter\',sans-serif;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none';
+    nameEl.id = 'navUserName';
+    nameEl.textContent = firstName;
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'nav-btn-login';
-    logoutBtn.style.cssText = 'background:rgba(255,100,100,0.08);border-color:rgba(255,100,100,0.2);color:#f87171';
+    logoutBtn.style.cssText = 'background:rgba(255,100,100,0.08);border-color:rgba(255,100,100,0.2);color:#f87171;font-size:12px;padding:7px 14px';
     logoutBtn.textContent = 'Sair';
     logoutBtn.onclick = doLogout;
     const wrap = document.createElement('div');
@@ -2057,6 +2076,11 @@ function setUser(user) {
     wrap.appendChild(logoutBtn);
     area.innerHTML = '';
     area.appendChild(wrap);
+    // Mostra nome só em telas maiores
+    if (window.innerWidth >= 480) nameEl.style.display = 'block';
+    window.addEventListener('resize', () => {
+      nameEl.style.display = window.innerWidth >= 480 ? 'block' : 'none';
+    }, { passive: true });
     autoSkipExtStep1(user.email);
   } else {
     area.innerHTML = '';
@@ -2349,7 +2373,7 @@ function renderQ() {
   body.innerHTML = `
     <div class="q-num">${q.tag}</div>
     <div class="q-title">${q.title}</div>
-    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Syne,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
+    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Plus Jakarta Sans,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
     <div class="options">
       ${q.opts.map((o,i) => {
         const isSel = isMulti ? multiSel.includes(i) : (sel?.index === i);
@@ -2436,50 +2460,70 @@ function showResult() {
   const pct = Math.min(100, Math.round((total / 19) * 100));
 
   let level, color, emoji, desc;
-  const alerts = [];
+  const alertsData = []; // { title, text, cls, icon }
 
   if (pct <= 20) {
-    level = 'VERDE — Baixo Risco'; color = '#00e676'; emoji = '🟢';
-    desc = 'Seu perfil fiscal está dentro do esperado para a Receita Federal.';
-    alerts.push({ cls:'alert-green', icon:'✅', text:'<strong>Fontes de renda:</strong> Seu perfil não apresenta sinais de inconsistência com o que a Receita espera declarado.' });
-    alerts.push({ cls:'alert-green', icon:'✅', text:'<strong>Movimentação:</strong> Nenhum padrão de recebimento informal recorrente que ative o sistema e-Financeira foi identificado.' });
-    alerts.push({ cls:'alert-green', icon:'💡', text:'<strong>Recomendação:</strong> Mantenha todos os comprovantes de deduções por pelo menos 5 anos — a Receita pode auditar retroativamente.' });
+    level = 'Baixo risco fiscal'; color = '#00d96e'; emoji = '🟢';
+    desc = 'Seu perfil está dentro do padrão esperado pela Receita Federal para este nível de declaração.';
+    alertsData.push({ cls:'alert-green', icon:'✅', title:'Fontes de renda consistentes', text:'Seu perfil não apresenta sinais de incompatibilidade entre movimentação bancária e o que a Receita espera declarado.' });
+    alertsData.push({ cls:'alert-green', icon:'✅', title:'Sem padrões informais detectados', text:'Nenhum padrão de recebimento recorrente sem justificativa que ative o sistema e-Financeira foi identificado.' });
+    alertsData.push({ cls:'alert-green', icon:'💡', title:'Recomendação preventiva', text:'Mantenha comprovantes de todas as deduções por pelo menos 5 anos. A Receita pode auditar retroativamente mesmo declarações aprovadas.' });
   } else if (pct <= 55) {
-    level = 'AMARELO — Risco Moderado'; color = '#ffc107'; emoji = '🟡';
-    desc = 'Inconsistências potenciais que merecem atenção antes da entrega.';
-    if (answers[0]?.multiSel?.length > 2) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Múltiplas fontes de renda:</strong> Cada fonte adicional aumenta a chance de divergência entre dados bancários e o declarado. Cada uma precisa estar detalhada.' });
-    if (answers[1]?.risk > 0) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Pix recebidos:</strong> Bancos reportam à Receita via e-Financeira toda movimentação mensal acima de R$5.000. Pix frequentes sem nota fiscal são o principal gatilho de malha fina em autônomos.' });
-    if (answers[2]?.risk > 0) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Declaração incompleta:</strong> A Receita já possui os dados bancários antes de você declarar. Qualquer entrada não justificada é cruzada automaticamente.' });
-    if (answers[4]?.risk > 0) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Deduções sem comprovante:</strong> Planos de saúde, hospitais e faculdades enviam dados à Receita independentemente. Valores divergentes geram malha fina automática.' });
-    if (!alerts.length) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Atenção geral:</strong> Seus dados apresentam pontos que merecem revisão com um contador antes do prazo.' });
-    alerts.push({ cls:'alert-green', icon:'💡', text:'<strong>O que fazer:</strong> Ainda há tempo para regularizar. Uma retificação preventiva custa muito menos que uma autuação.' });
+    level = 'Atenção — risco moderado'; color = '#f5a623'; emoji = '🟡';
+    desc = 'Seu perfil apresenta pontos que merecem revisão antes da entrega da declaração.';
+    if (answers[0]?.multiSel?.length > 2) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Múltiplas fontes de renda', text:'Cada fonte adicional aumenta a chance de divergência entre dados bancários e o declarado. Todas precisam estar detalhadas na declaração.' });
+    if (answers[1]?.risk > 0) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Pix recebidos sem justificativa', text:'Bancos reportam à Receita via e-Financeira toda movimentação mensal acima de R$5.000. Pix frequentes sem nota fiscal são o principal gatilho de malha fina em autônomos.' });
+    if (answers[2]?.risk > 0) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Declaração possivelmente incompleta', text:'A Receita já possui os dados bancários antes de você declarar. Qualquer entrada não justificada é cruzada automaticamente.' });
+    if (answers[4]?.risk > 0) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Deduções sem comprovante', text:'Planos de saúde, hospitais e faculdades enviam dados à Receita independentemente. Valores divergentes geram malha fina automática.' });
+    if (!alertsData.length) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Pontos que merecem revisão', text:'Seus dados apresentam aspectos que um contador deve avaliar antes do prazo de entrega.' });
+    alertsData.push({ cls:'alert-green', icon:'💡', title:'Ainda dá tempo de regularizar', text:'Uma retificação preventiva custa muito menos do que uma autuação. Após notificado, multas e juros se aplicam automaticamente.' });
   } else {
-    level = 'VERMELHO — Risco Alto'; color = '#ff4757'; emoji = '🔴';
-    desc = 'Seu perfil apresenta inconsistências que a Receita já pode estar cruzando.';
-    if (answers[2]?.risk >= 4) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Omissão de renda:</strong> É o motivo nº1 de malha fina no Brasil. A Receita recebe os dados bancários diretamente dos bancos — a declaração precisa bater exatamente.' });
-    if (answers[1]?.risk >= 3) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Pix informais frequentes:</strong> Recebimentos regulares sem nota são detectados automaticamente pelo e-Financeira. Não precisa de denúncia para a Receita identificar.' });
-    if (answers[3]?.risk >= 3) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Incompatibilidade patrimonial:</strong> Compras ou investimentos acima da renda declarada acionam o IRPF de ofício — a Receita lança o imposto automaticamente sobre a diferença.' });
-    if (answers[5]?.risk >= 2) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Dependente duplicado:</strong> Quando duas pessoas declaram o mesmo dependente, o sistema retém as duas declarações automaticamente para revisão.' });
-    if (!alerts.length) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Múltiplos fatores críticos:</strong> Seu perfil ativa vários critérios de atenção da Receita simultaneamente. Risco real de notificação.' });
-    alerts.push({ cls:'alert-yellow', icon:'💡', text:'<strong>Ação urgente:</strong> É possível retificar antes de qualquer notificação. Após notificado, multas e juros se aplicam automaticamente. Procure um contador agora.' });
+    level = 'Risco elevado'; color = '#f04f60'; emoji = '🔴';
+    desc = 'Seu perfil apresenta inconsistências que a Receita Federal pode estar cruzando agora.';
+    if (answers[2]?.risk >= 4) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Possível omissão de renda', text:'É o motivo número 1 de malha fina no Brasil. A Receita recebe os dados bancários diretamente dos bancos — a declaração precisa bater exatamente.' });
+    if (answers[1]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Pix informais recorrentes', text:'Recebimentos regulares sem nota fiscal são detectados automaticamente pelo e-Financeira. Não precisa de denúncia para a Receita identificar.' });
+    if (answers[3]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Incompatibilidade patrimonial', text:'Compras ou investimentos acima da renda declarada acionam o IRPF de ofício — a Receita lança o imposto automaticamente sobre a diferença.' });
+    if (answers[5]?.risk >= 2) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Dependente declarado por mais de uma pessoa', text:'Quando duas pessoas declaram o mesmo dependente, o sistema retém as duas declarações automaticamente para revisão.' });
+    if (!alertsData.length) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Múltiplos fatores de risco simultâneos', text:'Seu perfil ativa vários critérios de atenção da Receita ao mesmo tempo. Risco real de notificação.' });
+    alertsData.push({ cls:'alert-yellow', icon:'💡', title:'Ação urgente recomendada', text:'É possível retificar antes de qualquer notificação. Após notificado, multas e juros se aplicam automaticamente. Procure um contador agora.' });
   }
 
   document.getElementById('resultHero').innerHTML = `
     <div class="result-glow" style="background:${color}"></div>
-    <div class="result-sublabel">// resultado da análise</div>
+    <div class="result-sublabel">// diagnóstico fiscal</div>
     <span class="result-emoji">${emoji}</span>
     <div class="result-level" style="color:${color}">${level}</div>
-    <div class="result-desc">${desc}</div>
+    <div class="result-desc">${sanitize(desc)}</div>
     <div class="score-bar-bg">
       <div class="score-bar-fill" id="scoreBar" style="width:0%;background:${color}"></div>
     </div>
-    <div class="score-label">Índice de risco: ${pct}%</div>
+    <div class="score-label">Índice de risco estimado: ${pct}%</div>
   `;
 
-  document.getElementById('resultAlerts').innerHTML = alerts.map(a =>
-    `<div class="alert-item ${a.cls}"><span class="alert-icon">${a.icon}</span><span>${a.text}</span></div>`
+  // Mostra 2 alertas reais + paywall no 3º
+  const visiveis = alertsData.slice(0, 2);
+  const bloqueados = alertsData.slice(2);
+
+  let html = visiveis.map(a =>
+    `<div class="alert-item ${sanitize(a.cls)}">
+      <span class="alert-icon">${a.icon}</span>
+      <span><strong style="font-weight:600;display:block;margin-bottom:2px">${sanitize(a.title)}</strong>${sanitize(a.text)}</span>
+    </div>`
   ).join('');
 
+  if (bloqueados.length > 0) {
+    html += `
+    <div class="alert-paywall">
+      <div class="apw-lock">🔒</div>
+      <div class="apw-title">+${bloqueados.length} alerta${bloqueados.length > 1 ? 's' : ''} identificado${bloqueados.length > 1 ? 's' : ''}</div>
+      <div class="apw-desc">Faça upload do seu extrato bancário para ver a análise completa com os valores reais da sua conta.</div>
+      <button class="apw-btn" onclick="showPage('home');setTimeout(()=>{switchSimTab('extrato')},100)">Ver análise completa do extrato →</button>
+      <div class="apw-or">ou</div>
+      <button class="apw-btn-sec" onclick="openCheckout('avulso')">Análise avulsa — R$47,90</button>
+    </div>`;
+  }
+
+  document.getElementById('resultAlerts').innerHTML = html;
   setTimeout(() => { document.getElementById('scoreBar').style.width = pct + '%'; }, 300);
 }
 
@@ -2529,11 +2573,30 @@ function eDetectFormat(c,fn){
   const ext=fn.split('.').pop().toLowerCase();
   const h=c.substring(0,3000).toUpperCase();
   const l=c.split('\n').slice(0,15).join('\n').toLowerCase();
-  if(ext==='pdf')return{format:'pdf',bank:'PDF'};
-  if(ext==='ofx'||ext==='qfx'||h.includes('<OFX')||h.includes('OFXHEADER'))return{format:'ofx',bank:eDetectBankOFX(c)};
-  if(l.includes('"date"')&&l.includes('"title"')&&l.includes('"amount"'))return{format:'nubank_cartao',bank:'Nubank (cartão)'};
-  // Inter — deve vir antes do Nubank conta pois também tem lançamento/valor
-  if(l.includes('banco inter')||l.includes('extrato conta corrente')||(l.includes('histórico')&&l.includes('descrição')&&l.includes(';')))return{format:'inter',bank:'Banco Inter'};
+
+  let format, bankInfo;
+
+  if(ext==='pdf'){
+    format='pdf';
+    bankInfo=eDetectBankReal(c,'pdf',fn);
+    return{format,bank:bankInfo.label,conta:bankInfo.conta,banco:bankInfo.banco};
+  }
+  if(ext==='ofx'||ext==='qfx'||h.includes('<OFX')||h.includes('OFXHEADER')){
+    format='ofx';
+    bankInfo=eDetectBankReal(c,'ofx',fn);
+    return{format,bank:bankInfo.label,conta:bankInfo.conta,banco:bankInfo.banco};
+  }
+  if(l.includes('"date"')&&l.includes('"title"')&&l.includes('"amount"')){
+    format='nubank_cartao';
+    bankInfo=eDetectBankReal(c,'nubank_cartao',fn);
+    return{format,bank:bankInfo.label||'Nubank (cartão)',conta:bankInfo.conta,banco:bankInfo.banco};
+  }
+  // Inter — deve vir antes do Nubank conta
+  if(l.includes('banco inter')||l.includes('extrato conta corrente')||(l.includes('histórico')&&l.includes('descrição')&&l.includes(';'))){
+    format='inter';
+    bankInfo=eDetectBankReal(c,'inter',fn);
+    return{format,bank:bankInfo.label,conta:bankInfo.conta,banco:bankInfo.banco};
+  }
   // Nubank conta
   const isNubankConta=(
     ((l.includes('lançamento')||l.includes('lancamento'))&&l.includes('valor'))||
@@ -2541,23 +2604,113 @@ function eDetectFormat(c,fn){
     (l.includes('data')&&l.includes('descrição')&&l.includes('valor')&&!l.includes(';'))||
     (l.includes('data')&&l.includes('description')&&l.includes('amount')&&l.includes('identifier'))
   )&&!l.includes('"date"')&&!l.includes('"title"');
-  if(isNubankConta)return{format:'nubank_conta',bank:'Nubank (conta)'};
-  if(l.includes('data;histórico')||l.includes('data;historico'))return{format:'bb',bank:'Banco do Brasil'};
-  return{format:'generic',bank:'CSV genérico'};
+  if(isNubankConta){
+    format='nubank_conta';
+    bankInfo=eDetectBankReal(c,'nubank_conta',fn);
+    return{format,bank:bankInfo.label||'Nubank (conta)',conta:bankInfo.conta,banco:bankInfo.banco};
+  }
+  if(l.includes('data;histórico')||l.includes('data;historico')){
+    format='bb';
+    bankInfo=eDetectBankReal(c,'bb',fn);
+    return{format,bank:bankInfo.label||'Banco do Brasil',conta:bankInfo.conta,banco:bankInfo.banco};
+  }
+  bankInfo=eDetectBankReal(c,'generic',fn);
+  return{format:'generic',bank:bankInfo.label||'CSV genérico',conta:bankInfo.conta,banco:bankInfo.banco};
 }
-function eDetectBankOFX(c){
-  const u=c.toUpperCase();
-  if(u.includes('ITAU')||u.includes('ITAÚ'))return 'Itaú';
-  if(u.includes('BRADESCO'))return 'Bradesco';
-  if(u.includes('BANCOBRASIL')||u.includes('BANCO DO BRASIL'))return 'Banco do Brasil';
-  if(u.includes('CAIXA'))return 'Caixa Econômica';
-  if(u.includes('SICOOB'))return 'Sicoob';
-  if(u.includes('SICREDI'))return 'Sicredi';
-  if(u.includes('SANTANDER'))return 'Santander';
-  if(u.includes('NUBANK')||u.includes('NU PAGAMENTOS'))return 'Nubank';
-  if(u.includes('INTER'))return 'Banco Inter';
-  return 'OFX';
+// ── Mapa de códigos COMPE → nome do banco ──────────────────────
+const BANCO_COMPE = {
+  '001':'Banco do Brasil','033':'Santander','041':'Banrisul','077':'Banco Inter',
+  '104':'Caixa Econômica','208':'BTG Pactual','212':'Banco Original','237':'Bradesco',
+  '260':'Nu Pagamentos','290':'PagBank','341':'Itaú','348':'XP','376':'JP Morgan',
+  '422':'Safra','633':'Rendimento','637':'Sofisa','655':'Votorantim','745':'Citibank',
+  '756':'Sicoob','748':'Sicredi','336':'C6 Bank','380':'PicPay','323':'Mercado Pago',
+  '403':'Cora','461':'Asaas','084':'CC Uniprime','085':'Cooperativa Central',
+};
+
+// ── Extrai banco e conta de qualquer tipo de arquivo ───────────
+function eDetectBankReal(content, format, filename) {
+  const u = content.substring(0, 3000).toUpperCase();
+  const raw = content.substring(0, 3000);
+
+  let banco = null;
+  let conta = null;
+  let agencia = null;
+
+  // ── OFX: extrai via tags XML ──
+  if (format === 'ofx') {
+    // Banco via FID (código COMPE)
+    const fid = raw.match(/<FID>(\d+)/i)?.[1];
+    if (fid && BANCO_COMPE[fid]) banco = BANCO_COMPE[fid];
+
+    // Banco via ORG
+    if (!banco) {
+      const org = raw.match(/<ORG>([^<\n]+)/i)?.[1]?.trim();
+      if (org) banco = eBancoNomeFromText(org);
+    }
+
+    // Conta
+    conta = raw.match(/<ACCTID>([^<\n]+)/i)?.[1]?.trim();
+    agencia = raw.match(/<BRANCHID>([^<\n]+)/i)?.[1]?.trim();
+  }
+
+  // ── CSV/TXT: extrai via cabeçalho de metadados ──
+  if (!banco || format === 'inter' || format === 'nubank_conta' || format === 'bb') {
+    // Número de conta em linha de metadado "Conta ;32238762"
+    const contaM = raw.match(/conta\s*[;:]\s*(\d[\d\-\.]+)/i);
+    if (contaM) conta = contaM[1].replace(/[.\-]/g, '').trim();
+
+    // Agência
+    const agM = raw.match(/agência?\s*[;:]\s*([\d\-]+)/i);
+    if (agM) agencia = agM[1].replace(/[.\-]/g, '').trim();
+
+    // Banco via texto
+    if (!banco) banco = eBancoNomeFromText(raw.substring(0, 500));
+  }
+
+  // ── PDF: tenta extrair do texto ──
+  if (format === 'pdf' || !banco) {
+    banco = eBancoNomeFromText(u);
+    const contaM = u.match(/CONTA[^:]*:\s*([\d\.\-]+)/);
+    if (contaM && !conta) conta = contaM[1].replace(/[.\-]/g, '').trim();
+  }
+
+  // Fallback: usa o nome do arquivo
+  if (!banco) banco = eBancoNomeFromText(filename);
+
+  // Monta label do banco — inclui conta se disponível
+  const label = banco
+    ? (conta ? `${banco} ···${conta.slice(-4)}` : banco)
+    : (conta ? `Conta ···${conta.slice(-4)}` : 'Extrato');
+
+  return { banco: banco || 'Extrato', conta: conta || null, agencia: agencia || null, label };
 }
+
+// ── Identifica nome do banco a partir de texto livre ───────────
+function eBancoNomeFromText(text) {
+  const u = text.toUpperCase();
+  if (u.includes('BANCO INTER') || u.includes('INTERMEDIUM') || u.includes('INTER S/A')) return 'Banco Inter';
+  if (u.includes('NUBANK') || u.includes('NU PAGAMENTOS') || u.includes('NU FINANCEIRA')) return 'Nubank';
+  if (u.includes('ITAU') || u.includes('ITAÚ')) return 'Itaú';
+  if (u.includes('BRADESCO')) return 'Bradesco';
+  if (u.includes('BANCO DO BRASIL') || u.includes('BANCOBRASIL')) return 'Banco do Brasil';
+  if (u.includes('CAIXA ECONÔMICA') || u.includes('CAIXA ECONOMICA') || u.includes('CEF')) return 'Caixa Econômica';
+  if (u.includes('SANTANDER')) return 'Santander';
+  if (u.includes('SICOOB')) return 'Sicoob';
+  if (u.includes('SICREDI')) return 'Sicredi';
+  if (u.includes('C6 BANK') || u.includes('C6BANK')) return 'C6 Bank';
+  if (u.includes('BTG')) return 'BTG Pactual';
+  if (u.includes('ORIGINAL')) return 'Banco Original';
+  if (u.includes('PAGBANK') || u.includes('PAG BANK')) return 'PagBank';
+  if (u.includes('XP INVESTIMENTOS') || u.includes('XP INC')) return 'XP';
+  if (u.includes('PICPAY')) return 'PicPay';
+  if (u.includes('MERCADO PAGO')) return 'Mercado Pago';
+  if (u.includes('BANRISUL')) return 'Banrisul';
+  if (u.includes('SAFRA')) return 'Safra';
+  if (u.includes('VOTORANTIM')) return 'Votorantim';
+  return null;
+}
+
+function eDetectBankOFX(c){ return eDetectBankReal(c,'ofx','').label; }
 function eSplitCSV(line,sep=','){
   const r=[];let cur='',q=false;
   for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){q=!q;continue}if(c===sep&&!q){r.push(cur.trim());cur='';continue}cur+=c;}
@@ -2627,68 +2780,348 @@ function eParsePDFText(text){
   return txns.length>0?txns:eParseGeneric(lines);
 }
 
-const E_FORMAL=['salário','salario','holerite','folha pgto','pagamento folha','fgts','inss','irrf','pro-labore','pró-labore','beneficio','benefício','aposentadoria','pensão','pensao','rendimento prev','resgate prev'];
-const E_INVEST=['btc','bitcoin','cripto','crypto','ethereum','xrp','usdt','binance','foxbit','mercado bitcoin','novadax','tesouro direto','tesouro selic','tesouro ipca','dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca','resgate rdb','resgate fundo'];
-const E_RENT=['aluguel','locação','locacao','imóvel','imovel'];
-const E_PIX=['pix recebido','pix credit','recebido pix','transf. recebida','transferência recebida','transferencia recebida','ted recebida','doc recebido','depósito recebido','deposito recebido'];
+// ═══════════════════════════════════════════════════════════════
+// MOTOR DE COERÊNCIA FISCAL — Guardião Fiscal v2
+// Baseado em: compatibilidade financeira, detecção comportamental,
+// análise temporal, score tributário ponderado e explicação causal
+// ═══════════════════════════════════════════════════════════════
 
-function eClassifyTxn(t){
-  const d=t.desc.toLowerCase(),v=t.value;
-  if(v<=0)return{risk:'normal',flag:null};
-  if(E_FORMAL.some(k=>d.includes(k)))return{risk:'normal',flag:null};
-  if(E_INVEST.some(k=>d.includes(k)))return{risk:'attention',flag:'Investimento'};
-  if(E_RENT.some(k=>d.includes(k)))return{risk:'attention',flag:'Aluguel'};
-  const isPix=E_PIX.some(k=>d.includes(k))||(d.includes('pix')&&v>0)||(d.includes('transf')&&v>0&&!d.includes('entre contas')&&!d.includes('conta própria'));
-  if(isPix){if(v>=5000)return{risk:'suspicious',flag:'Pix ≥ R$5k'};if(v>=2000)return{risk:'attention',flag:'Pix relevante'};if(v>=500)return{risk:'attention',flag:'Pix'};}
-  if(v>=10000)return{risk:'suspicious',flag:'Crédito alto'};
-  if(v>=5000)return{risk:'attention',flag:'Valor relevante'};
-  return{risk:'normal',flag:null};
+// ── Dicionários de categorização semântica ──────────────────────
+const CAT = {
+  formal:    ['salário','salario','holerite','folha pgto','pagamento folha','fgts','inss','irrf','pro-labore','pró-labore','beneficio','benefício','aposentadoria','pensão','pensao','rendimento prev','13 salario','13° salario','férias','ferias','rescisão','rescisao','clt'],
+  invest:    ['btc','bitcoin','cripto','crypto','ethereum','xrp','usdt','binance','foxbit','mercado bitcoin','novadax','tesouro direto','tesouro selic','tesouro ipca','dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca','resgate rdb','resgate fundo','rendimento aplicacao','rendimento poupanca'],
+  aluguel:   ['aluguel','locação','locacao','imóvel','imovel','alugar','locatário','locatario'],
+  comercial: ['ifood','rappi','uber eats','99food','shopee','mercado livre','mercadolivre','ame digital','pagseguro','mercado pago','stone','cielo','getnet','rede ','sumup','ton ','pagar.me','venda','vend.','nota fiscal','nf-e','recebimento vendas','vendas online'],
+  especie:   ['saque','caixa eletronico','atm','deposito especie','dep especie','deposito em especie','dinheiro','cdas','cofre'],
+  interno:   ['entre contas','conta própria','conta propria','transferência interna','transf interna','tid própria','tid propria','portabilidade'],
+  pix:       ['pix recebido','pix credit','recebido pix','pix enviado','pix debitado','chave pix'],
+  transf:    ['transferência recebida','transferencia recebida','ted recebida','doc recebido','depósito recebido','deposito recebido','transf. recebida','transf recebida'],
+};
+
+function catMatch(desc, cats) {
+  const d = desc.toLowerCase();
+  return cats.some(k => d.includes(k));
 }
 
-function eAnalyzeSingle(txns,bank){
-  if(!txns||txns.length===0)return null;
-  const monthly={};
-  txns.forEach(t=>{if(t.value<=0)return;const k=t.date?`${t.date.getFullYear()}-${t.date.getMonth()}`:'unk';if(!monthly[k])monthly[k]={total:0,pix:0};monthly[k].total+=t.value;const d=t.desc.toLowerCase();if(d.includes('pix')||d.includes('transf'))monthly[k].pix+=t.value;});
-  const classified=txns.map(t=>({...t,...eClassifyTxn(t),bank}));
-  const credits=classified.filter(t=>t.value>0);
-  const suspicious=classified.filter(t=>t.risk==='suspicious'&&t.value>0);
-  const totalCredits=credits.reduce((a,t)=>a+t.value,0);
-  const pixTotal=credits.filter(t=>t.desc.toLowerCase().includes('pix')||t.desc.toLowerCase().includes('transf')).reduce((a,t)=>a+t.value,0);
-  const months=Object.keys(monthly).filter(k=>k!=='unk');
-  const monthsOverLimit=Object.values(monthly).filter(m=>m.pix>=5000).length;
-  const suspTotal=suspicious.reduce((a,t)=>a+t.value,0);
-  const infRatio=totalCredits>0?suspTotal/totalCredits:0;
-  let score=Math.round(infRatio*40)+Math.min(20,monthsOverLimit*10)+Math.min(20,suspicious.length*5);
-  if(classified.some(t=>t.flag==='Investimento'))score+=10;
-  if(classified.some(t=>t.flag==='Aluguel'))score+=8;
-  score=Math.min(100,Math.max(0,score));
-  return{bank,totalTxns:txns.length,creditCount:credits.length,totalCredits,pixTotal,suspCount:suspicious.length,attCount:classified.filter(t=>t.risk==='attention'&&t.value>0).length,monthsOverLimit,months:months.length,score,classified};
+// ── Classificador semântico de transação ───────────────────────
+function eClassifyTxn(t) {
+  const d = t.desc.toLowerCase();
+  const v = t.value;
+
+  if (v <= 0) return { risk: 'normal', flag: null, cat: 'saida' };
+
+  // Renda formal — baixo risco
+  if (catMatch(d, CAT.formal)) return { risk: 'normal', flag: 'Renda formal', cat: 'formal' };
+
+  // Transferência interna — ignorar
+  if (catMatch(d, CAT.interno)) return { risk: 'normal', flag: null, cat: 'interno' };
+
+  // Investimentos — atenção (precisam ser declarados)
+  if (catMatch(d, CAT.invest)) return { risk: 'attention', flag: 'Investimento', cat: 'invest' };
+
+  // Aluguel recebido — atenção
+  if (catMatch(d, CAT.aluguel)) return { risk: 'attention', flag: 'Aluguel', cat: 'aluguel' };
+
+  // Atividade comercial — suspeito se recorrente
+  if (catMatch(d, CAT.comercial)) return { risk: 'attention', flag: 'Comercial', cat: 'comercial' };
+
+  // Depósito em espécie — alto risco
+  if (catMatch(d, CAT.especie)) {
+    if (v >= 3000) return { risk: 'suspicious', flag: 'Espécie ≥ R$3k', cat: 'especie' };
+    return { risk: 'attention', flag: 'Espécie', cat: 'especie' };
+  }
+
+  // Pix recebido
+  const isPix = catMatch(d, CAT.pix) || (d.includes('pix') && v > 0);
+  const isTransf = catMatch(d, CAT.transf) || (d.includes('transf') && v > 0 && !catMatch(d, CAT.interno));
+
+  if (isPix || isTransf) {
+    if (v >= 10000) return { risk: 'suspicious', flag: 'Pix ≥ R$10k', cat: 'pix' };
+    if (v >= 5000)  return { risk: 'suspicious', flag: 'Pix ≥ R$5k',  cat: 'pix' };
+    if (v >= 2000)  return { risk: 'attention',  flag: 'Pix relevante', cat: 'pix' };
+    if (v >= 500)   return { risk: 'attention',  flag: 'Pix', cat: 'pix' };
+    return { risk: 'normal', flag: null, cat: 'pix' };
+  }
+
+  // Crédito genérico alto
+  if (v >= 15000) return { risk: 'suspicious', flag: 'Crédito alto', cat: 'outros' };
+  if (v >= 5000)  return { risk: 'attention',  flag: 'Valor relevante', cat: 'outros' };
+
+  return { risk: 'normal', flag: null, cat: 'outros' };
 }
 
-function eConsolidate(results){
-  const allC=results.flatMap(r=>r.classified);
-  const credits=allC.filter(t=>t.value>0);
-  const totalCredits=credits.reduce((a,t)=>a+t.value,0);
-  const pixTotal=credits.filter(t=>t.desc.toLowerCase().includes('pix')||t.desc.toLowerCase().includes('transf')).reduce((a,t)=>a+t.value,0);
-  const suspicious=allC.filter(t=>t.risk==='suspicious'&&t.value>0);
-  const attention=allC.filter(t=>t.risk==='attention'&&t.value>0);
-  const suspTotal=suspicious.reduce((a,t)=>a+t.value,0);
-  const totalVol=results.reduce((a,r)=>a+r.totalCredits,0);
-  let score=0;
-  if(totalVol>0)results.forEach(r=>{score+=r.score*(r.totalCredits/totalVol);});
-  else score=results.reduce((a,r)=>a+r.score,0)/results.length;
-  if(results.filter(r=>r.score>55).length>=2)score=Math.min(100,score+10);
-  score=Math.round(score);
-  const totalMOL=results.reduce((a,r)=>a+r.monthsOverLimit,0);
-  const alerts=[];
-  if(suspicious.length>0)alerts.push({type:'red',icon:'🚨',title:`${suspicious.length} crédito(s) de alto risco nos ${results.length} extrato(s)`,text:`Total de ${fmtBRL(suspTotal)} sem justificativa fiscal clara. A Receita cruza via e-Financeira em todos os bancos.`});
-  if(totalMOL>0)alerts.push({type:'red',icon:'⚠️',title:`Pix acima de R$5.000/mês em ${totalMOL} mês(es)`,text:`Bancos reportam automaticamente à Receita movimentações mensais de Pix acima desse limite.`});
-  if(allC.some(t=>t.flag==='Investimento')){const t=allC.filter(x=>x.flag==='Investimento').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'📈',title:`Rendimentos de investimentos: ${fmtBRL(t)}`,text:`CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos.`});}
-  if(allC.some(t=>t.flag==='Aluguel')){const t=allC.filter(x=>x.flag==='Aluguel').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'🏠',title:`Recebimentos de aluguel: ${fmtBRL(t)}`,text:`Devem ser informados no carnê-leão mensalmente e na declaração anual.`});}
-  if(attention.length>0&&suspicious.length===0)alerts.push({type:'yellow',icon:'⚠️',title:`${attention.length} transação(ões) merecem revisão`,text:`Créditos que podem ser questionados. Tenha comprovantes de origem disponíveis.`});
-  if(alerts.length===0)alerts.push({type:'green',icon:'✅',title:'Perfil de créditos dentro do esperado',text:`Nenhum crédito de alto risco nos ${results.length} extrato(s).`});
-  alerts.push({type:'blue',icon:'💡',title:'Próximo passo',text:`Compare os ${credits.length} créditos (${fmtBRL(totalCredits)}) com o declarado no IR. Qualquer diferença precisa de comprovante.`});
-  return{score,totalCredits,pixTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,alerts,all:allC};
+// ── Detecção de recorrência comportamental ─────────────────────
+function detectarRecorrencia(txns) {
+  // Agrupa por descrição normalizada e detecta padrões de frequência
+  const grupos = {};
+  txns.filter(t => t.value > 0).forEach(t => {
+    const chave = t.desc.toLowerCase()
+      .replace(/\d{2}\/\d{2}\/\d{4}/g, '')
+      .replace(/\d{2}\/\d{2}/g, '')
+      .replace(/r\$[\d.,]+/gi, '')
+      .replace(/\s+/g, ' ').trim().substring(0, 40);
+    if (!grupos[chave]) grupos[chave] = { count: 0, total: 0, valores: [] };
+    grupos[chave].count++;
+    grupos[chave].total += t.value;
+    grupos[chave].valores.push(t.value);
+  });
+
+  const recorrentes = Object.entries(grupos)
+    .filter(([, g]) => g.count >= 4)
+    .map(([desc, g]) => {
+      const media = g.total / g.count;
+      const desvioPct = g.valores.length > 1
+        ? Math.sqrt(g.valores.reduce((a, v) => a + Math.pow(v - media, 2), 0) / g.valores.length) / media
+        : 0;
+      return { desc, count: g.count, total: g.total, media, desvioPct };
+    });
+
+  // Recorrência com ticket parecido = sinal de atividade comercial
+  const comercialOculta = recorrentes.filter(r => r.desvioPct < 0.3 && r.count >= 6 && r.media >= 200);
+  return { recorrentes, comercialOculta };
+}
+
+// ── Análise temporal — variação mensal (z-score simplificado) ──
+function analiseTemporal(monthly) {
+  const meses = Object.values(monthly).filter(m => m.total > 0);
+  if (meses.length < 2) return { anomalias: [], mediaHistorica: 0, pico: 0 };
+
+  const totais = meses.map(m => m.total);
+  const media = totais.reduce((a, v) => a + v, 0) / totais.length;
+  const desvio = Math.sqrt(totais.reduce((a, v) => a + Math.pow(v - media, 2), 0) / totais.length);
+
+  const anomalias = meses.filter(m => {
+    const z = desvio > 0 ? Math.abs(m.total - media) / desvio : 0;
+    return z > 1.5; // 1.5 desvios padrão = anomalia relevante
+  });
+
+  return { anomalias, mediaHistorica: media, pico: Math.max(...totais) };
+}
+
+// ── Motor principal — análise de um extrato ────────────────────
+function eAnalyzeSingle(txns, bank) {
+  if (!txns || txns.length === 0) return null;
+
+  // Agrupa por mês
+  const monthly = {};
+  txns.forEach(t => {
+    if (t.value <= 0) return;
+    const k = t.date ? `${t.date.getFullYear()}-${String(t.date.getMonth()).padStart(2,'0')}` : 'unk';
+    if (!monthly[k]) monthly[k] = { total: 0, pix: 0, especie: 0, count: 0 };
+    monthly[k].total += t.value;
+    monthly[k].count++;
+    const d = t.desc.toLowerCase();
+    if (d.includes('pix') || d.includes('transf')) monthly[k].pix += t.value;
+    if (catMatch(d, CAT.especie)) monthly[k].especie += t.value;
+  });
+
+  const classified = txns.map(t => ({ ...t, ...eClassifyTxn(t), bank }));
+  const credits     = classified.filter(t => t.value > 0);
+  const debits      = classified.filter(t => t.value < 0);
+  const suspicious  = classified.filter(t => t.risk === 'suspicious' && t.value > 0);
+  const attention   = classified.filter(t => t.risk === 'attention' && t.value > 0);
+
+  const totalCredits  = credits.reduce((a, t) => a + t.value, 0);
+  const totalDebits   = Math.abs(debits.reduce((a, t) => a + t.value, 0));
+  const pixTotal      = credits.filter(t => t.cat === 'pix').reduce((a, t) => a + t.value, 0);
+  const especieTotal  = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
+  const formalTotal   = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
+  const comercialTotal= credits.filter(t => t.cat === 'comercial').reduce((a, t) => a + t.value, 0);
+  const suspTotal     = suspicious.reduce((a, t) => a + t.value, 0);
+  const months        = Object.keys(monthly).filter(k => k !== 'unk').sort();
+  const monthsOverLimit = Object.values(monthly).filter(m => m.pix >= 5000).length;
+
+  // Recorrência e análise temporal
+  const { recorrentes, comercialOculta } = detectarRecorrencia(txns);
+  const { anomalias, mediaHistorica, pico } = analiseTemporal(monthly);
+
+  // ── Cálculo de score com pesos ponderados ──────────────────
+  let score = 0;
+  const fatores = [];
+
+  // F1 — Proporção de créditos suspeitos (peso 40)
+  const infRatio = totalCredits > 0 ? suspTotal / totalCredits : 0;
+  const f1 = Math.round(infRatio * 40);
+  if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa clara` });
+  score += f1;
+
+  // F2 — Pix acima do limite e-Financeira (peso 20)
+  const f2 = Math.min(20, monthsOverLimit * 7);
+  if (f2 > 0) fatores.push({ peso: f2, motivo: `Pix acima de R$5k em ${monthsOverLimit} mês(es)` });
+  score += f2;
+
+  // F3 — Depósito em espécie (peso 20)
+  const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
+  const f3 = Math.round(Math.min(20, especieRatio * 80));
+  if (f3 > 0) fatores.push({ peso: f3, motivo: `${Math.round(especieRatio * 100)}% das entradas em espécie` });
+  score += f3;
+
+  // F4 — Atividade comercial oculta (peso 15)
+  const f4 = Math.min(15, comercialOculta.length * 5);
+  if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente` });
+  score += f4;
+
+  // F5 — Anomalia temporal (pico > 2x média) (peso 15)
+  const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
+  const f5 = pctPico >= 3 ? 15 : pctPico >= 2 ? 10 : pctPico >= 1.5 ? 5 : 0;
+  if (f5 > 0) fatores.push({ peso: f5, motivo: `Pico de ${Math.round(pctPico * 10) / 10}x acima da média histórica` });
+  score += f5;
+
+  // F6 — Bônus por investimentos e aluguel
+  if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos não declarados' }); }
+  if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel' }); }
+
+  score = Math.min(100, Math.max(0, Math.round(score)));
+
+  return {
+    bank, totalTxns: txns.length, creditCount: credits.length,
+    totalCredits, totalDebits, pixTotal, especieTotal, formalTotal, comercialTotal,
+    suspCount: suspicious.length, attCount: attention.length,
+    monthsOverLimit, months: months.length, score,
+    classified, fatores, recorrentes, comercialOculta,
+    anomalias, mediaHistorica, pico,
+    indiceEspecie: especieRatio,
+    indiceConsumo: totalCredits > 0 ? totalDebits / totalCredits : 0,
+  };
+}
+
+// ── Consolidação multi-extrato com explicação causal ──────────
+function eConsolidate(results) {
+  const allC = results.flatMap(r => r.classified);
+  const credits   = allC.filter(t => t.value > 0);
+  const debits    = allC.filter(t => t.value < 0);
+  const suspicious= allC.filter(t => t.risk === 'suspicious' && t.value > 0);
+  const attention = allC.filter(t => t.risk === 'attention'  && t.value > 0);
+
+  const totalCredits   = credits.reduce((a, t) => a + t.value, 0);
+  const totalDebits    = Math.abs(debits.reduce((a, t) => a + t.value, 0));
+  const pixTotal       = credits.filter(t => t.cat === 'pix').reduce((a, t) => a + t.value, 0);
+  const especieTotal   = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
+  const formalTotal    = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
+  const suspTotal      = suspicious.reduce((a, t) => a + t.value, 0);
+  const totalMOL       = results.reduce((a, r) => a + r.monthsOverLimit, 0);
+
+  // Score consolidado ponderado por volume
+  const totalVol = results.reduce((a, r) => a + r.totalCredits, 0);
+  let score = totalVol > 0
+    ? results.reduce((a, r) => a + r.score * (r.totalCredits / totalVol), 0)
+    : results.reduce((a, r) => a + r.score, 0) / results.length;
+
+  // Bônus se múltiplos extratos com score alto
+  if (results.filter(r => r.score > 55).length >= 2) score = Math.min(100, score + 10);
+  score = Math.round(score);
+
+  // Todos os fatores de todos os extratos
+  const todosFatores = results.flatMap(r => r.fatores);
+  const todasComerciais = results.flatMap(r => r.comercialOculta);
+  const totalRecorrentes = results.reduce((a, r) => a + r.recorrentes.length, 0);
+
+  // ── Geração de alertas causais com números reais ────────────
+  const alerts = [];
+
+  // Créditos suspeitos com valor exato
+  if (suspicious.length > 0) {
+    alerts.push({
+      type: 'red', icon: '🚨',
+      title: `${suspicious.length} crédito(s) de alto risco — ${fmtBRL(suspTotal)}`,
+      text: `Representam ${Math.round(suspTotal/totalCredits*100)}% das entradas totais sem justificativa fiscal clara. A Receita Federal cruza via e-Financeira em todos os bancos simultaneamente.`
+    });
+  }
+
+  // Pix acima do limite com meses exatos
+  if (totalMOL > 0) {
+    alerts.push({
+      type: 'red', icon: '⚠️',
+      title: `Pix acima de R$5.000/mês em ${totalMOL} mês(es) — ${fmtBRL(pixTotal)} total`,
+      text: `Bancos reportam automaticamente à Receita toda movimentação mensal de Pix acima desse valor via sistema e-Financeira. Cada mês é reportado individualmente.`
+    });
+  }
+
+  // Depósito em espécie
+  if (especieTotal > 0) {
+    const pctEspecie = Math.round(especieTotal / totalCredits * 100);
+    alerts.push({
+      type: pctEspecie >= 20 ? 'red' : 'yellow', icon: '💵',
+      title: `Depósitos em espécie: ${fmtBRL(especieTotal)} (${pctEspecie}% das entradas)`,
+      text: `Depósitos em espécie acima de R$2.000/mês devem ser informados pelo banco à Receita. Percentual acima de 20% eleva significativamente o índice de risco.`
+    });
+  }
+
+  // Atividade comercial oculta
+  if (todasComerciais.length > 0) {
+    const totalComercial = todasComerciais.reduce((a, r) => a + r.total, 0);
+    alerts.push({
+      type: 'red', icon: '🏪',
+      title: `${todasComerciais.length} padrão(ões) de atividade comercial recorrente — ${fmtBRL(totalComercial)}`,
+      text: `Recebimentos com frequência e ticket médio regulares indicam possível atividade comercial. Se não declarado como MEI, autônomo ou empresa, pode ser caracterizado como omissão de receita.`
+    });
+  }
+
+  // Investimentos
+  if (allC.some(t => t.flag === 'Investimento')) {
+    const t = allC.filter(x => x.flag === 'Investimento').reduce((a, x) => a + x.value, 0);
+    alerts.push({
+      type: 'yellow', icon: '📈',
+      title: `Rendimentos de investimentos: ${fmtBRL(t)}`,
+      text: `CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos tributáveis ou isentos conforme o tipo.`
+    });
+  }
+
+  // Aluguel
+  if (allC.some(t => t.flag === 'Aluguel')) {
+    const t = allC.filter(x => x.flag === 'Aluguel').reduce((a, x) => a + x.value, 0);
+    alerts.push({
+      type: 'yellow', icon: '🏠',
+      title: `Recebimentos de aluguel: ${fmtBRL(t)}`,
+      text: `Devem ser informados mensalmente no carnê-leão e na declaração anual. A Receita recebe informe do inquilino pessoa jurídica automaticamente.`
+    });
+  }
+
+  // Atenção geral sem suspeitos
+  if (attention.length > 0 && suspicious.length === 0) {
+    alerts.push({
+      type: 'yellow', icon: '⚠️',
+      title: `${attention.length} transação(ões) merecem revisão`,
+      text: `Créditos que podem ser questionados. Tenha comprovantes de origem disponíveis.`
+    });
+  }
+
+  // Score ok
+  if (alerts.length === 0) {
+    alerts.push({
+      type: 'green', icon: '✅',
+      title: 'Perfil de créditos dentro do esperado',
+      text: `Nenhum crédito de alto risco encontrado nos ${results.length} extrato(s) analisados.`
+    });
+  }
+
+  // Explicação causal do score — SEMPRE presente
+  if (todosFatores.length > 0) {
+    const top3 = todosFatores.sort((a, b) => b.peso - a.peso).slice(0, 3);
+    const explicacao = top3.map(f => `• ${f.motivo}`).join(' ');
+    alerts.push({
+      type: 'blue', icon: '🧠',
+      title: `Por que o score é ${score}%`,
+      text: `O risco aumentou porque: ${explicacao}. Score = soma ponderada de compatibilidade financeira, padrão de Pix, espécie, recorrência e variação temporal.`
+    });
+  }
+
+  // Próximo passo
+  alerts.push({
+    type: 'blue', icon: '💡',
+    title: 'Próximo passo',
+    text: `Compare os ${credits.length} créditos (${fmtBRL(totalCredits)}) com o total declarado no IR. Qualquer diferença acima de 10% precisa de comprovante de origem.`
+  });
+
+  return {
+    score, totalCredits, totalDebits, pixTotal, especieTotal, formalTotal,
+    suspCount: suspicious.length, attCount: attention.length,
+    creditCount: credits.length, totalTxns: allC.length,
+    indiceConsumo: totalCredits > 0 ? totalDebits / totalCredits : 0,
+    indiceEspecie: totalCredits > 0 ? especieTotal / totalCredits : 0,
+    recorrentes: totalRecorrentes, comercialOculta: todasComerciais.length,
+    alerts, all: allC,
+  };
 }
 
 
@@ -2795,30 +3228,85 @@ async function eRunAll(){
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   const results=[];
+  const parsed=[]; // {txns, bank, conta, banco, label}
+
+  // ── Etapa 1: parsear todos os arquivos ──
   for(let i=0;i<ready.length;i++){
     const f=ready[i];
-    eSetProgress(Math.round((i/ready.length)*80),`Processando ${f.name}...`);
+    eSetProgress(Math.round((i/ready.length)*60),`Processando ${f.name}...`);
     await new Promise(r=>setTimeout(r,200));
     try{
       let txns=[];
-      if(f.type==='pdf'){const text=await eParsePDF(f.content);txns=eParsePDFText(text);if(txns.length===0){eShowErr(`Não foi possível extrair de "${f.name}". Tente CSV ou OFX.`);continue;}f.detected.bank=`PDF (${txns.length} transações)`;}
-      else{const lines=f.content.split('\n');const fmt=f.detected.format;if(fmt==='nubank_cartao')txns=eParseNubankCartao(lines);
+      if(f.type==='pdf'){
+        const text=await eParsePDF(f.content);
+        txns=eParsePDFText(text);
+        if(txns.length===0){eShowErr(`Não foi possível extrair de "${f.name}". Tente CSV ou OFX.`);continue;}
+        // Para PDF, atualiza banco real após extração do texto
+        const pdfBankInfo=eDetectBankReal(text,'pdf',f.name);
+        if(pdfBankInfo.banco) f.detected.banco=pdfBankInfo.banco;
+        if(pdfBankInfo.conta) f.detected.conta=pdfBankInfo.conta;
+        f.detected.bank=pdfBankInfo.label||`PDF (${txns.length} transações)`;
+      } else {
+        const lines=f.content.split('\n');
+        const fmt=f.detected.format;
+        if(fmt==='nubank_cartao') txns=eParseNubankCartao(lines);
         else if(fmt==='nubank_conta'){txns=eParseNubankConta(lines);if(txns.length===0)txns=eParseGeneric(lines);}
-        else if(fmt==='inter')txns=eParseInter(lines);
-        else if(fmt==='bb')txns=eParseBB(lines);
-        else if(fmt==='ofx')txns=eParseOFX(f.content);
-        else txns=eParseGeneric(lines);}
+        else if(fmt==='inter') txns=eParseInter(lines);
+        else if(fmt==='bb') txns=eParseBB(lines);
+        else if(fmt==='ofx') txns=eParseOFX(f.content);
+        else txns=eParseGeneric(lines);
+      }
       if(txns.length===0){eShowErr(`Nenhuma transação em "${f.name}".`);continue;}
-      const r=eAnalyzeSingle(txns,f.detected.bank);
-      if(r)results.push(r);
-    }catch(e){eShowErr(`Erro em "${f.name}": ${e.message}`);console.error(e);}
+      parsed.push({
+        txns,
+        banco: f.detected.banco||f.detected.bank,
+        conta: f.detected.conta||null,
+        label: f.detected.bank,
+        formato: f.detected.format,
+      });
+    }catch(e){
+      const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${e.message}`;
+      eShowErr(msg);
+      console.error('[GuardiaoFiscal]', msg, e);
+    }
   }
+
+  if(parsed.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
+
+  // ── Etapa 2: agrupar por banco+conta ──
+  // Arquivos do mesmo banco e mesma conta → um único resultado consolidado
+  eSetProgress(70,'Identificando contas...');
+  const grupos={};
+  parsed.forEach(p=>{
+    // Chave de agrupamento: banco + conta (se disponível)
+    const chave = p.conta
+      ? `${p.banco}|${p.conta}`
+      : `${p.banco}|${p.label}`; // sem conta, agrupa por label
+    if(!grupos[chave]) grupos[chave]={txns:[],banco:p.banco,conta:p.conta,label:p.label,formatos:[]};
+    grupos[chave].txns.push(...p.txns);
+    if(!grupos[chave].formatos.includes(p.formato)) grupos[chave].formatos.push(p.formato);
+  });
+
+  // ── Etapa 3: analisar cada grupo ──
+  const grupoKeys=Object.keys(grupos);
+  for(let i=0;i<grupoKeys.length;i++){
+    const g=grupos[grupoKeys[i]];
+    eSetProgress(70+Math.round((i/grupoKeys.length)*25),`Analisando ${g.banco}...`);
+    await new Promise(r=>setTimeout(r,100));
+    // Label mostra banco + conta + formatos usados
+    const fmtLabel=g.formatos.length>1?` [${g.formatos.join('+')}]`:'';
+    const bankLabel=g.conta?`${g.banco} ···${g.conta.slice(-4)}${fmtLabel}`:g.banco+fmtLabel;
+    const r=eAnalyzeSingle(g.txns,bankLabel);
+    if(r) results.push(r);
+  }
+
   if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
   eSetProgress(95,'Consolidando...');
   await new Promise(r=>setTimeout(r,300));
   const consolidated=eConsolidate(results);
   eAllTxns=consolidated.all;
   eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
+
   // lock step 2, show step 3
   document.getElementById('extStep2').style.opacity='0.6';
   document.getElementById('extStep2').style.pointerEvents='none';
@@ -2828,9 +3316,16 @@ async function eRunAll(){
   const s3=document.getElementById('extStep3');
   s3.style.display='block';
   document.getElementById('s3num').classList.remove('locked');
-  document.getElementById('s3sub').textContent=`${results.length} extrato(s) analisado(s) — desbloqueie para ver`;
+
+  // Mensagem inteligente: 1 conta vs múltiplas
+  const nContas=results.length;
+  const nArquivos=parsed.length;
+  const msg=nArquivos>nContas
+    ? `${nArquivos} arquivo(s) → ${nContas} conta(s) identificada(s)`
+    : `${nContas} extrato(s) analisado(s)`;
+  document.getElementById('s3sub').textContent=`${msg} — desbloqueie para ver`;
+
   s3.scrollIntoView({behavior:'smooth',block:'start'});
-  // store results for after payment
   _eConsolidated=consolidated;
   _eSources=results;
 }
@@ -2841,31 +3336,41 @@ function eUnlockResult(){
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
   let emoji,level,color;
-  if(c.score<=25){emoji='🟢';level='BAIXO RISCO';color='#00d96e';}
-  else if(c.score<=55){emoji='🟡';level='RISCO MODERADO';color='#f5a623';}
-  else{emoji='🔴';level='RISCO ALTO';color='#f04f60';}
+  if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#00d96e';}
+  else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';}
+  else if(c.score<=70){emoji='🟠';level='RISCO ELEVADO';color='#f97316';}
+  else{emoji='🔴';level='RISCO CRÍTICO';color='#f04f60';}
   document.getElementById('ovEmoji').textContent=emoji;
   document.getElementById('ovLevel').textContent=level;
   document.getElementById('ovLevel').style.color=color;
-  document.getElementById('ovSub').textContent=`${sources.length} extrato(s) · ${c.totalTxns} transações · Score consolidado`;
+  document.getElementById('ovSub').textContent=`${sources.length} extrato(s) · ${c.totalTxns} transações · Motor fiscal v2`;
   document.getElementById('pScoreVal').textContent=c.score+'%';
   document.getElementById('pScoreVal').style.color=color;
   document.getElementById('pBarFill').style.background=color;
   setTimeout(()=>{document.getElementById('pBarFill').style.width=c.score+'%';},200);
+
+  // Índices do motor v2
+  const icConsumo=Math.round((c.indiceConsumo||0)*100);
+  const icEspecie=Math.round((c.indiceEspecie||0)*100);
+  const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
   document.getElementById('pStatsGrid').innerHTML=`
     <div class="p-stat"><div class="p-sl">Total créditos</div><div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div><div class="p-sn">${c.creditCount} entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Pix recebidos</div><div class="p-sv" style="color:${c.pixTotal>=5000?'var(--red)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${c.pixTotal>=5000?'⚠ acima do limite':'dentro do limite'}</div></div>
-    <div class="p-stat"><div class="p-sl">Suspeitos</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div><div class="p-sn">risco alto</div></div>
-    <div class="p-stat"><div class="p-sl">Atenção</div><div class="p-sv" style="color:${c.attCount>0?'var(--yellow)':'var(--green)'}">${c.attCount}</div><div class="p-sn">a revisar</div></div>`;
+    <div class="p-stat"><div class="p-sl">Pix (% das entradas)</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${pixPct}% das entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Índice de consumo</div><div class="p-sv" style="color:${icConsumo>=120?'var(--red)':icConsumo>=90?'var(--yellow)':'var(--green)'}">${icConsumo}%</div><div class="p-sn">saídas/entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Espécie</div><div class="p-sv" style="color:${icEspecie>=20?'var(--red)':icEspecie>=10?'var(--yellow)':'var(--green)'}">${icEspecie}%</div><div class="p-sn">das entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Suspeitos</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div><div class="p-sn">alto risco</div></div>
+    <div class="p-stat"><div class="p-sl">Padrões recorrentes</div><div class="p-sv" style="color:${c.recorrentes>3?'var(--yellow)':'var(--text)'}">${c.recorrentes}</div><div class="p-sn">detectados</div></div>`;
+
   document.getElementById('srcList').innerHTML=sources.map((r,i)=>`
     <div class="src-item"><div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div>
     <span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
     <span class="src-val">${fmtBRL(r.totalCredits)}</span>
-    <span style="font-size:10px;font-family:'Syne',sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=25?'rgba(0,217,110,0.1)':r.score<=55?'rgba(245,166,35,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=25?'var(--green)':r.score<=55?'var(--yellow)':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
+    <span style="font-size:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
+
   document.getElementById('pAlertList').innerHTML=c.alerts.map(a=>`
     <div class="pal ${a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu'}">
-    <span class="pal-ico">${a.icon}</span><div><strong>${a.title}</strong>${a.text}</div></div>`).join('');
-  // bankTabs via DOM para evitar injeção via nome de banco do arquivo
+    <span class="pal-ico">${a.icon}</span><div><strong>${sanitize(a.title||'')}</strong><br><span style="font-size:12px;opacity:0.85">${sanitize(a.text||'')}</span></div></div>`).join('');
+
   const bankTabsEl = document.getElementById('bankTabs');
   bankTabsEl.innerHTML = '';
   ['all', ...sources.map(r => r.bank)].forEach((b, i) => {
@@ -2876,7 +3381,7 @@ function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Extratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}%`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v2\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
 }
 
@@ -2897,6 +3402,11 @@ function eRenderTxns(filter){
 }
 function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
 function eToggleDbg(){const b=document.getElementById('pDbgBd'),open=b.classList.toggle('open');document.getElementById('pDbgTog').textContent=open?'▲ recolher':'▼ ver';}
+// Painel de debug só em desenvolvimento
+if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){
+  const dbgHd=document.getElementById('pDbgHd');
+  if(dbgHd){dbgHd.style.display='flex';document.getElementById('pDbgBd').style.display='';}
+}
 function eResetAll(){
   eFiles=[];eAllTxns=[];eActiveBankTab='all';
   document.getElementById('fileList').innerHTML='';
