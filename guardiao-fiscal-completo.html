@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://nnhbxyuggmcemqwzdxbg.supabase.co; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.mercadopago.com; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com; worker-src blob:; form-action https://www.mercadopago.com.br https://www.mercadopago.com;">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Syne:wght@700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  /* Azul-petróleo profundo — referência Nubank/Linear */
+  --bg:      #0b1120;
+  --surface: #111827;
+  --surface2:#18212f;
+  --border:  #1e2d40;
+  --border2: #263548;
+
+  /* Sky-blue para ações/links — confiança fintech */
+  --green:  #38bdf8;
+  --green2: #0ea5e9;
+
+  /* Emerald para positivo/sucesso */
+  --accent: #10b981;
+
+  /* Amarelo âmbar suave */
+  --yellow: #f59e0b;
+
+  /* Vermelho menos agressivo */
+  --red: #f87171;
+
+  /* Hierarquia de texto */
+  --text:   #f8fafc;
+  --text2:  #e2e8f0;
+  --muted:  #64748b;
+  --muted2: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text2);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  line-height: 1.72;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 1100px 600px at 50% -200px, rgba(56,189,248,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 500px at 100% 30%, rgba(56,189,248,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 500px 400px at 0% 85%, rgba(16,185,129,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== NAV ===== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(11,17,32,0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(30,45,64,0.8);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+
+
+.logo span { color: var(--green); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-link:hover { color: var(--text2); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--text); }
+
+.nav-btn-login {
+  background: rgba(56,189,248,0.08);
+  border: 1px solid rgba(56,189,248,0.2);
+  color: var(--green);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn-login:hover { background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.35); }
+
+/* ===== PAGES ===== */
+.page { display: none; padding-top: 60px; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ===== HOME PAGE ===== */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 96px 40px 72px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--muted2);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 7px 16px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.8); }
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px,5.5vw,42px);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -1.8px;
+  margin-bottom: 18px;
+}
+.hero h1 em { font-style: normal; color: var(--green); opacity: 0.9; }
+.hero p { font-size: 16px; color: var(--muted2); line-height: 1.75; max-width: 440px; margin: 0 auto 32px; letter-spacing: 0.01em; }
+
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.badge {
+  font-size: 12px;
+  color: var(--muted2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ===== SIMULADOR ===== */
+.sim-wrap {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 0 16px 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.tabs {
+  display: flex;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 6px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--muted);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+.tbadge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.tbadge-green { background: rgba(0,230,118,0.15); color: var(--green); }
+.tbadge-yellow { background: rgba(255,193,7,0.12); color: var(--yellow); }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+
+.panel-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.steps { display: flex; gap: 5px; }
+.step-dot {
+  height: 2px; border-radius: 2px;
+  transition: all 0.4s ease;
+  background: var(--border);
+  flex: 1;
+}
+.step-dot.done { background: rgba(56,189,248,0.4); }
+.step-dot.active { background: var(--green); box-shadow: none; }
+
+.q-body { padding: 32px 28px 24px; }
+.q-num { font-family:'Manrope',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
+.q-title { font-family:'Syne',sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
+.q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
+
+.options { display:flex; flex-direction:column; gap:10px; }
+
+.opt {
+  display:flex; align-items:center; gap:14px;
+  padding:15px 18px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  cursor:pointer; transition:all 0.2s ease;
+  text-align:left; width:100%; color:var(--text);
+  font-family:'Inter','DM Sans',sans-serif; position:relative;
+  min-height: 58px;
+}
+.opt:hover { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.04); transform:translateX(3px); box-shadow:0 2px 12px rgba(16,185,129,0.06); }
+.opt.sel { border-color:var(--green); background:rgba(16,185,129,0.08); box-shadow:0 0 0 1px rgba(16,185,129,0.2); }
+
+.opt-radio {
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid var(--border2);
+  flex-shrink:0; transition:all 0.18s;
+  display:flex; align-items:center; justify-content:center;
+}
+.opt.sel .opt-radio { border-color:var(--green); background:var(--green); }
+
+.opt-text { flex:1; }
+.opt-label { font-size:15px; font-weight:500; line-height:1.4; color:var(--text); }
+.opt-desc { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.55; font-weight:400; }
+
+.risk-pill {
+  font-size:10px; font-family:'Manrope',sans-serif; font-weight:600;
+  letter-spacing:0.2px; padding:3px 9px; border-radius:6px; flex-shrink:0;
+}
+.rp-green { background:rgba(16,185,129,0.1); color:#6ee7b7; }
+.rp-yellow { background:rgba(245,158,11,0.1); color:#fcd34d; }
+.rp-red { background:rgba(248,113,113,0.1); color:#fca5a5; }
+
+.panel-footer {
+  padding:22px 28px 28px;
+  border-top:1px solid rgba(255,255,255,0.05);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+
+.btn-back {
+  padding:13px 20px;
+  background:transparent; border:1px solid var(--border);
+  border-radius:12px; color:var(--muted2);
+  font-family:'Manrope',sans-serif; font-size:14px;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-back:hover { color:var(--text); border-color:var(--border2); }
+.btn-back:disabled { opacity:0.3; cursor:default; }
+
+.btn-next {
+  flex:1; padding:14px;
+  background:var(--green); border:none; border-radius:11px;
+  color:#000; font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+  opacity:0.35; pointer-events:none;
+  min-height: 48px;
+}
+.btn-next.on { opacity:1; pointer-events:all; }
+.btn-next.on:hover { background:#00f088; box-shadow:0 6px 20px rgba(0,230,118,0.3); transform:translateY(-1px); }
+
+/* RESULT */
+#resultPanel { display:none; }
+#resultPanel.show { display:block; }
+
+.result-box {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px; overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+
+.result-hero {
+  padding:32px 24px; text-align:center;
+  border-bottom:1px solid var(--border); position:relative;
+}
+.result-glow {
+  position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+  width:280px; height:280px; border-radius:50%;
+  filter:blur(80px); opacity:0.1; pointer-events:none;
+}
+.result-sublabel { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:18px; }
+.result-emoji { font-size:64px; display:block; margin-bottom:14px; }
+.result-level { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1.2px; margin-bottom:6px; }
+.result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
+.score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
+.score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+.score-label { font-size:11px; color:var(--muted); font-family:'Syne',sans-serif; }
+
+.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
+.alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
+.alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+.alert-red { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.12); }
+.alert-yellow { background:rgba(252,211,77,0.06); border:1px solid rgba(252,211,77,0.12); }
+.alert-green { background:rgba(110,231,183,0.06); border:1px solid rgba(110,231,183,0.12); }
+
+/* UPGRADE CTA NO RESULTADO */
+.result-upgrade {
+  padding:20px 22px;
+  border-bottom:1px solid var(--border);
+}
+
+.upgrade-label {
+  font-family:'Syne',sans-serif; font-size:10px; font-weight:600;
+  letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:14px;
+}
+
+.upgrade-cards {
+  display:flex; gap:10px; flex-direction:column;
+}
+
+.upgrade-card {
+  padding:20px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:var(--surface2);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  width:100%;
+  text-align:left;
+}
+.upgrade-card:hover { border-color:rgba(56,189,248,0.25); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+.upgrade-card.featured { border-color:rgba(56,189,248,0.3); background:rgba(56,189,248,0.04); }
+
+.uc-icon {
+  width:40px; height:40px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.uc-icon-avulso { background:rgba(255,193,7,0.1); }
+.uc-icon-pro { background:rgba(0,230,118,0.1); }
+
+.uc-info { flex:1; }
+.uc-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
+.uc-desc { font-size:11px; color:var(--muted2); line-height:1.4; }
+
+.uc-price { text-align:right; flex-shrink:0; }
+.uc-value { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:var(--green); }
+.uc-period { font-size:10px; color:var(--muted); }
+
+.best-tag {
+  font-size:9px; font-family:'Syne',sans-serif; font-weight:700;
+  background:var(--green); color:#000;
+  padding:2px 7px; border-radius:4px; letter-spacing:0.5px;
+  margin-bottom:4px; display:inline-block;
+}
+
+.result-cta { padding:16px 22px 22px; }
+.btn-restart {
+  width:100%; padding:12px;
+  background:transparent; border:1px solid var(--border);
+  border-radius:10px; color:var(--muted);
+  font-family:'Manrope',sans-serif; font-size:13px;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-restart:hover { color:var(--text); border-color:var(--border2); }
+
+/* ===== EXTRATO FLOW ===== */
+.ext-flow { display:flex; flex-direction:column; gap:14px; }
+
+/* step card genérico */
+.ext-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px; overflow:hidden;
+}
+
+.ext-card-header {
+  padding:18px 22px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+}
+
+.ext-step-num {
+  width:28px; height:28px; border-radius:8px;
+  background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--green);
+  flex-shrink:0;
+}
+.ext-step-num.done { background:var(--green); color:#000; }
+.ext-step-num.locked { background:rgba(90,112,144,0.1); border-color:var(--border); color:var(--muted); }
+
+.ext-step-info { flex:1; }
+.ext-step-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+.ext-step-sub { font-size:12px; color:var(--muted2); margin-top:2px; }
+
+.ext-card-body { padding:20px 22px; }
+
+/* upload zone */
+.upload-zone {
+  border:2px dashed var(--border2);
+  border-radius:12px;
+  padding:32px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+}
+.upload-zone:hover { border-color:rgba(0,230,118,0.4); background:rgba(0,230,118,0.02); }
+.upload-zone.has-file { border-color:rgba(0,230,118,0.5); background:rgba(0,230,118,0.04); border-style:solid; }
+.upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+
+.upload-icon { font-size:32px; margin-bottom:10px; display:block; }
+.upload-title { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
+.upload-sub { font-size:12px; color:var(--muted2); line-height:1.6; }
+
+.banks-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; justify-content:center; }
+.bank-chip {
+  font-size:11px; color:var(--muted2);
+  background:var(--surface2); border:1px solid var(--border);
+  padding:4px 10px; border-radius:6px;
+}
+
+/* file selected state */
+.file-selected {
+  display:none;
+  align-items:center; gap:12px;
+  padding:14px 16px;
+  background:rgba(0,230,118,0.06);
+  border:1px solid rgba(0,230,118,0.2);
+  border-radius:10px; margin-top:12px;
+}
+.file-selected.show { display:flex; }
+.file-name { font-size:13px; font-weight:500; flex:1; }
+.file-remove { font-size:12px; color:var(--muted); cursor:pointer; }
+.file-remove:hover { color:var(--red); }
+
+/* analyzing */
+.analyzing-block {
+  display:none; text-align:center; padding:8px 0 4px;
+}
+.analyzing-block.show { display:block; }
+.analyzing-bar {
+  height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:10px;
+}
+.analyzing-fill {
+  height:100%; background:var(--green); border-radius:2px;
+  animation:analyzeProgress 2.5s ease forwards;
+}
+@keyframes analyzeProgress {
+  0% { width:0%; }
+  60% { width:75%; }
+  90% { width:92%; }
+  100% { width:100%; }
+}
+.analyzing-label { font-size:12px; color:var(--muted2); font-family:'Syne',sans-serif; }
+
+/* PAYWALL result */
+.paywall-result {
+  display:none;
+}
+.paywall-result.show { display:block; }
+
+.paywall-preview {
+  position:relative; overflow:hidden; border-radius:12px; margin-bottom:16px;
+}
+
+.preview-content {
+  padding:16px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  filter:blur(4px);
+  user-select:none; pointer-events:none;
+}
+
+.preview-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.preview-row:last-child { border:none; }
+.preview-label { color:var(--muted2); }
+.preview-val { font-family:'Syne',sans-serif; font-weight:700; }
+.preview-val.red { color:var(--red); }
+.preview-val.yellow { color:var(--yellow); }
+.preview-val.green { color:var(--green); }
+
+.paywall-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(8,14,26,0.3) 0%, rgba(8,14,26,0.97) 60%);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  padding:20px; border-radius:12px;
+}
+
+.lock-icon { font-size:28px; margin-bottom:8px; }
+.paywall-msg {
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+  text-align:center; margin-bottom:4px;
+}
+.paywall-sub { font-size:12px; color:var(--muted2); text-align:center; margin-bottom:16px; line-height:1.5; }
+
+.paywall-actions { display:flex; flex-direction:column; gap:8px; width:100%; }
+.btn-unlock-avulso {
+  width:100%; padding:13px;
+  background:rgba(255,193,7,0.12); border:1px solid rgba(255,193,7,0.3);
+  border-radius:10px; color:var(--yellow);
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-unlock-avulso:hover { background:rgba(255,193,7,0.2); }
+.btn-unlock-pro {
+  width:100%; padding:13px;
+  background:var(--green); border:none; border-radius:10px;
+  color:#000; font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-unlock-pro:hover { background:#00f088; }
+
+/* ===== PLANOS PAGE ===== */
+.plans-page {
+  max-width:1080px; margin:0 auto; padding:64px 32px 112px;
+  position:relative; z-index:1;
+}
+
+.page-title {
+  font-family:'Syne',sans-serif; font-size:clamp(30px,4vw,46px);
+  font-weight:800; letter-spacing:-2px; text-align:center; margin-bottom:16px;
+  color:var(--text);
+}
+.page-sub { font-size:16px; color:var(--muted2); text-align:center; margin-bottom:44px; line-height:1.7; max-width:500px; margin-left:auto; margin-right:auto; }
+
+.plans-grid {
+  display:flex; flex-direction:column; gap:20px;
+}
+
+.plan-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:32px 28px;
+  position:relative;
+  transition:all 0.2s;
+}
+.plan-card:hover { border-color:rgba(16,185,129,0.3); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.25); }
+.plan-card.featured {
+  border-color:rgba(0,230,118,0.4);
+  background:linear-gradient(135deg, rgba(0,230,118,0.04), var(--surface));
+}
+
+.plan-popular {
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+  background:var(--green); color:#000;
+  font-family:'Syne',sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:1px; padding:3px 14px; border-radius:20px;
+  white-space:nowrap;
+}
+
+.plan-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
+.plan-icon { font-size:32px; margin-bottom:8px; display:block; }
+.plan-name { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; }
+.plan-tagline { font-size:12px; color:var(--muted2); margin-top:2px; }
+
+.plan-price { text-align:right; }
+.plan-value { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--green); line-height:1; letter-spacing:-1px; }
+.plan-period { font-size:11px; color:var(--muted); margin-top:2px; }
+.plan-free { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
+
+.plan-features { display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
+.plan-feat {
+  display:flex; align-items:flex-start; gap:12px;
+  font-size:14px; color:var(--muted2); line-height:1.6;
+  padding: 3px 0;
+  font-weight:400;
+}
+.feat-icon { font-size:14px; flex-shrink:0; }
+.feat-ok { color:var(--text); }
+
+.btn-plan {
+  width:100%; padding:16px;
+  border-radius:16px;
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all 0.25s ease; border:none;
+  min-height: 56px;
+  letter-spacing:0.01em;
+}
+.btn-plan-free { background:var(--surface2); color:var(--muted2); border:1px solid var(--border); }
+.btn-plan-free:hover { color:var(--text); }
+.btn-plan-avulso { background:rgba(255,193,7,0.1); color:var(--yellow); border:1px solid rgba(255,193,7,0.25); }
+.btn-plan-avulso:hover { background:rgba(255,193,7,0.2); }
+.btn-plan-pro { background:var(--green); color:#000; }
+.btn-plan-pro:hover { background:#00f088; box-shadow:0 6px 20px rgba(0,230,118,0.3); transform:translateY(-1px); }
+
+/* ===== CHECKOUT STEPPER ===== */
+.co-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.co-step-num {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--surface2); border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+  color:var(--muted); transition:all 0.3s;
+}
+.co-step.active .co-step-num { background:var(--green); border-color:var(--green); color:#000; }
+.co-step.done .co-step-num { background:rgba(0,230,118,0.15); border-color:rgba(0,230,118,0.4); color:var(--green); }
+.co-step-label { font-size:10px; color:var(--muted); font-family:'Syne',sans-serif; font-weight:600; white-space:nowrap; }
+.co-step.active .co-step-label { color:var(--text); }
+.co-step.done .co-step-label { color:var(--green); }
+.co-step-line { flex:1; height:1px; background:var(--border); margin-bottom:14px; }
+
+/* ===== CHECKOUT MODAL ===== */
+.overlay {
+  display:none; position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(4,9,18,0.85);
+  backdrop-filter:blur(8px);
+  z-index:200;
+  align-items:flex-end;
+  justify-content:center;
+}
+.overlay.show { display:flex; }
+
+@media(min-width:600px) {
+  .overlay { align-items:center; }
+}
+
+.modal {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:28px 28px 0 0;
+  padding:36px 32px 52px;
+  width:100%; max-width:500px;
+  position:relative;
+  animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1);
+  max-height:92vh;
+  overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.4);
+}
+
+@media(min-width:600px) {
+  .modal { border-radius:20px; }
+}
+
+@keyframes slideUp {
+  from { transform:translateY(40px); opacity:0; }
+  to { transform:translateY(0); opacity:1; }
+}
+
+.modal-close {
+  position:absolute; top:16px; right:16px;
+  width:30px; height:30px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:14px; color:var(--muted);
+  transition:all 0.2s;
+}
+.modal-close:hover { color:var(--text); }
+
+.modal-step { display:none; }
+.modal-step.active { display:block; }
+
+.modal-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.modal-sub { font-size:13px; color:var(--muted2); margin-bottom:24px; line-height:1.6; }
+
+/* Order summary */
+.order-summary {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.os-icon { font-size:24px; }
+.os-info { flex:1; }
+.os-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+.os-desc { font-size:12px; color:var(--muted2); margin-top:2px; }
+.os-price { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--green); }
+
+/* form */
+.form-label {
+  font-family:'Manrope',sans-serif; font-size:12px; font-weight:600;
+  letter-spacing:0.3px; color:var(--muted2);
+  display:block; margin-bottom:8px;
+}
+.form-input {
+  width:100%; padding:14px 18px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; color:var(--text);
+  font-family:'Inter','DM Sans',sans-serif; font-size:15px;
+  outline:none; transition:all 0.2s; margin-bottom:16px;
+  min-height: 50px;
+  letter-spacing:0.01em;
+}
+.form-input:focus { border-color:rgba(16,185,129,0.5); box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
+.form-input:focus { border-color:rgba(0,230,118,0.4); }
+.form-input::placeholder { color:var(--muted); }
+
+.form-row { display:flex; gap:10px; }
+.form-row .form-group { flex:1; }
+.form-group { display:flex; flex-direction:column; }
+
+.pix-block {
+  background:rgba(56,189,248,0.04);
+  border:1px solid rgba(56,189,248,0.15);
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  margin-bottom:16px;
+}
+.pix-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
+.pix-key {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:8px; padding:10px 14px;
+  font-family:monospace; font-size:13px; color:var(--green);
+  letter-spacing:1px; margin-bottom:12px;
+}
+.pix-note { font-size:12px; color:var(--muted2); line-height:1.6; }
+
+.payment-tabs {
+  display:flex; gap:6px; margin-bottom:18px;
+}
+.ptab {
+  flex:1; padding:10px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:9px; cursor:pointer; transition:all 0.2s;
+  font-family:'Syne',sans-serif; font-size:11px; font-weight:600;
+  color:var(--muted); text-align:center;
+}
+.ptab.active { border-color:rgba(0,230,118,0.4); color:var(--green); background:rgba(0,230,118,0.06); }
+
+.ptab-content { display:none; }
+.ptab-content.active { display:block; }
+
+.btn-pay {
+  width:100%; padding:16px;
+  background:var(--green); border:none; border-radius:14px;
+  color:#fff; font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+  cursor:pointer; transition:all 0.2s; margin-top:4px;
+  min-height: 54px;
+  letter-spacing:0.01em;
+}
+.btn-pay:hover { box-shadow:0 8px 28px rgba(56,189,248,0.35); transform:translateY(-1px); filter:brightness(1.1); }
+
+.security-note {
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; color:var(--muted); margin-top:12px;
+  justify-content:center;
+}
+
+/* success step */
+.success-block { text-align:center; padding:16px 0; }
+.success-icon { font-size:52px; display:block; margin-bottom:16px; }
+.success-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
+.success-sub { font-size:13px; color:var(--muted2); line-height:1.7; margin-bottom:24px; }
+
+.divider {
+  display:flex; align-items:center; gap:12px;
+  margin:16px 0; color:var(--muted); font-size:12px;
+}
+.divider::before, .divider::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* ===== LOGIN MODAL ===== */
+.login-modal-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+
+/* ===== ANIMATIONS ===== */
+/* ===== PARSER V3 — MULTI-EXTRATO ===== */
+.drop-zone{border:2px dashed var(--border2);border-radius:12px;
+  padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.drop-zone:hover,.drop-zone.drag{border-color:rgba(0,217,110,0.5);background:rgba(0,217,110,0.03)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-ico{font-size:36px;margin-bottom:10px;display:block}
+.dz-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.dz-sub{font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
+.chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
+.limit-bar{display:flex;align-items:center;gap:10px;margin-top:16px;
+  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
+.limit-dots{display:flex;gap:5px}
+.ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
+.ldot.used{background:rgba(0,217,110,0.15);border:1px solid rgba(0,217,110,0.3)}
+.ldot.full{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
+.limit-txt{font-size:12px;color:var(--muted2)}
+.limit-txt strong{color:var(--text);font-weight:600}
+.file-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.file-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px}
+.file-item.ok{border-color:rgba(0,217,110,0.25)}
+.file-item.err{border-color:rgba(240,79,96,0.3);background:rgba(240,79,96,0.05)}
+.file-ico{font-size:18px;flex-shrink:0}
+.file-info{flex:1;min-width:0}
+.file-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-bank{font-size:11px;color:var(--muted2);margin-top:1px}
+.file-rm{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 8px;
+  border-radius:6px;transition:all 0.15s;border:1px solid transparent;flex-shrink:0}
+.file-rm:hover{color:var(--red);border-color:rgba(240,79,96,0.3)}
+.file-status{font-size:10px;font-family:'Syne',sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
+.fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
+.fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
+.act-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.prog-ext{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
+.act-msg{font-size:12px;color:var(--muted2);flex:1}
+.btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:9px;
+  color:#000;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;opacity:0.35;pointer-events:none}
+.btn-go.on{opacity:1;pointer-events:all}
+.btn-go.on:hover{background:#00f088}
+.err-ext{display:none;padding:12px 16px;margin:0 0 12px;
+  background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.25);
+  border-radius:9px;font-size:13px;color:var(--red)}
+.err-ext.show{display:block}
+/* resultado parser */
+.ov-top{padding:24px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
+.ov-emoji{font-size:44px}
+.ov-level{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.ov-sub{font-size:13px;color:var(--muted2);margin-top:2px}
+.p-score-wrap{padding:16px 22px;border-bottom:1px solid var(--border)}
+.p-score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.p-score-lbl{font-size:13px;color:var(--muted2)}
+.p-score-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.p-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.p-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.p-stat{padding:14px 18px;background:var(--surface)}
+.p-sl{font-size:10px;font-family:'Syne',sans-serif;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.p-sv{font-family:'Syne',sans-serif;font-size:17px;font-weight:700}
+.p-sn{font-size:11px;color:var(--muted2);margin-top:2px}
+.sources{padding:16px 22px;border-bottom:1px solid var(--border)}
+.src-ttl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.src-list{display:flex;flex-direction:column;gap:7px}
+.src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:9px;font-size:13px}
+.src-bank{flex:1;font-weight:500}
+.src-txns{font-size:11px;color:var(--muted2)}
+.src-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green)}
+.src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.p-alerts{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.pal{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5}
+.pal-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.pal strong{font-weight:600;display:block;margin-bottom:1px}
+.p-red{background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.2)}
+.p-yel{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2)}
+.p-grn{background:rgba(0,217,110,0.07);border:1px solid rgba(0,217,110,0.15)}
+.p-blu{background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.15)}
+.bank-tabs{display:flex;gap:1px;background:var(--border);overflow-x:auto;border-bottom:1px solid var(--border)}
+.bank-tabs::-webkit-scrollbar{height:0}
+.btab{padding:11px 16px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;
+  color:var(--muted);background:var(--surface);cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;flex-shrink:0}
+.btab.on{color:var(--green);background:var(--surface2)}
+.p-txn-wrap{padding:16px 22px}
+.p-txn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.p-txn-ttl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.p-flt{display:flex;gap:5px}
+.pfb{font-size:11px;font-family:'Syne',sans-serif;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
+.pfb.on{background:rgba(240,79,96,0.12);border-color:rgba(240,79,96,0.3);color:var(--red)}
+.p-txn-list{display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto}
+.p-txn-list::-webkit-scrollbar{width:3px}
+.p-txn-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.pti{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:var(--surface2);border:1px solid transparent;font-size:12px}
+.pti.s{border-color:rgba(240,79,96,0.25);background:rgba(240,79,96,0.06)}
+.pti.a{border-color:rgba(245,166,35,0.2);background:rgba(245,166,35,0.05)}
+.pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.pdr{background:var(--red)}.pdy{background:var(--yellow)}.pdg{background:var(--green)}.pdm{background:var(--muted)}
+.ptinfo{flex:1;min-width:0}
+.ptd{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptt{font-size:10px;color:var(--muted2)}
+.ptv{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;white-space:nowrap}
+.ptv.p{color:var(--green)}.ptv.n{color:var(--muted2)}
+.ptf{font-size:9px;font-family:'Syne',sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ptf.r{background:rgba(240,79,96,0.15);color:var(--red)}
+.ptf.y{background:rgba(245,166,35,0.15);color:var(--yellow)}
+.ptbank{font-size:9px;color:var(--muted);white-space:nowrap}
+.p-dbg-hd{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.p-dbg-ttl{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);font-weight:600}
+.p-dbg-bd{display:none;padding:14px 22px;border-top:1px solid var(--border)}
+.p-dbg-bd.open{display:block}
+pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
+.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Manrope',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.btn-nova:hover{color:var(--text);border-color:var(--muted)}
+@media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}.p-sv{font-size:19px}}
+
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  25% { transform:translateX(-6px); }
+  75% { transform:translateX(6px); }
+}
+
+/* ===== RESPONSIVO — DESKTOP ===== */
+@media (min-width: 768px) {
+
+  /* Nav mais espaçosa */
+  nav { padding: 16px 48px; }
+  .nav-link { font-size: 14px; padding: 8px 16px; }
+  .nav-btn-login { font-size: 13px; padding: 9px 20px; }
+  .logo { font-size: 18px; }
+  
+
+  /* Hero mais generoso */
+  .hero { padding: 72px 32px 48px; max-width: 680px; }
+  .hero h1 { font-size: 44px; letter-spacing: -2px; }
+  .hero p { font-size: 16px; max-width: 480px; }
+  .hero-tag { font-size: 12px; padding: 7px 18px; }
+  .badge { font-size: 13px; padding: 6px 16px; }
+
+  /* Simulador centralizado com mais largura */
+  .sim-wrap { max-width: 660px; padding: 0 28px 96px; }
+
+  /* Tabs maiores */
+  .tab { font-size: 13px; padding: 12px 16px; }
+  .tbadge { font-size: 10px; }
+
+  /* Panel com mais respiro */
+  .panel-header { padding: 22px 28px 16px; }
+  .panel-label { font-size: 11px; }
+  .q-body { padding: 28px; }
+  .q-num { font-size: 12px; margin-bottom: 10px; }
+  .q-title { font-size: 20px; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .q-sub { font-size: 14px; margin-bottom: 24px; }
+
+  /* Opções mais confortáveis */
+  .opt { padding: 16px 18px; gap: 14px; }
+  .opt-label { font-size: 14px; }
+  .opt-desc { font-size: 12px; }
+  .opt-radio { width: 20px; height: 20px; }
+  .risk-pill { font-size: 10px; padding: 4px 9px; }
+
+  .panel-footer { padding: 18px 28px; }
+  .btn-back { padding: 13px 20px; font-size: 14px; }
+  .btn-next { font-size: 14px; padding: 14px; }
+
+  /* Resultado */
+  .result-hero { padding: 40px 32px; }
+  .result-emoji { font-size: 56px; }
+  .result-level { font-size: 30px; }
+  .result-desc { font-size: 14px; }
+  .alerts { padding: 22px 28px; }
+  .alert-item { font-size: 13px; padding: 14px 16px; }
+  .result-upgrade { padding: 24px 28px; }
+  .upgrade-cards { flex-direction: row; }
+  .upgrade-card { flex: 1; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .uc-price { text-align: left; }
+  .result-cta { padding: 20px 28px 28px; }
+
+  /* Planos em grid lado a lado */
+  .plans-page { max-width: 1100px; padding: 56px 32px 80px; }
+  .page-title { font-size: 36px; }
+  .page-sub { font-size: 15px; margin-bottom: 40px; }
+  .plans-grid { flex-direction: row; align-items: stretch; gap: 20px; }
+  .plan-card { flex: 1; }
+  .plan-name { font-size: 20px; }
+  .plan-value { font-size: 32px; }
+  .plan-feat { font-size: 14px; }
+  .btn-plan { font-size: 14px; padding: 15px; }
+
+  /* Extrato */
+  .ext-card-body { padding: 24px 28px; }
+  .ext-card-header { padding: 20px 28px 16px; }
+  .ext-step-title { font-size: 15px; }
+  .upload-zone { padding: 40px 24px; }
+  .upload-icon { font-size: 36px; }
+  .upload-title { font-size: 15px; }
+
+  /* Paywall */
+  .paywall-msg { font-size: 17px; }
+
+  /* Modal maior no desktop */
+  .modal { padding: 36px 32px 44px; max-width: 520px; }
+  .modal-title { font-size: 22px; }
+  .modal-sub { font-size: 14px; }
+  .form-input { font-size: 15px; padding: 14px 18px; }
+  .form-label { font-size: 12px; }
+  .btn-pay { font-size: 15px; padding: 16px; }
+  .os-name { font-size: 15px; }
+  .os-price { font-size: 20px; }
+  .ptab { font-size: 13px; padding: 12px; }
+  .pix-title { font-size: 16px; }
+  .pix-key { font-size: 14px; }
+
+  /* Stepper checkout */
+  .co-step-label { font-size: 11px; }
+  .co-step-num { width: 32px; height: 32px; font-size: 12px; }
+}
+
+@media (min-width: 1024px) {
+  .hero { padding: 88px 40px 56px; }
+  .hero h1 { font-size: 52px; }
+  .sim-wrap { max-width: 680px; }
+  .plans-page { max-width: 1000px; }
+}
+.page.active { animation: fadeUp 0.4s ease both; }
+.q-slide { animation: fadeUp 0.3s ease both; }
+
+/* disclaimer */
+.disclaimer {
+  text-align:center; font-size:11px; color:var(--muted);
+  margin-top:20px; line-height:1.7; padding:0 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="logo" onclick="showPage('home')">
+    <svg class="logo-svg" viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="rgba(14,165,233,0.15)" stroke="#38bdf8" stroke-width="1.5"/>
+      <path d="M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z" fill="#0f1720"/>
+      <rect x="23" y="43" width="9" height="21" rx="2.5" fill="#38bdf8" opacity="0.38"/>
+      <rect x="36" y="33" width="9" height="31" rx="2.5" fill="#38bdf8" opacity="0.7"/>
+      <rect x="49" y="23" width="9" height="41" rx="2.5" fill="#38bdf8"/>
+    </svg>
+    <div class="logo-wordmark">
+      <span class="logo-top">Guardião</span>
+      <span class="logo-bottom">Fiscal</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link" onclick="showPage('home')">Simulador</button>
+    <button class="nav-link" onclick="showPage('planos')">Planos</button>
+    <div id="navAuthArea">
+      <button class="nav-btn-login" onclick="openLogin()">Entrar</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HOME PAGE ===== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-tag">Simulador gratuito de risco fiscal</div>
+    <h1>Você sabe se está<br><em>seguro com a Receita?</em></h1>
+    <p>Responda perguntas sobre seu comportamento financeiro e descubra se sua declaração tem risco real de malha fina.</p>
+    <div class="hero-badges">
+      <span class="badge">✅ Sem cadastro</span>
+      <span class="badge">⚡ 2 minutos</span>
+      <span class="badge">🔒 Seus dados ficam no dispositivo</span>
+    </div>
+  </div>
+
+  <div class="sim-wrap">
+    <!-- tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tabQ" onclick="switchSimTab('perguntas')">
+        📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
+      </button>
+      <button class="tab" id="tabE" onclick="switchSimTab('extrato')">
+        📄 Análise por extrato <span class="tbadge tbadge-green" id="extratoTabBadge">PRO GRÁTIS</span>
+      </button>
+    </div>
+
+    <!-- simulador -->
+    <div id="simPerguntas">
+      <div class="panel" id="questionPanel">
+        <div class="panel-header">
+          <div class="panel-label">// análise de risco fiscal</div>
+          <div class="steps" id="stepsBar"></div>
+        </div>
+        <div class="q-body" id="qBody"></div>
+        <div class="panel-footer">
+          <button class="btn-back" id="btnBack" onclick="prevQ()" disabled>← Voltar</button>
+          <button class="btn-next" id="btnNext" onclick="nextQ()">Continuar →</button>
+        </div>
+      </div>
+
+      <div id="resultPanel">
+        <div class="result-box">
+          <div class="result-hero" id="resultHero"></div>
+          <div class="alerts" id="resultAlerts"></div>
+
+          <!-- upgrade cards no resultado -->
+          <div class="result-upgrade">
+            <div class="upgrade-label">// ativar monitoramento real</div>
+            <div class="upgrade-cards">
+              <button class="upgrade-card" onclick="openCheckout('avulso')">
+                <div class="uc-icon uc-icon-avulso">📄</div>
+                <div class="uc-info">
+                  <div class="uc-name">Análise Avulsa</div>
+                  <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
+                </div>
+                <div class="uc-price">
+                  <div class="uc-value">R$47,90</div>
+                  <div class="uc-period">uso único</div>
+                </div>
+              </button>
+
+              <button class="upgrade-card featured" onclick="openCheckout('pro')">
+                <div class="uc-icon uc-icon-pro">🛡️</div>
+                <div class="uc-info">
+                  <div class="best-tag">MELHOR CUSTO</div>
+                  <div class="uc-name">Plano Pro</div>
+                  <div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div>
+                </div>
+                <div class="uc-price">
+                  <div class="uc-value">R$29,90</div>
+                  <div class="uc-period">/mês</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="result-cta">
+            <button class="btn-restart" onclick="restart()">Refazer simulação</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- extrato flow v3 — multi-extrato -->
+    <div id="simExtrato" style="display:none;">
+
+      <!-- STEP 1: conta -->
+      <div class="ext-card" id="extStep1">
+        <div class="ext-card-header">
+          <div class="ext-step-num" id="s1num">1</div>
+          <div class="ext-step-info">
+            <div class="ext-step-title" id="extStep1Title">Crie sua conta gratuita</div>
+            <div class="ext-step-sub">Para salvar sua análise e acessar depois</div>
+          </div>
+        </div>
+        <div class="ext-card-body">
+          <!-- tabs login/cadastro -->
+          <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:16px">
+            <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
+            <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
+          </div>
+          <!-- cadastro pane -->
+          <div id="extCadPane">
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Senha</label>
+              <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('extSenhaMeter', this.value)">
+              <div id="extSenhaMeter"></div>
+            </div>
+          </div>
+          <!-- login pane -->
+          <div id="extLogPane" style="display:none">
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input class="form-input" type="email" id="extLoginEmail" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Senha</label>
+              <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha">
+            </div>
+          </div>
+          <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+          <button class="btn-next on" style="width:100%;margin-top:4px" onclick="extStep1Done()">
+            <span id="extAuthBtnTxt">Criar conta e continuar →</span>
+          </button>
+          <div class="security-note" style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
+            🔒 Gratuito — sem cobrança neste passo
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: upload multi-extrato -->
+      <div class="ext-card" id="extStep2" style="opacity:0.45;pointer-events:none">
+        <div class="ext-card-header">
+          <div class="ext-step-num locked" id="s2num">2</div>
+          <div class="ext-step-info">
+            <div class="ext-step-title">Faça upload dos seus extratos</div>
+            <div class="ext-step-sub">Até 5 arquivos · CSV · OFX · PDF · Múltiplos bancos</div>
+          </div>
+        </div>
+        <div class="ext-card-body">
+          <div class="drop-zone" id="dz"
+               ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)">
+            <input type="file" id="efi" accept=".csv,.ofx,.pdf,.txt,.qfx" multiple onchange="eOnSel(event)">
+            <span class="dz-ico" id="dzIco">📂</span>
+            <div class="dz-ttl" id="dzTtl">Arraste os extratos ou clique para selecionar</div>
+            <div class="dz-sub">Processado 100% no seu dispositivo — seus dados não saem daqui</div>
+            <div class="chips">
+              <span class="chip ok">✓ Nubank</span>
+              <span class="chip ok">✓ Inter</span>
+              <span class="chip ok">✓ Itaú OFX</span>
+              <span class="chip ok">✓ Bradesco</span>
+              <span class="chip ok">✓ BB</span>
+              <span class="chip ok">✓ Caixa</span>
+              <span class="chip ok">✓ PDF</span>
+              <span class="chip">+ outros</span>
+            </div>
+          </div>
+          <div class="limit-bar" id="limitBar" style="display:none">
+            <div class="limit-dots" id="ldots"></div>
+            <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos</div>
+            <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
+          </div>
+          <div class="file-list" id="fileList"></div>
+          <div class="err-ext" id="errExt"></div>
+        </div>
+        <div class="act-bar" id="actBar" style="display:none">
+          <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
+          <span class="act-msg" id="actMsg">Pronto para analisar</span>
+          <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: resultado com paywall -->
+      <div class="ext-card" id="extStep3" style="display:none">
+        <div class="ext-card-header">
+          <div class="ext-step-num locked" id="s3num">3</div>
+          <div class="ext-step-info">
+            <div class="ext-step-title">Resultado da análise</div>
+            <div class="ext-step-sub" id="s3sub">Desbloqueie para ver os detalhes completos</div>
+          </div>
+        </div>
+        <div class="ext-card-body" id="extResultBody">
+          <div id="paywallBlock">
+            <div class="paywall-preview">
+              <div class="preview-content">
+                <div class="preview-row"><span class="preview-label">Créditos analisados</span><span class="preview-val">R$ ██.███,██</span></div>
+                <div class="preview-row"><span class="preview-label">Créditos sem justificativa</span><span class="preview-val red">R$ █.███,██</span></div>
+                <div class="preview-row"><span class="preview-label">Pix informais detectados</span><span class="preview-val yellow">█ ocorrências</span></div>
+                <div class="preview-row"><span class="preview-label">Nível de risco geral</span><span class="preview-val red">🔴 ALTO</span></div>
+                <div class="preview-row"><span class="preview-label">Alertas encontrados</span><span class="preview-val red">█ alertas</span></div>
+                <div class="preview-row"><span class="preview-label">Relatório PDF</span><span class="preview-val green">✓ Pronto</span></div>
+              </div>
+              <div class="paywall-overlay">
+                <span class="lock-icon">🔒</span>
+                <div class="paywall-msg">Análise concluída — resultado bloqueado</div>
+                <div class="paywall-sub">Desbloqueie para ver alertas completos e baixar o relatório PDF.</div>
+                <div class="paywall-actions">
+                  <button class="btn-unlock-avulso" onclick="openCheckout('avulso')">📄 Desbloquear esta análise — R$47,90</button>
+                  <button class="btn-unlock-pro" onclick="openCheckout('pro')">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px">
+              <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">O que você verá ao desbloquear</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;gap:10px;font-size:13px;color:var(--muted2)"><span>📊</span><span>Score de risco consolidado de todos os bancos</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;color:var(--muted2)"><span>⚠️</span><span>Alertas por categoria fiscal com valores exatos</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;color:var(--muted2)"><span>🏦</span><span>Análise separada por banco e tipo de extrato</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;color:var(--muted2)"><span>📄</span><span>Relatório PDF para levar ao contador</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- resultado real (visível após pagamento) -->
+          <div id="realResultBlock" style="display:none">
+            <div class="ov-top">
+              <div class="ov-emoji" id="ovEmoji">🟡</div>
+              <div>
+                <div class="ov-level" id="ovLevel">—</div>
+                <div class="ov-sub" id="ovSub">—</div>
+              </div>
+            </div>
+            <div class="p-score-wrap">
+              <div class="p-score-row">
+                <span class="p-score-lbl">Índice de risco fiscal consolidado</span>
+                <span class="p-score-val" id="pScoreVal">0%</span>
+              </div>
+              <div class="p-bar-bg"><div class="p-bar-fill" id="pBarFill" style="width:0%"></div></div>
+            </div>
+            <div class="p-stats" id="pStatsGrid"></div>
+            <div class="sources"><div class="src-ttl">// Extratos analisados</div><div class="src-list" id="srcList"></div></div>
+            <div class="p-alerts" id="pAlertList"></div>
+            <div class="bank-tabs" id="bankTabs"></div>
+            <div class="p-txn-wrap">
+              <div class="p-txn-hd">
+                <span class="p-txn-ttl">Transações</span>
+                <div class="p-flt">
+                  <button class="pfb on" id="pfAll" onclick="eFilt('all')">Todas</button>
+                  <button class="pfb" id="pfRisk" onclick="eFilt('risk')">⚠ Risco</button>
+                </div>
+              </div>
+              <div class="p-txn-list" id="pTxnList"></div>
+            </div>
+            <div class="p-dbg-hd" onclick="eToggleDbg()">
+              <span class="p-dbg-ttl">🔧 Debug — dados do parser</span>
+              <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
+            </div>
+            <div class="p-dbg-bd" id="pDbgBd"><pre id="pDbgPre"></pre></div>
+            <div style="padding:4px 0 0">
+              <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LGPD + METODOLOGIA -->
+    <div style="max-width:540px;margin:16px auto 0;padding:0 16px">
+      <div style="border-top:1px solid var(--border);padding-top:20px;display:flex;flex-direction:column;gap:12px">
+
+        <!-- metodologia -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7">
+            O Guardião Fiscal utiliza os mesmos critérios que a Receita Federal aplica no sistema <strong style="color:var(--text)">e-Financeira</strong> — programa que obriga bancos a reportar movimentações de pessoas físicas. A análise cruza padrões comportamentais com os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
+          </div>
+        </div>
+
+        <!-- LGPD -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7">
+            <strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</strong>.
+          </div>
+        </div>
+
+        <!-- aviso legal -->
+        <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
+          oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
+          Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
+          <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLANOS PAGE ===== -->
+<div class="page" id="page-planos">
+  <div class="plans-page">
+    <div class="page-title">Escolha seu plano</div>
+    <div class="page-sub">Comece grátis. Monitore continuamente. Nunca seja pego de surpresa.</div>
+
+    <div class="plans-grid">
+
+      <!-- Gratuito -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div>
+            <div class="plan-icon">✦</div>
+            <div class="plan-name">Gratuito</div>
+            <div class="plan-tagline">Para quem quer uma primeira visão</div>
+          </div>
+          <div class="plan-price">
+            <div class="plan-free">R$0</div>
+            <div class="plan-period">para sempre</div>
+          </div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Simulador de perguntas completo</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Termômetro de risco Verde/Amarelo/Vermelho</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas básicos por categoria</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Análise por extrato bancário</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF detalhado</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
+        </div>
+        <button class="btn-plan btn-plan-free" onclick="showPage('home')">Usar grátis →</button>
+      </div>
+
+      <!-- Avulso -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div>
+            <div class="plan-icon">📄</div>
+            <div class="plan-name">Análise Avulsa</div>
+            <div class="plan-tagline">Para quem quer analisar uma vez só</div>
+          </div>
+          <div class="plan-price">
+            <div class="plan-value">R$47,90</div>
+            <div class="plan-period">uso único</div>
+          </div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Gratuito</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> 1 análise completa por extrato bancário</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF com alertas detalhados</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV (Nubank, Inter) e OFX</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Múltiplos arquivos de extrato</div>
+        </div>
+        <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Comprar análise única — R$47,90 →</button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
+          💡 Pelo mesmo valor você assina o Pro por 1 mês e faz análises ilimitadas
+        </div>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan-card featured">
+        <div class="plan-popular">⭐ MAIS POPULAR</div>
+        <div class="plan-header">
+          <div>
+            <div class="plan-icon">🛡️</div>
+            <div class="plan-name">Pro</div>
+            <div class="plan-tagline">Para quem quer proteção contínua</div>
+          </div>
+          <div class="plan-price">
+            <div class="plan-value">R$29,90</div>
+            <div class="plan-period">/mês</div>
+          </div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Avulso</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas por extrato</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Múltiplos arquivos por análise</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico completo de análises</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos ao longo do ano</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Prioridade no suporte</div>
+        </div>
+        <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Acessar Pro Grátis →</span></button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT MODAL ===== -->
+<div class="overlay" id="checkoutOverlay" onclick="closeCheckout(event)">
+  <div class="modal" id="checkoutModal">
+    <button class="modal-close" onclick="closeCheckoutDirect()">✕</button>
+
+    <!-- STEPPER -->
+    <div id="checkoutStepper" style="display:flex;align-items:center;gap:6px;margin-bottom:24px">
+      <div class="co-step active" id="cst1">
+        <div class="co-step-num" id="csn1">1</div>
+        <div class="co-step-label">Sua conta</div>
+      </div>
+      <div class="co-step-line"></div>
+      <div class="co-step" id="cst2">
+        <div class="co-step-num" id="csn2">2</div>
+        <div class="co-step-label">Pagamento</div>
+      </div>
+      <div class="co-step-line"></div>
+      <div class="co-step" id="cst3">
+        <div class="co-step-num" id="csn3">3</div>
+        <div class="co-step-label">Acesso</div>
+      </div>
+    </div>
+
+    <!-- resumo do plano (sempre visível) -->
+    <div class="order-summary" id="orderSummary" style="margin-bottom:20px"></div>
+
+    <!-- STEP 1: Criar conta -->
+    <div class="modal-step active" id="stepAccount">
+      <div class="modal-title">Crie sua conta</div>
+      <div class="modal-sub">Primeiro defina seu acesso. O pagamento é no próximo passo.</div>
+
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-input" type="text" id="coName" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" id="coEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
+        <div id="coSenhaMeter"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:20px">
+        <label class="form-label">Confirmar senha</label>
+        <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha">
+      </div>
+
+      <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
+
+      <div class="divider">já tem conta?</div>
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
+        Entrar com e-mail e senha
+      </button>
+      <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
+    </div>
+
+    <!-- STEP 2: Pagamento — Mercado Pago -->
+    <div class="modal-step" id="stepPay">
+      <div class="modal-title" id="checkoutTitle">Pagamento seguro</div>
+      <div class="modal-sub" id="checkoutSub">Você será redirecionado ao checkout do Mercado Pago.<br>Pix, cartão de crédito e boleto disponíveis.</div>
+
+      <!-- bloco central MP -->
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;margin:4px 0 16px;text-align:center">
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:28px">🔒</span>
+          <div style="text-align:left">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text)">Mercado Pago</div>
+            <div style="font-size:11px;color:var(--muted)">Checkout seguro · SSL · PCI DSS</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.7;margin-bottom:18px">
+          💳 Cartão de crédito (parcelado)<br>
+          🟢 Pix (aprovação imediata)<br>
+          📄 Boleto bancário (1 dia útil)
+        </div>
+        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+        <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
+          <span id="btnMpTxt">Ir para o pagamento →</span>
+        </button>
+      </div>
+
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
+      <div class="security-note" style="margin-top:12px">🔒 Seus dados de pagamento nunca passam pelos nossos servidores</div>
+    </div>
+
+    <!-- STEP 3: Sucesso -->
+    <div class="modal-step" id="stepSuccess">
+      <div class="success-block">
+        <span class="success-icon">🎉</span>
+        <div class="success-title">Tudo pronto!</div>
+        <div class="success-sub" id="successMsg"></div>
+        <button class="btn-pay" onclick="closeCheckoutDirect()">Acessar minha área →</button>
+        <div class="security-note" style="margin-top:14px">Um e-mail de confirmação foi enviado para você.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LOGIN MODAL ===== -->
+<div class="overlay" id="loginOverlay" onclick="closeLogin(event)">
+  <div class="modal" id="loginModal">
+    <button class="modal-close" onclick="closeLoginDirect()">✕</button>
+
+    <!-- tabs -->
+    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
+      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="authLoginPane">
+      <div class="modal-title">Entrar na sua conta</div>
+      <div class="modal-sub">Acesse suas análises e histórico fiscal.</div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" id="loginSenha" placeholder="Sua senha">
+      </div>
+      <div id="loginErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+      <button class="btn-pay" style="margin-bottom:14px" onclick="doLogin()">
+        <span id="loginBtnTxt">Entrar →</span>
+      </button>
+      <div class="security-note" style="margin-top:8px;text-align:center">
+        Não tem conta? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('cadastro')">Criar conta grátis →</span>
+      </div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="authCadastroPane" style="display:none">
+      <div class="modal-title">Criar conta gratuita</div>
+      <div class="modal-sub">Salve suas análises e acesse de qualquer lugar.</div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Nome</label>
+        <input class="form-input" type="text" id="cadNome" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" id="cadEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" id="cadSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('cadSenhaMeter', this.value)">
+        <div id="cadSenhaMeter"></div>
+      </div>
+      <div id="cadErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+      <div id="cadOk" style="display:none;color:var(--accent);font-size:13px;margin-bottom:10px;text-align:center;padding:10px;background:rgba(16,185,129,0.08);border-radius:8px"></div>
+      <button class="btn-pay" onclick="doCadastro()">
+        <span id="cadBtnTxt">Criar conta →</span>
+      </button>
+      <div class="security-note" style="margin-top:10px;text-align:center">🔒 Gratuito — sem cobrança</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== NAVIGATION =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function switchSimTab(tab) {
+  const isPerguntas = tab === 'perguntas';
+  document.getElementById('simPerguntas').style.display = isPerguntas ? 'block' : 'none';
+  document.getElementById('simExtrato').style.display = isPerguntas ? 'none' : 'block';
+  document.getElementById('tabQ').classList.toggle('active', isPerguntas);
+  document.getElementById('tabE').classList.toggle('active', !isPerguntas);
+  // quando abre extrato, rola até o step 1 (ou step 2 se já logado)
+  if (!isPerguntas) {
+    const s1 = document.getElementById('extStep1');
+    const s2 = document.getElementById('extStep2');
+    const target = (s1 && s1.style.display !== 'none' && s1.style.opacity !== '0.6') ? s1 : s2;
+    if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  }
+}
+
+// ===== CHECKOUT =====
+const plans = {
+  avulso: {
+    icon: '📄', name: 'Análise Avulsa', desc: '1 análise completa por extrato + relatório PDF',
+    price: 'R$47,90', period: 'uso único',
+    successMsg: 'Sua análise avulsa está ativa! Acesse a aba "Análise por extrato" para fazer o upload e ver os resultados.'
+  },
+  pro: {
+    icon: '🛡️', name: 'Plano Pro', desc: 'Análises ilimitadas + múltiplos extratos + histórico',
+    price: 'R$29,90', period: '/mês',
+    successMsg: 'Bem-vindo ao Pro! Acesso completo liberado — análises ilimitadas e múltiplos extratos disponíveis agora.'
+  }
+};
+
+let currentPlan = 'pro';
+
+
+// ===== PRO FREE MODE FUNCTIONS =====
+const PRO_FREE_MODE = true; // mude para false para reativar cobrança
+
+function showProFreeBanner() {
+  showPage('planos');
+  setTimeout(() => {
+    const banner = document.getElementById('proFreeBanner');
+    if (banner) { banner.style.display = 'block'; banner.scrollIntoView({behavior:'smooth',block:'start'}); }
+  }, 150);
+}
+
+function initProFreeMode() {
+  if (!PRO_FREE_MODE) return;
+  // Banner na página de planos
+  const plansWrap = document.querySelector('#page-planos .plans-page');
+  if (plansWrap && !document.getElementById('proFreeBanner')) {
+    const banner = document.createElement('div');
+    banner.id = 'proFreeBanner';
+    banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
+    banner.innerHTML = '<div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
+    plansWrap.insertBefore(banner, plansWrap.firstChild);
+  }
+  // Atualiza badge aba extrato
+  const badge = document.getElementById('extratoTabBadge');
+  if (badge) { badge.textContent = 'PRO GRÁTIS'; badge.className = 'tbadge tbadge-green'; }
+  // Atualiza botão Pro na página de planos
+  const btnPro = document.querySelector('.btn-plan-pro');
+  if (btnPro) btnPro.innerHTML = '🎉 Acessar Pro Grátis — Período de lançamento →';
+  // Atualiza destaque popular
+  const popular = document.querySelector('.plan-popular');
+  if (popular) popular.textContent = '🎉 GRATUITO AGORA';
+  // Atualiza preço
+  const planVal = document.querySelector('.plan-card.featured .plan-value');
+  if (planVal) { planVal.textContent = 'R$0'; planVal.style.color = '#00d96e'; }
+  const planPeriod = document.querySelector('.plan-card.featured .plan-period');
+  if (planPeriod) planPeriod.textContent = 'durante o lançamento';
+  // Atualiza cards upgrade no resultado
+  const ucPro = document.getElementById('ucProText');
+  if (ucPro) ucPro.textContent = 'Acessar Pro Grátis — Período de lançamento';
+  // Atualiza paywall
+  const pwPro = document.getElementById('paywallProText');
+  if (pwPro) pwPro.textContent = 'Acessar Pro Grátis — Período de lançamento';
+}
+
+function openCheckout(plan) {
+  // MODO PRO GRATUITO — bypass do checkout
+  if (PRO_FREE_MODE) {
+    if (_eConsolidated) {
+      // já tem análise feita — desbloqueia resultado direto
+      closeCheckoutDirect();
+      eUnlockResult();
+    } else {
+      // leva para a aba de extrato e sobe até o step de upload
+      showPage('home');
+      setTimeout(() => {
+        switchSimTab('extrato');
+        setTimeout(() => {
+          const step2 = document.getElementById('extStep2');
+          if (step2) step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+      }, 50);
+    }
+    return;
+  }
+  currentPlan = plan;
+  const p = plans[plan];
+
+  // resumo do plano
+  document.getElementById('orderSummary').innerHTML = `
+    <div class="os-icon">${p.icon}</div>
+    <div class="os-info">
+      <div class="os-name">${p.name}</div>
+      <div class="os-desc">${p.desc}</div>
+    </div>
+    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Manrope',sans-serif;font-weight:400"> ${p.period}</span></div>
+  `;
+
+  // reset para step 1
+  setCheckoutStep(1);
+  document.getElementById('checkoutOverlay').classList.add('show');
+  document.getElementById('checkoutModal').scrollTop = 0;
+}
+
+// ── MERCADO PAGO — CHECKOUT REAL ──────────────────────────────────────────
+
+async function goToMercadoPago() {
+  const btn = document.getElementById('btnMpTxt');
+  const errEl = document.getElementById('mpPayErr');
+  errEl.style.display = 'none';
+  btn.textContent = 'Gerando link de pagamento...';
+  document.getElementById('btnMpPay').disabled = true;
+
+  try {
+    // Pega o token de sessão atual do usuário
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const res = await fetch(
+      `${SUPA_URL}/functions/v1/create-mp-preference`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ plan: currentPlan }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? `Erro ${res.status}`);
+    }
+
+    const { init_point } = await res.json();
+    if (!init_point) throw new Error('Link de pagamento inválido.');
+
+    // Redireciona para o checkout do Mercado Pago
+    window.location.href = init_point;
+
+  } catch (e) {
+    errEl.textContent = e.message || 'Erro inesperado. Tente novamente.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Ir para o pagamento →';
+    document.getElementById('btnMpPay').disabled = false;
+  }
+}
+
+// Chamada no DOMContentLoaded — trata retorno do MP via query string
+async function handleMpReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const mp = params.get('mp');
+  if (!mp) return;
+
+  // Limpa a query string da URL sem reload
+  history.replaceState({}, '', window.location.pathname);
+
+  if (mp === 'success') {
+    // Aguarda webhook processar (até ~3s) e busca plano atualizado
+    await new Promise(r => setTimeout(r, 2500));
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('plano')
+        .eq('id', session.user.id)
+        .single();
+
+      const planoAtualizado = profile?.plano;
+
+      // Mostra modal de sucesso
+      const planKey = planoAtualizado ?? 'pro';
+      currentPlan = planKey === 'avulso' ? 'avulso' : 'pro';
+      setCheckoutStep(3);
+      document.getElementById('successMsg').textContent =
+        plans[currentPlan]?.successMsg ?? 'Pagamento confirmado! Seu acesso está liberado.';
+      document.getElementById('checkoutOverlay').classList.add('show');
+
+      if (_eConsolidated) {
+        setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1500);
+      }
+    }
+  } else if (mp === 'failure') {
+    // Mostra modal de erro de pagamento
+    openCheckout(currentPlan || 'pro');
+    setTimeout(() => {
+      const errEl = document.getElementById('mpPayErr');
+      if (errEl) {
+        errEl.textContent = 'Pagamento não aprovado. Tente novamente ou escolha outra forma de pagamento.';
+        errEl.style.display = 'block';
+        setCheckoutStep(2);
+      }
+    }, 100);
+  }
+  // pending: não faz nada, usuário verá o acesso liberado quando webhook chegar
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+
+function setCheckoutStep(n) {
+  // steps content
+  ['stepAccount','stepPay','stepSuccess'].forEach((id,i) => {
+    document.getElementById(id).classList.toggle('active', i+1 === n);
+  });
+  // stepper indicators
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('cst' + i);
+    el.classList.remove('active','done');
+    if (i === n) el.classList.add('active');
+    else if (i < n) el.classList.add('done');
+  });
+  // update done num to checkmark
+  [1,2,3].forEach(i => {
+    const num = document.getElementById('csn' + i);
+    if (i < n) num.textContent = '✓';
+    else num.textContent = i;
+  });
+}
+
+async function goToPay() {
+  const name = document.getElementById('coName').value.trim();
+  const email = document.getElementById('coEmail').value.trim();
+  const senha = document.getElementById('coSenha').value;
+  const senha2 = document.getElementById('coSenha2').value;
+
+  if (!name) { shake('coName'); return; }
+  if (!email.includes('@')) { shake('coEmail'); return; }
+  if (senha.length < 8) { shake('coSenha'); return; }
+  const pwCheck = checkPasswordStrength(senha);
+  if (!pwCheck.strong) { shake('coSenha'); return; }
+  if (senha !== senha2) { shake('coSenha2'); return; }
+
+  // Cria conta no Supabase se ainda não logado
+  if (!_currentUser) {
+    const btn = document.querySelector('#stepAccount .btn-pay');
+    if (btn) btn.textContent = 'Criando conta...';
+    const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome: name } } });
+    if (btn) btn.textContent = 'Continuar para pagamento →';
+    if (error && !error.message.includes('already registered')) {
+      shake('coEmail'); return;
+    }
+  }
+
+  setCheckoutStep(2);
+  document.getElementById('checkoutModal').scrollTop = 0;
+}
+
+function goToAccount() {
+  setCheckoutStep(1);
+  document.getElementById('checkoutModal').scrollTop = 0;
+}
+
+function goToSuccess() {
+  setCheckoutStep(3);
+  document.getElementById('successMsg').textContent = plans[currentPlan].successMsg;
+  document.getElementById('checkoutModal').scrollTop = 0;
+  // se veio do fluxo de extrato, desbloqueia o resultado após pagamento
+  if(_eConsolidated) {
+    setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1200);
+  }
+}
+
+function shake(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = 'rgba(255,71,87,0.6)';
+  el.style.animation = 'shake 0.3s ease';
+  setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
+}
+
+function closeCheckout(e) {
+  if (e.target === document.getElementById('checkoutOverlay')) closeCheckoutDirect();
+}
+function closeCheckoutDirect() {
+  document.getElementById('checkoutOverlay').classList.remove('show');
+}
+
+// switchPtab, formatCard, formatExpiry, copyPixKey removidos — checkout delegado ao Mercado Pago
+
+// ╔══════════════════════════════════════════════════╗
+// ║         MÓDULO DE SEGURANÇA — GUARDIÃO FISCAL   ║
+// ╚══════════════════════════════════════════════════╝
+
+// ── Rate limiter de autenticação (anti brute-force) ──
+const _authAttempts = {};
+function authRateLimit(email) {
+  const key = email.toLowerCase().trim();
+  const now = Date.now();
+  if (!_authAttempts[key]) _authAttempts[key] = { count: 0, first: now, blocked: false };
+  const a = _authAttempts[key];
+  // Reset janela de 15 min
+  if (now - a.first > 15 * 60 * 1000) { a.count = 0; a.first = now; a.blocked = false; }
+  a.count++;
+  if (a.count > 5) {
+    a.blocked = true;
+    const wait = Math.ceil((15 * 60 * 1000 - (now - a.first)) / 60000);
+    return `Muitas tentativas. Aguarde ~${wait} min.`;
+  }
+  return null;
+}
+function authSuccess(email) {
+  const key = email.toLowerCase().trim();
+  delete _authAttempts[key];
+}
+
+// ── Validação de magic bytes (PDF real vs PDF falso) ──
+async function validatePDFMagicBytes(buffer) {
+  const bytes = new Uint8Array(buffer.slice(0, 5));
+  const magic = String.fromCharCode(...bytes);
+  if (!magic.startsWith('%PDF-')) throw new Error('Arquivo corrompido ou não é um PDF real.');
+  return true;
+}
+
+// ── Sanitização de conteúdo de texto de extrato ──
+// Remove scripts, tags HTML e caracteres de controle do conteúdo dos arquivos
+function sanitizeFileContent(text) {
+  return text
+    .replace(/<script[\s\S]*?<\/script>/gi, '')  // remove blocos script
+    .replace(/<[^>]{0,200}>/g, '')                // remove tags HTML (limite 200 chars para evitar ReDoS)
+    .replace(/javascript:/gi, '')                 // remove JS URI
+    .replace(/data:text\/html/gi, '')             // remove data URIs perigosos
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // remove control chars exceto \t \n \r
+}
+
+// ── Limite de tamanho de texto processado (anti DoS) ──
+const MAX_TEXT_CHARS = 2_000_000; // 2MB de texto
+
+// ── Validação de nome de arquivo ──
+function validateFileName(name) {
+  // Bloqueia path traversal e nomes suspeitos
+  if (/[\/\\:*?"<>|]/.test(name)) return false;
+  if (name.startsWith('.')) return false;
+  if (name.length > 200) return false;
+  return true;
+}
+
+// ── Input length caps em todos os campos de auth ──
+const AUTH_INPUT_LIMITS = { email: 254, nome: 80, senha: 128 };
+function capAuthInput(value, type) {
+  return String(value).slice(0, AUTH_INPUT_LIMITS[type] || 128);
+}
+
+
+const SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
+const SUPA_KEY  = 'sb_publishable_qFSRCbgCxCG-Iiwj8zxk9Q_o8YEa3tP';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let _currentUser = null;
+
+// Inicializa sessão ao carregar
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) setUser(session.user);
+
+  sb.auth.onAuthStateChange((_event, session) => {
+    setUser(session ? session.user : null);
+  });
+
+  // Trata retorno do checkout do Mercado Pago
+  handleMpReturn();
+})();
+
+function setUser(user) {
+  _currentUser = user;
+  const area = document.getElementById('navAuthArea');
+  if (user) {
+    const rawName = user.user_metadata?.nome || user.email.split('@')[0];
+    const name = sanitizeText(rawName);
+    const nameEl = document.createElement('span');
+    nameEl.style.cssText = 'font-size:13px;color:var(--muted2);font-family:\'Manrope\',sans-serif';
+    nameEl.textContent = rawName; // textContent é seguro — sem parse HTML
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'nav-btn-login';
+    logoutBtn.style.cssText = 'background:rgba(255,100,100,0.08);border-color:rgba(255,100,100,0.2);color:#f87171';
+    logoutBtn.textContent = 'Sair';
+    logoutBtn.onclick = doLogout;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:8px';
+    wrap.appendChild(nameEl);
+    wrap.appendChild(logoutBtn);
+    area.innerHTML = '';
+    area.appendChild(wrap);
+    autoSkipExtStep1(user.email);
+  } else {
+    area.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn-login';
+    btn.textContent = 'Entrar';
+    btn.onclick = openLogin;
+    area.appendChild(btn);
+  }
+}
+
+function sanitizeText(str) {
+  return String(str).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;'}[c]));
+}
+
+function autoSkipExtStep1(email) {
+  // defer para garantir que o DOM já está montado
+  const run = () => {
+    const s1 = document.getElementById('extStep1');
+    if (!s1) return;
+    if (s1.style.opacity === '0.6') return; // já pulou
+    s1.style.opacity = '0.6';
+    if (s1.querySelector('.ext-card-body')) s1.querySelector('.ext-card-body').style.display = 'none';
+    const s1num = document.getElementById('s1num');
+    if (s1num) { s1num.classList.add('done'); s1num.textContent = '✓'; }
+    const sub = s1.querySelector('.ext-step-sub');
+    if (sub) sub.textContent = email;
+    const s2 = document.getElementById('extStep2');
+    if (s2) { s2.style.opacity = '1'; s2.style.pointerEvents = 'auto'; }
+    const s2num = document.getElementById('s2num');
+    if (s2num) { s2num.classList.remove('locked'); s2num.textContent = '2'; }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    setTimeout(run, 0);
+  }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+// ===== LOGIN MODAL =====
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('authLoginPane').style.display   = isLogin ? 'block' : 'none';
+  document.getElementById('authCadastroPane').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tabLoginBtn').style.background   = isLogin ? 'var(--surface)' : 'transparent';
+  document.getElementById('tabLoginBtn').style.color        = isLogin ? 'var(--text)' : 'var(--muted)';
+  document.getElementById('tabCadastroBtn').style.background = isLogin ? 'transparent' : 'var(--surface)';
+  document.getElementById('tabCadastroBtn').style.color      = isLogin ? 'var(--muted)' : 'var(--text)';
+}
+
+async function doLogin() {
+  const email = capAuthInput(document.getElementById('loginEmail').value.trim(), 'email');
+  const senha  = capAuthInput(document.getElementById('loginSenha').value, 'senha');
+  const err    = document.getElementById('loginErr');
+  const btn    = document.getElementById('loginBtnTxt');
+  err.style.display = 'none';
+  if (!email.includes('@') || senha.length < 6) { err.textContent='E-mail ou senha inválidos.'; err.style.display='block'; return; }
+  const blocked = authRateLimit(email);
+  if (blocked) { err.textContent = blocked; err.style.display='block'; return; }
+  btn.textContent = 'Entrando...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+  btn.textContent = 'Entrar →';
+  if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+  authSuccess(email);
+  closeLoginDirect();
+}
+
+async function doCadastro() {
+  const nome  = capAuthInput(document.getElementById('cadNome').value.trim(), 'nome');
+  const email = capAuthInput(document.getElementById('cadEmail').value.trim(), 'email');
+  const senha = capAuthInput(document.getElementById('cadSenha').value, 'senha');
+  const err   = document.getElementById('cadErr');
+  const ok    = document.getElementById('cadOk');
+  const btn   = document.getElementById('cadBtnTxt');
+  err.style.display='none'; ok.style.display='none';
+  if (!nome)                    { err.textContent='Informe seu nome.'; err.style.display='block'; return; }
+  if (!email.includes('@'))     { err.textContent='E-mail inválido.'; err.style.display='block'; return; }
+  if (senha.length < 8)         { err.textContent='Senha mínima de 8 caracteres.'; err.style.display='block'; return; }
+  const pwCheck = checkPasswordStrength(senha);
+  if (!pwCheck.strong) { err.textContent=`Senha fraca — adicione: ${pwCheck.failed.map(r=>r.msg).join(', ')}.`; err.style.display='block'; return; }
+  btn.textContent = 'Criando conta...';
+  const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome } } });
+  btn.textContent = 'Criar conta →';
+  if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+  ok.textContent = '✓ Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
+  ok.style.display = 'block';
+}
+
+// ===== EXTRATO STEP 1 AUTH =====
+let _extTab = 'cad'; // 'cad' | 'log'
+
+function extSwitchTab(tab) {
+  _extTab = tab;
+  const isCad = tab === 'cad';
+  document.getElementById('extCadPane').style.display = isCad ? 'block' : 'none';
+  document.getElementById('extLogPane').style.display = isCad ? 'none' : 'block';
+  document.getElementById('extTabCad').style.background = isCad ? 'var(--surface)' : 'transparent';
+  document.getElementById('extTabCad').style.color      = isCad ? 'var(--text)' : 'var(--muted)';
+  document.getElementById('extTabLog').style.background = isCad ? 'transparent' : 'var(--surface)';
+  document.getElementById('extTabLog').style.color      = isCad ? 'var(--muted)' : 'var(--text)';
+  document.getElementById('extAuthBtnTxt').textContent  = isCad ? 'Criar conta e continuar →' : 'Entrar e continuar →';
+}
+
+async function extStep1Done() {
+  // Se já logado, avança direto
+  if (_currentUser) { autoSkipExtStep1(_currentUser.email); return; }
+
+  const err = document.getElementById('extAuthErr');
+  const btn = document.getElementById('extAuthBtnTxt');
+  err.style.display = 'none';
+
+  if (_extTab === 'cad') {
+    const email = capAuthInput(document.getElementById('extEmail').value.trim(), 'email');
+    const senha = capAuthInput(document.getElementById('extSenha').value, 'senha');
+    if (!email.includes('@') || senha.length < 8) { err.textContent='E-mail inválido ou senha com menos de 8 caracteres.'; err.style.display='block'; return; }
+    const pwCheck = checkPasswordStrength(senha);
+    if (!pwCheck.strong) { err.style.color='var(--red)'; err.textContent=`Senha fraca — adicione: ${pwCheck.failed.map(r=>r.msg).join(', ')}.`; err.style.display='block'; return; }
+    btn.textContent = 'Criando conta...';
+    const { data, error } = await sb.auth.signUp({ email, password: senha });
+    btn.textContent = 'Criar conta e continuar →';
+    if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+    if (data.session) {
+      authSuccess(email);
+      autoSkipExtStep1(email);
+    } else {
+      err.style.color = 'var(--accent)';
+      err.textContent = '✓ Conta criada! Confirme seu e-mail e volte para continuar.';
+      err.style.display = 'block';
+    }
+  } else {
+    const email = capAuthInput(document.getElementById('extLoginEmail').value.trim(), 'email');
+    const senha = capAuthInput(document.getElementById('extLoginSenha').value, 'senha');
+    if (!email.includes('@') || senha.length < 6) { err.textContent='E-mail ou senha inválidos.'; err.style.display='block'; return; }
+    const blocked = authRateLimit(email);
+    if (blocked) { err.textContent = blocked; err.style.display='block'; return; }
+    btn.textContent = 'Entrando...';
+    const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+    btn.textContent = 'Entrar e continuar →';
+    if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+    authSuccess(email);
+    autoSkipExtStep1(email);
+  }
+}
+
+function traduzErro(msg) {
+  if (msg.includes('Invalid login')) return 'E-mail ou senha incorretos.';
+  if (msg.includes('Email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
+  if (msg.includes('already registered')) return 'Este e-mail já está cadastrado. Tente entrar.';
+  if (msg.includes('Password should')) return 'Senha muito fraca — use letras, números e símbolos.';
+  return msg;
+}
+
+// ===== VALIDADOR DE SENHA FORTE =====
+function checkPasswordStrength(senha) {
+  const rules = [
+    { ok: senha.length >= 8,          msg: 'Mínimo 8 caracteres' },
+    { ok: /[A-Z]/.test(senha),        msg: 'Uma letra maiúscula' },
+    { ok: /[a-z]/.test(senha),        msg: 'Uma letra minúscula' },
+    { ok: /[0-9]/.test(senha),        msg: 'Um número' },
+    { ok: /[^A-Za-z0-9]/.test(senha), msg: 'Um símbolo (!@#$...)' },
+  ];
+  const passed = rules.filter(r => r.ok).length;
+  const failed = rules.filter(r => !r.ok);
+  return { passed, total: rules.length, rules, failed, strong: passed >= 4 };
+}
+
+function renderPasswordMeter(containerId, senha) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (!senha) { container.innerHTML = ''; return; }
+  const { passed, total, rules } = checkPasswordStrength(senha);
+  const pct = Math.round((passed / total) * 100);
+  const color = passed <= 2 ? '#f87171' : passed <= 3 ? '#f59e0b' : '#10b981';
+  const label = passed <= 2 ? 'Fraca' : passed <= 3 ? 'Razoável' : passed === 5 ? 'Excelente' : 'Boa';
+  container.innerHTML = `
+    <div style="margin-top:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--muted)">Força da senha</span>
+        <span style="font-size:11px;font-weight:600;color:${color}">${label}</span>
+      </div>
+      <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:8px">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.3s,background 0.3s"></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${rules.map(r => `<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${r.ok ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)'};color:${r.ok ? '#10b981' : 'var(--muted)'};">${r.ok ? '✓' : '○'} ${r.msg}</span>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ===== LOGIN =====
+function openLogin() {
+  document.getElementById('loginOverlay').classList.add('show');
+}
+function closeLogin(e) {
+  if (e.target === document.getElementById('loginOverlay')) closeLoginDirect();
+}
+function closeLoginDirect() {
+  document.getElementById('loginOverlay').classList.remove('show');
+}
+
+// ===== SIMULADOR =====
+const questions = [
+  {
+    tag: "01 — Fontes de renda",
+    title: "Quais foram suas fontes de renda no ano?",
+    sub: "Selecione todas que se aplicam. A Receita cruza todas as entradas bancárias — fontes não declaradas são a causa nº1 de malha fina.",
+    multi: true,
+    opts: [
+      { label: "Salário CLT", desc: "Empregador formal com holerite", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Freelance ou prestação de serviço", desc: "Renda extra sem vínculo empregatício", risk: 2, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Aluguel de imóvel", desc: "Recebi valores mensais de locação", risk: 2, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Pró-labore ou MEI", desc: "Remuneração como sócio ou microempreendedor", risk: 2, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Investimentos (ações, fundos, cripto)", desc: "Rendimentos de aplicações financeiras", risk: 2, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Aposentadoria ou pensão", desc: "Benefício do INSS ou pensão alimentícia", risk: 1, pill: "rp-yellow", pillText: "ATENÇÃO" },
+    ]
+  },
+  {
+    tag: "02 — Recebimentos informais",
+    title: "Você costuma receber Pix ou TED de pessoas físicas sem emitir nota ou recibo?",
+    sub: "Bancos reportam à Receita toda movimentação acima de R$5.000/mês via e-Financeira. Pix sem justificativa são sinal de alerta.",
+    opts: [
+      { label: "Não, nunca", desc: "Tudo formalizado com nota ou holerite", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Raramente, valores pequenos", desc: "Esporadicamente abaixo de R$2.000", risk: 1, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Sim, com frequência", desc: "Recebimentos regulares sem nota fiscal", risk: 4, pill: "rp-red", pillText: "RISCO ALTO" },
+    ]
+  },
+  {
+    tag: "03 — Declaração",
+    title: "Na sua declaração mais recente, você incluiu todas as suas fontes de renda?",
+    sub: "Isso vale tanto para quem já entregou quanto para quem ainda está preparando. A Receita cruza o que foi declarado com os dados que os bancos já enviaram.",
+    opts: [
+      { label: "Sim, declarei tudo", desc: "Todas as fontes constam na declaração", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Acho que sim, mas não tenho certeza", desc: "Pode ter algo esquecido", risk: 2, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Não declarei algumas rendas", desc: "Ficou algo de fora da declaração", risk: 5, pill: "rp-red", pillText: "RISCO ALTO" },
+    ]
+  },
+  {
+    tag: "04 — Patrimônio",
+    title: "Você fez compras ou investimentos de alto valor no período declarado?",
+    sub: "Carro, imóvel, cripto ou investimentos cujo valor supera a renda declarada geram inconsistência patrimonial.",
+    opts: [
+      { label: "Não, gastos dentro da renda", desc: "Padrão de vida compatível com o declarado", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Sim, usando reservas ou herança", desc: "Recursos de origem anterior ou doação", risk: 1, pill: "rp-yellow", pillText: "ATENÇÃO" },
+      { label: "Sim — cripto ou ações não declaradas", desc: "Rendimentos de investimentos fora da declaração", risk: 4, pill: "rp-red", pillText: "RISCO ALTO" },
+      { label: "Sim, valor superior à renda declarada", desc: "Compra incompatível com o que foi declarado", risk: 4, pill: "rp-red", pillText: "RISCO ALTO" },
+    ]
+  },
+  {
+    tag: "05 — Deduções",
+    title: "Você deduziu despesas médicas ou educação na sua declaração?",
+    sub: "A Receita cruza deduções com dados de planos de saúde, hospitais e faculdades. Valores sem comprovante geram divergência automática.",
+    opts: [
+      { label: "Não fiz deduções", desc: "Usei o desconto simplificado", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Sim, com todos os comprovantes", desc: "Tenho notas e recibos de tudo", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Sim, mas sem todos os comprovantes", desc: "Alguns valores foram estimados", risk: 3, pill: "rp-red", pillText: "RISCO ALTO" },
+    ]
+  },
+  {
+    tag: "06 — Dependentes",
+    title: "Você possui dependentes declarados no seu IR?",
+    sub: "Dependente declarado por duas pessoas ao mesmo tempo gera malha fina automática — é um dos erros mais comuns.",
+    opts: [
+      { label: "Não tenho dependentes", desc: "Declaração individual sem dependentes", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Sim, com certeza só eu declarei", desc: "Coordenado com o outro responsável", risk: 0, pill: "rp-green", pillText: "BAIXO RISCO" },
+      { label: "Sim, mas não sei se outra pessoa declarou também", desc: "Pode ter duplicidade", risk: 3, pill: "rp-red", pillText: "RISCO ALTO" },
+    ]
+  }
+];
+
+let cur = 0, answers = [], sel = null;
+
+function renderQ() {
+  const q = questions[cur];
+  const isMulti = !!q.multi;
+  const multiSel = answers[cur]?.multiSel || [];
+
+  const bar = document.getElementById('stepsBar');
+  bar.innerHTML = questions.map((_,i) => {
+    let cls = 'step-dot';
+    if(i < cur) cls += ' done';
+    else if(i === cur) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  const body = document.getElementById('qBody');
+  body.innerHTML = `
+    <div class="q-num">${q.tag}</div>
+    <div class="q-title">${q.title}</div>
+    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Syne,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
+    <div class="options">
+      ${q.opts.map((o,i) => {
+        const isSel = isMulti ? multiSel.includes(i) : (sel?.index === i);
+        const radioStyle = isMulti ? 'border-radius:5px' : '';
+        return `<button class="opt${isSel?' sel':''}" onclick="${isMulti ? `toggleMulti(${i})` : `choose(${i},${o.risk})`}">
+          <div class="opt-radio" style="${radioStyle}">${isSel?'<span style="font-size:10px;color:#000;font-weight:800">✓</span>':''}</div>
+          <div class="opt-text">
+            <div class="opt-label">${o.label}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>
+          <span class="risk-pill ${o.pill}">${o.pillText}</span>
+        </button>`;
+      }).join('')}
+    </div>
+  `;
+
+  body.classList.remove('q-slide');
+  void body.offsetWidth;
+  body.classList.add('q-slide');
+
+  document.getElementById('btnBack').disabled = cur === 0;
+  const nx = document.getElementById('btnNext');
+  const hasAns = isMulti ? multiSel.length > 0 : sel !== null;
+  nx.classList.toggle('on', hasAns);
+  nx.textContent = cur === questions.length-1 ? 'Ver resultado →' : 'Continuar →';
+}
+
+function choose(index, risk) {
+  sel = { index, risk };
+  document.querySelectorAll('.opt').forEach((el,i) => {
+    el.classList.toggle('sel', i===index);
+    el.querySelector('.opt-radio').innerHTML = i===index ? '<span style="font-size:10px;color:#000;font-weight:800">✓</span>' : '';
+  });
+  document.getElementById('btnNext').classList.add('on');
+}
+
+function toggleMulti(index) {
+  const q = questions[cur];
+  if (!answers[cur]) answers[cur] = { multiSel: [], risk: 0 };
+  const ms = answers[cur].multiSel;
+  const pos = ms.indexOf(index);
+  if (pos === -1) ms.push(index); else ms.splice(pos, 1);
+  const total = ms.reduce((a,i) => a + q.opts[i].risk, 0);
+  answers[cur].risk = Math.min(5, total + (ms.length >= 3 ? 1 : 0));
+  document.querySelectorAll('.opt').forEach((el,i) => {
+    const isSel = ms.includes(i);
+    el.classList.toggle('sel', isSel);
+    el.querySelector('.opt-radio').innerHTML = isSel ? '<span style="font-size:10px;color:#000;font-weight:800">✓</span>' : '';
+  });
+  document.getElementById('btnNext').classList.toggle('on', ms.length > 0);
+}
+
+function nextQ() {
+  const q = questions[cur];
+  if (q.multi) {
+    if (!answers[cur] || answers[cur].multiSel.length === 0) return;
+  } else {
+    if (!sel) return;
+    answers[cur] = sel;
+  }
+  if (cur < questions.length-1) {
+    cur++;
+    sel = (answers[cur] && !questions[cur].multi) ? answers[cur] : null;
+    renderQ();
+  } else {
+    showResult();
+  }
+}
+
+function prevQ() {
+  if (cur > 0) {
+    cur--;
+    sel = (answers[cur] && !questions[cur].multi) ? answers[cur] : null;
+    renderQ();
+  }
+}
+
+function showResult() {
+  document.getElementById('questionPanel').style.display = 'none';
+  const rp = document.getElementById('resultPanel');
+  rp.style.display = 'block';
+
+  const total = answers.reduce((a,b) => a + (b?.risk || 0), 0);
+  const pct = Math.min(100, Math.round((total / 19) * 100));
+
+  let level, color, emoji, desc;
+  const alerts = [];
+
+  if (pct <= 20) {
+    level = 'VERDE — Baixo Risco'; color = '#00e676'; emoji = '🟢';
+    desc = 'Seu perfil fiscal está dentro do esperado para a Receita Federal.';
+    alerts.push({ cls:'alert-green', icon:'✅', text:'<strong>Fontes de renda:</strong> Seu perfil não apresenta sinais de inconsistência com o que a Receita espera declarado.' });
+    alerts.push({ cls:'alert-green', icon:'✅', text:'<strong>Movimentação:</strong> Nenhum padrão de recebimento informal recorrente que ative o sistema e-Financeira foi identificado.' });
+    alerts.push({ cls:'alert-green', icon:'💡', text:'<strong>Recomendação:</strong> Mantenha todos os comprovantes de deduções por pelo menos 5 anos — a Receita pode auditar retroativamente.' });
+  } else if (pct <= 55) {
+    level = 'AMARELO — Risco Moderado'; color = '#ffc107'; emoji = '🟡';
+    desc = 'Inconsistências potenciais que merecem atenção antes da entrega.';
+    if (answers[0]?.multiSel?.length > 2) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Múltiplas fontes de renda:</strong> Cada fonte adicional aumenta a chance de divergência entre dados bancários e o declarado. Cada uma precisa estar detalhada.' });
+    if (answers[1]?.risk > 0) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Pix recebidos:</strong> Bancos reportam à Receita via e-Financeira toda movimentação mensal acima de R$5.000. Pix frequentes sem nota fiscal são o principal gatilho de malha fina em autônomos.' });
+    if (answers[2]?.risk > 0) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Declaração incompleta:</strong> A Receita já possui os dados bancários antes de você declarar. Qualquer entrada não justificada é cruzada automaticamente.' });
+    if (answers[4]?.risk > 0) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Deduções sem comprovante:</strong> Planos de saúde, hospitais e faculdades enviam dados à Receita independentemente. Valores divergentes geram malha fina automática.' });
+    if (!alerts.length) alerts.push({ cls:'alert-yellow', icon:'⚠️', text:'<strong>Atenção geral:</strong> Seus dados apresentam pontos que merecem revisão com um contador antes do prazo.' });
+    alerts.push({ cls:'alert-green', icon:'💡', text:'<strong>O que fazer:</strong> Ainda há tempo para regularizar. Uma retificação preventiva custa muito menos que uma autuação.' });
+  } else {
+    level = 'VERMELHO — Risco Alto'; color = '#ff4757'; emoji = '🔴';
+    desc = 'Seu perfil apresenta inconsistências que a Receita já pode estar cruzando.';
+    if (answers[2]?.risk >= 4) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Omissão de renda:</strong> É o motivo nº1 de malha fina no Brasil. A Receita recebe os dados bancários diretamente dos bancos — a declaração precisa bater exatamente.' });
+    if (answers[1]?.risk >= 3) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Pix informais frequentes:</strong> Recebimentos regulares sem nota são detectados automaticamente pelo e-Financeira. Não precisa de denúncia para a Receita identificar.' });
+    if (answers[3]?.risk >= 3) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Incompatibilidade patrimonial:</strong> Compras ou investimentos acima da renda declarada acionam o IRPF de ofício — a Receita lança o imposto automaticamente sobre a diferença.' });
+    if (answers[5]?.risk >= 2) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Dependente duplicado:</strong> Quando duas pessoas declaram o mesmo dependente, o sistema retém as duas declarações automaticamente para revisão.' });
+    if (!alerts.length) alerts.push({ cls:'alert-red', icon:'🚨', text:'<strong>Múltiplos fatores críticos:</strong> Seu perfil ativa vários critérios de atenção da Receita simultaneamente. Risco real de notificação.' });
+    alerts.push({ cls:'alert-yellow', icon:'💡', text:'<strong>Ação urgente:</strong> É possível retificar antes de qualquer notificação. Após notificado, multas e juros se aplicam automaticamente. Procure um contador agora.' });
+  }
+
+  document.getElementById('resultHero').innerHTML = `
+    <div class="result-glow" style="background:${color}"></div>
+    <div class="result-sublabel">// resultado da análise</div>
+    <span class="result-emoji">${emoji}</span>
+    <div class="result-level" style="color:${color}">${level}</div>
+    <div class="result-desc">${desc}</div>
+    <div class="score-bar-bg">
+      <div class="score-bar-fill" id="scoreBar" style="width:0%;background:${color}"></div>
+    </div>
+    <div class="score-label">Índice de risco: ${pct}%</div>
+  `;
+
+  document.getElementById('resultAlerts').innerHTML = alerts.map(a =>
+    `<div class="alert-item ${a.cls}"><span class="alert-icon">${a.icon}</span><span>${a.text}</span></div>`
+  ).join('');
+
+  setTimeout(() => { document.getElementById('scoreBar').style.width = pct + '%'; }, 300);
+}
+
+function restart() {
+  cur = 0; answers = []; sel = null;
+  document.getElementById('resultPanel').style.display = 'none';
+  document.getElementById('questionPanel').style.display = 'block';
+  renderQ();
+}
+
+renderQ();
+initProFreeMode();
+
+// ===== PARSER V3 ENGINE =====
+if(typeof pdfjsLib!=='undefined')
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const MAX_FILES=5;
+const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
+let eFiles=[];
+let eAllTxns=[];
+let eActiveBankTab='all';
+let _eConsolidated=null;
+let _eSources=null;
+
+const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
+const fmtDate=d=>d?d.toLocaleDateString('pt-BR'):'—';
+
+function eParseBRL(s){
+  if(!s)return 0;
+  s=String(s).trim().replace(/\s/g,'');
+  if(/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(s))s=s.replace(/\./g,'').replace(',','.');
+  else s=s.replace(',','.');
+  return parseFloat(s)||0;
+}
+function eParseDate(s){
+  if(!s)return null;
+  s=s.trim().replace(/['"]/g,'');
+  let m;
+  if((m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/)))return new Date(+m[3],+m[2]-1,+m[1]);
+  if((m=s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
+  if((m=s.match(/^(\d{4})(\d{2})(\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
+  return null;
+}
+function eDetectFormat(c,fn){
+  const ext=fn.split('.').pop().toLowerCase();
+  const h=c.substring(0,3000).toUpperCase();
+  const l=c.split('\n').slice(0,8).join('\n').toLowerCase();
+  if(ext==='pdf')return{format:'pdf',bank:'PDF'};
+  if(ext==='ofx'||ext==='qfx'||h.includes('<OFX')||h.includes('OFXHEADER'))return{format:'ofx',bank:eDetectBankOFX(c)};
+  if(l.includes('"date"')&&l.includes('"title"')&&l.includes('"amount"'))return{format:'nubank_cartao',bank:'Nubank (cartão)'};
+  // Nubank conta — múltiplos formatos de cabeçalho
+  const isNubankConta=(
+    ((l.includes('lançamento')||l.includes('lancamento'))&&l.includes('valor'))||
+    (l.includes('data')&&l.includes('valor')&&l.includes('identificador'))||
+    (l.includes('data')&&l.includes('descrição')&&l.includes('valor')&&!l.includes(';'))||
+    (l.includes('data')&&l.includes('description')&&l.includes('amount')&&l.includes('identifier'))
+  )&&!l.includes('"date"')&&!l.includes('"title"');
+  if(isNubankConta)return{format:'nubank_conta',bank:'Nubank (conta)'};
+  if(l.includes('banco inter')||(l.includes('histórico')&&l.includes(';')))return{format:'inter',bank:'Banco Inter'};
+  if(l.includes('data;histórico')||l.includes('data;historico'))return{format:'bb',bank:'Banco do Brasil'};
+  return{format:'generic',bank:'CSV genérico'};
+}
+function eDetectBankOFX(c){
+  const u=c.toUpperCase();
+  if(u.includes('ITAU')||u.includes('ITAÚ'))return 'Itaú';
+  if(u.includes('BRADESCO'))return 'Bradesco';
+  if(u.includes('BANCOBRASIL')||u.includes('BANCO DO BRASIL'))return 'Banco do Brasil';
+  if(u.includes('CAIXA'))return 'Caixa Econômica';
+  if(u.includes('SICOOB'))return 'Sicoob';
+  if(u.includes('SICREDI'))return 'Sicredi';
+  if(u.includes('SANTANDER'))return 'Santander';
+  if(u.includes('NUBANK')||u.includes('NU PAGAMENTOS'))return 'Nubank';
+  if(u.includes('INTER'))return 'Banco Inter';
+  return 'OFX';
+}
+function eSplitCSV(line,sep=','){
+  const r=[];let cur='',q=false;
+  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){q=!q;continue}if(c===sep&&!q){r.push(cur.trim());cur='';continue}cur+=c;}
+  r.push(cur.trim());return r;
+}
+function eDetectSep(l){const s={',':0,';':0,'\t':0};for(const c of l)if(s[c]!==undefined)s[c]++;return Object.keys(s).reduce((a,b)=>s[a]>s[b]?a:b);}
+function eParseNubankCartao(lines){return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<3)return null;const date=eParseDate(c[0]),desc=(c[1]||'').trim(),value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
+function eParseNubankConta(lines){
+  if(lines.length<2)return[];
+  // detecta colunas pelo cabeçalho
+  const hdr=eSplitCSV(lines[0]).map(c=>c.toLowerCase().replace(/['"]/g,'').trim());
+  const iDate=hdr.findIndex(h=>h.includes('data')||h==='date');
+  const iDesc=hdr.findIndex(h=>h.includes('descri')||h.includes('description')||h.includes('histórico')||h.includes('historico'));
+  const iVal =hdr.findIndex(h=>h==='valor'||h==='value'||h==='amount'||h.includes('valor'));
+  const iId  =hdr.findIndex(h=>h.includes('identif'));
+  return lines.slice(1).filter(l=>l.trim()).map(l=>{
+    const c=eSplitCSV(l);
+    if(c.length<2)return null;
+    // usa índices detectados ou fallback posicional
+    const date=eParseDate(c[iDate>=0?iDate:0]);
+    const desc=(iDesc>=0?c[iDesc]:(iId>=0?c[iId]:c[1]||'')).replace(/['"]/g,'').trim();
+    const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-1]);
+    return date&&desc?{date,desc,value}:null;
+  }).filter(Boolean);
+}
+function eParseInter(lines){let s=0;for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i+1;break}}const sep=eDetectSep(lines[s]||lines[0]||'');return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(sep).map(x=>x.replace(/"/g,'').trim());if(c.length<3)return null;const date=eParseDate(c[0]),desc=c[1]||'',value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
+function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'',cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
+function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;let m;while((m=re.exec(content))!==null){const b=m[1],date=eParseDate(eGetTag(b,'DTPOSTED')),value=parseFloat(eGetTag(b,'TRNAMT')||'0'),desc=(eGetTag(b,'MEMO')||eGetTag(b,'NAME')||'Sem descrição').trim();if(date)txns.push({date,desc,value});}if(txns.length>0)return txns;const lines=content.split('\n');let cur={};for(const line of lines){const t=line.trim();if(t==='<STMTTRN>'){cur={};continue}if(t==='</STMTTRN>'){if(cur.date&&cur.value!==undefined)txns.push({...cur});cur={};continue}const mm=t.match(/^<([A-Z]+)>(.+)$/);if(mm){const[,tg,v]=mm;if(tg==='DTPOSTED')cur.date=eParseDate(v);if(tg==='TRNAMT')cur.value=parseFloat(v)||0;if((tg==='MEMO'||tg==='NAME')&&!cur.desc)cur.desc=v.trim();}}return txns;}
+function eGetTag(str,name){const r=new RegExp(`<${name}>([^<]+)`,'i');const m=str.match(r);return m?m[1].trim():null;}
+function eParseGeneric(lines){if(lines.length<2)return[];const sep=eDetectSep(lines[0]);const hdr=eSplitCSV(lines[0],sep).map(c=>c.toLowerCase().replace(/"/g,'').trim());const ci=h=>{for(const n of h){const i=hdr.findIndex(x=>x.includes(n));if(i>=0)return i;}return -1;};const iDt=ci(['data','date','dt lançamento','dt mov']);const iDsc=ci(['descrição','descricao','histórico','historico','memo','title','nome','name']);const iVl=ci(['valor','value','amount','vlr']);const iCr=ci(['crédito','credito','créd']);const iDb=ci(['débito','debito','déb']);return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l,sep);if(c.length<2)return null;const date=iDt>=0?eParseDate(c[iDt]):eParseDate(c[0]);const desc=iDsc>=0?c[iDsc].replace(/"/g,'').trim():c[1]?.trim()||'';let value=0;if(iVl>=0)value=eParseBRL(c[iVl]);else if(iCr>=0&&iDb>=0){const cr=eParseBRL(c[iCr]||''),db=eParseBRL(c[iDb]||'');value=cr>0?cr:-Math.abs(db);}else for(let j=c.length-1;j>=0;j--){const v=eParseBRL(c[j]);if(!isNaN(v)&&v!==0){value=v;break}}return desc?{date,desc,value}:null;}).filter(Boolean);}
+async function eParsePDF(buffer){const pdf=await pdfjsLib.getDocument({data:buffer}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();let lastY=null,line='';for(const item of tc.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}line+=(item.str||'')+' ';lastY=y;}if(line.trim())text+=line.trim()+'\n';}return text;}
+function eParsePDFText(text){const lines=text.split('\n').filter(l=>l.trim());const txns=[];const re=/(\d{2}[\/\-]\d{2}[\/\-]\d{4})\s+(.+?)\s+([\-\+]?\s*\d[\d.,]+)\s*$/;for(const line of lines){const m=line.match(re);if(!m)continue;const date=eParseDate(m[1]),desc=m[2].trim(),value=eParseBRL(m[3].replace(/\s/g,''));if(date&&desc)txns.push({date,desc,value});}return txns.length>0?txns:eParseGeneric(lines);}
+
+const E_FORMAL=['salário','salario','holerite','folha pgto','pagamento folha','fgts','inss','irrf','pro-labore','pró-labore','beneficio','benefício','aposentadoria','pensão','pensao','rendimento prev','resgate prev'];
+const E_INVEST=['btc','bitcoin','cripto','crypto','ethereum','xrp','usdt','binance','foxbit','mercado bitcoin','novadax','tesouro direto','tesouro selic','tesouro ipca','dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca','resgate rdb','resgate fundo'];
+const E_RENT=['aluguel','locação','locacao','imóvel','imovel'];
+const E_PIX=['pix recebido','pix credit','recebido pix','transf. recebida','transferência recebida','transferencia recebida','ted recebida','doc recebido','depósito recebido','deposito recebido'];
+
+function eClassifyTxn(t){
+  const d=t.desc.toLowerCase(),v=t.value;
+  if(v<=0)return{risk:'normal',flag:null};
+  if(E_FORMAL.some(k=>d.includes(k)))return{risk:'normal',flag:null};
+  if(E_INVEST.some(k=>d.includes(k)))return{risk:'attention',flag:'Investimento'};
+  if(E_RENT.some(k=>d.includes(k)))return{risk:'attention',flag:'Aluguel'};
+  const isPix=E_PIX.some(k=>d.includes(k))||(d.includes('pix')&&v>0)||(d.includes('transf')&&v>0&&!d.includes('entre contas')&&!d.includes('conta própria'));
+  if(isPix){if(v>=5000)return{risk:'suspicious',flag:'Pix ≥ R$5k'};if(v>=2000)return{risk:'attention',flag:'Pix relevante'};if(v>=500)return{risk:'attention',flag:'Pix'};}
+  if(v>=10000)return{risk:'suspicious',flag:'Crédito alto'};
+  if(v>=5000)return{risk:'attention',flag:'Valor relevante'};
+  return{risk:'normal',flag:null};
+}
+
+function eAnalyzeSingle(txns,bank){
+  if(!txns||txns.length===0)return null;
+  const monthly={};
+  txns.forEach(t=>{if(t.value<=0)return;const k=t.date?`${t.date.getFullYear()}-${t.date.getMonth()}`:'unk';if(!monthly[k])monthly[k]={total:0,pix:0};monthly[k].total+=t.value;const d=t.desc.toLowerCase();if(d.includes('pix')||d.includes('transf'))monthly[k].pix+=t.value;});
+  const classified=txns.map(t=>({...t,...eClassifyTxn(t),bank}));
+  const credits=classified.filter(t=>t.value>0);
+  const suspicious=classified.filter(t=>t.risk==='suspicious'&&t.value>0);
+  const totalCredits=credits.reduce((a,t)=>a+t.value,0);
+  const pixTotal=credits.filter(t=>t.desc.toLowerCase().includes('pix')||t.desc.toLowerCase().includes('transf')).reduce((a,t)=>a+t.value,0);
+  const months=Object.keys(monthly).filter(k=>k!=='unk');
+  const monthsOverLimit=Object.values(monthly).filter(m=>m.pix>=5000).length;
+  const suspTotal=suspicious.reduce((a,t)=>a+t.value,0);
+  const infRatio=totalCredits>0?suspTotal/totalCredits:0;
+  let score=Math.round(infRatio*40)+Math.min(20,monthsOverLimit*10)+Math.min(20,suspicious.length*5);
+  if(classified.some(t=>t.flag==='Investimento'))score+=10;
+  if(classified.some(t=>t.flag==='Aluguel'))score+=8;
+  score=Math.min(100,Math.max(0,score));
+  return{bank,totalTxns:txns.length,creditCount:credits.length,totalCredits,pixTotal,suspCount:suspicious.length,attCount:classified.filter(t=>t.risk==='attention'&&t.value>0).length,monthsOverLimit,months:months.length,score,classified};
+}
+
+function eConsolidate(results){
+  const allC=results.flatMap(r=>r.classified);
+  const credits=allC.filter(t=>t.value>0);
+  const totalCredits=credits.reduce((a,t)=>a+t.value,0);
+  const pixTotal=credits.filter(t=>t.desc.toLowerCase().includes('pix')||t.desc.toLowerCase().includes('transf')).reduce((a,t)=>a+t.value,0);
+  const suspicious=allC.filter(t=>t.risk==='suspicious'&&t.value>0);
+  const attention=allC.filter(t=>t.risk==='attention'&&t.value>0);
+  const suspTotal=suspicious.reduce((a,t)=>a+t.value,0);
+  const totalVol=results.reduce((a,r)=>a+r.totalCredits,0);
+  let score=0;
+  if(totalVol>0)results.forEach(r=>{score+=r.score*(r.totalCredits/totalVol);});
+  else score=results.reduce((a,r)=>a+r.score,0)/results.length;
+  if(results.filter(r=>r.score>55).length>=2)score=Math.min(100,score+10);
+  score=Math.round(score);
+  const totalMOL=results.reduce((a,r)=>a+r.monthsOverLimit,0);
+  const alerts=[];
+  if(suspicious.length>0)alerts.push({type:'red',icon:'🚨',title:`${suspicious.length} crédito(s) de alto risco nos ${results.length} extrato(s)`,text:`Total de ${fmtBRL(suspTotal)} sem justificativa fiscal clara. A Receita cruza via e-Financeira em todos os bancos.`});
+  if(totalMOL>0)alerts.push({type:'red',icon:'⚠️',title:`Pix acima de R$5.000/mês em ${totalMOL} mês(es)`,text:`Bancos reportam automaticamente à Receita movimentações mensais de Pix acima desse limite.`});
+  if(allC.some(t=>t.flag==='Investimento')){const t=allC.filter(x=>x.flag==='Investimento').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'📈',title:`Rendimentos de investimentos: ${fmtBRL(t)}`,text:`CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos.`});}
+  if(allC.some(t=>t.flag==='Aluguel')){const t=allC.filter(x=>x.flag==='Aluguel').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'🏠',title:`Recebimentos de aluguel: ${fmtBRL(t)}`,text:`Devem ser informados no carnê-leão mensalmente e na declaração anual.`});}
+  if(attention.length>0&&suspicious.length===0)alerts.push({type:'yellow',icon:'⚠️',title:`${attention.length} transação(ões) merecem revisão`,text:`Créditos que podem ser questionados. Tenha comprovantes de origem disponíveis.`});
+  if(alerts.length===0)alerts.push({type:'green',icon:'✅',title:'Perfil de créditos dentro do esperado',text:`Nenhum crédito de alto risco nos ${results.length} extrato(s).`});
+  alerts.push({type:'blue',icon:'💡',title:'Próximo passo',text:`Compare os ${credits.length} créditos (${fmtBRL(totalCredits)}) com o declarado no IR. Qualquer diferença precisa de comprovante.`});
+  return{score,totalCredits,pixTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,alerts,all:allC};
+}
+
+
+// ── sanitizador XSS ──────────────────────────────────────
+function sanitize(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+// ── UI extrato ──
+function eDov(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
+function eDlv(){document.getElementById('dz').classList.remove('drag')}
+function eDrp(e){e.preventDefault();eDlv();Array.from(e.dataTransfer.files).forEach(eAddFile)}
+function eOnSel(e){Array.from(e.target.files).forEach(eAddFile);e.target.value='';}
+
+function eAddFile(file){
+  eShowErr('');
+  if(eFiles.length>=MAX_FILES){eShowErr(`Limite de ${MAX_FILES} extratos atingido.`);return;}
+  if(!validateFileName(file.name)){eShowErr('Nome de arquivo inválido ou suspeito.');return;}
+  if(eFiles.find(f=>f.name===file.name)){eShowErr(`"${sanitize(file.name)}" já foi adicionado.`);return;}
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  if(file.size > MAX_SIZE){eShowErr(`"${sanitize(file.name)}" excede o limite de 10MB.`);return;}
+  const allowedExt = ['pdf','csv','ofx','txt','xlsx'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!allowedExt.includes(ext)){eShowErr(`Formato não suportado: .${sanitize(ext)}. Use PDF, CSV, OFX ou TXT.`);return;}
+  const entry={name:file.name,content:null,type:null,detected:null,status:'loading'};
+  eFiles.push(entry);eRenderFileList();
+  if(ext==='pdf'){
+    if(typeof pdfjsLib==='undefined'){
+      eShowErr('Biblioteca PDF ainda carregando. Aguarde 2 segundos e tente novamente.');
+      entry.status='err';eRenderFileList();return;
+    }
+    const r=new FileReader();
+    r.onload=async e=>{
+      try {
+        await validatePDFMagicBytes(e.target.result);
+        entry.content=e.target.result;entry.type='pdf';entry.detected={format:'pdf',bank:'PDF'};entry.status='ok';
+      } catch(err) {
+        entry.status='err';
+        eShowErr(`"${sanitize(file.name)}": ${err.message}`);
+      }
+      eRenderFileList();eUpdateActionBar();
+    };
+    r.readAsArrayBuffer(file);
+  } else {
+    const enc=['UTF-8','ISO-8859-1','windows-1252'];let idx=0;
+    const tryNext=()=>{
+      if(idx>=enc.length){entry.status='err';eRenderFileList();return;}
+      const r=new FileReader();
+      r.onload=e=>{
+        let c=e.target.result;
+        const bad=(c.match(/\uFFFD/g)||[]).length;
+        if(bad>20&&idx<enc.length-1){idx++;tryNext();return;}
+        if(c.length > MAX_TEXT_CHARS){eShowErr(`"${sanitize(file.name)}" tem conteúdo excessivo.`);entry.status='err';eRenderFileList();return;}
+        c=sanitizeFileContent(c);
+        entry.content=c;entry.type='text';entry.detected=eDetectFormat(c,file.name);entry.status='ok';
+        eRenderFileList();eUpdateActionBar();
+      };
+      r.readAsText(file,enc[idx]);
+    };
+    tryNext();
+  }
+}
+
+function eRemoveFile(idx){eFiles.splice(idx,1);eRenderFileList();eUpdateActionBar();if(eFiles.length===0)document.getElementById('actBar').style.display='none';}
+
+function eRenderFileList(){
+  document.getElementById('fileList').innerHTML=eFiles.map((f,i)=>`
+    <div class="file-item ${f.status==='ok'?'ok':f.status==='err'?'err':''}">
+      <span class="file-ico">${f.status==='loading'?'⏳':f.status==='err'?'❌':'📄'}</span>
+      <div class="file-info"><div class="file-name">${sanitize(f.name)}</div><div class="file-bank">${f.detected?sanitize(f.detected.bank):'Detectando...'}</div></div>
+      <span class="file-status ${f.status==='ok'?'fs-ok':f.status==='err'?'fs-err':'fs-load'}">${f.status==='ok'?'PRONTO':f.status==='err'?'ERRO':'...'}</span>
+      <span class="file-rm" onclick="eRemoveFile(${i})">✕</span>
+    </div>`).join('');
+  const lb=document.getElementById('limitBar');
+  if(eFiles.length>0){
+    lb.style.display='flex';
+    document.getElementById('limitTxt').textContent=`${eFiles.length} de ${MAX_FILES}`;
+    document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'✅':'📂';
+    document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
+    document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
+    document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'✓':''}</div>`).join('');
+  }else{lb.style.display='none';document.getElementById('dzIco').textContent='📂';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
+}
+
+function eUpdateActionBar(){
+  const ready=eFiles.filter(f=>f.status==='ok').length;
+  const ab=document.getElementById('actBar');
+  if(ready>0){ab.style.display='flex';document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;document.getElementById('btnGo').classList.add('on');}
+  else document.getElementById('btnGo').classList.remove('on');
+}
+function eShowErr(msg){const b=document.getElementById('errExt');b.textContent=msg;b.classList.toggle('show',!!msg);}
+function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=pct+'%';document.getElementById('actMsg').textContent=msg;}
+
+async function eRunAll(){
+  const ready=eFiles.filter(f=>f.status==='ok');
+  if(ready.length===0)return;
+  document.getElementById('btnGo').classList.remove('on');
+  eShowErr('');
+  const results=[];
+  for(let i=0;i<ready.length;i++){
+    const f=ready[i];
+    eSetProgress(Math.round((i/ready.length)*80),`Processando ${f.name}...`);
+    await new Promise(r=>setTimeout(r,200));
+    try{
+      let txns=[];
+      if(f.type==='pdf'){const text=await eParsePDF(f.content);txns=eParsePDFText(text);if(txns.length===0){eShowErr(`Não foi possível extrair de "${f.name}". Tente CSV ou OFX.`);continue;}f.detected.bank=`PDF (${txns.length} transações)`;}
+      else{const lines=f.content.split('\n');const fmt=f.detected.format;if(fmt==='nubank_cartao')txns=eParseNubankCartao(lines);
+        else if(fmt==='nubank_conta'){txns=eParseNubankConta(lines);if(txns.length===0)txns=eParseGeneric(lines);}
+        else if(fmt==='inter')txns=eParseInter(lines);
+        else if(fmt==='bb')txns=eParseBB(lines);
+        else if(fmt==='ofx')txns=eParseOFX(f.content);
+        else txns=eParseGeneric(lines);}
+      if(txns.length===0){eShowErr(`Nenhuma transação em "${f.name}".`);continue;}
+      const r=eAnalyzeSingle(txns,f.detected.bank);
+      if(r)results.push(r);
+    }catch(e){eShowErr(`Erro em "${f.name}": ${e.message}`);console.error(e);}
+  }
+  if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
+  eSetProgress(95,'Consolidando...');
+  await new Promise(r=>setTimeout(r,300));
+  const consolidated=eConsolidate(results);
+  eAllTxns=consolidated.all;
+  eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
+  // lock step 2, show step 3
+  document.getElementById('extStep2').style.opacity='0.6';
+  document.getElementById('extStep2').style.pointerEvents='none';
+  document.getElementById('s2num').textContent='✓';
+  document.getElementById('s2num').style.background='var(--green)';
+  document.getElementById('s2num').style.color='#000';
+  const s3=document.getElementById('extStep3');
+  s3.style.display='block';
+  document.getElementById('s3num').classList.remove('locked');
+  document.getElementById('s3sub').textContent=`${results.length} extrato(s) analisado(s) — desbloqueie para ver`;
+  s3.scrollIntoView({behavior:'smooth',block:'start'});
+  // store results for after payment
+  _eConsolidated=consolidated;
+  _eSources=results;
+}
+
+function eUnlockResult(){
+  document.getElementById('paywallBlock').style.display='none';
+  document.getElementById('realResultBlock').style.display='block';
+  const c=_eConsolidated,sources=_eSources;
+  if(!c||!sources)return;
+  let emoji,level,color;
+  if(c.score<=25){emoji='🟢';level='BAIXO RISCO';color='#00d96e';}
+  else if(c.score<=55){emoji='🟡';level='RISCO MODERADO';color='#f5a623';}
+  else{emoji='🔴';level='RISCO ALTO';color='#f04f60';}
+  document.getElementById('ovEmoji').textContent=emoji;
+  document.getElementById('ovLevel').textContent=level;
+  document.getElementById('ovLevel').style.color=color;
+  document.getElementById('ovSub').textContent=`${sources.length} extrato(s) · ${c.totalTxns} transações · Score consolidado`;
+  document.getElementById('pScoreVal').textContent=c.score+'%';
+  document.getElementById('pScoreVal').style.color=color;
+  document.getElementById('pBarFill').style.background=color;
+  setTimeout(()=>{document.getElementById('pBarFill').style.width=c.score+'%';},200);
+  document.getElementById('pStatsGrid').innerHTML=`
+    <div class="p-stat"><div class="p-sl">Total créditos</div><div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div><div class="p-sn">${c.creditCount} entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Pix recebidos</div><div class="p-sv" style="color:${c.pixTotal>=5000?'var(--red)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${c.pixTotal>=5000?'⚠ acima do limite':'dentro do limite'}</div></div>
+    <div class="p-stat"><div class="p-sl">Suspeitos</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div><div class="p-sn">risco alto</div></div>
+    <div class="p-stat"><div class="p-sl">Atenção</div><div class="p-sv" style="color:${c.attCount>0?'var(--yellow)':'var(--green)'}">${c.attCount}</div><div class="p-sn">a revisar</div></div>`;
+  document.getElementById('srcList').innerHTML=sources.map((r,i)=>`
+    <div class="src-item"><div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div>
+    <span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
+    <span class="src-val">${fmtBRL(r.totalCredits)}</span>
+    <span style="font-size:10px;font-family:'Syne',sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=25?'rgba(0,217,110,0.1)':r.score<=55?'rgba(245,166,35,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=25?'var(--green)':r.score<=55?'var(--yellow)':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
+  document.getElementById('pAlertList').innerHTML=c.alerts.map(a=>`
+    <div class="pal ${a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu'}">
+    <span class="pal-ico">${a.icon}</span><div><strong>${a.title}</strong>${a.text}</div></div>`).join('');
+  // bankTabs via DOM para evitar injeção via nome de banco do arquivo
+  const bankTabsEl = document.getElementById('bankTabs');
+  bankTabsEl.innerHTML = '';
+  ['all', ...sources.map(r => r.bank)].forEach((b, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btab' + (b === 'all' ? ' on' : '');
+    btn.textContent = b === 'all' ? 'Todos' : b;
+    btn.onclick = () => eSwitchBank(b);
+    bankTabsEl.appendChild(btn);
+  });
+  eActiveBankTab='all';
+  document.getElementById('pDbgPre').textContent=`Extratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}%`).join('\n');
+  eRenderTxns('all');
+}
+
+function eSwitchBank(bank){
+  eActiveBankTab=bank;
+  document.querySelectorAll('.btab').forEach(b=>b.classList.toggle('on',b.textContent.trim()===(bank==='all'?'Todos':bank)));
+  eRenderTxns(document.getElementById('pfRisk').classList.contains('on')?'risk':'all');
+}
+function eRenderTxns(filter){
+  let list=eActiveBankTab==='all'?[...eAllTxns]:eAllTxns.filter(t=>t.bank===eActiveBankTab);
+  if(filter==='risk')list=list.filter(t=>t.risk!=='normal');
+  list.sort((a,b)=>{const o={suspicious:0,attention:1,normal:2};if(o[a.risk]!==o[b.risk])return o[a.risk]-o[b.risk];return b.value-a.value;});
+  document.getElementById('pTxnList').innerHTML=list.map(t=>{
+    const dc=t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
+    const cls=t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
+    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${t.flag}</span>`:''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
+  }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>';
+}
+function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
+function eToggleDbg(){const b=document.getElementById('pDbgBd'),open=b.classList.toggle('open');document.getElementById('pDbgTog').textContent=open?'▲ recolher':'▼ ver';}
+function eResetAll(){
+  eFiles=[];eAllTxns=[];eActiveBankTab='all';
+  document.getElementById('fileList').innerHTML='';
+  document.getElementById('limitBar').style.display='none';
+  document.getElementById('actBar').style.display='none';
+  document.getElementById('extStep3').style.display='none';
+  document.getElementById('pFillExt').style.width='0%';
+  document.getElementById('dzIco').textContent='📂';
+  document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
+  document.getElementById('paywallBlock').style.display='block';
+  document.getElementById('realResultBlock').style.display='none';
+  document.getElementById('extStep2').style.opacity='0.45';
+  document.getElementById('extStep2').style.pointerEvents='none';
+  eShowErr('');
+}
+
+// extrato step 1 — handled by Supabase auth above
+
+
+</script>
+</body>
+</html>
