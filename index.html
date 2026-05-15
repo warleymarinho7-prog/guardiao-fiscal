@@ -867,6 +867,47 @@ nav {
 /* ===== LOGIN MODAL ===== */
 .login-modal-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
 
+/* ===== FAQ ===== */
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.faq-item:hover { border-color: var(--border2); }
+.faq-item.open { border-color: rgba(56,189,248,0.25); }
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+.faq-arrow {
+  font-size: 16px;
+  color: var(--muted);
+  transition: transform 0.25s;
+  flex-shrink: 0;
+}
+.faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--green); }
+.faq-a {
+  display: none;
+  padding: 0 18px 16px;
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.75;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.faq-item.open .faq-a { display: block; }
+
 /* ===== ANIMATIONS ===== */
 /* ===== PARSER V3 — MULTI-EXTRATO ===== */
 .drop-zone{border:2px dashed var(--border2);border-radius:12px;
@@ -1454,6 +1495,112 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
     </div>
   </div>
+
+  <!-- ===== BLOCO DE CREDIBILIDADE ===== -->
+  <div style="max-width:540px;margin:0 auto;padding:0 12px 48px;position:relative;z-index:1">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;box-shadow:0 4px 24px rgba(0,0,0,0.2)">
+
+      <!-- quem faz -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+        <div style="width:42px;height:42px;border-radius:12px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🛡️</div>
+        <div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Guardião Fiscal</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7">
+            Ferramenta de triagem fiscal preventiva para pessoa física.<br>
+            Desenvolvido no Brasil · <span style="color:var(--green)">oguardiaofiscal.com.br</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 pilares de confiança -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:20px 0;border-bottom:1px solid var(--border)">
+        <div style="text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">🔒</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px">100% local</div>
+          <div style="font-size:10px;color:var(--muted2);line-height:1.5">Seus arquivos nunca saem do seu dispositivo</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">📊</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px">Análise real</div>
+          <div style="font-size:10px;color:var(--muted2);line-height:1.5">Motor fiscal com 6 fatores ponderados</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">⚖️</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px">Indicativo</div>
+          <div style="font-size:10px;color:var(--muted2);line-height:1.5">Não substitui contador ou advogado</div>
+        </div>
+      </div>
+
+      <!-- links de confiança -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:18px;justify-content:center">
+        <a href="#" onclick="showPage('privacidade');return false;" style="font-size:11px;color:var(--muted2);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:20px;transition:all 0.2s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted2)';this.style.borderColor='var(--border)'">🔐 Política de Privacidade</a>
+        <a href="mailto:contato@oguardiaofiscal.com.br" style="font-size:11px;color:var(--muted2);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:20px;transition:all 0.2s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted2)';this.style.borderColor='var(--border)'">✉️ Fale conosco</a>
+        <a href="#faq" onclick="document.getElementById('faqSection').scrollIntoView({behavior:'smooth'});return false;" style="font-size:11px;color:var(--muted2);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:20px;transition:all 0.2s" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted2)';this.style.borderColor='var(--border)'">❓ Dúvidas frequentes</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <div id="faqSection" style="max-width:540px;margin:0 auto;padding:0 12px 72px;position:relative;z-index:1">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// dúvidas frequentes</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text)">Perguntas sobre o Guardião</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+
+      <!-- FAQ item -->
+      <div class="faq-item" onclick="faqToggle(this)">
+        <div class="faq-q">
+          <span>O que acontece com meus arquivos após o upload?</span>
+          <span class="faq-arrow">▾</span>
+        </div>
+        <div class="faq-a">Seus extratos são processados <strong>100% no seu navegador</strong>, sem nenhum envio para servidores externos. Os dados financeiros nunca saem do seu dispositivo. Ao fechar a aba, tudo é descartado automaticamente.</div>
+      </div>
+
+      <div class="faq-item" onclick="faqToggle(this)">
+        <div class="faq-q">
+          <span>O Guardião Fiscal substitui um contador?</span>
+          <span class="faq-arrow">▾</span>
+        </div>
+        <div class="faq-a">Não. O Guardião é uma <strong>ferramenta de triagem preventiva</strong> — ele identifica inconsistências e pontos de atenção para que você chegue mais preparado ao contador ou revisor fiscal. A análise é indicativa e não tem valor jurídico ou contábil.</div>
+      </div>
+
+      <div class="faq-item" onclick="faqToggle(this)">
+        <div class="faq-q">
+          <span>Como o score de risco é calculado?</span>
+          <span class="faq-arrow">▾</span>
+        </div>
+        <div class="faq-a">O motor fiscal v2 analisa 6 fatores ponderados: proporção de créditos sem justificativa, Pix acima do limite e-Financeira, depósitos em espécie, atividade comercial recorrente, anomalias temporais e rendimentos não declarados. Cada fator tem peso definido e o sistema explica <strong>por que o score aumentou</strong>, com os valores reais do extrato.</div>
+      </div>
+
+      <div class="faq-item" onclick="faqToggle(this)">
+        <div class="faq-q">
+          <span>Quais formatos de extrato são aceitos?</span>
+          <span class="faq-arrow">▾</span>
+        </div>
+        <div class="faq-a">CSV, OFX, QFX e PDF. O sistema detecta automaticamente o banco (Nubank, Inter, Itaú, Bradesco, Banco do Brasil, Caixa, Santander e outros) e identifica o formato correto. Você pode enviar até 5 arquivos de bancos diferentes na mesma análise.</div>
+      </div>
+
+      <div class="faq-item" onclick="faqToggle(this)">
+        <div class="faq-q">
+          <span>Qual a diferença entre análise avulsa e plano Pro?</span>
+          <span class="faq-arrow">▾</span>
+        </div>
+        <div class="faq-a">A <strong>análise avulsa (R$47,90)</strong> libera o resultado completo de uma análise — ideal para quem quer conferir a situação antes de declarar o IR. O <strong>Plano Pro (R$29,90/mês)</strong> dá acesso ilimitado a análises, múltiplos extratos simultâneos, histórico de análises e relatório PDF exportável.</div>
+      </div>
+
+      <div class="faq-item" onclick="faqToggle(this)">
+        <div class="faq-q">
+          <span>Meus dados ficam armazenados no sistema?</span>
+          <span class="faq-arrow">▾</span>
+        </div>
+        <div class="faq-a">Os arquivos financeiros são processados localmente e <strong>nunca são armazenados</strong>. Apenas dados de conta (nome e e-mail) e informações de plano são salvos no banco de dados, com criptografia e em conformidade com a LGPD.</div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== PLANOS PAGE ===== -->
@@ -3685,6 +3832,13 @@ function eResetAll(){
   document.getElementById('extStep2').style.opacity='0.45';
   document.getElementById('extStep2').style.pointerEvents='none';
   eShowErr('');
+}
+
+// ── FAQ toggle ──────────────────────────────────────────────
+function faqToggle(el){
+  const isOpen=el.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen) el.classList.add('open');
 }
 
 // extrato step 1 — handled by Supabase auth above
