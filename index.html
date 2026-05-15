@@ -139,8 +139,8 @@ nav {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 80px 20px 48px;
-  max-width: 680px;
+  padding: 88px 24px 56px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -149,15 +149,16 @@ nav {
   align-items: center;
   gap: 7px;
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  color: var(--muted2);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 7px 16px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(56,189,248,0.07);
+  border: 1px solid rgba(56,189,248,0.18);
+  padding: 6px 16px;
   border-radius: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .hero-tag::before {
@@ -174,14 +175,15 @@ nav {
 
 .hero h1 {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(24px,6vw,42px);
+  font-size: clamp(26px,6.5vw,48px);
   font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -1px;
-  margin-bottom: 16px;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+  color: var(--text);
 }
-.hero h1 em { font-style: normal; color: var(--green); opacity: 0.9; }
-.hero p { font-size: 15px; color: var(--muted2); line-height: 1.75; max-width: 440px; margin: 0 auto 28px; letter-spacing: 0.01em; }
+.hero h1 em { font-style: normal; color: var(--green); opacity: 0.95; }
+.hero p { font-size: 16px; color: var(--muted2); line-height: 1.8; max-width: 480px; margin: 0 auto 36px; letter-spacing: 0.01em; font-weight: 400; }
 
 .hero-badges {
   display: flex;
@@ -372,9 +374,9 @@ nav {
   width:280px; height:280px; border-radius:50%;
   filter:blur(80px); opacity:0.1; pointer-events:none;
 }
-.result-sublabel { font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:18px; }
+.result-sublabel { font-family:'Inter',sans-serif; font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
-.result-level { font-family:'Plus Jakarta Sans',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1.2px; margin-bottom:6px; }
+.result-level { font-family:'Plus Jakarta Sans',sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
 .result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
 .score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
 .score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
@@ -914,21 +916,21 @@ nav {
   border-radius:9px;font-size:13px;color:var(--red)}
 .err-ext.show{display:block}
 /* resultado parser */
-.ov-top{padding:24px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
-.ov-emoji{font-size:44px}
-.ov-level{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
-.ov-sub{font-size:13px;color:var(--muted2);margin-top:2px}
-.p-score-wrap{padding:16px 22px;border-bottom:1px solid var(--border)}
-.p-score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.p-score-lbl{font-size:13px;color:var(--muted2)}
-.p-score-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800}
-.p-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.p-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.ov-top{padding:28px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px}
+.ov-emoji{font-size:48px;flex-shrink:0;line-height:1}
+.ov-level{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.15}
+.ov-sub{font-size:12px;color:var(--muted2);margin-top:5px;letter-spacing:0.2px}
+.p-score-wrap{padding:20px 24px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.12)}
+.p-score-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.p-score-lbl{font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;letter-spacing:0.8px;text-transform:uppercase}
+.p-score-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1}
+.p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.p-bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
 .p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
-.p-stat{padding:14px 18px;background:var(--surface)}
-.p-sl{font-size:10px;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
-.p-sv{font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:700}
-.p-sn{font-size:11px;color:var(--muted2);margin-top:2px}
+.p-stat{padding:16px 20px;background:var(--surface)}
+.p-sl{font-size:10px;font-family:'Inter',sans-serif;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.p-sv{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.p-sn{font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.4}
 .sources{padding:16px 22px;border-bottom:1px solid var(--border)}
 .src-ttl{font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
 .src-list{display:flex;flex-direction:column;gap:7px}
@@ -938,7 +940,7 @@ nav {
 .src-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--green)}
 .src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .p-alerts{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
-.pal{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5}
+.pal{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6}
 .pal-ico{font-size:15px;flex-shrink:0;margin-top:1px}
 .pal strong{font-weight:600;display:block;margin-bottom:1px}
 .p-red{background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.2)}
@@ -1131,13 +1133,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <!-- ===== HOME PAGE ===== -->
 <div class="page active" id="page-home">
   <div class="hero">
-    <div class="hero-tag">Análise fiscal preventiva · Gratuito</div>
+    <div class="hero-tag">🛡️ Proteção fiscal preventiva</div>
     <h1>Sua movimentação bancária<br><em>está compatível com o IR?</em></h1>
-    <p>O Guardião Fiscal cruza seus extratos com os critérios do e-Financeira e identifica inconsistências antes que a Receita Federal as encontre.</p>
+    <p>O Guardião Fiscal analisa seus extratos com os mesmos critérios do e-Financeira e detecta inconsistências antes que a Receita Federal as encontre.</p>
     <div class="hero-badges">
-      <span class="badge">🔒 Processamento 100% local</span>
+      <span class="badge">🔒 Dados 100% no seu dispositivo</span>
       <span class="badge">⚡ Resultado em 2 minutos</span>
-      <span class="badge">✅ Sem compartilhar dados</span>
+      <span class="badge">✅ Gratuito para começar</span>
     </div>
   </div>
 
@@ -1393,8 +1395,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <!-- metodologia -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.7">
-            O Guardião Fiscal utiliza os mesmos critérios que a Receita Federal aplica no sistema <strong style="color:var(--text)">e-Financeira</strong> — programa que obriga bancos a reportar movimentações de pessoas físicas. A análise cruza padrões comportamentais com os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
+          <div style="font-size:12px;color:var(--muted2);line-height:1.75">
+            O Guardião Fiscal funciona como um <strong style="color:var(--text)">antivírus fiscal pessoal</strong> — monitora continuamente se sua movimentação bancária é compatível com o que foi declarado à Receita Federal. A análise usa os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas. Identificamos os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
           </div>
         </div>
 
@@ -1439,11 +1441,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
         </div>
         <div class="plan-features">
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Simulador de perguntas completo</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Termômetro de risco Verde/Amarelo/Vermelho</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas básicos por categoria</div>
-          <div class="plan-feat"><span class="feat-icon">—</span> Análise por extrato bancário</div>
-          <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF detalhado</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Simulador de risco fiscal completo</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Termômetro Verde / Atenção / Elevado / Crítico</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Diagnóstico com os critérios do e-Financeira</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Análise de extrato bancário real</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF exportável</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
         </div>
         <button class="btn-plan btn-plan-free" onclick="showPage('home')">Usar grátis →</button>
@@ -1464,11 +1466,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
         <div class="plan-features">
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Gratuito</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> 1 análise completa por extrato bancário</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF com alertas detalhados</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV (Nubank, Inter) e OFX</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análise completa do extrato bancário real</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score de risco com explicação causal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV, OFX e PDF (25 bancos)</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
-          <div class="plan-feat"><span class="feat-icon">—</span> Múltiplos arquivos de extrato</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Monitoramento contínuo</div>
         </div>
         <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Comprar análise única — R$47,90 →</button>
         <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
@@ -1492,11 +1494,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
         <div class="plan-features">
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Avulso</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas por extrato</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Múltiplos arquivos por análise</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico completo de análises</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos ao longo do ano</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Prioridade no suporte</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas — monitore o ano todo</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Múltiplos extratos por análise (até 5 arquivos)</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico de risco — veja sua evolução fiscal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos quando seu risco muda</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF exportável</div>
         </div>
         <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Acessar Pro Grátis →</span></button>
       </div>
@@ -1757,14 +1759,14 @@ function initProFreeMode() {
 }
 
 function openCheckout(plan) {
-  // MODO PRO GRATUITO — bypass do checkout
-  if (PRO_FREE_MODE) {
+  // MODO PRO GRATUITO — bypass só para o plano Pro, nunca para avulso
+  if (PRO_FREE_MODE && plan !== 'avulso') {
     if (_eConsolidated) {
       // já tem análise feita — desbloqueia resultado direto
       closeCheckoutDirect();
       eUnlockResult();
     } else {
-      // leva para a aba de extrato e sobe até o step de upload
+      // leva para a aba de extrato
       showPage('home');
       setTimeout(() => {
         switchSimTab('extrato');
@@ -1776,6 +1778,7 @@ function openCheckout(plan) {
     }
     return;
   }
+
   currentPlan = plan;
   const p = plans[plan];
 
@@ -1789,8 +1792,12 @@ function openCheckout(plan) {
     <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:400"> ${p.period}</span></div>
   `;
 
-  // reset para step 1
-  setCheckoutStep(1);
+  // Se já está logado, pula step 1 e vai direto para pagamento
+  if (_currentUser) {
+    setCheckoutStep(2);
+  } else {
+    setCheckoutStep(1);
+  }
   document.getElementById('checkoutOverlay').classList.add('show');
   document.getElementById('checkoutModal').scrollTop = 0;
 }
@@ -1805,32 +1812,40 @@ async function goToMercadoPago() {
   document.getElementById('btnMpPay').disabled = true;
 
   try {
-    // Pega o token de sessão atual do usuário
-    const { data: { session } } = await sb.auth.getSession();
+    // Verifica sessão
+    const { data: { session }, error: sessErr } = await sb.auth.getSession();
+    if (sessErr) throw new Error('Erro de autenticação. Faça login novamente.');
     if (!session) throw new Error('Sessão expirada. Faça login novamente.');
 
-    const res = await fetch(
-      `${SUPA_URL}/functions/v1/create-mp-preference`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ plan: currentPlan }),
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error ?? `Erro ${res.status}`);
+    let res;
+    try {
+      res = await fetch(
+        `${SUPA_URL}/functions/v1/create-mp-preference`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ plan: currentPlan }),
+        }
+      );
+    } catch (networkErr) {
+      // Erro de rede/CORS — mostra mensagem mais útil
+      throw new Error('Não foi possível conectar ao servidor de pagamento. Verifique sua conexão e tente novamente.');
     }
 
-    const { init_point } = await res.json();
-    if (!init_point) throw new Error('Link de pagamento inválido.');
+    if (!res.ok) {
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
+    }
 
-    // Redireciona para o checkout do Mercado Pago
-    window.location.href = init_point;
+    const data = await res.json();
+    const url = data.init_point || data.sandbox_url;
+    if (!url) throw new Error('Link de pagamento inválido. Tente novamente.');
+
+    window.location.href = url;
 
   } catch (e) {
     errEl.textContent = e.message || 'Erro inesperado. Tente novamente.';
@@ -1941,8 +1956,13 @@ async function goToPay() {
 }
 
 function goToAccount() {
-  setCheckoutStep(1);
-  document.getElementById('checkoutModal').scrollTop = 0;
+  // Se já está logado, fechar o modal em vez de voltar para cadastro
+  if (_currentUser) {
+    closeCheckoutDirect();
+  } else {
+    setCheckoutStep(1);
+    document.getElementById('checkoutModal').scrollTop = 0;
+  }
 }
 
 function goToSuccess() {
