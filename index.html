@@ -2073,18 +2073,27 @@ function sanitizeText(str) {
 }
 
 function autoSkipExtStep1(email) {
-  const s1 = document.getElementById('extStep1');
-  if (!s1 || s1.style.opacity === '0.6') return;
-  s1.style.opacity = '0.6';
-  if (s1.querySelector('.ext-card-body')) s1.querySelector('.ext-card-body').style.display = 'none';
-  document.getElementById('s1num').classList.add('done');
-  document.getElementById('s1num').textContent = '✓';
-  s1.querySelector('.ext-step-sub').textContent = email;
-  const s2 = document.getElementById('extStep2');
-  s2.style.opacity = '1';
-  s2.style.pointerEvents = 'auto';
-  document.getElementById('s2num').classList.remove('locked');
-  document.getElementById('s2num').textContent = '2';
+  // defer para garantir que o DOM já está montado
+  const run = () => {
+    const s1 = document.getElementById('extStep1');
+    if (!s1) return;
+    if (s1.style.opacity === '0.6') return; // já pulou
+    s1.style.opacity = '0.6';
+    if (s1.querySelector('.ext-card-body')) s1.querySelector('.ext-card-body').style.display = 'none';
+    const s1num = document.getElementById('s1num');
+    if (s1num) { s1num.classList.add('done'); s1num.textContent = '✓'; }
+    const sub = s1.querySelector('.ext-step-sub');
+    if (sub) sub.textContent = email;
+    const s2 = document.getElementById('extStep2');
+    if (s2) { s2.style.opacity = '1'; s2.style.pointerEvents = 'auto'; }
+    const s2num = document.getElementById('s2num');
+    if (s2num) { s2num.classList.remove('locked'); s2num.textContent = '2'; }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    setTimeout(run, 0);
+  }
 }
 
 async function doLogout() {
@@ -2674,6 +2683,10 @@ function eAddFile(file){
   const entry={name:file.name,content:null,type:null,detected:null,status:'loading'};
   eFiles.push(entry);eRenderFileList();
   if(ext==='pdf'){
+    if(typeof pdfjsLib==='undefined'){
+      eShowErr('Biblioteca PDF ainda carregando. Aguarde 2 segundos e tente novamente.');
+      entry.status='err';eRenderFileList();return;
+    }
     const r=new FileReader();
     r.onload=async e=>{
       try {
