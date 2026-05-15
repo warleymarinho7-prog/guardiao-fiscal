@@ -1507,7 +1507,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Guardião Fiscal</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.7">
             Ferramenta de triagem fiscal preventiva para pessoa física.<br>
-            Desenvolvido no Brasil · <span style="color:var(--green)">oguardiaofiscal.com.br</span>
+            Desenvolvido no Brasil · <span style="color:var(--green)">oguardiaofiscal.com.br</span><br>
+            <span style="color:var(--muted);font-size:11px">Contato: contato@oguardiaofiscal.com.br</span>
           </div>
         </div>
       </div>
@@ -1865,6 +1866,7 @@ function switchSimTab(tab) {
   document.getElementById('simExtrato').style.display = isPerguntas ? 'none' : 'block';
   document.getElementById('tabQ').classList.toggle('active', isPerguntas);
   document.getElementById('tabE').classList.toggle('active', !isPerguntas);
+  track('tab_switch', { aba: tab });
   // quando abre extrato, garante desbloqueio se já logado
   if (!isPerguntas) {
     if (_currentUser) {
@@ -1943,6 +1945,7 @@ function initProFreeMode() {
 }
 
 function openCheckout(plan) {
+  track('checkout_aberto', { plano: plan });
   // MODO PRO GRATUITO — bypass só para o plano Pro, nunca para avulso
   if (PRO_FREE_MODE && plan !== 'avulso') {
     if (_eConsolidated) {
@@ -2244,6 +2247,59 @@ const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
+// ===== TRACKING DE EVENTOS =====
+const _sessaoId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+let _trackQueue = [];
+let _trackFlushing = false;
+
+async function track(evento, props = {}) {
+  const payload = {
+    sessao_id: _sessaoId,
+    user_id:   _currentUser?.id ?? null,
+    evento,
+    propriedades: {
+      ...props,
+      url:       location.pathname,
+      referrer:  document.referrer || null,
+      ua:        navigator.userAgent.slice(0, 120),
+      ts:        new Date().toISOString(),
+    }
+  };
+  _trackQueue.push(payload);
+  if (!_trackFlushing) _flushTrack();
+}
+
+async function _flushTrack() {
+  if (_trackQueue.length === 0) { _trackFlushing = false; return; }
+  _trackFlushing = true;
+  const batch = _trackQueue.splice(0, 10);
+  try {
+    await sb.from('eventos').insert(batch);
+  } catch(e) {
+    // silencioso — tracking nunca quebra o produto
+  }
+  setTimeout(_flushTrack, 300);
+}
+
+// Eventos automáticos de navegação e engajamento
+document.addEventListener('DOMContentLoaded', () => {
+  track('page_view');
+
+  // Tempo na página
+  let _startTime = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) track('page_blur', { segundos: Math.round((Date.now()-_startTime)/1000) });
+    else _startTime = Date.now();
+  });
+
+  // Scroll depth
+  let _maxScroll = 0;
+  window.addEventListener('scroll', () => {
+    const pct = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+    if (pct > _maxScroll + 25) { _maxScroll = pct; track('scroll_depth', { pct }); }
+  }, { passive: true });
+});
+
 let _currentUser = null;
 
 // Inicializa sessão ao carregar
@@ -2411,6 +2467,7 @@ async function extStep1Done() {
     btn.textContent = 'Criar conta e continuar →';
     if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
     if (data.session) {
+      track('cadastro', { origem: 'extrato' });
       authSuccess(email);
       autoSkipExtStep1(email);
     } else {
@@ -2428,6 +2485,7 @@ async function extStep1Done() {
     const { error } = await sb.auth.signInWithPassword({ email, password: senha });
     btn.textContent = 'Entrar e continuar →';
     if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
+    track('login', { origem: 'extrato' });
     authSuccess(email);
     autoSkipExtStep1(email);
   }
@@ -2662,6 +2720,7 @@ function showResult() {
 
   const total = answers.reduce((a,b) => a + (b?.risk || 0), 0);
   const pct = Math.min(100, Math.round((total / 19) * 100));
+  track('simulador_resultado', { score: pct });
 
   let level, color, emoji, desc;
   const alertsData = []; // { title, text, cls, icon }
@@ -3393,6 +3452,7 @@ function eAddFile(file){
       try {
         await validatePDFMagicBytes(e.target.result);
         entry.content=e.target.result;entry.type='pdf';entry.detected={format:'pdf',bank:'PDF'};entry.status='ok';
+        track('arquivo_adicionado', { tipo: 'pdf', nome: file.name.slice(-20) });
       } catch(err) {
         entry.status='err';
         eShowErr(`"${sanitize(file.name)}": ${err.message}`);
@@ -3414,6 +3474,7 @@ function eAddFile(file){
         const isOFX=ext==='ofx'||ext==='qfx'||c.substring(0,500).toUpperCase().includes('OFXHEADER');
         if(!isOFX) c=sanitizeFileContent(c);
         entry.content=c;entry.type='text';entry.detected=eDetectFormat(c,file.name);entry.status='ok';
+        track('arquivo_adicionado', { tipo: entry.detected?.format||'text', banco: entry.detected?.banco||null });
         eRenderFileList();eUpdateActionBar();
       };
       r.readAsText(file,enc[idx]);
@@ -3582,11 +3643,19 @@ async function eRunAll(){
   s3.scrollIntoView({behavior:'smooth',block:'start'});
   _eConsolidated=consolidated;
   _eSources=results;
+  track('extrato_analisado', {
+    score:        consolidated.score,
+    n_extratos:   results.length,
+    n_txns:       consolidated.totalTxns,
+    renda_informada: rendaAnual > 0,
+    n_alertas:    consolidated.alerts.length,
+  });
 }
 
 function eUnlockResult(){
   document.getElementById('paywallBlock').style.display='none';
   document.getElementById('realResultBlock').style.display='block';
+  track('paywall_desbloqueado', { score: _eConsolidated?.score ?? null });
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
   let emoji,level,color;
@@ -3665,6 +3734,7 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
 async function eExportPDF(){
   const btn=document.getElementById('btnExportPDF');
   if(!_eConsolidated||!_eSources){return;}
+  track('pdf_exportado', { score: _eConsolidated.score, n_alertas: _eConsolidated.alerts.length });
   const c=_eConsolidated,sources=_eSources;
 
   // Fallback se jsPDF não carregou
