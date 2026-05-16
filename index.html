@@ -1692,7 +1692,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                 <div class="uc-info">
                   <div class="best-tag">MELHOR CUSTO</div>
                   <div class="uc-name">Plano Pro</div>
-                  <div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div>
+                  <div class="uc-desc"><span id="ucProText">Análises ilimitadas + múltiplos extratos + histórico</span></div>
                 </div>
                 <div class="uc-price">
                   <div class="uc-value">R$29,90</div>
@@ -1730,11 +1730,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <!-- cadastro pane -->
           <div id="extCadPane">
             <div class="form-group">
-              <label class="form-label">E-mail</label>
+              <label class="form-label" for="extEmail">E-mail</label>
               <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com">
             </div>
             <div class="form-group">
-              <label class="form-label">Senha</label>
+              <label class="form-label" for="extSenha">Senha</label>
               <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('extSenhaMeter', this.value)">
               <div id="extSenhaMeter"></div>
             </div>
@@ -1742,11 +1742,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <!-- login pane -->
           <div id="extLogPane" style="display:none">
             <div class="form-group">
-              <label class="form-label">E-mail</label>
+              <label class="form-label" for="extLoginEmail">E-mail</label>
               <input class="form-input" type="email" id="extLoginEmail" placeholder="seu@email.com">
             </div>
             <div class="form-group">
-              <label class="form-label">Senha</label>
+              <label class="form-label" for="extLoginSenha">Senha</label>
               <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha">
             </div>
           </div>
@@ -1772,7 +1772,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div class="ext-card-body">
           <div class="drop-zone" id="dz"
                ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)">
-            <input type="file" id="efi" accept=".csv,.ofx,.pdf,.txt,.qfx" multiple onchange="eOnSel(event)">
+            <input type="file" id="efi" aria-label="Selecionar extratos bancários" accept=".csv,.ofx,.pdf,.txt,.qfx" multiple onchange="eOnSel(event)">
             <span class="dz-ico" id="dzIco">📂</span>
             <div class="dz-ttl" id="dzTtl">Arraste os extratos ou clique para selecionar</div>
             <div class="dz-sub">Processado 100% no seu dispositivo — seus dados não saem daqui</div>
@@ -2071,20 +2071,20 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="modal-sub">Primeiro defina seu acesso. O pagamento é no próximo passo.</div>
 
       <div class="form-group">
-        <label class="form-label">Nome completo</label>
+        <label class="form-label" for="coName">Nome completo</label>
         <input class="form-input" type="text" id="coName" placeholder="Seu nome">
       </div>
       <div class="form-group">
-        <label class="form-label">E-mail</label>
+        <label class="form-label" for="coEmail">E-mail</label>
         <input class="form-input" type="email" id="coEmail" placeholder="seu@email.com">
       </div>
       <div class="form-group">
-        <label class="form-label">Senha</label>
+        <label class="form-label" for="coSenha">Senha</label>
         <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
         <div id="coSenhaMeter"></div>
       </div>
       <div class="form-group" style="margin-bottom:20px">
-        <label class="form-label">Confirmar senha</label>
+        <label class="form-label" for="coSenha2">Confirmar senha</label>
         <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha">
       </div>
 
@@ -2156,11 +2156,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="modal-title">Entrar na sua conta</div>
       <div class="modal-sub">Acesse suas análises e histórico fiscal.</div>
       <div class="form-group" style="margin-top:16px">
-        <label class="form-label">E-mail</label>
+        <label class="form-label" for="loginEmail">E-mail</label>
         <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com">
       </div>
       <div class="form-group">
-        <label class="form-label">Senha</label>
+        <label class="form-label" for="loginSenha">Senha</label>
         <input class="form-input" type="password" id="loginSenha" placeholder="Sua senha">
       </div>
       <div id="loginErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
@@ -2177,15 +2177,15 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="modal-title">Criar conta gratuita</div>
       <div class="modal-sub">Salve suas análises e acesse de qualquer lugar.</div>
       <div class="form-group" style="margin-top:16px">
-        <label class="form-label">Nome</label>
+        <label class="form-label" for="cadNome">Nome</label>
         <input class="form-input" type="text" id="cadNome" placeholder="Seu nome">
       </div>
       <div class="form-group">
-        <label class="form-label">E-mail</label>
+        <label class="form-label" for="cadEmail">E-mail</label>
         <input class="form-input" type="email" id="cadEmail" placeholder="seu@email.com">
       </div>
       <div class="form-group">
-        <label class="form-label">Senha</label>
+        <label class="form-label" for="cadSenha">Senha</label>
         <input class="form-input" type="password" id="cadSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('cadSenhaMeter', this.value)">
         <div id="cadSenhaMeter"></div>
       </div>
@@ -2204,8 +2204,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <script>
 // ===== NAVIGATION =====
 function showPage(id) {
+  const target = document.getElementById('page-' + id);
+  if (!target) { console.warn('showPage: página não encontrada:', id); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
+  target.classList.add('active');
   window.scrollTo(0,0);
   // Atualiza estado ativo do nav desktop
   document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
@@ -2215,6 +2217,13 @@ function showPage(id) {
   document.querySelectorAll('.nav-drawer-link').forEach(b => b.classList.remove('active'));
   if (id === 'home') document.getElementById('drawerHome')?.classList.add('active');
   if (id === 'planos') document.getElementById('drawerPlanos')?.classList.add('active');
+}
+
+// ── Fecha todos os overlays ativos (mutex) ──
+function closeAllOverlays() {
+  document.getElementById('checkoutOverlay').classList.remove('show');
+  document.getElementById('loginOverlay').classList.remove('show');
+  document.body.style.overflow = '';
 }
 
 // ── Mobile drawer ──
@@ -2230,8 +2239,8 @@ function closeDrawer() {
   document.getElementById('navHamburger')?.classList.remove('open');
   document.body.style.overflow = '';
 }
-// Fechar drawer com ESC
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+// Fechar drawer e modais com ESC
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeAllOverlays(); } });
 
 function switchSimTab(tab) {
   const isPerguntas = tab === 'perguntas';
@@ -2356,8 +2365,10 @@ function openCheckout(plan) {
   } else {
     setCheckoutStep(1);
   }
+  closeAllOverlays();
   document.getElementById('checkoutOverlay').classList.add('show');
   document.getElementById('checkoutModal').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
 }
 
 // ── MERCADO PAGO — CHECKOUT REAL ──────────────────────────────────────────
@@ -2542,11 +2553,13 @@ function shake(id) {
   setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
 }
 
+// ── Fecha todos os overlays ativos (mutex) ──
 function closeCheckout(e) {
   if (e.target === document.getElementById('checkoutOverlay')) closeCheckoutDirect();
 }
 function closeCheckoutDirect() {
   document.getElementById('checkoutOverlay').classList.remove('show');
+  document.body.style.overflow = '';
 }
 
 // switchPtab, formatCard, formatExpiry, copyPixKey removidos — checkout delegado ao Mercado Pago
@@ -2888,13 +2901,16 @@ function renderPasswordMeter(containerId, senha) {
 
 // ===== LOGIN =====
 function openLogin() {
+  closeAllOverlays();
   document.getElementById('loginOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
 }
 function closeLogin(e) {
   if (e.target === document.getElementById('loginOverlay')) closeLoginDirect();
 }
 function closeLoginDirect() {
   document.getElementById('loginOverlay').classList.remove('show');
+  document.body.style.overflow = '';
 }
 
 // ===== SIMULADOR =====
