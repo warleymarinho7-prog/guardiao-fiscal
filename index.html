@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 :root {
   /* Azul-petróleo profundo — referência Nubank/Linear */
@@ -1295,6 +1296,32 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
           </div>
           <div class="file-list" id="fileList"></div>
+
+          <!-- RENDA DECLARADA — ativa índice de compatibilidade -->
+          <div id="rendaBlock" style="display:none;margin-top:14px;background:rgba(56,189,248,0.04);border:1px solid rgba(56,189,248,0.15);border-radius:12px;padding:14px 16px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <span style="font-size:15px">📋</span>
+              <div>
+                <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--text)">Renda declarada no IR <span style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-left:5px">Opcional</span></div>
+                <div style="font-size:11px;color:var(--muted2);margin-top:1px">Ativa o Índice de Compatibilidade — movimentação real vs declarada</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="position:relative;flex:1">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted2);font-family:'DM Mono',monospace;pointer-events:none">R$</span>
+                <input id="rendaDeclarada" type="text" inputmode="numeric" placeholder="0,00" autocomplete="off"
+                  style="width:100%;padding:11px 12px 11px 36px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;outline:none;transition:all 0.2s"
+                  oninput="eFormatRenda(this)"
+                  onfocus="this.style.borderColor='rgba(56,189,248,0.45)';this.style.boxShadow='0 0 0 3px rgba(56,189,248,0.1)'"
+                  onblur="this.style.borderColor='var(--border2)';this.style.boxShadow='none'">
+              </div>
+              <div style="font-size:11px;color:var(--muted);white-space:nowrap">/ano</div>
+            </div>
+            <div id="rendaHint" style="display:none;margin-top:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+              💡 Inclua salário, autônomo, MEI, aluguel e investimentos do ano.
+            </div>
+          </div>
+
           <div class="err-ext" id="errExt"></div>
         </div>
         <div class="act-bar" id="actBar" style="display:none">
@@ -1382,8 +1409,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
             </div>
             <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
-            <div style="padding:4px 0 0">
-              <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
+            <div style="padding:16px 0 0;display:flex;gap:10px;flex-wrap:wrap">
+              <button onclick="eExportPDF()" id="btnExportPDF" style="flex:1;min-width:160px;padding:13px 18px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);border-radius:12px;color:var(--green);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:7px" onmouseover="this.style.background='rgba(56,189,248,0.18)'" onmouseout="this.style.background='rgba(56,189,248,0.1)'">
+                <span>📄</span> Exportar Relatório PDF
+              </button>
+              <button class="btn-nova" style="flex:1;min-width:140px" onclick="eResetAll()">← Nova análise</button>
             </div>
           </div>
         </div>
@@ -1847,7 +1877,10 @@ async function goToMercadoPago() {
     const data = await res.json();
     const url = data.init_point || data.sandbox_url;
     if (!url) throw new Error('Link de pagamento inválido. Tente novamente.');
-
+    // Valida que é URL do Mercado Pago antes de redirecionar (open redirect protection)
+    if (!url.startsWith('https://www.mercadopago.com') && !url.startsWith('https://mercadopago.com') && !url.startsWith('https://sandbox.mercadopago.com')) {
+      throw new Error('URL de pagamento inválida. Contate o suporte.');
+    }
     window.location.href = url;
 
   } catch (e) {
@@ -2007,11 +2040,16 @@ function authRateLimit(email) {
   const a = _authAttempts[key];
   // Reset janela de 15 min
   if (now - a.first > 15 * 60 * 1000) { a.count = 0; a.first = now; a.blocked = false; }
+  // Já bloqueado — retorna imediatamente sem incrementar
+  if (a.blocked) {
+    const wait = Math.ceil((15 * 60 * 1000 - (now - a.first)) / 60000);
+    return `Muitas tentativas. Aguarde ~${Math.max(1,wait)} min.`;
+  }
   a.count++;
   if (a.count > 5) {
     a.blocked = true;
     const wait = Math.ceil((15 * 60 * 1000 - (now - a.first)) / 60000);
-    return `Muitas tentativas. Aguarde ~${wait} min.`;
+    return `Muitas tentativas. Aguarde ~${Math.max(1,wait)} min.`;
   }
   return null;
 }
@@ -2538,14 +2576,47 @@ function showResult() {
   ).join('');
 
   if (bloqueados.length > 0) {
+    // Monta prévia dos alertas bloqueados (título visível, texto oculto)
+    const previasHtml = bloqueados.map(a => `
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;filter:blur(2px);user-select:none;pointer-events:none">
+        <span style="font-size:13px">${a.icon}</span>
+        <span style="font-size:12px;color:var(--muted2);font-weight:500">████████████████████</span>
+      </div>`).join('');
+
+    // Urgência baseada no score
+    const urgLevel = pct >= 56
+      ? { cor: '#f04f60', emoji: '🚨', texto: 'Risco alto detectado', sub: 'Seu perfil ativou múltiplos critérios de atenção da Receita Federal.' }
+      : pct >= 21
+      ? { cor: '#f5a623', emoji: '⚠️', texto: 'Pontos de atenção encontrados', sub: 'Há inconsistências que merecem verificação antes do prazo.' }
+      : { cor: '#38bdf8', emoji: '🔍', texto: 'Análise incompleta', sub: 'O simulador usa estimativas. O extrato real revela os valores exatos.' };
+
     html += `
-    <div class="alert-paywall">
-      <div class="apw-lock">🔒</div>
-      <div class="apw-title">+${bloqueados.length} alerta${bloqueados.length > 1 ? 's' : ''} identificado${bloqueados.length > 1 ? 's' : ''}</div>
-      <div class="apw-desc">Faça upload do seu extrato bancário para ver a análise completa com os valores reais da sua conta.</div>
-      <button class="apw-btn" onclick="showPage('home');setTimeout(()=>{switchSimTab('extrato')},100)">Ver análise completa do extrato →</button>
-      <div class="apw-or">ou</div>
-      <button class="apw-btn-sec" onclick="openCheckout('avulso')">Análise avulsa — R$47,90</button>
+    <div class="alert-paywall" style="background:rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.08);padding:0;overflow:hidden;border-radius:16px">
+      <!-- header urgência -->
+      <div style="background:linear-gradient(135deg,rgba(${pct>=56?'240,79,96':pct>=21?'245,166,35':'56,189,248'},0.12),transparent);padding:18px 18px 14px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:22px">${urgLevel.emoji}</span>
+          <div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;color:${urgLevel.cor}">${urgLevel.texto}</div>
+            <div style="font-size:12px;color:var(--muted2);margin-top:2px">${urgLevel.sub}</div>
+          </div>
+        </div>
+      </div>
+      <!-- alertas bloqueados -->
+      <div style="padding:14px 14px 10px">
+        <div style="font-size:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 ${bloqueados.length} alerta${bloqueados.length > 1 ? 's' : ''} bloqueado${bloqueados.length > 1 ? 's' : ''}</div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px">${previasHtml}</div>
+        <div style="font-size:11px;color:var(--muted2);text-align:center;margin-bottom:12px;line-height:1.6">
+          O simulador usa perguntas. O extrato real usa <strong style="color:var(--text)">seus números reais</strong> do banco — muito mais preciso.
+        </div>
+      </div>
+      <!-- CTAs -->
+      <div style="padding:0 14px 16px;display:flex;flex-direction:column;gap:8px">
+        <button class="apw-btn" style="background:var(--green);color:#000;display:flex;align-items:center;justify-content:center;gap:8px" onclick="showPage('home');setTimeout(()=>{switchSimTab('extrato')},100)">
+          📄 Analisar meu extrato agora <span style="font-size:10px;font-weight:600;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:4px">GRÁTIS</span>
+        </button>
+        <button class="apw-btn-sec" onclick="openCheckout('avulso')">Análise avulsa com relatório PDF — R$47,90</button>
+      </div>
     </div>`;
   }
 
@@ -2925,6 +2996,59 @@ function analiseTemporal(monthly) {
 }
 
 // ── Motor principal — análise de um extrato ────────────────────
+// ── Índice de Herfindahl-Hirschman adaptado (concentração de origens) ──
+function calcularIHH(txns) {
+  // Agrupa créditos por origem normalizada
+  const origens = {};
+  const totalCr = txns.filter(t => t.value > 0).reduce((a, t) => a + t.value, 0);
+  if (totalCr === 0) return { ihh: 1, nOrigens: 0, tipo: 'indefinido' };
+
+  txns.filter(t => t.value > 0).forEach(t => {
+    // normaliza origem: remove valores, datas, ids
+    const chave = t.desc.toLowerCase()
+      .replace(/\d{2}\/\d{2}\/?\d{0,4}/g, '')
+      .replace(/r\$[\d.,]+/gi, '')
+      .replace(/\d{5,}/g, '')
+      .replace(/\s+/g, ' ').trim().substring(0, 30);
+    if (!origens[chave]) origens[chave] = 0;
+    origens[chave] += t.value;
+  });
+
+  const nOrigens = Object.keys(origens).length;
+  // IHH = soma dos quadrados das participações (0 a 1)
+  const ihh = Object.values(origens).reduce((a, v) => a + Math.pow(v / totalCr, 2), 0);
+
+  // IHH > 0.6 = concentrado (1 pagador dominante = formal)
+  // IHH < 0.2 = pulverizado (muitos pagadores = possível comercial)
+  const tipo = ihh > 0.6 ? 'concentrado' : ihh > 0.3 ? 'moderado' : 'pulverizado';
+  return { ihh, nOrigens, tipo };
+}
+
+// ── Coeficiente de Variação mensal (perfil de renda) ──
+function calcularCV(monthly) {
+  const totais = Object.values(monthly).map(m => m.total).filter(v => v > 0);
+  if (totais.length < 2) return { cv: 0, perfil: 'indefinido' };
+  const media = totais.reduce((a, v) => a + v, 0) / totais.length;
+  const desvio = Math.sqrt(totais.reduce((a, v) => a + Math.pow(v - media, 2), 0) / totais.length);
+  const cv = media > 0 ? desvio / media : 0;
+  // CV < 0.2 = renda estável (CLT) → thresholds menos severos
+  // CV > 0.5 = renda irregular (autônomo/freelancer) → mais atenção
+  const perfil = cv < 0.2 ? 'estavel' : cv < 0.5 ? 'variavel' : 'irregular';
+  return { cv, perfil, media };
+}
+
+// ── Razão de renda implícita (débitos revelam renda mínima) ──
+// Se pessoa gasta mais do que os créditos formais justificam → renda oculta implícita
+function calcularRendaImplicita(totalCredits, totalDebits, formalTotal) {
+  if (totalCredits === 0) return { ratio: 0, suspeito: false };
+  // Se débitos > créditos formais * 1.1 e há créditos não-formais relevantes
+  const creditosNaoFormais = totalCredits - formalTotal;
+  const ratio = totalDebits > 0 && formalTotal > 0 ? totalDebits / formalTotal : 0;
+  // ratio > 1.3 com créditos não-formais relevantes = possível renda oculta
+  const suspeito = ratio > 1.3 && creditosNaoFormais > formalTotal * 0.3;
+  return { ratio, suspeito };
+}
+
 function eAnalyzeSingle(txns, bank) {
   if (!txns || txns.length === 0) return null;
 
@@ -2957,45 +3081,84 @@ function eAnalyzeSingle(txns, bank) {
   const months        = Object.keys(monthly).filter(k => k !== 'unk').sort();
   const monthsOverLimit = Object.values(monthly).filter(m => m.pix >= 5000).length;
 
-  // Recorrência e análise temporal
+  // ── Modelos matemáticos v3 ──────────────────────────────────
   const { recorrentes, comercialOculta } = detectarRecorrencia(txns);
   const { anomalias, mediaHistorica, pico } = analiseTemporal(monthly);
+  const { ihh, nOrigens, tipo: tipoConcentracao } = calcularIHH(txns);
+  const { cv, perfil: perfilRenda, media: mediaCV } = calcularCV(monthly);
+  const { ratio: rendaImplicitaRatio, suspeito: rendaImplicitaSuspeita } = calcularRendaImplicita(totalCredits, totalDebits, formalTotal);
 
-  // ── Cálculo de score com pesos ponderados ──────────────────
+  // ── Score ponderado v3 ──────────────────────────────────────
+  // Fator de contexto: renda estável (CLT) tem thresholds mais tolerantes
+  const fatorContexto = perfilRenda === 'estavel' ? 0.75 : perfilRenda === 'variavel' ? 1.0 : 1.2;
+
   let score = 0;
   const fatores = [];
 
-  // F1 — Proporção de créditos suspeitos (peso 40)
+  // F1 — Proporção de créditos suspeitos (peso 35)
   const infRatio = totalCredits > 0 ? suspTotal / totalCredits : 0;
-  const f1 = Math.round(infRatio * 40);
-  if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa clara` });
+  const f1 = Math.round(infRatio * 35 * fatorContexto);
+  if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa fiscal clara` });
   score += f1;
 
-  // F2 — Pix acima do limite e-Financeira (peso 20)
-  const f2 = Math.min(20, monthsOverLimit * 7);
+  // F2 — Pix acima do limite e-Financeira (peso 18)
+  const f2 = Math.min(18, monthsOverLimit * 6);
   if (f2 > 0) fatores.push({ peso: f2, motivo: `Pix acima de R$5k em ${monthsOverLimit} mês(es)` });
   score += f2;
 
-  // F3 — Depósito em espécie (peso 20)
+  // F3 — Depósito em espécie (peso 18)
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
-  const f3 = Math.round(Math.min(20, especieRatio * 80));
+  const f3 = Math.round(Math.min(18, especieRatio * 72));
   if (f3 > 0) fatores.push({ peso: f3, motivo: `${Math.round(especieRatio * 100)}% das entradas em espécie` });
   score += f3;
 
-  // F4 — Atividade comercial oculta (peso 15)
-  const f4 = Math.min(15, comercialOculta.length * 5);
+  // F4 — Atividade comercial oculta (peso 12)
+  const f4 = Math.min(12, comercialOculta.length * 4);
   if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente` });
   score += f4;
 
-  // F5 — Anomalia temporal (pico > 2x média) (peso 15)
+  // F5 — Anomalia temporal z-score (peso 12)
   const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
-  const f5 = pctPico >= 3 ? 15 : pctPico >= 2 ? 10 : pctPico >= 1.5 ? 5 : 0;
+  const f5 = pctPico >= 3 ? 12 : pctPico >= 2 ? 8 : pctPico >= 1.5 ? 4 : 0;
   if (f5 > 0) fatores.push({ peso: f5, motivo: `Pico de ${Math.round(pctPico * 10) / 10}x acima da média histórica` });
   score += f5;
 
-  // F6 — Bônus por investimentos e aluguel
-  if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos não declarados' }); }
-  if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel' }); }
+  // F6 — IHH: conta pulverizada com muitos pagadores (peso 10)
+  // Conta pulverizada + renda irregular = forte indício de atividade comercial oculta
+  if (tipoConcentracao === 'pulverizado' && perfilRenda === 'irregular') {
+    const f6 = 10;
+    fatores.push({ peso: f6, motivo: `${nOrigens} origens distintas de crédito — padrão de atividade comercial` });
+    score += f6;
+  } else if (tipoConcentracao === 'pulverizado') {
+    const f6 = 5;
+    fatores.push({ peso: f6, motivo: `${nOrigens} origens distintas de crédito` });
+    score += f6;
+  }
+
+  // F7 — Coeficiente de Variação: renda irregular sem formalização (peso 8)
+  if (perfilRenda === 'irregular' && formalTotal < totalCredits * 0.3) {
+    const f7 = 8;
+    fatores.push({ peso: f7, motivo: `Renda altamente irregular (CV=${Math.round(cv*100)}%) sem créditos formais proporcionais` });
+    score += f7;
+  }
+
+  // F8 — Renda implícita suspeita (peso 8)
+  if (rendaImplicitaSuspeita) {
+    const f8 = 8;
+    fatores.push({ peso: f8, motivo: `Débitos ${Math.round(rendaImplicitaRatio * 100)}% acima da renda formal — possível renda complementar não declarada` });
+    score += f8;
+  }
+
+  // F9 — Bônus por investimentos e aluguel (peso menor pois podem ser legítimos)
+  if (classified.some(t => t.flag === 'Investimento')) { score += 6; fatores.push({ peso: 6, motivo: 'Rendimentos de investimentos (precisam ser declarados)' }); }
+  if (classified.some(t => t.flag === 'Aluguel'))       { score += 5; fatores.push({ peso: 5, motivo: 'Recebimento de aluguel (precisa de carnê-leão)' }); }
+
+  // Desconto por formalização alta — conta claramente CLT com IHH concentrado
+  if (tipoConcentracao === 'concentrado' && perfilRenda === 'estavel' && formalTotal > totalCredits * 0.7) {
+    const desconto = Math.min(15, Math.round((formalTotal / totalCredits) * 15));
+    score = Math.max(0, score - desconto);
+    fatores.push({ peso: -desconto, motivo: `Desconto: ${Math.round(formalTotal/totalCredits*100)}% dos créditos são renda formal identificada` });
+  }
 
   score = Math.min(100, Math.max(0, Math.round(score)));
 
@@ -3008,11 +3171,15 @@ function eAnalyzeSingle(txns, bank) {
     anomalias, mediaHistorica, pico,
     indiceEspecie: especieRatio,
     indiceConsumo: totalCredits > 0 ? totalDebits / totalCredits : 0,
+    // novos indicadores v3
+    ihh, nOrigens, tipoConcentracao,
+    cv, perfilRenda,
+    rendaImplicitaRatio, rendaImplicitaSuspeita,
   };
 }
 
 // ── Consolidação multi-extrato com explicação causal ──────────
-function eConsolidate(results) {
+function eConsolidate(results, rendaAnual=0) {
   const allC = results.flatMap(r => r.classified);
   const credits   = allC.filter(t => t.value > 0);
   const debits    = allC.filter(t => t.value < 0);
@@ -3242,8 +3409,30 @@ function eRenderFileList(){
 function eUpdateActionBar(){
   const ready=eFiles.filter(f=>f.status==='ok').length;
   const ab=document.getElementById('actBar');
-  if(ready>0){ab.style.display='flex';document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;document.getElementById('btnGo').classList.add('on');}
-  else document.getElementById('btnGo').classList.remove('on');
+  const rb=document.getElementById('rendaBlock');
+  if(ready>0){
+    ab.style.display='flex';
+    document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;
+    document.getElementById('btnGo').classList.add('on');
+    if(rb) rb.style.display='block';
+  } else {
+    document.getElementById('btnGo').classList.remove('on');
+    if(rb) rb.style.display='none';
+  }
+}
+
+function eFormatRenda(input){
+  let raw=input.value.replace(/\D/g,'');
+  if(raw.length===0){input.value='';const h=document.getElementById('rendaHint');if(h)h.style.display='none';return;}
+  const h=document.getElementById('rendaHint');if(h)h.style.display='block';
+  const num=parseInt(raw,10)/100;
+  input.value=num.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function eGetRendaDeclarada(){
+  const el=document.getElementById('rendaDeclarada');
+  if(!el||!el.value.trim())return 0;
+  return parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;
 }
 function eShowErr(msg){const b=document.getElementById('errExt');b.textContent=msg;b.classList.toggle('show',!!msg);}
 function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=pct+'%';document.getElementById('actMsg').textContent=msg;}
@@ -3329,7 +3518,8 @@ async function eRunAll(){
   if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
   eSetProgress(95,'Consolidando...');
   await new Promise(r=>setTimeout(r,300));
-  const consolidated=eConsolidate(results);
+  const rendaAnual=eGetRendaDeclarada();
+  const consolidated=eConsolidate(results,rendaAnual);
   eAllTxns=consolidated.all;
   eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
 
@@ -3357,8 +3547,12 @@ async function eRunAll(){
 }
 
 function eUnlockResult(){
-  document.getElementById('paywallBlock').style.display='none';
-  document.getElementById('realResultBlock').style.display='block';
+  const pw=document.getElementById('paywallBlock');
+  const rr=document.getElementById('realResultBlock');
+  if(!pw||!rr){console.warn('[GuardiaoFiscal] eUnlockResult: DOM not ready');return;}
+  pw.style.display='none';
+  rr.style.display='block';
+  track('paywall_desbloqueado',{score:_eConsolidated?.score??null});
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
   let emoji,level,color;
@@ -3375,15 +3569,19 @@ function eUnlockResult(){
   document.getElementById('pBarFill').style.background=color;
   setTimeout(()=>{document.getElementById('pBarFill').style.width=c.score+'%';},200);
 
-  // Índices do motor v2
+  // Índices do motor v3
   const icConsumo=Math.round((c.indiceConsumo||0)*100);
   const icEspecie=Math.round((c.indiceEspecie||0)*100);
   const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
+  const perfilLabel=c.perfilRenda==='estavel'?'CLT/Formal':c.perfilRenda==='variavel'?'Variável':c.perfilRenda==='irregular'?'Irregular':'—';
+  const concentLabel=c.tipoConcentracao==='concentrado'?'1 pagador':c.tipoConcentracao==='moderado'?'Moderado':'Pulverizado';
   document.getElementById('pStatsGrid').innerHTML=`
     <div class="p-stat"><div class="p-sl">Total créditos</div><div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div><div class="p-sn">${c.creditCount} entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Pix (% das entradas)</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${pixPct}% das entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Pix recebidos</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${pixPct}% das entradas</div></div>
     <div class="p-stat"><div class="p-sl">Índice de consumo</div><div class="p-sv" style="color:${icConsumo>=120?'var(--red)':icConsumo>=90?'var(--yellow)':'var(--green)'}">${icConsumo}%</div><div class="p-sn">saídas/entradas</div></div>
     <div class="p-stat"><div class="p-sl">Espécie</div><div class="p-sv" style="color:${icEspecie>=20?'var(--red)':icEspecie>=10?'var(--yellow)':'var(--green)'}">${icEspecie}%</div><div class="p-sn">das entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Perfil de renda</div><div class="p-sv" style="color:${c.perfilRenda==='irregular'?'var(--red)':c.perfilRenda==='estavel'?'var(--green)':'var(--yellow)'};font-size:15px">${perfilLabel}</div><div class="p-sn">padrão mensal</div></div>
+    <div class="p-stat"><div class="p-sl">Origens (IHH)</div><div class="p-sv" style="color:${c.tipoConcentracao==='pulverizado'?'var(--red)':c.tipoConcentracao==='moderado'?'var(--yellow)':'var(--green)'};font-size:15px">${concentLabel}</div><div class="p-sn">${c.nOrigens||'—'} distintas</div></div>
     <div class="p-stat"><div class="p-sl">Suspeitos</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div><div class="p-sn">alto risco</div></div>
     <div class="p-stat"><div class="p-sl">Padrões recorrentes</div><div class="p-sv" style="color:${c.recorrentes>3?'var(--yellow)':'var(--text)'}">${c.recorrentes}</div><div class="p-sn">detectados</div></div>`;
 
@@ -3433,20 +3631,240 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
   const dbgHd=document.getElementById('pDbgHd');
   if(dbgHd){dbgHd.style.display='flex';document.getElementById('pDbgBd').style.display='';}
 }
+// ── Exportação de Relatório PDF Profissional v2 ───────────────
+async function eExportPDF(){
+  const btn=document.getElementById('btnExportPDF');
+  if(!_eConsolidated||!_eSources)return;
+  if(typeof window.jspdf==='undefined'&&typeof jsPDF==='undefined'){
+    alert('Biblioteca PDF carregando. Aguarde e tente novamente.');return;
+  }
+  track('pdf_exportado',{score:_eConsolidated?.score??0,n_alertas:_eConsolidated?.alerts?.length??0});
+  btn.innerHTML='⏳ Gerando PDF...';btn.disabled=true;
+  try{
+    // jsPDF CDN expõe window.jspdf.jsPDF (UMD) — fallback para window.jsPDF (legado)
+    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if(!JsPDF){alert('Biblioteca PDF não carregou. Recarregue a página.');return;}
+    const doc=new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210,M=16,CW=W-M*2;
+    let y=M;
+    const now=new Date();
+
+    // ── Paleta de cores ──
+    const C={
+      bg:[11,17,32],surface:[17,24,39],surface2:[24,33,47],
+      border:[30,45,64],accent:[56,189,248],
+      green:[0,217,110],yellow:[245,166,35],red:[240,79,96],orange:[249,115,22],
+      text:[248,250,252],muted:[100,116,139],muted2:[148,163,184],
+    };
+
+    const checkPage=(h=20)=>{if(y+h>282){doc.addPage();y=M+2;}};
+    const rule=()=>{doc.setDrawColor(...C.border);doc.setLineWidth(0.25);doc.line(M,y,W-M,y);y+=4;};
+    const label=(t,color=C.muted)=>{doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...color);doc.text(t.toUpperCase(),M,y);y+=4;};
+    const scoreColor=(s)=>s<=20?C.green:s<=45?C.yellow:s<=70?C.orange:C.red;
+    const scoreLabel=(s)=>s<=20?'BAIXO RISCO':s<=45?'ATENÇÃO':s<=70?'RISCO ELEVADO':'RISCO CRÍTICO';
+
+    // ══════════════════════════════════════════════════════════
+    // CABEÇALHO
+    // ══════════════════════════════════════════════════════════
+    doc.setFillColor(...C.bg);doc.rect(0,0,W,36,'F');
+    // Linha accent
+    doc.setFillColor(...C.accent);doc.rect(0,34,W,1.2,'F');
+    // Logo textual
+    doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(...C.accent);
+    doc.text('GUARDIÃO FISCAL',M,20);
+    // Subtítulo
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted2);
+    doc.text('Relatório de Coerência Financeira — Motor v3',M,27);
+    // Data e hora alinhados à direita
+    doc.setFontSize(7.5);doc.setTextColor(...C.muted);
+    doc.text(`Emitido em ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,W-M,20,{align:'right'});
+    doc.text('oguardiaofiscal.com.br',W-M,27,{align:'right'});
+    y=42;
+
+    const c=_eConsolidated,sources=_eSources;
+    const sColor=scoreColor(c.score);
+    const sLabel=scoreLabel(c.score);
+
+    // ══════════════════════════════════════════════════════════
+    // SCORE PRINCIPAL — card destacado
+    // ══════════════════════════════════════════════════════════
+    doc.setFillColor(...C.surface);doc.roundedRect(M,y,CW,32,3,3,'F');
+    doc.setDrawColor(...sColor);doc.setLineWidth(0.6);doc.roundedRect(M,y,CW,32,3,3,'S');
+    // Score numérico grande
+    doc.setFontSize(34);doc.setFont('helvetica','bold');doc.setTextColor(...sColor);
+    doc.text(`${c.score}%`,M+10,y+22);
+    // Label e descrição
+    doc.setFontSize(15);doc.setFont('helvetica','bold');doc.setTextColor(...sColor);
+    doc.text(sLabel,M+42,y+13);
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted2);
+    doc.text(`${sources.length} extrato(s) · ${c.totalTxns} transações analisadas · Motor fiscal v3`,M+42,y+20);
+    // Barra de progresso
+    doc.setFillColor(...C.surface2);doc.roundedRect(M+42,y+24,CW-52,3.5,1.5,1.5,'F');
+    const barW=Math.max(3,(CW-52)*c.score/100);
+    doc.setFillColor(...sColor);doc.roundedRect(M+42,y+24,barW,3.5,1.5,1.5,'F');
+    // Perfil de renda (canto direito)
+    const perfilLbl=c.perfilRenda==='estavel'?'FORMAL/CLT':c.perfilRenda==='variavel'?'VARIÁVEL':'IRREGULAR';
+    doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...C.muted);
+    doc.text('PERFIL',W-M-18,y+8,{align:'right'});
+    doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+    doc.setTextColor(c.perfilRenda==='estavel'?...C.green:c.perfilRenda==='variavel'?...C.yellow:...C.red);
+    doc.text(perfilLbl,W-M-3,y+14,{align:'right'});
+    y+=38;
+
+    // Disclaimer indicativo
+    doc.setFillColor(24,33,47);doc.roundedRect(M,y,CW,9,2,2,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','italic');doc.setTextColor(...C.muted);
+    doc.text('⚖ Análise indicativa gerada automaticamente. Não substitui parecer jurídico ou contábil. Art. 20 LGPD — solicite revisão pelo e-mail de contato.',M+4,y+5.5);
+    y+=14;
+
+    // ══════════════════════════════════════════════════════════
+    // INDICADORES FINANCEIROS — tabela zebra
+    // ══════════════════════════════════════════════════════════
+    checkPage(60);
+    label('INDICADORES FINANCEIROS');rule();
+
+    const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
+    const icConsumo=Math.round((c.indiceConsumo||0)*100);
+    const icEspecie=Math.round((c.indiceEspecie||0)*100);
+    const concentLabel=c.tipoConcentracao==='concentrado'?`Concentrado (1 pagador)`:c.tipoConcentracao==='moderado'?'Moderado':'Pulverizado';
+
+    const indicadores=[
+      ['Total de créditos',fmtBRL(c.totalCredits),C.green],
+      ['Total de débitos',fmtBRL(c.totalDebits),C.muted2],
+      ['Pix recebidos',`${fmtBRL(c.pixTotal)} (${pixPct}%)`,pixPct>=50?C.red:pixPct>=30?C.yellow:C.muted2],
+      ['Espécie / saques',`${fmtBRL(c.especieTotal||0)} (${icEspecie}%)`,icEspecie>=20?C.red:icEspecie>=10?C.yellow:C.muted2],
+      ['Índice de consumo',`${icConsumo}%`,icConsumo>=120?C.red:icConsumo>=90?C.yellow:C.green],
+      ['Transações suspeitas',String(c.suspCount),c.suspCount>0?C.red:C.green],
+      ['Padrões recorrentes',String(c.recorrentes),c.recorrentes>3?C.yellow:C.muted2],
+      ['Origens distintas (IHH)',concentLabel,c.tipoConcentracao==='pulverizado'?C.red:c.tipoConcentracao==='moderado'?C.yellow:C.green],
+      ...(c.rendaAnual>0?[
+        ['Renda declarada (IR)',fmtBRL(c.rendaAnual),C.muted2],
+        ['Índice compatibilidade',`${Math.round(c.totalCredits/c.rendaAnual*100)}%`,c.totalCredits/c.rendaAnual>1.3?C.red:c.totalCredits/c.rendaAnual>1.05?C.yellow:C.green],
+      ]:[]),
+    ];
+
+    const rowH=8,colA=M,colB=W-M-46,colW=CW;
+    indicadores.forEach((row,i)=>{
+      checkPage(rowH+2);
+      if(i%2===0){doc.setFillColor(...C.surface);doc.rect(M,y,CW,rowH,'F');}
+      else{doc.setFillColor(...C.surface2);doc.rect(M,y,CW,rowH,'F');}
+      doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted2);
+      doc.text(row[0],colA+4,y+5.5);
+      doc.setFont('helvetica','bold');doc.setTextColor(...row[2]);
+      doc.text(row[1],W-M-4,y+5.5,{align:'right'});
+      y+=rowH;
+    });
+    y+=6;
+
+    // ══════════════════════════════════════════════════════════
+    // EXTRATOS ANALISADOS
+    // ══════════════════════════════════════════════════════════
+    checkPage(30);
+    label('EXTRATOS ANALISADOS POR BANCO');rule();
+
+    sources.forEach((r,i)=>{
+      checkPage(18);
+      const sc=scoreColor(r.score);
+      doc.setFillColor(...C.surface);doc.roundedRect(M,y,CW,14,2,2,'F');
+      // Dot colorido
+      // Converte hex p/ RGB com segurança
+      const hexRgb=(hex)=>{const m=hex.replace('#','').match(/.{2}/g);return m?m.map(x=>parseInt(x,16)):[56,189,248];};
+      doc.setFillColor(...hexRgb(SRC_COLORS[i%SRC_COLORS.length]));
+      doc.circle(M+6,y+7,2.5,'F');
+      // Banco
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...C.text);
+      doc.text(r.bank,M+12,y+6);
+      doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted2);
+      doc.text(`${r.totalTxns} transações · ${r.months} mês(es) · ${fmtBRL(r.totalCredits)}`,M+12,y+11);
+      // Score à direita
+      doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...sc);
+      doc.text(`${r.score}%`,W-M-4,y+8,{align:'right'});
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted);
+      doc.text(scoreLabel(r.score),W-M-4,y+12.5,{align:'right'});
+      y+=17;
+    });
+    y+=2;
+
+    // ══════════════════════════════════════════════════════════
+    // ALERTAS FISCAIS
+    // ══════════════════════════════════════════════════════════
+    checkPage(30);
+    label('ALERTAS E DIAGNÓSTICO FISCAL');rule();
+
+    c.alerts.forEach(a=>{
+      const lines=doc.splitTextToSize(a.text||'',CW-10);
+      const boxH=8+lines.length*4.5+5;
+      checkPage(boxH+4);
+      const fg=a.type==='red'?C.red:a.type==='yellow'?C.yellow:a.type==='green'?C.green:C.accent;
+      // Background sutil
+      const bgAlpha=[fg[0],fg[1],fg[2]];
+      doc.setFillColor(Math.min(255,C.surface[0]+bgAlpha[0]*0.05),Math.min(255,C.surface[1]+bgAlpha[1]*0.03),Math.min(255,C.surface[2]+bgAlpha[2]*0.03));
+      doc.roundedRect(M,y,CW,boxH,2,2,'F');
+      // Borda lateral colorida
+      doc.setFillColor(...fg);doc.roundedRect(M,y,2.5,boxH,1,1,'F');
+      // Título
+      doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(...fg);
+      doc.text(`${a.icon} ${a.title||''}`.substring(0,72),M+6,y+6.5);
+      // Texto
+      doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted2);
+      doc.text(lines,M+6,y+12);
+      y+=boxH+3;
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // RODAPÉ EM TODAS AS PÁGINAS
+    // ══════════════════════════════════════════════════════════
+    const pages=doc.internal.getNumberOfPages();
+    for(let p=1;p<=pages;p++){
+      doc.setPage(p);
+      doc.setFillColor(...C.bg);doc.rect(0,286,W,12,'F');
+      doc.setDrawColor(...C.border);doc.setLineWidth(0.3);doc.line(M,286,W-M,286);
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted);
+      doc.text('Guardião Fiscal · oguardiaofiscal.com.br · Dados processados localmente (LGPD) — não armazenados em servidores',M,291.5);
+      doc.text(`Pág. ${p}/${pages}`,W-M,291.5,{align:'right'});
+    }
+
+    doc.save(`guardiao-fiscal-${now.toISOString().slice(0,10)}.pdf`);
+  }catch(err){
+    console.error('[GuardiaoFiscal PDF]',err);
+    alert('Erro ao gerar PDF: '+err.message);
+  }finally{
+    btn.innerHTML='<span>📄</span> Exportar Relatório PDF';btn.disabled=false;
+  }
+}
+
 function eResetAll(){
+  // Estado de dados
   eFiles=[];eAllTxns=[];eActiveBankTab='all';
+  _eConsolidated=null;_eSources=null;
+  // UI — upload
   document.getElementById('fileList').innerHTML='';
   document.getElementById('limitBar').style.display='none';
   document.getElementById('actBar').style.display='none';
-  document.getElementById('extStep3').style.display='none';
-  document.getElementById('pFillExt').style.width='0%';
   document.getElementById('dzIco').textContent='📂';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
-  document.getElementById('paywallBlock').style.display='block';
-  document.getElementById('realResultBlock').style.display='none';
-  document.getElementById('extStep2').style.opacity='0.45';
-  document.getElementById('extStep2').style.pointerEvents='none';
+  document.getElementById('pFillExt').style.width='0%';
   eShowErr('');
+  // Renda declarada
+  const rd=document.getElementById('rendaDeclarada');if(rd)rd.value='';
+  const rb=document.getElementById('rendaBlock');if(rb)rb.style.display='none';
+  const rh=document.getElementById('rendaHint');if(rh)rh.style.display='none';
+  // Step 2 — volta ao estado bloqueado (só se não estiver logado)
+  const s2=document.getElementById('extStep2');
+  if(s2){
+    s2.style.opacity=_currentUser?'1':'0.45';
+    s2.style.pointerEvents=_currentUser?'auto':'none';
+  }
+  // Step 3 — esconde
+  const s3=document.getElementById('extStep3');if(s3)s3.style.display='none';
+  // Step nums
+  const s2num=document.getElementById('s2num');
+  if(s2num){s2num.textContent='2';s2num.style.background='';s2num.style.color='';}
+  const s3num=document.getElementById('s3num');
+  if(s3num){s3num.classList.add('locked');}
+  // Resultado — volta ao paywall
+  const pw=document.getElementById('paywallBlock');if(pw)pw.style.display='block';
+  const rr=document.getElementById('realResultBlock');if(rr)rr.style.display='none';
 }
 
 // extrato step 1 — handled by Supabase auth above
