@@ -2650,6 +2650,8 @@ try {
     if (session) setUser(session.user);
     sb.auth.onAuthStateChange((_event, session) => {
       setUser(session ? session.user : null);
+      // Fecha qualquer overlay de auth aberto ao logar/deslogar
+      if (session) closeAllOverlays();
     });
     handleMpReturn();
   } catch(e) {
@@ -2693,11 +2695,15 @@ function setUser(user) {
       da2.appendChild(drawerName);
       da2.appendChild(drawerLogout);
     }
-    // Mostra nome só em telas maiores
+    // Mostra nome só em telas maiores — listener único (sem leak)
     if (window.innerWidth >= 480) nameEl.style.display = 'block';
-    window.addEventListener('resize', () => {
-      nameEl.style.display = window.innerWidth >= 480 ? 'block' : 'none';
-    }, { passive: true });
+    if (!window._navResizeListenerSet) {
+      window._navResizeListenerSet = true;
+      window.addEventListener('resize', () => {
+        const el = document.getElementById('navUserName');
+        if (el) el.style.display = window.innerWidth >= 480 ? 'block' : 'none';
+      }, { passive: true });
+    }
     autoSkipExtStep1(user.email);
   } else {
     area.innerHTML = '';
@@ -2794,6 +2800,8 @@ async function doCadastro() {
   if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
   ok.textContent = '✓ Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
   ok.style.display = 'block';
+  // Fecha o overlay após 2s para o usuário ler a mensagem
+  setTimeout(() => closeLoginDirect(), 2000);
 }
 
 // ===== EXTRATO STEP 1 AUTH =====
