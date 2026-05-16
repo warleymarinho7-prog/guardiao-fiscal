@@ -1483,10 +1483,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <button class="nav-link" onclick="showPage('home')">Simulador</button>
     <button class="nav-link" onclick="showPage('planos')">Planos</button>
   </div>
-  <!-- Auth area sempre visível -->
-  <div id="navAuthArea" style="display:flex;align-items:center;gap:8px">
-    <button class="nav-btn-login" onclick="openLogin()">Entrar</button>
-  </div>
+  <!-- Auth area sempre visível — populada pelo JS (setUser) -->
+  <div id="navAuthArea" style="display:flex;align-items:center;gap:8px"></div>
   <!-- Hamburger mobile (só aparece em <768px) -->
   <button class="nav-hamburger" id="navHamburger" onclick="toggleDrawer()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -1494,7 +1492,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 </nav>
 
 <!-- Mobile drawer -->
-<div class="nav-drawer" id="navDrawer">
+<div class="nav-drawer" id="navDrawer" style="display:none">
   <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
   <div class="nav-drawer-panel">
     <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()">📋 Simulador</button>
@@ -2232,11 +2230,14 @@ function toggleDrawer() {
   const hamburger = document.getElementById('navHamburger');
   const isOpen = drawer.classList.toggle('open');
   hamburger.classList.toggle('open', isOpen);
+  drawer.style.display = isOpen ? 'block' : 'none';
   document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 function closeDrawer() {
-  document.getElementById('navDrawer')?.classList.remove('open');
-  document.getElementById('navHamburger')?.classList.remove('open');
+  const drawer = document.getElementById('navDrawer');
+  const hamburger = document.getElementById('navHamburger');
+  if (drawer) { drawer.classList.remove('open'); drawer.style.display = 'none'; }
+  if (hamburger) hamburger.classList.remove('open');
   document.body.style.overflow = '';
 }
 // Fechar drawer e modais com ESC
@@ -2641,6 +2642,9 @@ try {
 } catch(e) {
   console.warn('[GuardiaoFiscal] Supabase nao disponivel:', e.message);
 }
+
+// Popula navAuthArea imediatamente (sem esperar Supabase) para evitar flash de UI vazia
+setUser(null);
 
 // Inicializa sessão ao carregar
 (async () => {
