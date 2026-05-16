@@ -1182,6 +1182,22 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 }
 .split-cta-primary:hover { background: #1d4ed8; box-shadow: 0 8px 28px rgba(59,130,246,0.3); transform: translateY(-1px); }
 
+.split-cta-quiz {
+  width: 100%;
+  padding: 13px 24px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: Manrope, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.split-cta-quiz:hover { background: var(--surface2); border-color: var(--green); color: var(--green); }
+
 .split-cta-sec {
   font-size: 12px;
   color: var(--muted);
@@ -1523,8 +1539,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <span class="badge">✅ Grátis para começar</span>
       </div>
       <div class="split-cta">
-        <button class="split-cta-primary" onclick="switchSimTab('extrato');setTimeout(()=>{const el=document.getElementById('extStep2')||document.querySelector('.sim-wrap');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},100)">
+        <button class="split-cta-primary" onclick="showPage('planos');window.scrollTo({top:0,behavior:'smooth'})">
           Analisar meu extrato →
+        </button>
+        <button class="split-cta-quiz" onclick="showPage('home');setTimeout(()=>{switchSimTab('perguntas');document.querySelector('.sim-wrap')?.scrollIntoView({behavior:'smooth',block:'start'})},120)">
+          📋 Fazer quiz gratuito →
         </button>
         <div class="split-cta-sec">🔒 Dados processados localmente · Nenhum arquivo enviado a servidores</div>
       </div>
@@ -1978,7 +1997,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF exportável</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
         </div>
-        <button class="btn-plan btn-plan-free" onclick="showPage('home');setTimeout(()=>document.querySelector('.sim-wrap')?.scrollIntoView({behavior:'smooth'}),100)">Usar grátis →</button>
+        <button class="btn-plan btn-plan-free" onclick="showPage('home');setTimeout(()=>{switchSimTab('perguntas');document.querySelector('.sim-wrap')?.scrollIntoView({behavior:'smooth',block:'start'})},120)">Usar grátis →</button>
       </div>
 
       <!-- Avulso -->
