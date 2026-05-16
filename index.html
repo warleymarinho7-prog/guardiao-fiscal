@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob: 'self'; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
+<title>Guardião Fiscal — Monitor fiscal preventivo para pessoa física</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -1094,11 +1094,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .sim-wrap { max-width: 680px; }
   .plans-page { max-width: 1000px; }
 }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 .page.active { animation: fadeUp 0.4s ease both; }
 .q-slide { animation: fadeUp 0.3s ease both; }
 
@@ -1106,6 +1101,16 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .disclaimer {
   text-align:center; font-size:11px; color:var(--muted);
   margin-top:20px; line-height:1.7; padding:0 8px;
+}
+
+/* motor grid — mobile first */
+.motor-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+@media(max-width:380px){
+  .motor-grid { grid-template-columns:1fr; }
 }
 </style>
 </head>
@@ -1138,13 +1143,30 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <!-- ===== HOME PAGE ===== -->
 <div class="page active" id="page-home">
   <div class="hero">
-    <div class="hero-tag">🛡️ Proteção fiscal preventiva</div>
-    <h1>Sua movimentação bancária<br><em>está compatível com o IR?</em></h1>
-    <p>O Guardião Fiscal analisa seus extratos com os mesmos critérios do e-Financeira e detecta inconsistências antes que a Receita Federal as encontre.</p>
+    <div class="hero-tag">🛡️ Monitor fiscal preventivo · IR 2026</div>
+    <h1>Sua movimentação bancária<br><em>bate com o que você declarou?</em></h1>
+    <p>O Guardião Fiscal cruza seus extratos com os mesmos critérios usados pela Receita Federal — e mostra onde há inconsistências antes da declaração ser entregue.</p>
     <div class="hero-badges">
-      <span class="badge">🔒 Dados 100% no seu dispositivo</span>
-      <span class="badge">⚡ Resultado em 2 minutos</span>
+      <span class="badge">🔒 Arquivos processados localmente</span>
+      <span class="badge">📊 Score com explicação causal</span>
       <span class="badge">✅ Gratuito para começar</span>
+    </div>
+    <!-- Prova social — números reais ou estimativas conservadoras -->
+    <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px">
+      <div style="text-align:center">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:-1px">6 fatores</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">analisados no extrato</div>
+      </div>
+      <div style="width:1px;background:var(--border);height:36px;align-self:center"></div>
+      <div style="text-align:center">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:-1px">25 bancos</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">detectados automaticamente</div>
+      </div>
+      <div style="width:1px;background:var(--border);height:36px;align-self:center"></div>
+      <div style="text-align:center">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">local — dados não saem do dispositivo</div>
+      </div>
     </div>
   </div>
 
@@ -1300,32 +1322,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
           </div>
           <div class="file-list" id="fileList"></div>
-
-          <!-- RENDA DECLARADA — ativa índice de compatibilidade -->
-          <div id="rendaBlock" style="display:none;margin-top:14px;background:rgba(56,189,248,0.04);border:1px solid rgba(56,189,248,0.15);border-radius:12px;padding:14px 16px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-              <span style="font-size:15px">📋</span>
-              <div>
-                <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--text)">Renda declarada no IR <span style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-left:5px">Opcional</span></div>
-                <div style="font-size:11px;color:var(--muted2);margin-top:1px">Ativa o Índice de Compatibilidade — movimentação real vs declarada</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center">
-              <div style="position:relative;flex:1">
-                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted2);font-family:'DM Mono',monospace;pointer-events:none">R$</span>
-                <input id="rendaDeclarada" type="text" inputmode="numeric" placeholder="0,00" autocomplete="off"
-                  style="width:100%;padding:11px 12px 11px 36px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;outline:none;transition:all 0.2s"
-                  oninput="eFormatRenda(this)"
-                  onfocus="this.style.borderColor='rgba(56,189,248,0.45)';this.style.boxShadow='0 0 0 3px rgba(56,189,248,0.1)'"
-                  onblur="this.style.borderColor='var(--border2)';this.style.boxShadow='none'">
-              </div>
-              <div style="font-size:11px;color:var(--muted);white-space:nowrap">/ano</div>
-            </div>
-            <div id="rendaHint" style="display:none;margin-top:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-              💡 Inclua salário, autônomo, MEI, aluguel e investimentos do ano.
-            </div>
-          </div>
-
           <div class="err-ext" id="errExt"></div>
         </div>
         <div class="act-bar" id="actBar" style="display:none">
@@ -1419,32 +1415,64 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     </div>
 
-    <!-- LGPD + METODOLOGIA -->
-    <div style="max-width:540px;margin:16px auto 0;padding:0 16px">
-      <div style="border-top:1px solid var(--border);padding-top:20px;display:flex;flex-direction:column;gap:12px">
+    <!-- COMO FUNCIONA — visualização do motor -->
+    <div style="max-width:560px;margin:32px auto 0;padding:0 16px">
 
-        <!-- metodologia -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.75">
-            O Guardião Fiscal funciona como um <strong style="color:var(--text)">antivírus fiscal pessoal</strong> — monitora continuamente se sua movimentação bancária é compatível com o que foi declarado à Receita Federal. A análise usa os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas. Identificamos os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
+      <!-- Seção: como o motor analisa -->
+      <div style="border-top:1px solid var(--border);padding-top:28px;margin-bottom:20px">
+        <div style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:6px">// como o motor analisa</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;letter-spacing:-0.5px;color:var(--text);text-align:center;margin-bottom:20px">6 fatores que a Receita Federal usa para identificar inconsistências</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">📡</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Pix via e-Financeira</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.55">Todos os bancos reportam Pix acima de R$5k/mês à Receita automaticamente</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">🔄</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Recorrência comercial</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.55">Padrões de recebimento regulares sem nota fiscal indicam atividade não declarada</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">💵</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Depósito em espécie</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.55">Saques e depósitos em dinheiro acima de limites definidos são monitorados</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">📈</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Anomalia temporal</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.55">Picos de movimentação fora do padrão histórico ativam verificação automática</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">⚖️</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Compatibilidade com IR</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.55">Créditos totais vs renda declarada — diferença acima de 10% exige justificativa</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:18px;margin-bottom:6px">🏦</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Concentração de origens</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.55">Muitos pagadores distintos com ticket regular = padrão de atividade comercial</div>
           </div>
         </div>
+      </div>
 
-        <!-- LGPD -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.7">
-            <strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</strong>.
+      <!-- Privacidade — diferencial técnico -->
+      <div style="background:linear-gradient(135deg,rgba(56,189,248,0.04),rgba(16,185,129,0.03));border:1px solid rgba(56,189,248,0.12);border-radius:14px;padding:18px 20px;margin-bottom:16px">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:24px;flex-shrink:0">🔒</div>
+          <div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px">Seus arquivos nunca saem do seu navegador</div>
+            <div style="font-size:12px;color:var(--muted2);line-height:1.7">O processamento acontece 100% localmente no seu dispositivo. Nenhum extrato, CPF ou dado financeiro é enviado para servidores externos. Apenas e-mail de cadastro e informações de plano são armazenados — em conformidade com a <strong style="color:var(--text)">LGPD (Lei 13.709/2018)</strong>.</div>
           </div>
         </div>
+      </div>
 
-        <!-- aviso legal -->
-        <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
-          oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
-          Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
-          <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
-        </div>
+      <!-- Disclaimer legal — preciso e sem alarme -->
+      <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:12px">
+        oguardiaofiscal.com.br · Ferramenta de triagem fiscal preventiva<br>
+        Os resultados são indicativos — baseados em padrões fiscais públicos conhecidos.<br>
+        <strong>Não substituem análise de contador ou advogado tributarista.</strong>
       </div>
     </div>
   </div>
@@ -1453,8 +1481,27 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <!-- ===== PLANOS PAGE ===== -->
 <div class="page" id="page-planos">
   <div class="plans-page">
+    <!-- Credibilidade no topo da página de planos -->
+    <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:36px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:16px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)">
+        <span style="font-size:16px">🔒</span>
+        <span>Arquivos processados <strong style="color:var(--text)">100% localmente</strong></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)">
+        <span style="font-size:16px">🏦</span>
+        <span><strong style="color:var(--text)">25 bancos</strong> detectados automaticamente</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)">
+        <span style="font-size:16px">⚖️</span>
+        <span>Análise <strong style="color:var(--text)">indicativa</strong> — não substitui contador</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)">
+        <span style="font-size:16px">📧</span>
+        <span>contato@oguardiaofiscal.com.br</span>
+      </div>
+    </div>
     <div class="page-title">Proteção fiscal contínua</div>
-    <div class="page-sub">Identifique riscos antes da Receita. Monitore o ano inteiro. Declare com segurança.</div>
+    <div class="page-sub">Identifique inconsistências antes da Receita. Monitore o ano inteiro. Chegue ao contador mais preparado.</div>
 
     <div class="plans-grid">
 
@@ -2091,23 +2138,6 @@ const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
-// ── Tracking stub seguro — nunca quebra a aplicação ──────────
-// Substitua por implementação completa quando tabela 'eventos' estiver criada
-function track(evento, props) {
-  try {
-    if (!sb || typeof sb.from !== 'function') return;
-    const payload = {
-      sessao_id: _sessaoId,
-      user_id:   _currentUser?.id ?? null,
-      evento,
-      propriedades: { ...props, ts: new Date().toISOString() }
-    };
-    sb.from('eventos').insert([payload]).then(() => {}).catch(() => {});
-  } catch(e) { /* silencioso — tracking nunca quebra o produto */ }
-}
-// ID de sessão único por visita
-const _sessaoId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-
 let _currentUser = null;
 
 // Inicializa sessão ao carregar
@@ -2547,10 +2577,10 @@ function showResult() {
     alertsData.push({ cls:'alert-green', icon:'💡', title:'Ainda dá tempo de regularizar', text:'Uma retificação preventiva custa muito menos do que uma autuação. Após notificado, multas e juros se aplicam automaticamente.' });
   } else {
     level = 'Risco elevado'; color = '#f04f60'; emoji = '🔴';
-    desc = 'Seu perfil apresenta inconsistências que a Receita Federal pode estar cruzando agora.';
+    desc = 'Seu perfil apresenta pontos que merecem revisão antes da entrega ou retificação da declaração.';
     if (answers[2]?.risk >= 4) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Possível omissão de renda', text:'É o motivo número 1 de malha fina no Brasil. A Receita recebe os dados bancários diretamente dos bancos — a declaração precisa bater exatamente.' });
     if (answers[1]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Pix informais recorrentes', text:'Recebimentos regulares sem nota fiscal são detectados automaticamente pelo e-Financeira. Não precisa de denúncia para a Receita identificar.' });
-    if (answers[3]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Incompatibilidade patrimonial', text:'Compras ou investimentos acima da renda declarada acionam o IRPF de ofício — a Receita lança o imposto automaticamente sobre a diferença.' });
+    if (answers[3]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'⚠️', title:'Possível incompatibilidade patrimonial', text:'Compras ou investimentos acima da renda declarada precisam de comprovante de origem — herança, reservas anteriores ou financiamento. Sem isso, a Receita pode questionar na malha fina.' });
     if (answers[5]?.risk >= 2) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Dependente declarado por mais de uma pessoa', text:'Quando duas pessoas declaram o mesmo dependente, o sistema retém as duas declarações automaticamente para revisão.' });
     if (!alertsData.length) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Múltiplos fatores de risco simultâneos', text:'Seu perfil ativa vários critérios de atenção da Receita ao mesmo tempo. Risco real de notificação.' });
     alertsData.push({ cls:'alert-yellow', icon:'💡', title:'Ação urgente recomendada', text:'É possível retificar antes de qualquer notificação. Após notificado, multas e juros se aplicam automaticamente. Procure um contador agora.' });
@@ -2582,12 +2612,12 @@ function showResult() {
   if (bloqueados.length > 0) {
     html += `
     <div class="alert-paywall">
-      <div class="apw-lock">🔒</div>
-      <div class="apw-title">+${bloqueados.length} alerta${bloqueados.length > 1 ? 's' : ''} identificado${bloqueados.length > 1 ? 's' : ''}</div>
-      <div class="apw-desc">Faça upload do seu extrato bancário para ver a análise completa com os valores reais da sua conta.</div>
-      <button class="apw-btn" onclick="showPage('home');setTimeout(()=>{switchSimTab('extrato')},100)">Ver análise completa do extrato →</button>
+      <div class="apw-lock">📊</div>
+      <div class="apw-title">+${bloqueados.length} ponto${bloqueados.length > 1 ? 's' : ''} de atenção identificado${bloqueados.length > 1 ? 's' : ''}</div>
+      <div class="apw-desc">O simulador usa perguntas — o extrato bancário usa seus números reais. A análise por extrato é muito mais precisa e mostra valores exatos.</div>
+      <button class="apw-btn" onclick="showPage('home');setTimeout(()=>{switchSimTab('extrato')},100)">Analisar extrato real — mais preciso →</button>
       <div class="apw-or">ou</div>
-      <button class="apw-btn-sec" onclick="openCheckout('avulso')">Análise avulsa — R$47,90</button>
+      <button class="apw-btn-sec" onclick="openCheckout('avulso')">Análise avulsa com relatório PDF — R$47,90</button>
     </div>`;
   }
 
@@ -3054,7 +3084,7 @@ function eAnalyzeSingle(txns, bank) {
 }
 
 // ── Consolidação multi-extrato com explicação causal ──────────
-function eConsolidate(results, rendaAnual=0) {
+function eConsolidate(results) {
   const allC = results.flatMap(r => r.classified);
   const credits   = allC.filter(t => t.value > 0);
   const debits    = allC.filter(t => t.value < 0);
@@ -3181,30 +3211,6 @@ function eConsolidate(results, rendaAnual=0) {
     text: `Compare os ${credits.length} créditos (${fmtBRL(totalCredits)}) com o total declarado no IR. Qualquer diferença acima de 10% precisa de comprovante de origem.`
   });
 
-  // ── Índice de compatibilidade (só se renda foi informada) ──
-  if (rendaAnual > 0) {
-    const compatRatio = totalCredits / rendaAnual;
-    const excedente = totalCredits - rendaAnual;
-    const compatPct = Math.round(compatRatio * 100);
-    let cType, cIcon, cTitle, cText;
-    if (compatRatio <= 1.05) {
-      cType='green'; cIcon='✅';
-      cTitle=`Compatibilidade OK — ${compatPct}% da renda declarada`;
-      cText=`Sua movimentação (${fmtBRL(totalCredits)}) está dentro do esperado para a renda de ${fmtBRL(rendaAnual)}/ano.`;
-    } else if (compatRatio <= 1.30) {
-      cType='yellow'; cIcon='⚠️';
-      cTitle=`Movimentação ${compatPct}% da renda declarada — atenção`;
-      cText=`Excedente de ${fmtBRL(excedente)} acima do declarado. Tenha comprovantes de origem disponíveis.`;
-      score = Math.min(100, score + 8);
-    } else {
-      cType='red'; cIcon='🚨';
-      cTitle=`Incompatibilidade fiscal: movimentação é ${compatPct}% da renda declarada`;
-      cText=`Excedente de ${fmtBRL(excedente)}. Principal gatilho de malha fina. Declare heranças, doações, vendas de bens ou corrija a renda declarada.`;
-      score = Math.min(100, score + 18);
-    }
-    alerts.unshift({ type: cType, icon: cIcon, title: cTitle, text: cText });
-  }
-
   return {
     score, totalCredits, totalDebits, pixTotal, especieTotal, formalTotal,
     suspCount: suspicious.length, attCount: attention.length,
@@ -3213,13 +3219,6 @@ function eConsolidate(results, rendaAnual=0) {
     indiceEspecie: totalCredits > 0 ? especieTotal / totalCredits : 0,
     recorrentes: totalRecorrentes, comercialOculta: todasComerciais.length,
     alerts, all: allC,
-    // Campos v3 — consolidados dos extratos individuais
-    rendaAnual: rendaAnual || 0,
-    perfilRenda: results[0]?.perfilRenda ?? 'indefinido',
-    tipoConcentracao: results[0]?.tipoConcentracao ?? 'moderado',
-    nOrigens: results.reduce((a, r) => a + (r.nOrigens || 0), 0),
-    ihh: results.length > 0 ? results.reduce((a, r) => a + (r.ihh || 0), 0) / results.length : 0,
-    cv: results.length > 0 ? results.reduce((a, r) => a + (r.cv || 0), 0) / results.length : 0,
   };
 }
 
@@ -3315,30 +3314,8 @@ function eRenderFileList(){
 function eUpdateActionBar(){
   const ready=eFiles.filter(f=>f.status==='ok').length;
   const ab=document.getElementById('actBar');
-  const rb=document.getElementById('rendaBlock');
-  if(ready>0){
-    ab.style.display='flex';
-    document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;
-    document.getElementById('btnGo').classList.add('on');
-    if(rb) rb.style.display='block';
-  } else {
-    document.getElementById('btnGo').classList.remove('on');
-    if(rb) rb.style.display='none';
-  }
-}
-
-function eFormatRenda(input){
-  let raw=input.value.replace(/\D/g,'');
-  if(raw.length===0){input.value='';const h=document.getElementById('rendaHint');if(h)h.style.display='none';return;}
-  const h=document.getElementById('rendaHint');if(h)h.style.display='block';
-  const num=parseInt(raw,10)/100;
-  input.value=num.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-function eGetRendaDeclarada(){
-  const el=document.getElementById('rendaDeclarada');
-  if(!el||!el.value.trim())return 0;
-  return parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;
+  if(ready>0){ab.style.display='flex';document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;document.getElementById('btnGo').classList.add('on');}
+  else document.getElementById('btnGo').classList.remove('on');
 }
 function eShowErr(msg){const b=document.getElementById('errExt');b.textContent=msg;b.classList.toggle('show',!!msg);}
 function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=pct+'%';document.getElementById('actMsg').textContent=msg;}
@@ -3424,8 +3401,7 @@ async function eRunAll(){
   if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
   eSetProgress(95,'Consolidando...');
   await new Promise(r=>setTimeout(r,300));
-  const rendaAnual=eGetRendaDeclarada();
-  const consolidated=eConsolidate(results,rendaAnual);
+  const consolidated=eConsolidate(results);
   eAllTxns=consolidated.all;
   eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
 
@@ -3453,12 +3429,8 @@ async function eRunAll(){
 }
 
 function eUnlockResult(){
-  const pw=document.getElementById('paywallBlock');
-  const rr=document.getElementById('realResultBlock');
-  if(!pw||!rr)return;
-  pw.style.display='none';
-  rr.style.display='block';
-  track('paywall_desbloqueado',{score:_eConsolidated?.score??null});
+  document.getElementById('paywallBlock').style.display='none';
+  document.getElementById('realResultBlock').style.display='block';
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
   let emoji,level,color;
@@ -3475,21 +3447,15 @@ function eUnlockResult(){
   document.getElementById('pBarFill').style.background=color;
   setTimeout(()=>{document.getElementById('pBarFill').style.width=c.score+'%';},200);
 
-  // Índices do motor v3 — com fallbacks seguros
+  // Índices do motor v2
   const icConsumo=Math.round((c.indiceConsumo||0)*100);
   const icEspecie=Math.round((c.indiceEspecie||0)*100);
   const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
-  const perfilRenda=c.perfilRenda||'indefinido';
-  const tipoConc=c.tipoConcentracao||'moderado';
-  const perfilLabel=perfilRenda==='estavel'?'CLT/Formal':perfilRenda==='variavel'?'Variável':perfilRenda==='irregular'?'Irregular':'—';
-  const concentLabel=tipoConc==='concentrado'?'1 pagador':tipoConc==='moderado'?'Moderado':'Pulverizado';
   document.getElementById('pStatsGrid').innerHTML=`
     <div class="p-stat"><div class="p-sl">Total créditos</div><div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div><div class="p-sn">${c.creditCount} entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Pix recebidos</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${pixPct}% das entradas</div></div>
+    <div class="p-stat"><div class="p-sl">Pix (% das entradas)</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${pixPct}% das entradas</div></div>
     <div class="p-stat"><div class="p-sl">Índice de consumo</div><div class="p-sv" style="color:${icConsumo>=120?'var(--red)':icConsumo>=90?'var(--yellow)':'var(--green)'}">${icConsumo}%</div><div class="p-sn">saídas/entradas</div></div>
     <div class="p-stat"><div class="p-sl">Espécie</div><div class="p-sv" style="color:${icEspecie>=20?'var(--red)':icEspecie>=10?'var(--yellow)':'var(--green)'}">${icEspecie}%</div><div class="p-sn">das entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Perfil de renda</div><div class="p-sv" style="color:${perfilRenda==='irregular'?'var(--red)':perfilRenda==='estavel'?'var(--green)':'var(--yellow)'};font-size:15px">${perfilLabel}</div><div class="p-sn">padrão mensal</div></div>
-    <div class="p-stat"><div class="p-sl">Origens (IHH)</div><div class="p-sv" style="color:${tipoConc==='pulverizado'?'var(--red)':tipoConc==='moderado'?'var(--yellow)':'var(--green)'};font-size:15px">${concentLabel}</div><div class="p-sn">${c.nOrigens||'—'} distintas</div></div>
     <div class="p-stat"><div class="p-sl">Suspeitos</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div><div class="p-sn">alto risco</div></div>
     <div class="p-stat"><div class="p-sl">Padrões recorrentes</div><div class="p-sv" style="color:${c.recorrentes>3?'var(--yellow)':'var(--text)'}">${c.recorrentes}</div><div class="p-sn">detectados</div></div>`;
 
@@ -3541,30 +3507,18 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
 }
 function eResetAll(){
   eFiles=[];eAllTxns=[];eActiveBankTab='all';
-  _eConsolidated=null;_eSources=null;
   document.getElementById('fileList').innerHTML='';
   document.getElementById('limitBar').style.display='none';
   document.getElementById('actBar').style.display='none';
+  document.getElementById('extStep3').style.display='none';
   document.getElementById('pFillExt').style.width='0%';
   document.getElementById('dzIco').textContent='📂';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
+  document.getElementById('paywallBlock').style.display='block';
+  document.getElementById('realResultBlock').style.display='none';
+  document.getElementById('extStep2').style.opacity='0.45';
+  document.getElementById('extStep2').style.pointerEvents='none';
   eShowErr('');
-  // Limpa renda declarada
-  const rd=document.getElementById('rendaDeclarada');if(rd)rd.value='';
-  const rb=document.getElementById('rendaBlock');if(rb)rb.style.display='none';
-  const rh=document.getElementById('rendaHint');if(rh)rh.style.display='none';
-  // Step 2 — respeita login
-  const s2=document.getElementById('extStep2');
-  if(s2){s2.style.opacity=_currentUser?'1':'0.45';s2.style.pointerEvents=_currentUser?'auto':'none';}
-  // Step 3 — esconde
-  const s3=document.getElementById('extStep3');if(s3)s3.style.display='none';
-  // Step nums — reset
-  const s2num=document.getElementById('s2num');
-  if(s2num){s2num.textContent='2';s2num.style.background='';s2num.style.color='';}
-  const s3num=document.getElementById('s3num');if(s3num)s3num.classList.add('locked');
-  // Volta ao paywall
-  const pw=document.getElementById('paywallBlock');if(pw)pw.style.display='block';
-  const rr=document.getElementById('realResultBlock');if(rr)rr.style.display='none';
 }
 
 // extrato step 1 — handled by Supabase auth above
