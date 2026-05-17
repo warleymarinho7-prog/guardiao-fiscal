@@ -3622,6 +3622,11 @@ function mNextQ() {
   if (mCur < questions.length-1) {
     mCur++;
     mSel = (mAnswers[mCur] && !questions[mCur].multi) ? mAnswers[mCur] : null;
+    // Desabilita botões durante microfeedback — evita duplo clique/travamento
+    const nx = document.getElementById('mBtnNext');
+    const bk = document.getElementById('mBtnBack');
+    if (nx) { nx.disabled = true; nx.classList.remove('on'); }
+    if (bk) bk.disabled = true;
     // Microfeedback entre perguntas
     const body = document.getElementById('mQBody');
     const msgs = [
