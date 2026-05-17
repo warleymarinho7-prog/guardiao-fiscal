@@ -1799,6 +1799,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <span class="badge">⚡ Resultado em 2 minutos</span>
       <span class="badge">✅ Gratuito para começar</span>
     </div>
+    <div style="margin-top:24px">
+      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">🔍 Verificar meu perfil fiscal →</button>
+    </div>
   </div>
 
 </div>
@@ -3615,7 +3618,18 @@ function mNextQ() {
   if (mCur < questions.length-1) {
     mCur++;
     mSel = (mAnswers[mCur] && !questions[mCur].multi) ? mAnswers[mCur] : null;
-    mRenderQ();
+    // Microfeedback entre perguntas
+    const body = document.getElementById('mQBody');
+    const msgs = [
+      'Analisando compatibilidade financeira…',
+      'Detectando possíveis sinais…',
+      'Cruzando com critérios do e-Financeira…',
+      'Calculando índice de coerência fiscal…',
+    ];
+    if (body) {
+      body.innerHTML = `<div style="text-align:center;padding:32px 0;color:var(--muted2);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(mCur-1) % msgs.length]}</div>`;
+    }
+    setTimeout(() => mRenderQ(), 600);
   } else {
     mShowResult();
   }
@@ -3642,26 +3656,26 @@ function mShowResult() {
   const alertsData = [];
 
   if (pct <= 20) {
-    level = 'Baixo risco fiscal'; color = '#00d96e'; emoji = '🟢';
-    desc = 'Seu perfil está dentro do padrão esperado pela Receita Federal.';
-    alertsData.push({ cls:'alert-green', icon:'✅', title:'Fontes de renda consistentes', text:'Seu perfil não apresenta sinais de incompatibilidade entre movimentação bancária e o que a Receita espera declarado.' });
+    level = 'Perfil compatível'; color = '#00d96e'; emoji = '🟢';
+    desc = 'Seu perfil não apresenta sinais evidentes de incompatibilidade financeira com o declarado.';
+    alertsData.push({ cls:'alert-green', icon:'✅', title:'Coerência fiscal dentro do esperado', text:'Seu perfil não apresenta sinais de incompatibilidade entre movimentação bancária e o que a Receita espera declarado.' });
     alertsData.push({ cls:'alert-green', icon:'💡', title:'Recomendação preventiva', text:'Mantenha comprovantes de todas as deduções por pelo menos 5 anos.' });
   } else if (pct <= 55) {
-    level = 'Atenção — risco moderado'; color = '#f5a623'; emoji = '🟡';
-    desc = 'Seu perfil apresenta pontos que merecem revisão antes da entrega da declaração.';
-    alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Pontos que merecem revisão', text:'Seus dados apresentam aspectos que um contador deve avaliar antes do prazo de entrega.' });
+    level = 'Sinais que merecem atenção'; color = '#f5a623'; emoji = '🟡';
+    desc = 'Identificamos possíveis incompatibilidades financeiras. Uma análise mais profunda é recomendada.';
+    alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Possíveis incompatibilidades detectadas', text:'Seu perfil apresenta aspectos que podem divergir do esperado pela Receita. Vale revisar antes da declaração.' });
     alertsData.push({ cls:'alert-green', icon:'💡', title:'Ainda dá tempo de regularizar', text:'Uma retificação preventiva custa muito menos do que uma autuação.' });
   } else {
-    level = 'Risco elevado'; color = '#f04f60'; emoji = '🔴';
-    desc = 'Seu perfil apresenta inconsistências que a Receita Federal pode estar cruzando agora.';
-    alertsData.push({ cls:'alert-red', icon:'🚨', title:'Múltiplos fatores de risco simultâneos', text:'Seu perfil ativa vários critérios de atenção da Receita ao mesmo tempo.' });
-    alertsData.push({ cls:'alert-yellow', icon:'💡', title:'Ação urgente recomendada', text:'É possível retificar antes de qualquer notificação. Procure um contador agora.' });
+    level = 'Perfil requer análise urgente'; color = '#f04f60'; emoji = '🔴';
+    desc = 'Seu perfil apresentou sinais que merecem análise mais profunda antes da declaração.';
+    alertsData.push({ cls:'alert-red', icon:'🚨', title:'Divergências financeiras identificadas', text:'Seu perfil ativa critérios de atenção da Receita Federal. Uma análise do extrato real é recomendada.' });
+    alertsData.push({ cls:'alert-yellow', icon:'💡', title:'Ação preventiva recomendada', text:'É possível corrigir antes de qualquer notificação. Após notificado, multas e juros se aplicam automaticamente.' });
   }
 
   const rh = document.getElementById('mResultHero');
   if (rh) rh.innerHTML = `
     <div class="result-glow" style="background:${color}"></div>
-    <div class="result-sublabel">// diagnóstico fiscal</div>
+    <div class="result-sublabel">// score de coerência fiscal</div>
     <span class="result-emoji">${emoji}</span>
     <div class="result-level" style="color:${color}">${level}</div>
     <div class="result-desc">${sanitize(desc)}</div>
