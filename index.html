@@ -1759,7 +1759,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="hero">
     <div class="hero-tag">🛡️ Proteção fiscal preventiva</div>
     <h1>Sua movimentação bancária<br><em>está compatível com o IR?</em></h1>
-    <p>O Guardião Fiscal analisa seus extratos com os mesmos critérios do e-Financeira e detecta inconsistências antes que a Receita Federal as encontre.</p>
+    <p>O Guardião Fiscal analisa seus extratos com os mesmos critérios do e-Financeira e detecta inconsistências antes de inconsistências aparecerem na sua análise fiscal.</p>
     <div class="hero-badges">
       <span class="badge">🔒 Dados 100% no seu dispositivo</span>
       <span class="badge">⚡ Resultado em 2 minutos</span>
@@ -1780,7 +1780,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div style="padding-bottom:32px;border-bottom:1px solid var(--border);margin-bottom:32px">
       <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">Scanner fiscal</div>
       <h2 style="font-family:Manrope,sans-serif;font-size:clamp(22px,4vw,32px);font-weight:800;color:var(--text);margin:0 0 14px;letter-spacing:-1px;line-height:1.2">Descubra inconsistências financeiras<br><em style="font-style:normal;color:var(--accent)">antes da Receita Federal.</em></h2>
-      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 24px;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita. O Guardião Fiscal cruza seu extrato com esses critérios e aponta onde há risco — antes da sua declaração ser entregue.</p>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 24px;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
 
       <!-- Benefícios -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
@@ -3544,15 +3544,26 @@ const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
 
 // ── ENGINE CONFIG — limites centralizados e ajustáveis ───────
 const ENGINE_CONFIG = {
-  PIX_LIMIT:        5000,
-  ESPECIE_LIMIT:    3000,
+  // Limites e-Financeira (Receita Federal)
+  PIX_LIMIT_PF:     5000,   // total mensal consolidado PF (crédito + débito)
+  PIX_LIMIT_PJ:     15000,  // total mensal consolidado PJ
+  PIX_LIMIT:        5000,   // alias PF para compatibilidade
+  ESPECIE_LIMIT:    3000,   // depósito espécie relevante
+  // Split Pix
   SPLIT_PIX_DELTA:  500,
   SPLIT_PIX_MIN:    4500,
   SPLIT_PIX_WINDOW: 7,
+  // Circularidade
   CIRCULAR_RATIO:   0.85,
   CIRCULAR_HOURS:   72,
+  // PDF segurança
   PDF_MAX_PAGES:    60,
   PDF_TIMEOUT_MS:   15000,
+  // Score e confiança
+  MIN_EVIDENCIAS_ALTO_RISCO: 2,  // mínimo de fatores para classificar "alto risco"
+  CONFIDENCE_REBAIXAR:       0.35, // confidence abaixo disso rebaixa alerta
+  // Janela de análise
+  JANELA_TRIMESTRAL: 3,  // meses para análise trimestral
 };
 
 // ── NORMALIZAÇÃO SEMÂNTICA ────────────────────────────────────
@@ -3868,23 +3879,38 @@ function catMatch(desc, cats) {
 }
 
 // ── Classificador semântico de transação ───────────────────────
+function detectChannel(desc) {
+  // Identifica o canal da transação para schema canônico
+  const d = normalizeDesc(desc);
+  if (d.includes('pix')) return 'pix';
+  if (d.includes('ted') || d.includes('doc recebido')) return 'ted';
+  if (d.includes('saque') || d.includes('caixa eletronico') || d.includes('atm')) return 'saque';
+  if (d.includes('deposito especie') || d.includes('dep especie') || d.includes('deposito em especie')) return 'especie';
+  if (d.includes('entre contas') || d.includes('conta propria') || d.includes('transf interna')) return 'proprio';
+  if (d.includes('cartao') || d.includes('credito') || d.includes('debito')) return 'cartao';
+  if (d.includes('boleto') || d.includes('tributo') || d.includes('pagamento')) return 'boleto';
+  return 'outros';
+}
+
 function eClassifyTxn(t) {
   const d = normalizeDesc(t.desc);
   const v = t.value;
+  const channel = detectChannel(t.desc);
 
-  if (v <= 0) return { risk: 'normal', flag: null, cat: 'saida' };
+  if (v <= 0) return { risk: 'normal', flag: null, cat: 'saida', channel };
+
+  // Transferência entre contas do próprio titular — não infla risco
+  if (channel === 'proprio' || catMatch(d, CAT.interno))
+    return { risk: 'normal', flag: null, cat: 'interno', channel };
 
   // Renda formal — baixo risco
-  if (catMatch(d, CAT.formal)) return { risk: 'normal', flag: 'Renda formal', cat: 'formal' };
-
-  // Transferência interna — ignorar
-  if (catMatch(d, CAT.interno)) return { risk: 'normal', flag: null, cat: 'interno' };
+  if (catMatch(d, CAT.formal)) return { risk: 'normal', flag: 'Renda formal', cat: 'formal', channel };
 
   // Investimentos — atenção (precisam ser declarados)
-  if (catMatch(d, CAT.invest)) return { risk: 'attention', flag: 'Investimento', cat: 'invest' };
+  if (catMatch(d, CAT.invest)) return { risk: 'attention', flag: 'Investimento', cat: 'invest', channel };
 
   // Aluguel recebido — atenção
-  if (catMatch(d, CAT.aluguel)) return { risk: 'attention', flag: 'Aluguel', cat: 'aluguel' };
+  if (catMatch(d, CAT.aluguel)) return { risk: 'attention', flag: 'Aluguel', cat: 'aluguel', channel };
 
   // Atividade comercial — suspeito se recorrente
   if (catMatch(d, CAT.comercial)) return { risk: 'attention', flag: 'Comercial', cat: 'comercial' };
@@ -4027,17 +4053,36 @@ function calcConfidence(signals) {
 function eAnalyzeSingle(txns, bank) {
   if (!txns || txns.length === 0) return null;
 
-  // Agrupa por mês
+  // Agrupa por mês — consolidado crédito + débito (modelo e-Financeira)
   const monthly = {};
   txns.forEach(t => {
-    if (t.value <= 0) return;
     const k = t.date ? `${t.date.getFullYear()}-${String(t.date.getMonth()+1).padStart(2,'0')}` : 'unk';
-    if (!monthly[k]) monthly[k] = { total: 0, pix: 0, especie: 0, count: 0 };
-    monthly[k].total += t.value;
-    monthly[k].count++;
+    if (!monthly[k]) monthly[k] = { total: 0, totalDebito: 0, pix: 0, pixDebito: 0, especie: 0, count: 0, consolidado: 0 };
     const d = normalizeDesc(t.desc);
-    if (d.includes('pix') || d.includes('transf')) monthly[k].pix += t.value;
-    if (catMatch(d, CAT.especie)) monthly[k].especie += t.value;
+    if (t.value > 0) {
+      monthly[k].total += t.value;
+      monthly[k].count++;
+      if (d.includes('pix')) monthly[k].pix += t.value;
+      if (catMatch(d, CAT.especie)) monthly[k].especie += t.value;
+    } else {
+      monthly[k].totalDebito += Math.abs(t.value);
+      if (d.includes('pix')) monthly[k].pixDebito += Math.abs(t.value);
+    }
+    // Consolidado = crédito + débito (como a e-Financeira calcula)
+    monthly[k].consolidado = monthly[k].pix + monthly[k].pixDebito;
+  });
+
+  // Análise trimestral — padrão de 3 meses consecutivos
+  const quarterly = {};
+  Object.entries(monthly).forEach(([k, m]) => {
+    if (k === 'unk') return;
+    const [y, mo] = k.split('-').map(Number);
+    const q = `${y}-Q${Math.ceil(mo / 3)}`;
+    if (!quarterly[q]) quarterly[q] = { total: 0, pix: 0, consolidado: 0, meses: 0 };
+    quarterly[q].total += m.total;
+    quarterly[q].pix += m.pix;
+    quarterly[q].consolidado += m.consolidado;
+    quarterly[q].meses++;
   });
 
   const classified = txns.map(t => ({ ...t, ...eClassifyTxn(t), bank }));
@@ -4054,7 +4099,7 @@ function eAnalyzeSingle(txns, bank) {
   const comercialTotal= credits.filter(t => t.cat === 'comercial').reduce((a, t) => a + t.value, 0);
   const suspTotal     = suspicious.reduce((a, t) => a + t.value, 0);
   const months        = Object.keys(monthly).filter(k => k !== 'unk').sort();
-  const monthsOverLimit = Object.values(monthly).filter(m => m.pix >= 5000).length;
+  const monthsOverLimit = Object.values(monthly).filter(m => m.consolidado >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
 
   // Recorrência, análise temporal, circularidade e split Pix
   const { recorrentes, comercialOculta } = detectarRecorrencia(txns);
@@ -4072,10 +4117,22 @@ function eAnalyzeSingle(txns, bank) {
   if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa clara` });
   score += f1;
 
-  // F2 — Pix acima do limite e-Financeira (peso 20)
+  // F2 — Movimentação Pix mensal consolidada acima do limite e-Financeira (peso 20)
+  // Baseado em total crédito+débito Pix por mês (modelo real da e-Financeira para PF)
   const f2 = Math.min(20, monthsOverLimit * 7);
-  if (f2 > 0) fatores.push({ peso: f2, motivo: `Pix acima do limite e-Financeira em ${monthsOverLimit} mês(es)` });
+  if (f2 > 0) fatores.push({
+    peso: f2,
+    motivo: `Movimentação Pix consolidada (crédito+débito) acima de R$${ENGINE_CONFIG.PIX_LIMIT_PF.toLocaleString('pt-BR')} em ${monthsOverLimit} mês(es) — perfil reportável ao e-Financeira`
+  });
   score += f2;
+
+  // F2b — Padrão trimestral elevado (peso 8)
+  const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
+  if (trimestresElevados > 0) {
+    const f2b = Math.min(8, trimestresElevados * 4);
+    score += f2b;
+    fatores.push({ peso: f2b, motivo: `Padrão trimestral elevado: ${trimestresElevados} trimestre(s) com média mensal acima do limite e-Financeira` });
+  }
 
   // F3 — Depósito em espécie (peso 20)
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
@@ -4115,7 +4172,7 @@ function eAnalyzeSingle(txns, bank) {
   score = Math.min(100, Math.max(0, Math.round(score)));
 
   // Confidence score — baseado em número de fatores corroborados
-  const confidence = calcConfidence([
+  const evidencias = [
     infRatio > 0.2,
     monthsOverLimit > 0,
     especieRatio > 0.1,
@@ -4123,18 +4180,39 @@ function eAnalyzeSingle(txns, bank) {
     anomalias.length > 0,
     circularidade.length > 0,
     splitPix.length > 0,
-  ]);
+  ];
+  const confidence = calcConfidence(evidencias);
+  const numEvidencias = evidencias.filter(Boolean).length;
+
+  // Rebaixar score se confidence baixa (documento: "rebaixar alertas com baixa confiança")
+  if (confidence < ENGINE_CONFIG.CONFIDENCE_REBAIXAR && score > 40) {
+    score = Math.round(score * 0.7); // reduz 30% do score se pouca evidência corrobora
+    fatores.push({ peso: 0, motivo: `Score ajustado: baixa confiança nos sinais detectados (${Math.round(confidence * 100)}%)` });
+  }
+
+  // Documento: "alto risco exige 2+ evidências fortes"
+  // Se score >= 70 mas apenas 1 evidência, rebaixa para "atenção" (máx 69)
+  if (score >= 70 && numEvidencias < ENGINE_CONFIG.MIN_EVIDENCIAS_ALTO_RISCO) {
+    score = 69;
+    fatores.push({ peso: 0, motivo: 'Indicador de atenção: múltiplas evidências necessárias para classificação de risco elevado' });
+  }
+
+  score = Math.min(100, Math.max(0, score));
 
   return {
     bank, totalTxns: txns.length, creditCount: credits.length,
     totalCredits, totalDebits, pixTotal, especieTotal, formalTotal, comercialTotal,
     suspCount: suspicious.length, attCount: attention.length,
-    monthsOverLimit, months: months.length, score, confidence,
+    monthsOverLimit, months: months.length, score, confidence, numEvidencias,
     classified, fatores, recorrentes, comercialOculta,
     anomalias, mediaHistorica, pico,
     circularidade, splitPix,
+    quarterly,
     indiceEspecie: especieRatio,
     indiceConsumo: totalCredits > 0 ? totalDebits / totalCredits : 0,
+    // Campos de schema canônico para auditoria futura
+    tipoAnalise: 'indicador_compatibilidade_fiscal',
+    versaoEngine: 'v3.1',
   };
 }
 
@@ -4499,15 +4577,17 @@ function eRenderPreview(c, sources) {
   if (c.score <= 20)      { emoji='🟢'; level='BAIXO RISCO';   color='#00d96e'; }
   else if (c.score <= 45) { emoji='🟡'; level='ATENÇÃO';       color='#f5a623'; }
   else if (c.score <= 70) { emoji='🟠'; level='RISCO ELEVADO'; color='#f97316'; }
-  else                    { emoji='🔴'; level='RISCO CRÍTICO'; color='#f04f60'; }
+  else                    { emoji='🔴'; level='ATENÇÃO ELEVADA'; color='#f04f60'; }
 
   document.getElementById('pvEmoji').textContent = emoji;
   document.getElementById('pvLevel').textContent = level;
   document.getElementById('pvLevel').style.color = color;
   document.getElementById('pvScore').textContent = c.score + '%';
   document.getElementById('pvScore').style.color = color;
+  const evidStr = c.numEvidencias !== undefined ? ` · ${c.numEvidencias} indicador(es) corroborado(s)` : '';
+  const confStr = c.confidence !== undefined ? ` · confiança ${Math.round(c.confidence * 100)}%` : '';
   document.getElementById('pvSub').textContent =
-    `${sources.length} extrato(s) · ${c.totalTxns} transações analisadas`;
+    `${sources.length} extrato(s) · ${c.totalTxns} transações analisadas${evidStr}${confStr}`;
   document.getElementById('pvBarFill').style.background = color;
   setTimeout(() => { document.getElementById('pvBarFill').style.width = c.score + '%'; }, 300);
 
@@ -4562,7 +4642,7 @@ function eUnlockResult(){
   if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#00d96e';}
   else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';}
   else if(c.score<=70){emoji='🟠';level='RISCO ELEVADO';color='#f97316';}
-  else{emoji='🔴';level='RISCO CRÍTICO';color='#f04f60';}
+  else{emoji='🔴';level='ATENÇÃO ELEVADA';color='#f04f60';}
   document.getElementById('ovEmoji').textContent=emoji;
   document.getElementById('ovLevel').textContent=level;
   document.getElementById('ovLevel').style.color=color;
