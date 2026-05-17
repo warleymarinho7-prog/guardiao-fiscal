@@ -3391,6 +3391,7 @@ function renderQ() {
 
   document.getElementById('btnBack').disabled = cur === 0;
   const nx = document.getElementById('btnNext');
+  nx.disabled = false;
   const hasAns = isMulti ? multiSel.length > 0 : sel !== null;
   nx.classList.toggle('on', hasAns);
   nx.textContent = cur === questions.length-1 ? 'Ver resultado →' : 'Continuar →';
@@ -3432,7 +3433,22 @@ function nextQ() {
   if (cur < questions.length-1) {
     cur++;
     sel = (answers[cur] && !questions[cur].multi) ? answers[cur] : null;
-    renderQ();
+    // Desabilita botões + microfeedback
+    const nx = document.getElementById('btnNext');
+    const bk = document.getElementById('btnBack');
+    if (nx) { nx.disabled = true; nx.classList.remove('on'); }
+    if (bk) bk.disabled = true;
+    const body = document.getElementById('qBody');
+    const msgs = [
+      'Analisando compatibilidade financeira…',
+      'Detectando possíveis sinais…',
+      'Cruzando com critérios do e-Financeira…',
+      'Calculando índice de coerência fiscal…',
+    ];
+    if (body) {
+      body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted2);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(cur-1) % msgs.length]}</div>`;
+    }
+    setTimeout(() => renderQ(), 250);
   } else {
     showResult();
   }
@@ -3452,80 +3468,224 @@ function showResult() {
   rp.style.display = 'block';
 
   const total = answers.reduce((a,b) => a + (b?.risk || 0), 0);
-  const pct = Math.min(100, Math.round((total / 19) * 100));
+  const pct   = Math.min(100, Math.round((total / 19) * 100));
 
-  let level, color, emoji, desc;
-  const alertsData = []; // { title, text, cls, icon }
+  const scanLines = [
+    'Cruzando movimentações com critérios e-Financeira…',
+    'Verificando compatibilidade renda × extrato…',
+    'Detectando padrões de Pix e espécie…',
+    'Calculando Score de Coerência Fiscal…',
+    'Consolidando diagnóstico…',
+  ];
+
+  const rh = document.getElementById('resultHero');
+  const ra = document.getElementById('resultAlerts');
+
+  if (rh) rh.innerHTML = `
+    <div style="padding:28px 20px 24px;text-align:center">
+      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:20px">// processando análise</div>
+      <div id="dScanAnim" style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto"></div>
+      <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:8px;max-width:400px;margin-left:auto;margin-right:auto">
+        <div id="dScanBar" style="height:100%;background:var(--green);border-radius:2px;width:0%;transition:width 0.4s ease"></div>
+      </div>
+      <div id="dScanPct" style="font-family:Manrope,sans-serif;font-size:12px;color:var(--muted)">0%</div>
+    </div>`;
+  if (ra) ra.innerHTML = '';
+
+  const scanEl = document.getElementById('dScanAnim');
+  const barEl  = document.getElementById('dScanBar');
+  const pctEl  = document.getElementById('dScanPct');
+  let lineIdx  = 0;
+
+  function addScanLine() {
+    if (!scanEl || lineIdx >= scanLines.length) return;
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2);opacity:0;transition:opacity 0.3s';
+    div.innerHTML = `<span style="color:var(--green);font-size:10px">▶</span>${scanLines[lineIdx]}`;
+    scanEl.appendChild(div);
+    setTimeout(() => { div.style.opacity = '1'; }, 30);
+    lineIdx++;
+    const prog = Math.round((lineIdx / scanLines.length) * 100);
+    if (barEl) barEl.style.width = prog + '%';
+    if (pctEl) pctEl.textContent = prog + '%';
+  }
+
+  for (let i = 0; i < scanLines.length; i++) {
+    setTimeout(addScanLine, i * 350);
+  }
+
+  setTimeout(() => dRevealResult(pct, answers), scanLines.length * 350 + 400);
+}
+
+function dRevealResult(pct, answers) {
+  let level, color, emoji, desc, ctaCopy;
+  const alertsData = [];
+  const lockedData = [];
 
   if (pct <= 20) {
-    level = 'Baixo risco fiscal'; color = '#00d96e'; emoji = '🟢';
-    desc = 'Seu perfil está dentro do padrão esperado pela Receita Federal para este nível de declaração.';
+    level = 'Perfil compatível'; color = '#00d96e'; emoji = '🟢';
+    desc  = 'Seu perfil não apresenta sinais evidentes de incompatibilidade com o declarado. Confirmar com o extrato real é a forma mais segura de garantir.';
+    ctaCopy = 'Confirmar que está tudo certo →';
     alertsData.push({ cls:'alert-green', icon:'✅', title:'Fontes de renda consistentes', text:'Seu perfil não apresenta sinais de incompatibilidade entre movimentação bancária e o que a Receita espera declarado.' });
     alertsData.push({ cls:'alert-green', icon:'✅', title:'Sem padrões informais detectados', text:'Nenhum padrão de recebimento recorrente sem justificativa que ative o sistema e-Financeira foi identificado.' });
     alertsData.push({ cls:'alert-green', icon:'💡', title:'Recomendação preventiva', text:'Mantenha comprovantes de todas as deduções por pelo menos 5 anos. A Receita pode auditar retroativamente mesmo declarações aprovadas.' });
+    lockedData.push({ label:'Padrão de Pix recebidos', val:'Aguarda extrato' });
+    lockedData.push({ label:'Índice de espécie', val:'Aguarda extrato' });
+    lockedData.push({ label:'Anomalia temporal', val:'Aguarda extrato' });
   } else if (pct <= 55) {
-    level = 'Atenção — risco moderado'; color = '#f5a623'; emoji = '🟡';
-    desc = 'Seu perfil apresenta pontos que merecem revisão antes da entrega da declaração.';
+    level = 'Sinais que merecem atenção'; color = '#f5a623'; emoji = '🟡';
+    desc  = 'Identificamos possíveis incompatibilidades. Esses padrões são os mesmos que o e-Financeira usa para cruzar com sua declaração.';
+    ctaCopy = 'Confirmar sinais no meu extrato →';
     if (answers[0]?.multiSel?.length > 2) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Múltiplas fontes de renda', text:'Cada fonte adicional aumenta a chance de divergência entre dados bancários e o declarado. Todas precisam estar detalhadas na declaração.' });
     if (answers[1]?.risk > 0) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Pix recebidos sem justificativa', text:'Bancos reportam à Receita via e-Financeira toda movimentação mensal acima de R$5.000. Pix frequentes sem nota fiscal são o principal gatilho de malha fina em autônomos.' });
     if (answers[2]?.risk > 0) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Declaração possivelmente incompleta', text:'A Receita já possui os dados bancários antes de você declarar. Qualquer entrada não justificada é cruzada automaticamente.' });
     if (answers[4]?.risk > 0) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Deduções sem comprovante', text:'Planos de saúde, hospitais e faculdades enviam dados à Receita independentemente. Valores divergentes geram malha fina automática.' });
     if (!alertsData.length) alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Pontos que merecem revisão', text:'Seus dados apresentam aspectos que um contador deve avaliar antes do prazo de entrega.' });
     alertsData.push({ cls:'alert-green', icon:'💡', title:'Ainda dá tempo de regularizar', text:'Uma retificação preventiva custa muito menos do que uma autuação. Após notificado, multas e juros se aplicam automaticamente.' });
+    lockedData.push({ label:'Divergência renda × movimentação', val:'🔒 bloqueado' });
+    lockedData.push({ label:'Padrão Pix suspeito', val:'🔒 bloqueado' });
+    lockedData.push({ label:'Variação patrimonial', val:'🔒 bloqueado' });
   } else {
-    level = 'Risco elevado'; color = '#f04f60'; emoji = '🔴';
-    desc = 'Seu perfil apresenta inconsistências que a Receita Federal pode estar cruzando agora.';
+    level = 'Perfil requer análise urgente'; color = '#f04f60'; emoji = '🔴';
+    desc  = 'Seu perfil ativou múltiplos critérios de atenção. Esses são os mesmos sinais que a Receita Federal cruza automaticamente com extratos bancários.';
+    ctaCopy = 'Ver o que a Receita pode estar vendo →';
     if (answers[2]?.risk >= 4) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Possível omissão de renda', text:'É o motivo número 1 de malha fina no Brasil. A Receita recebe os dados bancários diretamente dos bancos — a declaração precisa bater exatamente.' });
     if (answers[1]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Pix informais recorrentes', text:'Recebimentos regulares sem nota fiscal são detectados automaticamente pelo e-Financeira. Não precisa de denúncia para a Receita identificar.' });
     if (answers[3]?.risk >= 3) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Incompatibilidade patrimonial', text:'Compras ou investimentos acima da renda declarada acionam o IRPF de ofício — a Receita lança o imposto automaticamente sobre a diferença.' });
     if (answers[5]?.risk >= 2) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Dependente declarado por mais de uma pessoa', text:'Quando duas pessoas declaram o mesmo dependente, o sistema retém as duas declarações automaticamente para revisão.' });
     if (!alertsData.length) alertsData.push({ cls:'alert-red', icon:'🚨', title:'Múltiplos fatores de risco simultâneos', text:'Seu perfil ativa vários critérios de atenção da Receita ao mesmo tempo. Risco real de notificação.' });
     alertsData.push({ cls:'alert-yellow', icon:'💡', title:'Ação urgente recomendada', text:'É possível retificar antes de qualquer notificação. Após notificado, multas e juros se aplicam automaticamente. Procure um contador agora.' });
+    lockedData.push({ label:'Incompatibilidade renda declarada', val:'🔒 crítico' });
+    lockedData.push({ label:'Pix informais recorrentes', val:'🔒 crítico' });
+    lockedData.push({ label:'Anomalia temporal detectada', val:'🔒 crítico' });
   }
 
-  document.getElementById('resultHero').innerHTML = `
-    <div class="result-glow" style="background:${color}"></div>
-    <div class="result-sublabel">// diagnóstico fiscal</div>
-    <span class="result-emoji">${emoji}</span>
-    <div class="result-level" style="color:${color}">${level}</div>
-    <div class="result-desc">${sanitize(desc)}</div>
-    <div class="score-bar-bg">
-      <div class="score-bar-fill" id="scoreBar" style="width:0%;background:${color}"></div>
-    </div>
-    <div class="score-label">Índice de risco estimado: ${pct}%</div>
-  `;
+  // gauge
+  const gaugeR = 70, cx = 110, cy = 100;
+  const startAngle = 210, endAngle = 330;
+  const totalDeg  = 360 - startAngle + endAngle;
+  const targetDeg = (pct / 100) * totalDeg;
 
-  // Mostra 2 alertas reais + paywall no 3º
-  const visiveis = alertsData.slice(0, 2);
+  function polarToXY(deg, r) {
+    const rad = (deg - 90) * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+  function arcPath(s, e, r) {
+    const sp = polarToXY(s, r), ep = polarToXY(e, r);
+    const large = (e - s + 360) % 360 > 180 ? 1 : 0;
+    return `M ${sp.x} ${sp.y} A ${r} ${r} 0 ${large} 1 ${ep.x} ${ep.y}`;
+  }
+  const needleStart = polarToXY(startAngle, gaugeR - 14);
+
+  const rh = document.getElementById('resultHero');
+  if (rh) rh.innerHTML = `
+    <div class="result-glow" style="background:${color}"></div>
+    <div style="padding:28px 28px 16px">
+      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center">// score de coerência fiscal</div>
+      <div style="display:flex;align-items:center;gap:24px">
+        <div style="flex-shrink:0">
+          <svg width="220" height="130" viewBox="0 0 220 130">
+            <path d="${arcPath(startAngle, startAngle + totalDeg, gaugeR)}"
+              fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round"/>
+            <path id="dGaugeArc" d="${arcPath(startAngle, startAngle, gaugeR)}"
+              fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round"
+              style="transition:all 1.4s cubic-bezier(0.4,0,0.2,1)"/>
+            <line id="dNeedle" x1="${cx}" y1="${cy}" x2="${needleStart.x}" y2="${needleStart.y}"
+              stroke="${color}" stroke-width="2.5" stroke-linecap="round"
+              style="transform-origin:${cx}px ${cy}px;transition:transform 1.4s cubic-bezier(0.4,0,0.2,1)"/>
+            <circle cx="${cx}" cy="${cy}" r="5" fill="${color}"/>
+            <text x="${cx}" y="${cy - 14}" text-anchor="middle"
+              style="font-family:Manrope,sans-serif;font-size:32px;font-weight:800;fill:${color};letter-spacing:-2px"
+              id="dGaugeNum">0</text>
+            <text x="${cx}" y="${cy + 4}" text-anchor="middle"
+              style="font-family:Inter,sans-serif;font-size:10px;fill:#64748b;letter-spacing:1px">ÍNDICE</text>
+            <text x="38"  y="122" text-anchor="middle" style="font-family:Inter,sans-serif;font-size:9px;fill:#64748b">BAIXO</text>
+            <text x="${cx}" y="128" text-anchor="middle" style="font-family:Inter,sans-serif;font-size:9px;fill:#64748b">MÉDIO</text>
+            <text x="182" y="122" text-anchor="middle" style="font-family:Inter,sans-serif;font-size:9px;fill:#64748b">ALTO</text>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
+          <div style="font-size:14px;color:var(--muted2);line-height:1.65">${desc}</div>
+        </div>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const arc   = document.getElementById('dGaugeArc');
+    const ndl   = document.getElementById('dNeedle');
+    const numEl = document.getElementById('dGaugeNum');
+    if (arc) arc.setAttribute('d', arcPath(startAngle, startAngle + targetDeg, gaugeR));
+    if (ndl) ndl.style.transform = `rotate(${targetDeg}deg)`;
+    let n = 0;
+    const step = () => { n = Math.min(n + 2, pct); if (numEl) numEl.textContent = n; if (n < pct) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }, 100);
+
+  // alertas progressivos
+  const ra = document.getElementById('resultAlerts');
+  if (!ra) return;
+  ra.innerHTML = '';
+
+  const visiveis  = alertsData.slice(0, 2);
   const bloqueados = alertsData.slice(2);
 
-  let html = visiveis.map(a =>
-    `<div class="alert-item ${sanitize(a.cls)}">
-      <span class="alert-icon">${a.icon}</span>
-      <span><strong style="font-weight:600;display:block;margin-bottom:2px">${sanitize(a.title)}</strong>${sanitize(a.text)}</span>
-    </div>`
-  ).join('');
+  visiveis.forEach((a, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = `alert-item ${a.cls}`;
+      div.style.cssText = 'opacity:0;transform:translateY(8px);transition:all 0.35s ease';
+      div.innerHTML = `<span class="alert-icon">${a.icon}</span><span><strong style="font-weight:600;display:block;margin-bottom:2px">${sanitize(a.title)}</strong>${sanitize(a.text)}</span>`;
+      ra.appendChild(div);
+      setTimeout(() => { div.style.opacity='1'; div.style.transform='translateY(0)'; }, 30);
+    }, i * 400);
+  });
 
-  if (bloqueados.length > 0) {
-    html += `
-    <div class="alert-paywall">
-      <div class="apw-lock">🔍</div>
-      <div class="apw-title">Encontramos sinais que merecem atenção</div>
-      <div class="apw-desc">Desbloqueie a análise real com seu extrato bancário e veja exatamente onde está o risco — com os valores da sua conta.</div>
-      <button class="apw-btn" onclick="openCheckout('avulso')">Desbloquear análise completa → R$34,90</button>
-      <div class="apw-or">ou</div>
-      <button class="apw-btn-sec" onclick="openCheckout('pro')">Plano Pro — R$29,90/mês</button>
-    </div>`;
-  }
+  // blur paywall
+  setTimeout(() => {
+    if (bloqueados.length > 0 || lockedData.length > 0) {
+      const blurBlock = document.createElement('div');
+      blurBlock.style.cssText = 'margin-top:8px;border-radius:14px;overflow:hidden;position:relative';
+      blurBlock.innerHTML = `
+        <div style="filter:blur(5px);user-select:none;pointer-events:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px 16px">
+          ${lockedData.map(d => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+              <span style="color:var(--muted2)">${d.label}</span>
+              <span style="font-family:Manrope,sans-serif;font-weight:700;color:var(--red)">${d.val}</span>
+            </div>`).join('')}
+          ${bloqueados.map(a => `
+            <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+              <span>${a.icon}</span>
+              <span style="color:var(--muted2)">${a.title}</span>
+            </div>`).join('')}
+        </div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,24,39,0.2) 0%,rgba(17,24,39,0.92) 55%);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px">
+          <div style="font-size:20px;margin-bottom:6px">🔒</div>
+          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${lockedData.length + bloqueados.length} padrões na sua simulação</div>
+          <div style="font-size:11px;color:var(--muted2);text-align:center;line-height:1.5">Confirme com seu extrato real para ver os detalhes exatos</div>
+        </div>`;
+      ra.appendChild(blurBlock);
+    }
 
-  document.getElementById('resultAlerts').innerHTML = html;
-  setTimeout(() => { document.getElementById('scoreBar').style.width = pct + '%'; }, 300);
+    // CTA contextual
+    setTimeout(() => {
+      const ctaBlock = document.createElement('div');
+      ctaBlock.style.cssText = 'margin-top:16px;opacity:0;transform:translateY(10px);transition:all 0.4s ease';
+      ctaBlock.innerHTML = `
+        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color === '#00d96e' ? 'var(--green)' : color};border:none;border-radius:12px;color:${color === '#f04f60' ? '#fff' : '#000'};font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em">${ctaCopy}</button>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Seus arquivos são processados localmente · Nenhum dado enviado</div>`;
+      ra.appendChild(ctaBlock);
+      setTimeout(() => { ctaBlock.style.opacity='1'; ctaBlock.style.transform='translateY(0)'; }, 30);
+    }, 300);
+  }, visiveis.length * 400 + 300);
 }
 
 function restart() {
   cur = 0; answers = []; sel = null;
   document.getElementById('resultPanel').style.display = 'none';
   document.getElementById('questionPanel').style.display = 'block';
+  document.getElementById('resultHero').innerHTML = '';
+  document.getElementById('resultAlerts').innerHTML = '';
   renderQ();
 }
 
@@ -3568,13 +3728,13 @@ function mRenderQ() {
   `;
 
   body.classList.remove('q-slide');
-  void body.offsetWidth;
-  body.classList.add('q-slide');
+  requestAnimationFrame(() => body.classList.add('q-slide'));
 
   const bb = document.getElementById('mBtnBack');
   const nx = document.getElementById('mBtnNext');
-  if (bb) bb.disabled = mCur === 0;
+  if (bb) { bb.disabled = mCur === 0; }
   if (nx) {
+    nx.disabled = false;
     const hasAns = isMulti ? multiSel.length > 0 : mSel !== null;
     nx.classList.toggle('on', hasAns);
     nx.textContent = mCur === questions.length-1 ? 'Ver resultado →' : 'Continuar →';
@@ -3583,9 +3743,9 @@ function mRenderQ() {
 
 function mChoose(index, risk) {
   mSel = { index, risk };
-  const panel = document.getElementById('mQuestionPanel');
-  if (!panel) return;
-  panel.querySelectorAll('.opt').forEach((el,i) => {
+  const body = document.getElementById('mQBody');
+  if (!body) return;
+  body.querySelectorAll('.opt').forEach((el,i) => {
     el.classList.toggle('sel', i===index);
     el.querySelector('.opt-radio').innerHTML = i===index ? '<span style="font-size:10px;color:#000;font-weight:800">✓</span>' : '';
   });
@@ -3601,8 +3761,8 @@ function mToggleMulti(index) {
   if (pos === -1) ms.push(index); else ms.splice(pos, 1);
   const total = ms.reduce((a,i) => a + q.opts[i].risk, 0);
   mAnswers[mCur].risk = Math.min(5, total + (ms.length >= 3 ? 1 : 0));
-  const panel = document.getElementById('mQuestionPanel');
-  if (panel) panel.querySelectorAll('.opt').forEach((el,i) => {
+  const body2 = document.getElementById('mQBody');
+  if (body2) body2.querySelectorAll('.opt').forEach((el,i) => {
     const isSel = ms.includes(i);
     el.classList.toggle('sel', isSel);
     el.querySelector('.opt-radio').innerHTML = isSel ? '<span style="font-size:10px;color:#000;font-weight:800">✓</span>' : '';
@@ -3636,9 +3796,9 @@ function mNextQ() {
       'Calculando índice de coerência fiscal…',
     ];
     if (body) {
-      body.innerHTML = `<div style="text-align:center;padding:32px 0;color:var(--muted2);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(mCur-1) % msgs.length]}</div>`;
+      body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted2);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(mCur-1) % msgs.length]}</div>`;
     }
-    setTimeout(() => mRenderQ(), 600);
+    setTimeout(() => mRenderQ(), 250);
   } else {
     mShowResult();
   }
@@ -3770,7 +3930,7 @@ function mRevealResult(pct) {
     const large = (endDeg - startDeg + 360) % 360 > 180 ? 1 : 0;
     return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
   }
-  const needleEnd = polarToXY(startAngle + targetDeg * 0, gaugeR - 14);
+  const needleEnd = polarToXY(startAngle, gaugeR - 14); // posição inicial do ponteiro
 
   const rh = document.getElementById('mResultHero');
   if (rh) rh.innerHTML = `
