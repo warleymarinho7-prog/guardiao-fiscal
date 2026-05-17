@@ -1759,7 +1759,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="hero">
     <div class="hero-tag">🛡️ Proteção fiscal preventiva</div>
     <h1>Sua movimentação bancária<br><em>está compatível com o IR?</em></h1>
-    <p>O Guardião Fiscal analisa seus extratos com os mesmos critérios do e-Financeira e detecta inconsistências antes de inconsistências aparecerem na sua análise fiscal.</p>
+    <p>O Guardião Fiscal analisa seus extratos com os mesmos critérios do e-Financeira e detecta inconsistências antes de inconsistências aparecerem na sua análise de compatibilidade financeira.</p>
     <div class="hero-badges">
       <span class="badge">🔒 Dados 100% no seu dispositivo</span>
       <span class="badge">⚡ Resultado em 2 minutos</span>
@@ -1792,7 +1792,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
           <div style="font-size:18px;margin-bottom:6px">⚠️</div>
           <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Pix recorrentes, espécie, padrões suspeitos</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
           <div style="font-size:18px;margin-bottom:6px">📊</div>
@@ -2061,7 +2061,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
           <div style="font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.75">
-            O Guardião Fiscal funciona como um <strong style="color:var(--text)">antivírus fiscal pessoal</strong> — monitora continuamente se sua movimentação bancária é compatível com o que foi declarado à Receita Federal. A análise usa os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas. Identificamos os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
+            O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira — identifica padrões de movimentação que merecem atenção antes da sua declaração de IR. A análise usa os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas. Identificamos os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
           </div>
         </div>
 
@@ -3544,11 +3544,17 @@ const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
 
 // ── ENGINE CONFIG — limites centralizados e ajustáveis ───────
 const ENGINE_CONFIG = {
-  // Limites e-Financeira (Receita Federal)
-  PIX_LIMIT_PF:     5000,   // total mensal consolidado PF (crédito + débito)
-  PIX_LIMIT_PJ:     15000,  // total mensal consolidado PJ
-  PIX_LIMIT:        5000,   // alias PF para compatibilidade
-  ESPECIE_LIMIT:    3000,   // depósito espécie relevante
+  // Limites de reporte e-Financeira (Receita Federal)
+  // Fonte: gov.br/receitafederal — FAQ e-Financeira jan/2025
+  MONTHLY_REPORT_LIMIT_PF:  5000,   // total mensal consolidado PF (credito + debito)
+  MONTHLY_REPORT_LIMIT_PJ:  15000,  // total mensal consolidado PJ
+  // Aliases de compatibilidade
+  PIX_LIMIT_PF:     5000,
+  PIX_LIMIT_PJ:     15000,
+  PIX_LIMIT:        5000,
+  // Heuristicas internas (nao sao regras oficiais da Receita)
+  CASH_ALERT_THRESHOLD: 3000,
+  ESPECIE_LIMIT:        3000,
   // Split Pix
   SPLIT_PIX_DELTA:  500,
   SPLIT_PIX_MIN:    4500,
@@ -3556,15 +3562,100 @@ const ENGINE_CONFIG = {
   // Circularidade
   CIRCULAR_RATIO:   0.85,
   CIRCULAR_HOURS:   72,
-  // PDF segurança
+  // PDF seguranca
   PDF_MAX_PAGES:    60,
   PDF_TIMEOUT_MS:   15000,
-  // Score e confiança
-  MIN_EVIDENCIAS_ALTO_RISCO: 2,  // mínimo de fatores para classificar "alto risco"
-  CONFIDENCE_REBAIXAR:       0.35, // confidence abaixo disso rebaixa alerta
-  // Janela de análise
-  JANELA_TRIMESTRAL: 3,  // meses para análise trimestral
+  // Score e confianca
+  MIN_EVIDENCIAS_ALTO_RISCO: 2,
+  CONFIDENCE_REBAIXAR:       0.35,
+  // Janelas de analise
+  JANELA_TRIMESTRAL: 3,
+  JANELA_SEMESTRAL:  6,
+  JANELA_ANUAL:      12,
 };
+
+// ── AGREGAÇÃO MENSAL CANÔNICA (modelo e-Financeira) ─────────
+// Consolida créditos + débitos por mês e por tipo de canal
+// A e-Financeira usa totais mensais, não transações isoladas
+function aggregateMonthly(txns) {
+  const months = {};
+  for (const t of txns) {
+    if (!t.date || !(t.date instanceof Date) || isNaN(t.date)) continue;
+    const key = t.date.getFullYear() + '-' + String(t.date.getMonth()+1).padStart(2,'0');
+    if (!months[key]) months[key] = {
+      credits: 0, debits: 0,
+      cashIn: 0,  cashOut: 0,
+      pixIn: 0,   pixOut: 0,
+      pixConsolidado: 0,  // crédito + débito Pix (modelo e-Financeira)
+      especie: 0,
+      formal: 0,
+      txns: [], count: 0
+    };
+    const b = months[key];
+    const v = Math.abs(t.value);
+    const d = normalizeDesc(t.desc);
+    if (t.value > 0) {
+      b.credits += v;
+      if (d.includes('pix'))  b.pixIn   += v;
+      if (d.includes('saque') || d.includes('especie')) b.cashIn += v;
+      if (d.includes('salario') || d.includes('holerite')) b.formal += v;
+    } else {
+      b.debits += v;
+      if (d.includes('pix'))  b.pixOut  += v;
+      if (d.includes('saque')) b.cashOut += v;
+    }
+    b.pixConsolidado = b.pixIn + b.pixOut;
+    b.txns.push(t);
+    b.count++;
+  }
+  return months;
+}
+
+// ── PERFIL HISTÓRICO (médias 3/6/12 meses) ───────────────────
+function calcProfile(months) {
+  const keys = Object.keys(months).filter(k => k !== 'unk').sort();
+  const values = keys.map(k => months[k].credits + months[k].debits);
+  const credits = keys.map(k => months[k].credits);
+  const pixVals = keys.map(k => months[k].pixConsolidado);
+
+  const avg = (arr) => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+  const last = (arr, n) => arr.slice(-n);
+
+  return {
+    avgTotal3:  avg(last(values, 3)),
+    avgTotal6:  avg(last(values, 6)),
+    avgTotal12: avg(last(values, 12)),
+    avgCredits: avg(credits),
+    avgPix:     avg(pixVals),
+    totalMeses: keys.length,
+    mesCritico: keys.reduce((best, k) => {
+      const v = months[k].credits + months[k].debits;
+      return (!best || v > (months[best].credits + months[best].debits)) ? k : best;
+    }, null),
+  };
+}
+
+// ── VALIDAÇÃO DE TRANSAÇÃO ────────────────────────────────────
+function isValidTxn(t) {
+  return (
+    t.date instanceof Date &&
+    !isNaN(t.date) &&
+    typeof t.value === 'number' &&
+    !isNaN(t.value) &&
+    t.value !== 0 &&
+    typeof t.desc === 'string' &&
+    t.desc.trim().length >= 2
+  );
+}
+
+// ── FINGERPRINT REFORÇADO (banco incluso) ────────────────────
+function txnFingerprintV2(t) {
+  const dateStr = t.date instanceof Date ? t.date.toISOString().slice(0,10) : String(t.date||'');
+  const valStr  = Math.abs(t.value).toFixed(2);
+  const descStr = normalizeDesc(t.desc).slice(0, 50);
+  const bank    = normalizeDesc(t.bank || '').slice(0, 20);
+  return dateStr + '|' + valStr + '|' + descStr + '|' + bank;
+}
 
 // ── NORMALIZAÇÃO SEMÂNTICA ────────────────────────────────────
 function normalizeDesc(desc) {
@@ -4050,46 +4141,152 @@ function calcConfidence(signals) {
   return Math.min(0.97, 0.80 + (hits - 3) * 0.05);
 }
 
+// ── DETECÇÃO DE MOVIMENTO INTERNO (mesmo titular) ───────────
+// Documento: a Receita trata transferências entre contas do mesmo
+// titular como lançamento específico — não conta como renda nova
+
+function normalizeAccountId(v) {
+  if (!v) return '';
+  return String(v).replace(/\D/g, '').slice(-8);
+}
+
+function sameOwnerHeuristic(a, b) {
+  if (!a || !b) return false;
+  // Mesmo banco + mesma conta
+  if (a.bank && b.bank && a.bank === b.bank &&
+      a.account && b.account &&
+      normalizeAccountId(a.account) === normalizeAccountId(b.account)) return true;
+  // Mesmo nome do titular normalizado
+  if (a.ownerName && b.ownerName) {
+    const x = normalizeDesc(a.ownerName);
+    const y = normalizeDesc(b.ownerName);
+    if (x && y && x === y && x.length > 3) return true;
+  }
+  return false;
+}
+
+// Verifica se uma transação é provavelmente uma movimentação interna
+// entre contas do mesmo titular (não conta como renda nova no score)
+function isInternalTransfer(txn, allTxns) {
+  // 1. Detecção por keywords explícitas
+  const s = normalizeDesc(txn.desc);
+  if (/transferencia entre contas|entre minhas contas|aporte|resgate/.test(s)) return 'confirmed';
+  if (catMatch(s, CAT.interno)) return 'confirmed';
+  if (txn.channel === 'proprio') return 'confirmed';
+
+  // 2. Pareamento ida/volta — mesmo valor, janela de 2 dias, sentido oposto
+  const sameValueWindow = allTxns.filter(t =>
+    t !== txn &&
+    Math.abs(Math.abs(t.value) - Math.abs(txn.value)) <= 0.01 &&
+    Math.sign(t.value) !== Math.sign(txn.value) &&  // sentido oposto
+    t.date instanceof Date && txn.date instanceof Date &&
+    Math.abs((t.date - txn.date) / 86400000) <= 2
+  );
+
+  if (sameValueWindow.some(t => sameOwnerHeuristic(txn, t))) return 'probable';
+
+  // 3. Valor idêntico bidirecional no mesmo banco em curto prazo
+  const espelhos = allTxns.filter(t =>
+    t !== txn &&
+    Math.abs(t.value) === Math.abs(txn.value) &&
+    t.bank === txn.bank &&
+    t.date instanceof Date && txn.date instanceof Date &&
+    Math.abs((t.date - txn.date) / 86400000) <= 1
+  );
+  if (espelhos.length > 0) return 'uncertain';
+
+  return null; // não é movimento interno
+}
+
+// Aplica detecção interna no array de transações classificadas
+// Retorna array com campo internalMove e riskWeight ajustado
+function applyInternalDetection(classified) {
+  return classified.map(txn => {
+    const result = isInternalTransfer(txn, classified);
+    if (!result) return txn;
+
+    const riskWeight = result === 'confirmed' ? 0 :
+                       result === 'probable'  ? 0.1 :
+                       result === 'uncertain' ? 0.3 : 1;
+
+    const flag = result === 'confirmed' ? 'Movimento interno — excluído do score' :
+                 result === 'probable'  ? 'Provável transferência entre contas do mesmo titular' :
+                 'Possível movimentação interna (baixo peso)';
+
+    return {
+      ...txn,
+      internalMove: result,
+      riskWeight,
+      risk: result === 'confirmed' ? 'normal' :
+            result === 'probable'  ? 'normal' : txn.risk,
+      cat: result === 'confirmed' || result === 'probable' ? 'interno' : txn.cat,
+      flag,
+    };
+  });
+}
+
+// ── ESTRUTURA CANÔNICA DE ALERTA ─────────────────────────────
+// Cada alerta tem: code, title, weight, confidence, evidence[], severity
+// Score final = soma(weight * confidence) por alerta ativo
+function criarAlerta(code, title, weight, confidence, evidence, severity) {
+  return { code, title, weight, confidence, evidence: evidence || [], severity: severity || 'medium' };
+}
+
+function scoreDeAlertas(alertas) {
+  return Math.min(100, Math.round(
+    alertas.reduce((acc, a) => acc + (a.weight * Math.min(1, a.confidence)), 0)
+  ));
+}
+
 function eAnalyzeSingle(txns, bank) {
   if (!txns || txns.length === 0) return null;
 
-  // Agrupa por mês — consolidado crédito + débito (modelo e-Financeira)
-  const monthly = {};
-  txns.forEach(t => {
-    const k = t.date ? `${t.date.getFullYear()}-${String(t.date.getMonth()+1).padStart(2,'0')}` : 'unk';
-    if (!monthly[k]) monthly[k] = { total: 0, totalDebito: 0, pix: 0, pixDebito: 0, especie: 0, count: 0, consolidado: 0 };
-    const d = normalizeDesc(t.desc);
-    if (t.value > 0) {
-      monthly[k].total += t.value;
-      monthly[k].count++;
-      if (d.includes('pix')) monthly[k].pix += t.value;
-      if (catMatch(d, CAT.especie)) monthly[k].especie += t.value;
-    } else {
-      monthly[k].totalDebito += Math.abs(t.value);
-      if (d.includes('pix')) monthly[k].pixDebito += Math.abs(t.value);
-    }
-    // Consolidado = crédito + débito (como a e-Financeira calcula)
-    monthly[k].consolidado = monthly[k].pix + monthly[k].pixDebito;
+  // P6: Validar transacoes antes de processar
+  const txnsValidas = txns.filter(isValidTxn);
+  const parserConfidence = txns.length > 0 ? txnsValidas.length / txns.length : 0;
+  const txnsDescartadas = txns.length - txnsValidas.length;
+
+  // P1+P3: Agregacao mensal canonica usando aggregateMonthly()
+  const monthly = aggregateMonthly(txnsValidas);
+
+  // Compat: mapear para estrutura antiga usada pelo resto do codigo
+  Object.entries(monthly).forEach(([k, m]) => {
+    monthly[k].total     = m.credits;
+    monthly[k].totalDebito = m.debits;
+    monthly[k].pix       = m.pixIn;
+    monthly[k].pixDebito = m.pixOut;
+    monthly[k].especie   = m.cashIn;
+    monthly[k].consolidado = m.pixConsolidado;
+    monthly[k].count     = m.count;
   });
 
-  // Análise trimestral — padrão de 3 meses consecutivos
+  // P4: Perfil historico — medias de 3/6/12 meses
+  const perfil = calcProfile(monthly);
+
+  // Analise trimestral — padrao de 3 meses consecutivos
   const quarterly = {};
   Object.entries(monthly).forEach(([k, m]) => {
     if (k === 'unk') return;
     const [y, mo] = k.split('-').map(Number);
-    const q = `${y}-Q${Math.ceil(mo / 3)}`;
+    const q = y + '-Q' + Math.ceil(mo / 3);
     if (!quarterly[q]) quarterly[q] = { total: 0, pix: 0, consolidado: 0, meses: 0 };
-    quarterly[q].total += m.total;
-    quarterly[q].pix += m.pix;
-    quarterly[q].consolidado += m.consolidado;
+    quarterly[q].total += m.credits;
+    quarterly[q].pix += m.pixIn;
+    quarterly[q].consolidado += m.pixConsolidado;
     quarterly[q].meses++;
   });
 
-  const classified = txns.map(t => ({ ...t, ...eClassifyTxn(t), bank }));
+  // Ordem: classify → isInternal → score (dedup já aplicado antes via deduplicateTxns)
+  const classifiedRaw = txns.map(t => ({ ...t, ...eClassifyTxn(t), bank }));
+  // Aplica detecção de movimento interno antes de calcular risco
+  const classified  = applyInternalDetection(classifiedRaw);
   const credits     = classified.filter(t => t.value > 0);
   const debits      = classified.filter(t => t.value < 0);
-  const suspicious  = classified.filter(t => t.risk === 'suspicious' && t.value > 0);
-  const attention   = classified.filter(t => t.risk === 'attention' && t.value > 0);
+  // Internos confirmados/prováveis excluídos do cálculo de risco
+  const creditsRisco= credits.filter(t => !t.internalMove || t.internalMove === 'uncertain');
+  const suspicious  = classified.filter(t => t.risk === 'suspicious' && t.value > 0 && t.riskWeight !== 0);
+  const attention   = classified.filter(t => t.risk === 'attention'  && t.value > 0);
+  const internos    = classified.filter(t => t.internalMove === 'confirmed' || t.internalMove === 'probable');
 
   const totalCredits  = credits.reduce((a, t) => a + t.value, 0);
   const totalDebits   = Math.abs(debits.reduce((a, t) => a + t.value, 0));
@@ -4112,7 +4309,9 @@ function eAnalyzeSingle(txns, bank) {
   const fatores = [];
 
   // F1 — Proporção de créditos suspeitos (peso 40)
-  const infRatio = totalCredits > 0 ? suspTotal / totalCredits : 0;
+  // Usa apenas créditos de risco real (exclui internos confirmados/prováveis)
+  const totalCreditsRisco = creditsRisco.reduce((a, t) => a + t.value, 0);
+  const infRatio = totalCreditsRisco > 0 ? suspTotal / totalCreditsRisco : 0;
   const f1 = Math.round(infRatio * 40);
   if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa clara` });
   score += f1;
@@ -4145,11 +4344,28 @@ function eAnalyzeSingle(txns, bank) {
   if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente` });
   score += f4;
 
-  // F5 — Anomalia temporal (pico > 2x média) (peso 15)
+  // F5 — Anomalia temporal com perfil historico (peso 15)
   const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
+  // Usar media do perfil historico (3 meses) como referencia adicional
+  const mediaRef = perfil.avgCredits > 0 ? perfil.avgCredits : mediaHistorica;
+  const ratioAtual = mediaRef > 0 && totalCredits > 0 ? totalCredits / mediaRef : 1;
   const f5 = pctPico >= 3 ? 15 : pctPico >= 2 ? 10 : pctPico >= 1.5 ? 5 : 0;
-  if (f5 > 0) fatores.push({ peso: f5, motivo: `Pico de ${Math.round(pctPico * 10) / 10}x acima da média histórica` });
+  if (f5 > 0) fatores.push({
+    peso: f5,
+    motivo: 'Pico de ' + (Math.round(pctPico * 10)/10) + 'x acima da media historica' +
+      (perfil.avgCredits > 0 ? ' (media ref: ' + fmtBRL(Math.round(perfil.avgCredits)) + ')' : '')
+  });
   score += f5;
+  // F5b — Razao creditos totais vs media historica (peso 8)
+  if (ratioAtual >= 1.8 && perfil.avgCredits > 0) {
+    const f5b = ratioAtual >= 3 ? 8 : ratioAtual >= 2 ? 5 : 3;
+    score += f5b;
+    fatores.push({
+      peso: f5b,
+      motivo: 'Creditos totais ' + (Math.round(ratioAtual * 10)/10) + 'x acima da media historica — ' +
+        'Media: ' + fmtBRL(Math.round(perfil.avgCredits)) + ' | Atual: ' + fmtBRL(Math.round(totalCredits))
+    });
+  }
 
   // F6 — Bônus por investimentos e aluguel
   if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos não declarados' }); }
@@ -4203,16 +4419,22 @@ function eAnalyzeSingle(txns, bank) {
     bank, totalTxns: txns.length, creditCount: credits.length,
     totalCredits, totalDebits, pixTotal, especieTotal, formalTotal, comercialTotal,
     suspCount: suspicious.length, attCount: attention.length,
-    monthsOverLimit, months: months.length, score, confidence, numEvidencias,
+    monthsOverLimit, months: Object.keys(monthly).length, score, confidence, numEvidencias,
     classified, fatores, recorrentes, comercialOculta,
     anomalias, mediaHistorica, pico,
     circularidade, splitPix,
-    quarterly,
+    internos,
+    quarterly, perfil,
+    mesCritico: perfil.mesCritico,
     indiceEspecie: especieRatio,
     indiceConsumo: totalCredits > 0 ? totalDebits / totalCredits : 0,
-    // Campos de schema canônico para auditoria futura
+    // P6: qualidade do parsing
+    parserConfidence: Math.round(parserConfidence * 100) / 100,
+    txnsValidas: txnsValidas.length,
+    txnsDescartadas,
+    // Schema canonico
     tipoAnalise: 'indicador_compatibilidade_fiscal',
-    versaoEngine: 'v3.1',
+    versaoEngine: 'v3.2',
   };
 }
 
@@ -4584,10 +4806,13 @@ function eRenderPreview(c, sources) {
   document.getElementById('pvLevel').style.color = color;
   document.getElementById('pvScore').textContent = c.score + '%';
   document.getElementById('pvScore').style.color = color;
-  const evidStr = c.numEvidencias !== undefined ? ` · ${c.numEvidencias} indicador(es) corroborado(s)` : '';
-  const confStr = c.confidence !== undefined ? ` · confiança ${Math.round(c.confidence * 100)}%` : '';
+  const evidStr = c.numEvidencias !== undefined ? ' · ' + c.numEvidencias + ' indicador(es)' : '';
+  const confStr = c.confidence !== undefined ? ' · confiança ' + Math.round(c.confidence * 100) + '%' : '';
+  const parseStr = c.parserConfidence !== undefined ? ' · leitura ' + Math.round(c.parserConfidence * 100) + '%' : '';
+  const descStr = c.txnsDescartadas > 0 ? ' (' + c.txnsDescartadas + ' descartadas)' : '';
   document.getElementById('pvSub').textContent =
-    `${sources.length} extrato(s) · ${c.totalTxns} transações analisadas${evidStr}${confStr}`;
+    sources.length + ' extrato(s) · ' + c.totalTxns + ' transações analisadas' +
+    evidStr + confStr + parseStr + descStr;
   document.getElementById('pvBarFill').style.background = color;
   setTimeout(() => { document.getElementById('pvBarFill').style.width = c.score + '%'; }, 300);
 
@@ -4620,6 +4845,45 @@ function eRenderPreview(c, sources) {
   const alertsVisiveis = c.alerts.slice(0, 2);
   const alertsBloqueados = c.alerts.slice(2);
   document.getElementById('pvLockedCount').textContent = alertsBloqueados.length;
+
+  // P8: Card mês mais crítico e confiança do parser
+  // Card movimentos internos detectados
+  if (c.internos && c.internos.length > 0) {
+    const internCard = document.createElement('div');
+    internCard.style.cssText = 'grid-column:1/-1;margin-top:4px';
+    const confirmedCount = c.internos.filter(t => t.internalMove === 'confirmed').length;
+    const probableCount  = c.internos.filter(t => t.internalMove === 'probable').length;
+    internCard.innerHTML =
+      '<div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--muted2)">' +
+      '🔄 <strong style="color:var(--text)">' + c.internos.length + ' movimentação(ões) interna(s) identificada(s)</strong> — ' +
+      (confirmedCount > 0 ? confirmedCount + ' confirmada(s)' : '') +
+      (confirmedCount > 0 && probableCount > 0 ? ', ' : '') +
+      (probableCount > 0  ? probableCount  + ' provável(is)' : '') +
+      ' · Excluídas do cálculo de renda nova' +
+      '</div>';
+    document.getElementById('pvMetrics').appendChild(internCard);
+  }
+
+  if (c.mesCritico || c.parserConfidence !== undefined) {
+    const extra = document.createElement('div');
+    extra.style.cssText = 'grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px';
+    if (c.mesCritico) {
+      const m = c.mesCritico;
+      extra.innerHTML += '<div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--muted2)">' +
+        '<strong style="color:var(--text)">📅 Mês mais crítico: ' + m + '</strong>' +
+        (c.perfil && c.perfil.avgCredits > 0 ? ' · Média histórica de créditos: ' + fmtBRL(Math.round(c.perfil.avgCredits)) : '') +
+        '</div>';
+    }
+    if (c.parserConfidence !== undefined) {
+      const pct = Math.round(c.parserConfidence * 100);
+      const pColor = pct >= 90 ? 'var(--green)' : pct >= 70 ? 'var(--orange)' : 'var(--red)';
+      extra.innerHTML += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--muted2)">' +
+        'Confiança de leitura: <strong style="color:' + pColor + '">' + pct + '%</strong>' +
+        (c.txnsDescartadas > 0 ? ' · ' + c.txnsDescartadas + ' transações descartadas' : '') +
+        '</div>';
+    }
+    document.getElementById('pvMetrics').appendChild(extra);
+  }
 
   document.getElementById('pvAlerts').innerHTML = alertsVisiveis.map(a => {
     const cls = a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu';
