@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob: 'self'; form-action https:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
@@ -82,6 +82,9 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   background: rgba(11,17,32,0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -1499,7 +1502,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   nav { padding: 12px 16px; }
 
   /* === HERO MOBILE === */
-  .hero { padding: 72px 16px 40px; }
+  .hero { padding: max(72px, calc(60px + env(safe-area-inset-top))) 16px 40px; }
   .hero h1 { font-size: clamp(24px, 7vw, 36px); letter-spacing: -1px; }
   .hero p { font-size: 14px; }
   .hero-badges { flex-wrap: wrap; gap: 6px; justify-content: center; }
@@ -1628,7 +1631,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 </nav>
 
 <!-- Mobile drawer -->
-<div class="nav-drawer" id="navDrawer" style="display:none">
+<div class="nav-drawer" id="navDrawer">
   <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
   <div class="nav-drawer-panel">
     <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()">📋 Simulador</button>
@@ -2567,13 +2570,12 @@ function toggleDrawer() {
   const hamburger = document.getElementById('navHamburger');
   const isOpen = drawer.classList.toggle('open');
   hamburger.classList.toggle('open', isOpen);
-  drawer.style.display = isOpen ? 'block' : 'none';
   document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 function closeDrawer() {
   const drawer = document.getElementById('navDrawer');
   const hamburger = document.getElementById('navHamburger');
-  if (drawer) { drawer.classList.remove('open'); drawer.style.display = 'none'; }
+  if (drawer) { drawer.classList.remove('open'); }
   if (hamburger) hamburger.classList.remove('open');
   document.body.style.overflow = '';
 }
