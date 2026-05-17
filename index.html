@@ -2229,7 +2229,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
           </div>
           <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
-          <div style="padding:4px 0 0">
+          <div style="padding:4px 0 0;display:flex;flex-direction:column;gap:8px">
+            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px" id="btnExportPDF">
+              📄 Exportar relatório em PDF
+            </button>
             <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
           </div>
         </div>
@@ -2558,6 +2561,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 // ===== NAVIGATION =====
 function _applyPage(id) {
@@ -5570,6 +5574,281 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
   const dbgHd=document.getElementById('pDbgHd');
   if(dbgHd){dbgHd.style.display='flex';document.getElementById('pDbgBd').style.display='';}
 }
+function gerarRelatorioPDF() {
+  const c = _eConsolidated;
+  const sources = _eSources;
+  if (!c || !sources) { alert('Dados da análise não encontrados. Refaça a análise.'); return; }
+
+  const btn = document.getElementById('btnExportPDF');
+  if (btn) { btn.textContent = '⏳ Gerando PDF...'; btn.style.opacity = '0.7'; btn.disabled = true; }
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const W = 210, M = 16, CW = W - M * 2;
+    let Y = 0;
+
+    // ── Paleta ──────────────────────────────────────────────────────────
+    const CLR = {
+      bg:      [11, 17, 32],
+      surface: [17, 24, 39],
+      green:   [0, 217, 110],
+      yellow:  [245, 166, 35],
+      red:     [240, 79, 96],
+      orange:  [249, 115, 22],
+      muted:   [100, 116, 139],
+      text:    [248, 250, 252],
+      border:  [30, 45, 64],
+    };
+
+    function scoreColor(s) {
+      if (s <= 20) return CLR.green;
+      if (s <= 45) return CLR.yellow;
+      if (s <= 70) return CLR.orange;
+      return CLR.red;
+    }
+    function scoreLabel(s) {
+      if (s <= 20) return 'BAIXO RISCO';
+      if (s <= 45) return 'ATENÇÃO';
+      if (s <= 70) return 'RISCO ELEVADO';
+      return 'ATENÇÃO ELEVADA';
+    }
+
+    // ── Helper: texto com quebra automática ─────────────────────────────
+    function addText(text, x, y, opts = {}) {
+      const { size = 9, color = CLR.text, bold = false, maxW = CW, align = 'left' } = opts;
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(String(text), maxW);
+      doc.text(lines, x, y, { align });
+      return lines.length * (size * 0.42);
+    }
+
+    function addRect(x, y, w, h, color, radius = 2) {
+      doc.setFillColor(...color);
+      doc.roundedRect(x, y, w, h, radius, radius, 'F');
+    }
+
+    function addLine(y, color = CLR.border) {
+      doc.setDrawColor(...color);
+      doc.setLineWidth(0.2);
+      doc.line(M, y, W - M, y);
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // HEADER
+    // ════════════════════════════════════════════════════════════════════
+    addRect(0, 0, W, 42, CLR.bg);
+    addText('GUARDIÃO FISCAL', M, 14, { size: 16, bold: true, color: CLR.green });
+    addText('Relatório de Análise Fiscal', M, 21, { size: 9, color: CLR.muted });
+    const now = new Date();
+    const dataStr = now.toLocaleDateString('pt-BR') + ' · ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    addText(dataStr, W - M, 14, { size: 8, color: CLR.muted, align: 'right' });
+    addText('Processamento 100% local · Nenhum dado enviado a servidores', W - M, 20, { size: 7, color: CLR.muted, align: 'right' });
+    Y = 50;
+
+    // ════════════════════════════════════════════════════════════════════
+    // SCORE PRINCIPAL
+    // ════════════════════════════════════════════════════════════════════
+    const sc = c.score;
+    const scColor = scoreColor(sc);
+    const scLabel = scoreLabel(sc);
+
+    addRect(M, Y, CW, 30, CLR.surface);
+    doc.setDrawColor(...CLR.border);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(M, Y, CW, 30, 2, 2, 'S');
+
+    // score número
+    doc.setFontSize(28);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...scColor);
+    doc.text(sc + '%', M + 8, Y + 20);
+
+    // barra de score
+    const barX = M + 40, barY = Y + 10, barW = CW - 50, barH = 5;
+    addRect(barX, barY, barW, barH, CLR.border, 1);
+    addRect(barX, barY, Math.round(barW * sc / 100), barH, scColor, 1);
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...scColor);
+    doc.text(scLabel, barX, Y + 22);
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...CLR.muted);
+    doc.text('Score de Coerência Fiscal · Motor v3', barX, Y + 27);
+
+    Y += 38;
+
+    // ════════════════════════════════════════════════════════════════════
+    // EXTRATOS ANALISADOS
+    // ════════════════════════════════════════════════════════════════════
+    addText('EXTRATOS ANALISADOS', M, Y, { size: 8, color: CLR.muted, bold: true });
+    Y += 6;
+
+    sources.forEach((r, i) => {
+      addRect(M, Y, CW, 14, CLR.surface);
+      const rColor = scoreColor(r.score);
+      addRect(M, Y, 3, 14, rColor, 0);
+      addText(r.bank, M + 6, Y + 5.5, { size: 9, bold: true });
+      addText(`${r.totalTxns} transações · ${r.months} mês(es)`, M + 6, Y + 10, { size: 8, color: CLR.muted });
+      addText(fmtBRL(r.totalCredits), W - M, Y + 5.5, { size: 9, bold: true, color: CLR.green, align: 'right' });
+      addText(r.score + '%', W - M, Y + 10, { size: 8, color: rColor, align: 'right' });
+      Y += 17;
+    });
+
+    Y += 4;
+
+    // ════════════════════════════════════════════════════════════════════
+    // MÉTRICAS
+    // ════════════════════════════════════════════════════════════════════
+    addText('INDICADORES FISCAIS', M, Y, { size: 8, color: CLR.muted, bold: true });
+    Y += 6;
+
+    const icConsumo = Math.round((c.indiceConsumo || 0) * 100);
+    const icEspecie = Math.round((c.indiceEspecie || 0) * 100);
+    const pixPct = c.totalCredits > 0 ? Math.round(c.pixTotal / c.totalCredits * 100) : 0;
+
+    const metricas = [
+      { label: 'Total de créditos', val: fmtBRL(c.totalCredits), sub: c.creditCount + ' entradas', color: CLR.green },
+      { label: 'Pix (% das entradas)', val: fmtBRL(c.pixTotal), sub: pixPct + '%', color: pixPct >= 50 ? CLR.red : pixPct >= 30 ? CLR.yellow : CLR.text },
+      { label: 'Índice de consumo', val: icConsumo + '%', sub: 'saídas/entradas', color: icConsumo >= 120 ? CLR.red : icConsumo >= 90 ? CLR.yellow : CLR.green },
+      { label: 'Espécie', val: icEspecie + '%', sub: 'das entradas', color: icEspecie >= 20 ? CLR.red : icEspecie >= 10 ? CLR.yellow : CLR.green },
+      { label: 'Transações suspeitas', val: String(c.suspCount), sub: 'alto risco', color: c.suspCount > 0 ? CLR.red : CLR.green },
+      { label: 'Padrões recorrentes', val: String(c.recorrentes), sub: 'detectados', color: c.recorrentes > 3 ? CLR.yellow : CLR.text },
+    ];
+
+    const cellW = (CW - 4) / 3;
+    metricas.forEach((m, i) => {
+      const col = i % 3, row = Math.floor(i / 3);
+      const cx2 = M + col * (cellW + 2), cy2 = Y + row * 22;
+      addRect(cx2, cy2, cellW, 19, CLR.surface);
+      addText(m.label, cx2 + 4, cy2 + 5.5, { size: 7, color: CLR.muted, maxW: cellW - 6 });
+      addText(m.val, cx2 + 4, cy2 + 12, { size: 11, bold: true, color: m.color, maxW: cellW - 6 });
+      addText(m.sub, cx2 + 4, cy2 + 17, { size: 7, color: CLR.muted, maxW: cellW - 6 });
+    });
+
+    Y += Math.ceil(metricas.length / 3) * 22 + 6;
+
+    // ════════════════════════════════════════════════════════════════════
+    // ALERTAS
+    // ════════════════════════════════════════════════════════════════════
+    if (c.alerts && c.alerts.length > 0) {
+      addText('ALERTAS DETECTADOS', M, Y, { size: 8, color: CLR.muted, bold: true });
+      Y += 6;
+
+      c.alerts.forEach(a => {
+        const aColor = a.type === 'red' ? CLR.red : a.type === 'yellow' ? CLR.yellow : a.type === 'green' ? CLR.green : [77, 159, 255];
+        const titleLines = doc.splitTextToSize(a.title || '', CW - 12);
+        const textLines  = doc.splitTextToSize(a.text  || '', CW - 12);
+        const blockH = 8 + (titleLines.length * 4.2) + (textLines.length * 3.8) + 4;
+
+        // nova página se necessário
+        if (Y + blockH > 270) { doc.addPage(); addRect(0, 0, W, 10, CLR.bg); Y = 16; }
+
+        addRect(M, Y, CW, blockH, CLR.surface);
+        addRect(M, Y, 3, blockH, aColor, 0);
+
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...aColor);
+        doc.text(titleLines, M + 7, Y + 5.5);
+        const titleH = titleLines.length * 4.2;
+
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...CLR.muted);
+        doc.text(textLines, M + 7, Y + 5.5 + titleH + 1);
+
+        Y += blockH + 3;
+      });
+    }
+
+    Y += 4;
+
+    // ════════════════════════════════════════════════════════════════════
+    // TRANSAÇÕES DE RISCO
+    // ════════════════════════════════════════════════════════════════════
+    const txnsRisco = eAllTxns.filter(t => t.risk !== 'normal').sort((a, b) => {
+      const o = { suspicious: 0, attention: 1 };
+      return (o[a.risk] || 2) - (o[b.risk] || 2) || b.value - a.value;
+    }).slice(0, 30);
+
+    if (txnsRisco.length > 0) {
+      if (Y + 40 > 270) { doc.addPage(); addRect(0, 0, W, 10, CLR.bg); Y = 16; }
+
+      addText('TRANSAÇÕES DE RISCO (' + txnsRisco.length + ')', M, Y, { size: 8, color: CLR.muted, bold: true });
+      Y += 6;
+
+      // cabeçalho tabela
+      addRect(M, Y, CW, 7, CLR.border);
+      const cols = [
+        { label: 'Data',       x: M + 2,       w: 22 },
+        { label: 'Descrição',  x: M + 26,      w: 78 },
+        { label: 'Banco',      x: M + 106,     w: 34 },
+        { label: 'Valor',      x: M + 142,     w: 28 },
+        { label: 'Risco',      x: M + 172,     w: 24 },
+      ];
+      cols.forEach(col => {
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...CLR.muted);
+        doc.text(col.label, col.x, Y + 4.5);
+      });
+      Y += 8;
+
+      txnsRisco.forEach((t, i) => {
+        if (Y + 7 > 275) { doc.addPage(); addRect(0, 0, W, 10, CLR.bg); Y = 16; }
+        const rowColor = i % 2 === 0 ? CLR.surface : CLR.bg;
+        addRect(M, Y, CW, 6.5, rowColor);
+        const rColor = t.risk === 'suspicious' ? CLR.red : CLR.yellow;
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...CLR.text);
+        doc.text(fmtDate(t.date), cols[0].x, Y + 4.2);
+        const descTrunc = doc.splitTextToSize(t.desc || '—', cols[1].w)[0];
+        doc.text(descTrunc, cols[1].x, Y + 4.2);
+        doc.setTextColor(...CLR.muted);
+        doc.text((t.bank || '').slice(0, 12), cols[2].x, Y + 4.2);
+        if (t.value >= 0) { doc.setTextColor(...CLR.green); } else { doc.setTextColor(...CLR.text); }
+        doc.text(fmtBRL(t.value), cols[3].x, Y + 4.2);
+        doc.setTextColor(...rColor);
+        doc.text(t.risk === 'suspicious' ? 'SUSPEITO' : 'ATENÇÃO', cols[4].x, Y + 4.2);
+        Y += 7;
+      });
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // RODAPÉ
+    // ════════════════════════════════════════════════════════════════════
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      addRect(0, 291, W, 8, CLR.bg);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...CLR.muted);
+      doc.text('Guardião Fiscal · oguardiaofiscal.com.br · Simulador educacional e preventivo', M, 296);
+      doc.text('Página ' + p + ' de ' + totalPages, W - M, 296, { align: 'right' });
+      doc.text('Este relatório não substitui a orientação de um contador. LGPD: processamento 100% local.', M, 299);
+    }
+
+    // ── Salvar ──────────────────────────────────────────────────────────
+    const filename = 'guardiao-fiscal-' + now.toISOString().slice(0, 10) + '.pdf';
+    doc.save(filename);
+
+  } catch(err) {
+    console.error('[GuardiaoFiscal] Erro ao gerar PDF:', err);
+    alert('Erro ao gerar o PDF. Tente novamente.');
+  } finally {
+    if (btn) { btn.innerHTML = '📄 Exportar relatório em PDF'; btn.style.opacity = '1'; btn.disabled = false; }
+  }
+}
+
 function eResetAll(){
   eFiles=[];eAllTxns=[];eActiveBankTab='all';
   _eConsolidated=null;_eSources=null;
