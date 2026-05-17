@@ -1514,6 +1514,17 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .sim-wrap { padding: 0 12px 48px; max-width: 100%; box-sizing: border-box; }
   .tabs { flex-wrap: wrap; }
   .tab { font-size: 12px; padding: 8px 10px; }
+  /* quiz body e opções mais compactos no mobile */
+  .q-body { padding: 20px 16px 16px; }
+  .q-title { font-size: 17px; }
+  .q-sub { font-size: 13px; margin-bottom: 16px; }
+  .opt { padding: 12px 14px; gap: 10px; min-height: 52px; }
+  .opt-label { font-size: 14px; }
+  .opt-desc { font-size: 12px; }
+  .risk-pill { font-size: 9px; padding: 2px 7px; max-width: 72px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel-footer { padding: 14px 16px 18px; }
+  .btn-back { padding: 12px 16px; font-size: 13px; min-width: 72px; }
+  .btn-next { padding: 13px; font-size: 14px; }
 
   /* === PAGE-EXTRATO === */
   #page-extrato .sim-wrap {
@@ -2616,6 +2627,18 @@ function closeDrawer() {
 }
 // Fechar drawer e modais com ESC
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeAllOverlays(); } });
+
+// Scroll automático para input ativo no mobile (evita teclado cobrir campo)
+document.addEventListener('focusin', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    const modal = e.target.closest('.modal');
+    if (modal && window.innerWidth < 768) {
+      setTimeout(() => {
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 320); // aguarda teclado abrir (~300ms no iOS)
+    }
+  }
+});
 
 function switchSimTab(tab) {
   if (tab === 'extrato') { showPage('extrato'); return; }
@@ -3937,9 +3960,9 @@ function mRevealResult(pct) {
     <div class="result-glow" style="background:${color}"></div>
     <div style="padding:28px 20px 16px">
       <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center">// score de coerência fiscal</div>
-      <div style="display:flex;align-items:center;gap:20px">
-        <div style="flex-shrink:0">
-          <svg width="220" height="130" viewBox="0 0 220 130">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div style="width:100%;max-width:240px">
+          <svg width="100%" viewBox="0 0 220 130">
             <!-- trilha cinza -->
             <path d="${arcPath(startAngle, startAngle + totalDeg, gaugeR)}"
               fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round"/>
@@ -3969,8 +3992,8 @@ function mRevealResult(pct) {
               style="font-family:Inter,sans-serif;font-size:9px;fill:#64748b">ALTO</text>
           </svg>
         </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-family:Manrope,sans-serif;font-size:17px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
+        <div style="text-align:center;padding:0 8px">
+          <div style="font-family:Manrope,sans-serif;font-size:18px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.65">${desc}</div>
         </div>
       </div>
@@ -4019,8 +4042,8 @@ function mRevealResult(pct) {
       <div style="filter:blur(5px);user-select:none;pointer-events:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px 16px">
         ${lockedData.map(d => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
-            <span style="color:var(--muted2)">${d.label}</span>
-            <span style="font-family:Manrope,sans-serif;font-weight:700;color:var(--red)">${d.val}</span>
+            <span style="color:var(--muted2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${d.label}</span>
+            <span style="font-family:Manrope,sans-serif;font-weight:700;color:var(--red);flex-shrink:0;margin-left:8px">${d.val}</span>
           </div>`).join('')}
       </div>
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,24,39,0.2) 0%,rgba(17,24,39,0.92) 55%);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px">
