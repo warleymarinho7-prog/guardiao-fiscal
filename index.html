@@ -1653,7 +1653,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="split-left">
       <div class="hero-tag">🛡️ Proteção fiscal preventiva · e-Financeira</div>
       <h1>Sua movimentação<br>bancária pode revelar<br><em>sinais que merecem atenção.</em></h1>
-      <p>A Receita Federal já tem seus dados bancários. O Guardião Fiscal mostra — antes de você declarar — se sua movimentação levanta sinais de risco.</p>
+      <p>Movimentações bancárias relevantes podem ser cruzadas com sua declaração de IR. O Guardião Fiscal mostra — antes de você declarar — se sua movimentação levanta sinais de risco.</p>
       <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
         <span class="badge">🔒 Arquivos 100% locais</span>
         <span class="badge">📊 Score com causa</span>
@@ -2293,7 +2293,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <!-- Seção 1: Por que isso existe -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
       <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Por que isso existe</h2>
-      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O e-Financeira obriga bancos a reportar movimentações acima de R$5.000 (pessoa física) diretamente à Receita Federal. Isso significa que, independente do que você declarou, o governo já tem seus dados bancários.</p>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O e-Financeira determina que instituições financeiras reportem movimentações relevantes de pessoas físicas. Movimentações nesse perfil podem ser cruzadas com os dados da sua declaração de IR.</p>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O problema: a maioria das pessoas só descobre a inconsistência quando recebe a notificação de malha fina — depois que a declaração foi entregue. Nesse ponto, a margem de manobra é muito menor.</p>
       <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:18px 20px;margin-top:20px">
         <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">A lógica do Guardião Fiscal</div>
@@ -3541,6 +3541,56 @@ if(typeof pdfjsLib!=='undefined')
 
 const MAX_FILES=5;
 const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
+
+// ── ENGINE CONFIG — limites centralizados e ajustáveis ───────
+const ENGINE_CONFIG = {
+  PIX_LIMIT:        5000,
+  ESPECIE_LIMIT:    3000,
+  SPLIT_PIX_DELTA:  500,
+  SPLIT_PIX_MIN:    4500,
+  SPLIT_PIX_WINDOW: 7,
+  CIRCULAR_RATIO:   0.85,
+  CIRCULAR_HOURS:   72,
+  PDF_MAX_PAGES:    60,
+  PDF_TIMEOUT_MS:   15000,
+};
+
+// ── NORMALIZAÇÃO SEMÂNTICA ────────────────────────────────────
+function normalizeDesc(desc) {
+  if (!desc) return '';
+  let s = desc.toLowerCase();
+  // remove acentos
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // remove emojis (faixa Unicode)
+  s = s.replace(/[\u{1F000}-\u{1FFFF}]/gu, '');
+  // remove IDs/códigos longos (6+ dígitos)
+  s = s.replace(/\b\d{6,}\b/g, '');
+  // remove pontuação
+  s = s.replace(/[^\w\s]/g, ' ');
+  // comprime espaços
+  s = s.replace(/\s+/g, ' ').trim();
+  return s;
+}
+
+// ── DEDUPLICAÇÃO POR FINGERPRINT ─────────────────────────────
+function txnFingerprint(t) {
+  const dateStr = t.date instanceof Date
+    ? t.date.toISOString().slice(0, 10)
+    : String(t.date || '');
+  const valStr  = Math.abs(t.value).toFixed(2);
+  const descStr = normalizeDesc(t.desc).slice(0, 30);
+  return dateStr + '|' + valStr + '|' + descStr;
+}
+
+function deduplicateTxns(txns) {
+  const seen = new Set();
+  return txns.filter(function(t) {
+    const fp = txnFingerprint(t);
+    if (seen.has(fp)) return false;
+    seen.add(fp);
+    return true;
+  });
+}
 let eFiles=[];
 let eAllTxns=[];
 let eActiveBankTab='all';
@@ -3764,7 +3814,20 @@ function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toL
 function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;let m;while((m=re.exec(content))!==null){const b=m[1],date=eParseDate(eGetTag(b,'DTPOSTED')),value=parseFloat(eGetTag(b,'TRNAMT')||'0'),desc=(eGetTag(b,'MEMO')||eGetTag(b,'NAME')||'Sem descrição').trim();if(date)txns.push({date,desc,value});}if(txns.length>0)return txns;const lines=content.split('\n');let cur={};for(const line of lines){const t=line.trim();if(t==='<STMTTRN>'){cur={};continue}if(t==='</STMTTRN>'){if(cur.date&&cur.value!==undefined)txns.push({...cur});cur={};continue}const mm=t.match(/^<([A-Z]+)>(.+)$/);if(mm){const[,tg,v]=mm;if(tg==='DTPOSTED')cur.date=eParseDate(v);if(tg==='TRNAMT')cur.value=parseFloat(v)||0;if((tg==='MEMO'||tg==='NAME')&&!cur.desc)cur.desc=v.trim();}}return txns;}
 function eGetTag(str,name){const r=new RegExp(`<${name}>([^<]+)`,'i');const m=str.match(r);return m?m[1].trim():null;}
 function eParseGeneric(lines){if(lines.length<2)return[];const sep=eDetectSep(lines[0]);const hdr=eSplitCSV(lines[0],sep).map(c=>c.toLowerCase().replace(/"/g,'').trim());const ci=h=>{for(const n of h){const i=hdr.findIndex(x=>x.includes(n));if(i>=0)return i;}return -1;};const iDt=ci(['data','date','dt lançamento','dt mov']);const iDsc=ci(['descrição','descricao','histórico','historico','memo','title','nome','name']);const iVl=ci(['valor','value','amount','vlr']);const iCr=ci(['crédito','credito','créd']);const iDb=ci(['débito','debito','déb']);return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l,sep);if(c.length<2)return null;const date=iDt>=0?eParseDate(c[iDt]):eParseDate(c[0]);const desc=iDsc>=0?c[iDsc].replace(/"/g,'').trim():c[1]?.trim()||'';let value=0;if(iVl>=0)value=eParseBRL(c[iVl]);else if(iCr>=0&&iDb>=0){const cr=eParseBRL(c[iCr]||''),db=eParseBRL(c[iDb]||'');value=cr>0?cr:-Math.abs(db);}else for(let j=c.length-1;j>=0;j--){const v=eParseBRL(c[j]);if(!isNaN(v)&&v!==0){value=v;break}}return desc?{date,desc,value}:null;}).filter(Boolean);}
-async function eParsePDF(buffer){const copy=buffer.slice(0);const pdf=await pdfjsLib.getDocument({data:copy}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();let lastY=null,line='';for(const item of tc.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}line+=(item.str||'')+' ';lastY=y;}if(line.trim())text+=line.trim()+'\n';}return text;}
+async function eParsePDF(buffer){
+  const copy=buffer.slice(0);
+  let pdf;
+  try {
+    const loadTask = pdfjsLib.getDocument({data:copy});
+    const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error('PDF timeout')), ENGINE_CONFIG.PDF_TIMEOUT_MS));
+    pdf = await Promise.race([loadTask.promise, timeout]);
+  } catch(e) {
+    throw new Error('PDF corrompido ou ilegivel: ' + e.message);
+  }
+  if (pdf.numPages > ENGINE_CONFIG.PDF_MAX_PAGES) {
+    throw new Error('PDF com mais de ' + ENGINE_CONFIG.PDF_MAX_PAGES + ' paginas. Exporte apenas o periodo necessario.');
+  }
+  let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();let lastY=null,line='';for(const item of tc.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}line+=(item.str||'')+' ';lastY=y;}if(line.trim())text+=line.trim()+'\n';}return text;}
 function eParsePDFText(text){
   const lines=text.split('\n').filter(l=>l.trim());
   const txns=[];
@@ -3806,7 +3869,7 @@ function catMatch(desc, cats) {
 
 // ── Classificador semântico de transação ───────────────────────
 function eClassifyTxn(t) {
-  const d = t.desc.toLowerCase();
+  const d = normalizeDesc(t.desc);
   const v = t.value;
 
   if (v <= 0) return { risk: 'normal', flag: null, cat: 'saida' };
@@ -3900,6 +3963,67 @@ function analiseTemporal(monthly) {
 }
 
 // ── Motor principal — análise de um extrato ────────────────────
+// ── DETECCAO DE CIRCULARIDADE FINANCEIRA ─────────────────────
+// Dinheiro que entra e sai em <= CIRCULAR_HOURS horas
+function detectarCircularidade(txns) {
+  const sorted = txns.slice().sort((a, b) => (a.date || 0) - (b.date || 0));
+  const eventos = [];
+  for (let i = 0; i < sorted.length; i++) {
+    const t = sorted[i];
+    if (t.value <= 0) continue;
+    // procurar saida equivalente nas proximas CIRCULAR_HOURS horas
+    let saidaAcum = 0;
+    for (let j = i + 1; j < sorted.length; j++) {
+      const u = sorted[j];
+      if (!u.date || !t.date) break;
+      const diffH = (u.date - t.date) / 3600000;
+      if (diffH > ENGINE_CONFIG.CIRCULAR_HOURS) break;
+      if (u.value < 0) saidaAcum += Math.abs(u.value);
+    }
+    const ratio = t.value > 0 ? saidaAcum / t.value : 0;
+    if (ratio >= ENGINE_CONFIG.CIRCULAR_RATIO) {
+      eventos.push({ entrada: t.value, saidaRatio: Math.round(ratio * 100), desc: t.desc });
+    }
+  }
+  return eventos;
+}
+
+// ── DETECCAO DE SPLIT PIX ─────────────────────────────────────
+// Series de Pix proximos ao threshold para evitar notificacao
+function detectarSplitPix(txns) {
+  const pixAltos = txns.filter(t =>
+    t.value >= ENGINE_CONFIG.SPLIT_PIX_MIN &&
+    t.value < ENGINE_CONFIG.PIX_LIMIT &&
+    normalizeDesc(t.desc).includes('pix')
+  ).sort((a, b) => (a.date || 0) - (b.date || 0));
+
+  const series = [];
+  for (let i = 0; i < pixAltos.length - 1; i++) {
+    const a = pixAltos[i], b = pixAltos[i + 1];
+    if (!a.date || !b.date) continue;
+    const diffDays = (b.date - a.date) / 86400000;
+    const valueDiff = Math.abs(a.value - b.value);
+    if (diffDays <= ENGINE_CONFIG.SPLIT_PIX_WINDOW && valueDiff <= ENGINE_CONFIG.SPLIT_PIX_DELTA) {
+      series.push({ valores: [a.value, b.value], diffDays: Math.round(diffDays) });
+    }
+  }
+  return series;
+}
+
+// ── CONFIDENCE SCORE ──────────────────────────────────────────
+// Pontua a confianca da classificacao com base em sinais multiplos
+function calcConfidence(signals) {
+  // signals: array de booleanos/pesos que corroboram o risco
+  const hits = signals.filter(Boolean).length;
+  const base = hits / signals.length;
+  // Escala nao-linear: 1 sinal = 0.4, 2 = 0.65, 3+ = 0.80+
+  if (hits === 0) return 0.10;
+  if (hits === 1) return 0.40;
+  if (hits === 2) return 0.65;
+  if (hits === 3) return 0.80;
+  return Math.min(0.97, 0.80 + (hits - 3) * 0.05);
+}
+
 function eAnalyzeSingle(txns, bank) {
   if (!txns || txns.length === 0) return null;
 
@@ -3911,7 +4035,7 @@ function eAnalyzeSingle(txns, bank) {
     if (!monthly[k]) monthly[k] = { total: 0, pix: 0, especie: 0, count: 0 };
     monthly[k].total += t.value;
     monthly[k].count++;
-    const d = t.desc.toLowerCase();
+    const d = normalizeDesc(t.desc);
     if (d.includes('pix') || d.includes('transf')) monthly[k].pix += t.value;
     if (catMatch(d, CAT.especie)) monthly[k].especie += t.value;
   });
@@ -3932,9 +4056,11 @@ function eAnalyzeSingle(txns, bank) {
   const months        = Object.keys(monthly).filter(k => k !== 'unk').sort();
   const monthsOverLimit = Object.values(monthly).filter(m => m.pix >= 5000).length;
 
-  // Recorrência e análise temporal
+  // Recorrência, análise temporal, circularidade e split Pix
   const { recorrentes, comercialOculta } = detectarRecorrencia(txns);
   const { anomalias, mediaHistorica, pico } = analiseTemporal(monthly);
+  const circularidade = detectarCircularidade(txns);
+  const splitPix = detectarSplitPix(txns);
 
   // ── Cálculo de score com pesos ponderados ──────────────────
   let score = 0;
@@ -3948,7 +4074,7 @@ function eAnalyzeSingle(txns, bank) {
 
   // F2 — Pix acima do limite e-Financeira (peso 20)
   const f2 = Math.min(20, monthsOverLimit * 7);
-  if (f2 > 0) fatores.push({ peso: f2, motivo: `Pix acima de R$5k em ${monthsOverLimit} mês(es)` });
+  if (f2 > 0) fatores.push({ peso: f2, motivo: `Pix acima do limite e-Financeira em ${monthsOverLimit} mês(es)` });
   score += f2;
 
   // F3 — Depósito em espécie (peso 20)
@@ -3972,15 +4098,41 @@ function eAnalyzeSingle(txns, bank) {
   if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos não declarados' }); }
   if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel' }); }
 
+  // F7 — Circularidade financeira (peso 12)
+  if (circularidade.length > 0) {
+    const f7 = Math.min(12, circularidade.length * 6);
+    score += f7;
+    fatores.push({ peso: f7, motivo: `${circularidade.length} entrada(s) com saída rápida (possível circularidade)` });
+  }
+
+  // F8 — Split de Pix abaixo do threshold (peso 10)
+  if (splitPix.length > 0) {
+    const f8 = Math.min(10, splitPix.length * 5);
+    score += f8;
+    fatores.push({ peso: f8, motivo: `${splitPix.length} série(s) de Pix fracionados próximos a R$${ENGINE_CONFIG.PIX_LIMIT.toLocaleString('pt-BR')}` });
+  }
+
   score = Math.min(100, Math.max(0, Math.round(score)));
+
+  // Confidence score — baseado em número de fatores corroborados
+  const confidence = calcConfidence([
+    infRatio > 0.2,
+    monthsOverLimit > 0,
+    especieRatio > 0.1,
+    comercialOculta.length > 0,
+    anomalias.length > 0,
+    circularidade.length > 0,
+    splitPix.length > 0,
+  ]);
 
   return {
     bank, totalTxns: txns.length, creditCount: credits.length,
     totalCredits, totalDebits, pixTotal, especieTotal, formalTotal, comercialTotal,
     suspCount: suspicious.length, attCount: attention.length,
-    monthsOverLimit, months: months.length, score,
+    monthsOverLimit, months: months.length, score, confidence,
     classified, fatores, recorrentes, comercialOculta,
     anomalias, mediaHistorica, pico,
+    circularidade, splitPix,
     indiceEspecie: especieRatio,
     indiceConsumo: totalCredits > 0 ? totalDebits / totalCredits : 0,
   };
@@ -4034,7 +4186,7 @@ function eConsolidate(results) {
     alerts.push({
       type: 'red', icon: '⚠️',
       title: `Pix acima de R$5.000/mês em ${totalMOL} mês(es) — ${fmtBRL(pixTotal)} total`,
-      text: `Bancos reportam automaticamente à Receita toda movimentação mensal de Pix acima desse valor via sistema e-Financeira. Cada mês é reportado individualmente.`
+      text: `Movimentações mensais de Pix nesse patamar podem ser objeto de cruzamentos fiscais via sistema e-Financeira. Cada mês é reportado individualmente.`
     });
   }
 
@@ -4297,7 +4449,7 @@ async function eRunAll(){
     // Label mostra banco + conta + formatos usados
     const fmtLabel=g.formatos.length>1?` [${g.formatos.join('+')}]`:'';
     const bankLabel=g.conta?`${g.banco} ···${g.conta.slice(-4)}${fmtLabel}`:g.banco+fmtLabel;
-    const r=eAnalyzeSingle(g.txns,bankLabel);
+    const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel);
     if(r) results.push(r);
   }
 
