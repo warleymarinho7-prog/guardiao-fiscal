@@ -1109,8 +1109,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 @media (min-width: 1100px) {
   /* Wrapper que contém hero + simulador lado a lado */
   #page-home > .hero,
-  #page-home > .sim-wrap {
-    display: none; /* esconde versão mobile */
+  #page-home > #quizWrap {
+    display: none; /* esconde versão mobile no desktop */
   }
 
   /* Layout split visível só no desktop */
@@ -1616,7 +1616,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
   </div>
   <div class="nav-links">
-    <button class="nav-link" onclick="showPage('home')">Simulador</button>
+    <button class="nav-link" onclick="showPage('home')">Início</button>
     <button class="nav-link" onclick="showPage('extrato')">Análise de Extrato</button>
     <button class="nav-link" onclick="showPage('planos')">Planos</button>
     <button class="nav-link" onclick="showPage('institucional')">Institucional</button>
@@ -1633,7 +1633,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <div class="nav-drawer" id="navDrawer" style="display:none">
   <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
   <div class="nav-drawer-panel">
-    <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()">📋 Simulador</button>
+    <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()">🏠 Início</button>
     <button class="nav-drawer-link" id="drawerPlanos" onclick="showPage('planos');closeDrawer()">💎 Planos</button>
     <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()">🛡️ Institucional</button>
     <div class="nav-drawer-divider"></div>
@@ -1685,78 +1685,110 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
     </div>
 
-    <!-- DIREITA: dashboard mockup -->
-        <div class="split-right">
+    <!-- DIREITA: quiz desktop -->
+    <div class="split-right">
       <div class="sim-wrap">
-            <!-- tabs -->
-            <div class="tabs">
-              <button class="tab active" id="tabQ" onclick="switchSimTab('perguntas')">
-                📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
-              </button>
-
+        <div class="tabs">
+          <button class="tab active" id="tabQ" onclick="switchSimTab('perguntas')">
+            📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
+          </button>
+        </div>
+        <div id="simPerguntas">
+          <div class="panel" id="questionPanel">
+            <div class="panel-header">
+              <div class="panel-label">// análise de risco fiscal</div>
+              <div class="steps" id="stepsBar"></div>
             </div>
-
-            <!-- simulador -->
-            <div id="simPerguntas">
-              <div class="panel" id="questionPanel">
-                <div class="panel-header">
-                  <div class="panel-label">// análise de risco fiscal</div>
-                  <div class="steps" id="stepsBar"></div>
-                </div>
-                <div class="q-body" id="qBody"></div>
-                <div class="panel-footer">
-                  <button class="btn-back" id="btnBack" onclick="prevQ()" disabled>← Voltar</button>
-                  <button class="btn-next" id="btnNext" onclick="nextQ()">Continuar →</button>
-                </div>
-              </div>
-
-              <div id="resultPanel">
-                <div class="result-box">
-                  <div class="result-hero" id="resultHero"></div>
-                  <div class="alerts" id="resultAlerts"></div>
-
-                  <!-- upgrade cards no resultado -->
-                  <div class="result-upgrade">
-                    <div class="upgrade-label">// ativar monitoramento real</div>
-                    <div class="upgrade-cards">
-                      <button class="upgrade-card" onclick="openCheckout('avulso')">
-                        <div class="uc-icon uc-icon-avulso">📄</div>
-                        <div class="uc-info">
-                          <div class="uc-name">Análise Avulsa</div>
-                          <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
-                        </div>
-                        <div class="uc-price">
-                          <div class="uc-value">R$34,90</div>
-                          <div class="uc-period">uso único</div>
-                        </div>
-                      </button>
-
-                      <button class="upgrade-card featured" onclick="openCheckout('pro')">
-                        <div class="uc-icon uc-icon-pro">🛡️</div>
-                        <div class="uc-info">
-                          <div class="best-tag">MELHOR CUSTO</div>
-                          <div class="uc-name">Plano Pro</div>
-                          <div class="uc-desc"><span id="ucProText">Análises ilimitadas + múltiplos extratos + histórico</span></div>
-                        </div>
-                        <div class="uc-price">
-                          <div class="uc-value">R$29,90</div>
-                          <div class="uc-period">/mês</div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="result-cta">
-                    <button class="btn-restart" onclick="restart()">Refazer simulação</button>
-                  </div>
-                </div>
-              </div>
+            <div class="q-body" id="qBody"></div>
+            <div class="panel-footer">
+              <button class="btn-back" id="btnBack" onclick="prevQ()" disabled>← Voltar</button>
+              <button class="btn-next" id="btnNext" onclick="nextQ()">Continuar →</button>
             </div>
-
           </div>
+          <div id="resultPanel">
+            <div class="result-box">
+              <div class="result-hero" id="resultHero"></div>
+              <div class="alerts" id="resultAlerts"></div>
+              <div class="result-upgrade">
+                <div class="upgrade-label">// ativar monitoramento real</div>
+                <div class="upgrade-cards">
+                  <button class="upgrade-card" onclick="openCheckout('avulso')">
+                    <div class="uc-icon uc-icon-avulso">📄</div>
+                    <div class="uc-info">
+                      <div class="uc-name">Análise Avulsa</div>
+                      <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
+                    </div>
+                    <div class="uc-price">
+                      <div class="uc-value">R$34,90</div>
+                      <div class="uc-period">uso único</div>
+                    </div>
+                  </button>
+                  <button class="upgrade-card featured" onclick="openCheckout('pro')">
+                    <div class="uc-icon uc-icon-pro">🛡️</div>
+                    <div class="uc-info">
+                      <div class="best-tag">MELHOR CUSTO</div>
+                      <div class="uc-name">Plano Pro</div>
+                      <div class="uc-desc"><span id="ucProText">Análises ilimitadas + múltiplos extratos + histórico</span></div>
+                    </div>
+                    <div class="uc-price">
+                      <div class="uc-value">R$29,90</div>
+                      <div class="uc-period">/mês</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+              <div class="result-cta">
+                <button class="btn-restart" onclick="restart()">Refazer simulação</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <!-- FIM SPLIT HERO -->
+
+  <!-- QUIZ MOBILE — IDs únicos, renderizado pelo JS separado -->
+  <div class="sim-wrap" id="quizWrap">
+    <div class="tabs">
+      <button class="tab active">📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span></button>
+    </div>
+    <div class="panel" id="mQuestionPanel">
+      <div class="panel-header">
+        <div class="panel-label">// análise de risco fiscal</div>
+        <div class="steps" id="mStepsBar"></div>
+      </div>
+      <div class="q-body" id="mQBody"></div>
+      <div class="panel-footer">
+        <button class="btn-back" id="mBtnBack" onclick="mPrevQ()" disabled>← Voltar</button>
+        <button class="btn-next" id="mBtnNext" onclick="mNextQ()">Continuar →</button>
+      </div>
+    </div>
+    <div id="mResultPanel" style="display:none">
+      <div class="result-box">
+        <div class="result-hero" id="mResultHero"></div>
+        <div class="alerts" id="mResultAlerts"></div>
+        <div class="result-upgrade">
+          <div class="upgrade-label">// ativar monitoramento real</div>
+          <div class="upgrade-cards">
+            <button class="upgrade-card" onclick="openCheckout('avulso')">
+              <div class="uc-icon uc-icon-avulso">📄</div>
+              <div class="uc-info"><div class="uc-name">Análise Avulsa</div><div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div></div>
+              <div class="uc-price"><div class="uc-value">R$34,90</div><div class="uc-period">uso único</div></div>
+            </button>
+            <button class="upgrade-card featured" onclick="openCheckout('pro')">
+              <div class="uc-icon uc-icon-pro">🛡️</div>
+              <div class="uc-info"><div class="best-tag">MELHOR CUSTO</div><div class="uc-name">Plano Pro</div><div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div></div>
+              <div class="uc-price"><div class="uc-value">R$29,90</div><div class="uc-period">/mês</div></div>
+            </button>
+          </div>
+        </div>
+        <div class="result-cta">
+          <button class="btn-restart" onclick="mRestart()">Refazer simulação</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="hero">
     <div class="hero-tag">🛡️ Proteção fiscal preventiva</div>
@@ -1766,10 +1798,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <span class="badge">🔒 Dados 100% no seu dispositivo</span>
       <span class="badge">⚡ Resultado em 2 minutos</span>
       <span class="badge">✅ Gratuito para começar</span>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px">
-      <button onclick="showPage('extrato')" style="padding:13px 22px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s">⚠️ Verificar sinais no extrato →</button>
-
     </div>
   </div>
 
@@ -3494,6 +3522,179 @@ function restart() {
   renderQ();
 }
 
+// ===== QUIZ MOBILE — mesmo engine, IDs m* =====
+let mCur = 0, mAnswers = [], mSel = null;
+
+function mRenderQ() {
+  const q = questions[mCur];
+  const isMulti = !!q.multi;
+  const multiSel = mAnswers[mCur]?.multiSel || [];
+
+  const bar = document.getElementById('mStepsBar');
+  if (bar) bar.innerHTML = questions.map((_,i) => {
+    let cls = 'step-dot';
+    if(i < mCur) cls += ' done';
+    else if(i === mCur) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  const body = document.getElementById('mQBody');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="q-num">${q.tag}</div>
+    <div class="q-title">${q.title}</div>
+    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Manrope,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
+    <div class="options">
+      ${q.opts.map((o,i) => {
+        const isSel = isMulti ? multiSel.includes(i) : (mSel?.index === i);
+        const radioStyle = isMulti ? 'border-radius:5px' : '';
+        return `<button class="opt${isSel?' sel':''}" onclick="${isMulti ? `mToggleMulti(${i})` : `mChoose(${i},${o.risk})`}">
+          <div class="opt-radio" style="${radioStyle}">${isSel?'<span style="font-size:10px;color:#000;font-weight:800">✓</span>':''}</div>
+          <div class="opt-text">
+            <div class="opt-label">${o.label}</div>
+            <div class="opt-desc">${o.desc}</div>
+          </div>
+          <span class="risk-pill ${o.pill}">${o.pillText}</span>
+        </button>`;
+      }).join('')}
+    </div>
+  `;
+
+  body.classList.remove('q-slide');
+  void body.offsetWidth;
+  body.classList.add('q-slide');
+
+  const bb = document.getElementById('mBtnBack');
+  const nx = document.getElementById('mBtnNext');
+  if (bb) bb.disabled = mCur === 0;
+  if (nx) {
+    const hasAns = isMulti ? multiSel.length > 0 : mSel !== null;
+    nx.classList.toggle('on', hasAns);
+    nx.textContent = mCur === questions.length-1 ? 'Ver resultado →' : 'Continuar →';
+  }
+}
+
+function mChoose(index, risk) {
+  mSel = { index, risk };
+  const panel = document.getElementById('mQuestionPanel');
+  if (!panel) return;
+  panel.querySelectorAll('.opt').forEach((el,i) => {
+    el.classList.toggle('sel', i===index);
+    el.querySelector('.opt-radio').innerHTML = i===index ? '<span style="font-size:10px;color:#000;font-weight:800">✓</span>' : '';
+  });
+  const nx = document.getElementById('mBtnNext');
+  if (nx) nx.classList.add('on');
+}
+
+function mToggleMulti(index) {
+  const q = questions[mCur];
+  if (!mAnswers[mCur]) mAnswers[mCur] = { multiSel: [], risk: 0 };
+  const ms = mAnswers[mCur].multiSel;
+  const pos = ms.indexOf(index);
+  if (pos === -1) ms.push(index); else ms.splice(pos, 1);
+  const total = ms.reduce((a,i) => a + q.opts[i].risk, 0);
+  mAnswers[mCur].risk = Math.min(5, total + (ms.length >= 3 ? 1 : 0));
+  const panel = document.getElementById('mQuestionPanel');
+  if (panel) panel.querySelectorAll('.opt').forEach((el,i) => {
+    const isSel = ms.includes(i);
+    el.classList.toggle('sel', isSel);
+    el.querySelector('.opt-radio').innerHTML = isSel ? '<span style="font-size:10px;color:#000;font-weight:800">✓</span>' : '';
+  });
+  const nx = document.getElementById('mBtnNext');
+  if (nx) nx.classList.toggle('on', ms.length > 0);
+}
+
+function mNextQ() {
+  const q = questions[mCur];
+  if (q.multi) {
+    if (!mAnswers[mCur] || mAnswers[mCur].multiSel.length === 0) return;
+  } else {
+    if (!mSel) return;
+    mAnswers[mCur] = mSel;
+  }
+  if (mCur < questions.length-1) {
+    mCur++;
+    mSel = (mAnswers[mCur] && !questions[mCur].multi) ? mAnswers[mCur] : null;
+    mRenderQ();
+  } else {
+    mShowResult();
+  }
+}
+
+function mPrevQ() {
+  if (mCur > 0) {
+    mCur--;
+    mSel = (mAnswers[mCur] && !questions[mCur].multi) ? mAnswers[mCur] : null;
+    mRenderQ();
+  }
+}
+
+function mShowResult() {
+  const qp = document.getElementById('mQuestionPanel');
+  const rp = document.getElementById('mResultPanel');
+  if (qp) qp.style.display = 'none';
+  if (rp) rp.style.display = 'block';
+
+  const total = mAnswers.reduce((a,b) => a + (b?.risk || 0), 0);
+  const pct = Math.min(100, Math.round((total / 19) * 100));
+
+  let level, color, emoji, desc;
+  const alertsData = [];
+
+  if (pct <= 20) {
+    level = 'Baixo risco fiscal'; color = '#00d96e'; emoji = '🟢';
+    desc = 'Seu perfil está dentro do padrão esperado pela Receita Federal.';
+    alertsData.push({ cls:'alert-green', icon:'✅', title:'Fontes de renda consistentes', text:'Seu perfil não apresenta sinais de incompatibilidade entre movimentação bancária e o que a Receita espera declarado.' });
+    alertsData.push({ cls:'alert-green', icon:'💡', title:'Recomendação preventiva', text:'Mantenha comprovantes de todas as deduções por pelo menos 5 anos.' });
+  } else if (pct <= 55) {
+    level = 'Atenção — risco moderado'; color = '#f5a623'; emoji = '🟡';
+    desc = 'Seu perfil apresenta pontos que merecem revisão antes da entrega da declaração.';
+    alertsData.push({ cls:'alert-yellow', icon:'⚠️', title:'Pontos que merecem revisão', text:'Seus dados apresentam aspectos que um contador deve avaliar antes do prazo de entrega.' });
+    alertsData.push({ cls:'alert-green', icon:'💡', title:'Ainda dá tempo de regularizar', text:'Uma retificação preventiva custa muito menos do que uma autuação.' });
+  } else {
+    level = 'Risco elevado'; color = '#f04f60'; emoji = '🔴';
+    desc = 'Seu perfil apresenta inconsistências que a Receita Federal pode estar cruzando agora.';
+    alertsData.push({ cls:'alert-red', icon:'🚨', title:'Múltiplos fatores de risco simultâneos', text:'Seu perfil ativa vários critérios de atenção da Receita ao mesmo tempo.' });
+    alertsData.push({ cls:'alert-yellow', icon:'💡', title:'Ação urgente recomendada', text:'É possível retificar antes de qualquer notificação. Procure um contador agora.' });
+  }
+
+  const rh = document.getElementById('mResultHero');
+  if (rh) rh.innerHTML = `
+    <div class="result-glow" style="background:${color}"></div>
+    <div class="result-sublabel">// diagnóstico fiscal</div>
+    <span class="result-emoji">${emoji}</span>
+    <div class="result-level" style="color:${color}">${level}</div>
+    <div class="result-desc">${sanitize(desc)}</div>
+    <div class="score-bar-bg"><div class="score-bar-fill" id="mScoreBar" style="width:0%;background:${color}"></div></div>
+    <div class="score-label">Índice de risco estimado: ${pct}%</div>
+  `;
+
+  const visiveis = alertsData.slice(0, 2);
+  const bloqueados = alertsData.slice(2);
+  let html = visiveis.map(a =>
+    `<div class="alert-item ${sanitize(a.cls)}">
+      <span class="alert-icon">${a.icon}</span>
+      <span><strong style="font-weight:600;display:block;margin-bottom:2px">${sanitize(a.title)}</strong>${sanitize(a.text)}</span>
+    </div>`
+  ).join('');
+  if (bloqueados.length > 0) {
+    html += `<div class="alert-paywall"><div class="apw-lock">🔍</div><div class="apw-title">Encontramos sinais que merecem atenção</div><div class="apw-desc">Desbloqueie a análise real com seu extrato bancário.</div><button class="apw-btn" onclick="openCheckout('avulso')">Desbloquear análise completa → R$34,90</button><div class="apw-or">ou</div><button class="apw-btn-sec" onclick="openCheckout('pro')">Plano Pro — R$29,90/mês</button></div>`;
+  }
+
+  const ra = document.getElementById('mResultAlerts');
+  if (ra) ra.innerHTML = html;
+  setTimeout(() => { const sb = document.getElementById('mScoreBar'); if(sb) sb.style.width = pct + '%'; }, 300);
+}
+
+function mRestart() {
+  mCur = 0; mAnswers = []; mSel = null;
+  const rp = document.getElementById('mResultPanel');
+  const qp = document.getElementById('mQuestionPanel');
+  if (rp) rp.style.display = 'none';
+  if (qp) qp.style.display = 'block';
+  mRenderQ();
+}
+
 // Abre o quiz sempre limpo — usado pelo botão "Fazer quiz gratuito"
 function openQuiz() {
   // Navega para home se necessário
@@ -3520,6 +3721,7 @@ function openQuiz() {
 // ── Inicialização da UI — aguarda DOM pronto ──
 document.addEventListener('DOMContentLoaded', function() {
   renderQ();
+  mRenderQ();
   initProFreeMode();
   // Anima o dashboard mockup no hero desktop
   setTimeout(() => {
