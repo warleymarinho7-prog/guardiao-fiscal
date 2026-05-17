@@ -611,18 +611,20 @@ nav {
 
 .paywall-actions { display:flex; flex-direction:column; gap:8px; width:100%; }
 .btn-unlock-avulso {
-  width:100%; padding:13px;
+  width:100%; padding:12px 10px;
   background:rgba(255,193,7,0.12); border:1px solid rgba(255,193,7,0.3);
   border-radius:10px; color:var(--yellow);
-  font-family:Manrope,sans-serif; font-size:13px; font-weight:700;
+  font-family:Manrope,sans-serif; font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
+  line-height:1.4; text-align:center;
 }
 .btn-unlock-avulso:hover { background:rgba(255,193,7,0.2); }
 .btn-unlock-pro {
-  width:100%; padding:13px;
+  width:100%; padding:12px 10px;
   background:var(--green); border:none; border-radius:10px;
-  color:#000; font-family:Manrope,sans-serif; font-size:13px; font-weight:700;
+  color:#000; font-family:Manrope,sans-serif; font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
+  line-height:1.4; text-align:center;
 }
 .btn-unlock-pro:hover { background:#2563eb; }
 
@@ -1588,6 +1590,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .modal { padding: 24px 16px !important; margin: 0 !important;
            border-radius: 16px 16px 0 0 !important; }
   .overlay { align-items: flex-end !important; }
+  .form-row { flex-direction: column; gap: 0; }
 
   /* === RESULTADO QUIZ === */
   #resultPanel { padding: 16px 12px; }
@@ -2138,14 +2141,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <!-- Score e nível — VISÍVEL -->
             <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:12px">
     <div style="font-size:10px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-      <div id="pvEmoji" style="font-size:36px"></div>
-      <div>
-        <div id="pvLevel" style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px"></div>
-        <div id="pvSub" style="font-size:12px;color:var(--muted2);margin-top:2px"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <div id="pvEmoji" style="font-size:32px;flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div id="pvLevel" style="font-family:Manrope,sans-serif;font-size:clamp(15px,4vw,20px);font-weight:800;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        <div id="pvSub" style="font-size:11px;color:var(--muted2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
       </div>
-      <div style="margin-left:auto;text-align:right">
-        <div id="pvScore" style="font-family:Manrope,sans-serif;font-size:32px;font-weight:800;letter-spacing:-2px"></div>
+      <div style="flex-shrink:0;text-align:right">
+        <div id="pvScore" style="font-family:Manrope,sans-serif;font-size:28px;font-weight:800;letter-spacing:-2px"></div>
         <div style="font-size:10px;color:var(--muted)">risco fiscal</div>
       </div>
     </div>
@@ -2155,7 +2158,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             </div>
 
             <!-- Métricas rápidas — VISÍVEL -->
-            <div id="pvMetrics" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"></div>
+            <div id="pvMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px"></div>
 
             <!-- 2 primeiros alertas — VISÍVEL -->
             <div id="pvAlerts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
@@ -2179,8 +2182,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="font-size:24px;margin-bottom:6px">🔒</div>
       <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
       <div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:16px;line-height:1.5">Desbloqueie para ver cada transação de risco com valor exato, relatório PDF e orientação fiscal personalizada.</div>
-      <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
-      <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%">📄 Análise avulsa — R$34,90</button>
+      <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
+      <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — R$34,90</button>
     </div>
             </div>
 
@@ -2230,7 +2233,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
           <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
           <div style="padding:4px 0 0;display:flex;flex-direction:column;gap:8px">
-            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px" id="btnExportPDF">
+            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;line-height:1.4" id="btnExportPDF">
               📄 Exportar relatório em PDF
             </button>
             <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
