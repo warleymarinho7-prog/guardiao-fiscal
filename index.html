@@ -1655,7 +1655,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <span class="badge">✅ Gratuito para começar</span>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px">
-      <button onclick="switchSimTab('perguntas');document.querySelector('.sim-wrap').scrollIntoView({behavior:'smooth'})" style="padding:13px 22px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s">📋 Simulador rápido →</button>
+      <button onclick="openQuiz()" style="padding:13px 22px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s">📋 Simulador rápido →</button>
       <button onclick="switchSimTab('extrato');setTimeout(()=>{const el=document.getElementById('extStep2')||document.querySelector('.sim-wrap');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},100)" style="padding:13px 22px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:12px;color:var(--green);font-family:Manrope,sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s">📄 Analisar extrato →</button>
     </div>
   </div>
@@ -1999,7 +1999,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF exportável</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
         </div>
-        <button class="btn-plan btn-plan-free" onclick="showPage('home');setTimeout(()=>{switchSimTab('perguntas');document.querySelector('.sim-wrap')?.scrollIntoView({behavior:'smooth',block:'start'})},120)">Usar grátis →</button>
+        <button class="btn-plan btn-plan-free" onclick="openQuiz()">Usar grátis →</button>
       </div>
 
       <!-- Avulso -->
@@ -3282,20 +3282,22 @@ function restart() {
 
 // Abre o quiz sempre limpo — usado pelo botão "Fazer quiz gratuito"
 function openQuiz() {
+  // Navega para home se necessário
   const current = document.querySelector('.page.active')?.id?.replace('page-', '');
   if (current !== 'home') {
     history.pushState({ page: 'home' }, '', '#home');
     _applyPage('home');
   }
+  // Garante tab perguntas ativa
   switchSimTab('perguntas');
+  // Sempre reseta estado — independente de onde o quiz estava
+  cur = 0; answers = []; sel = null;
   const rp = document.getElementById('resultPanel');
   const qp = document.getElementById('questionPanel');
-  if (rp && rp.style.display !== 'none') {
-    cur = 0; answers = []; sel = null;
-    rp.style.display = 'none';
-    qp.style.display = 'block';
-    renderQ();
-  }
+  if (rp) rp.style.display = 'none';
+  if (qp) qp.style.display = 'block';
+  renderQ();
+  // Scroll suave até o simulador
   setTimeout(() => {
     document.querySelector('.sim-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 80);
