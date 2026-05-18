@@ -2781,7 +2781,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script>
 // ===== NAVIGATION =====
@@ -3461,18 +3461,27 @@ let sb = null;
 let _currentUser = null;
 
 // Inicializa Supabase com guard — se CDN falhar, UI continua funcionando
-try {
-  const { createClient } = supabase;
-  sb = createClient(SUPA_URL, SUPA_KEY);
-} catch(e) {
-  console.warn('[GuardiaoFiscal] Supabase não disponível:', e.message);
+function _initSupabase() {
+  try {
+    if (typeof supabase === 'undefined') { console.warn('[GuardiaoFiscal] Supabase CDN não carregou'); return; }
+    const { createClient } = supabase;
+    sb = createClient(SUPA_URL, SUPA_KEY);
+  } catch(e) {
+    console.warn('[GuardiaoFiscal] Supabase não disponível:', e.message);
+  }
+}
+// Com async, supabase pode não estar pronto ainda — aguarda
+if (typeof supabase !== 'undefined') {
+  _initSupabase();
+} else {
+  window.addEventListener('load', _initSupabase, { once: true });
 }
 
 // Popula navAuthArea imediatamente (sem esperar Supabase) para evitar flash de UI vazia
 setUser(null);
 
-// Inicializa sessão ao carregar
-(async () => {
+// Inicializa sessão ao carregar — aguarda Supabase se carregando async
+async function _initSession() {
   if (!sb) return;
   try {
     const { data: { session } } = await sb.auth.getSession();
@@ -3486,7 +3495,12 @@ setUser(null);
   } catch(e) {
     console.warn('[GuardiaoFiscal] Erro ao inicializar sessao:', e.message);
   }
-})();
+}
+if (sb) {
+  _initSession();
+} else {
+  window.addEventListener('load', () => { _initSupabase(); _initSession(); }, { once: true });
+}
 
 function setUser(user) {
   _currentUser = user;
