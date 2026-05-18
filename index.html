@@ -2827,6 +2827,23 @@ function switchPayTab(tab) {
 async function initMpBrick() {
   const container = document.getElementById('mpBrickContainer');
   if (!container) return;
+
+  // Verifica se está no domínio de produção
+  const isProd = window.location.hostname === 'oguardiaofiscal.com.br' ||
+                 window.location.hostname === 'www.oguardiaofiscal.com.br';
+
+  if (!isProd) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:24px 16px">
+        <div style="font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6">
+          O formulário de cartão está disponível apenas no site oficial.<br>
+          <strong style="color:var(--text)">oguardiaofiscal.com.br</strong>
+        </div>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+      </div>`;
+    return;
+  }
+
   container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
 
   // Aguarda o SDK do MP estar disponível (máx 8s)
@@ -2844,30 +2861,24 @@ async function initMpBrick() {
   try {
     const mp = getMpInstance();
     const bricksBuilder = mp.bricks();
-
-    const p = plans[currentPlan];
     const amountVal = currentPlan === 'pro' ? 29.90 : 34.90;
 
     _mpBrick = await bricksBuilder.create('cardPayment', 'mpBrickContainer', {
       initialization: {
         amount: amountVal,
-        payer: {
-          email: _currentUser?.email || '',
-        },
+        payer: { email: _currentUser?.email || '' },
       },
       customization: {
         visual: {
           style: {
             theme: 'dark',
             customVariables: {
-              baseColor:          '#3B82F6',
-              buttonTextColor:    '#ffffff',
-              fontSizeExtraSmall: '11px',
-              fontSizeMedium:     '14px',
-              borderRadiusFull:   '10px',
+              baseColor:       '#3B82F6',
+              buttonTextColor: '#ffffff',
+              borderRadiusFull:'10px',
             },
           },
-          hideFormTitle: true,
+          hideFormTitle:   true,
           hidePaymentButton: false,
         },
         paymentMethods: {
@@ -2875,25 +2886,27 @@ async function initMpBrick() {
         },
       },
       callbacks: {
-        onReady: () => {
-          // Brick pronto — nada a fazer
-        },
-        onSubmit: async (cardData) => {
-          await processCardPayment(cardData);
-        },
+        onReady: () => {},
+        onSubmit: async (cardData) => { await processCardPayment(cardData); },
         onError: (err) => {
-          console.error('[MP Brick]', err);
+          console.error('[MP Brick error]', JSON.stringify(err));
           const errEl = document.getElementById('mpPayErr');
           if (errEl) {
-            errEl.textContent = 'Erro no formulário de pagamento: ' + (err.message || JSON.stringify(err));
+            errEl.textContent = 'Erro no formulário: ' + (err?.message || JSON.stringify(err));
             errEl.style.display = 'block';
           }
         },
       },
     });
   } catch (e) {
-    console.error('[MP Brick init]', e);
-    if (container) container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:13px">Erro ao carregar formulário. Tente a opção Pix/Boleto ou recarregue a página.</div>';
+    console.error('[MP Brick init error]', e);
+    const msg = e?.message || String(e);
+    if (container) container.innerHTML = `
+      <div style="text-align:center;padding:20px;font-size:13px">
+        <div style="color:var(--red);margin-bottom:12px">Erro ao carregar o formulário de cartão.</div>
+        <div style="color:var(--muted);font-size:11px;margin-bottom:12px">${msg}</div>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+      </div>`;
   }
 }
 
@@ -2970,7 +2983,7 @@ function closeCheckoutDirect() {
 }
 
 // ── setCheckoutStep: inicializa tab cartão quando vai para step 2 ──
-const _origSetCheckoutStep = typeof setCheckoutStep === 'function' ? setCheckoutStep : null;
+// ── setCheckoutStep: gerencia steps do modal + init do Brick ──
 
 function setCheckoutStep(n) {
   ['stepAccount','stepPay','stepSuccess'].forEach((id, i) => {
@@ -2990,9 +3003,9 @@ function setCheckoutStep(n) {
 // ── MERCADO PAGO — CHECKOUT PRO (Pix/Boleto redirect) ────────
 async function goToMercadoPago() {
   const btn = document.getElementById('btnMpTxt');
-  const errEl = document.getElementById('mpPayErr');
-  errEl.style.display = 'none';
-  btn.textContent = 'Gerando link de pagamento...';
+  const errEl = document.getElementById('mpPayErrOutros');
+  if (errEl) errEl.style.display = 'none';
+  if (btn) btn.textContent = 'Gerando link de pagamento...';
   document.getElementById('btnMpPay').disabled = true;
 
   try {
