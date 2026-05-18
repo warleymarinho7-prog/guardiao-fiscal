@@ -1611,7 +1611,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .ext-step-title { font-size: 13px; }
 }
 </style>
-  <script src="https://sdk.mercadopago.com/v2/mercadopago.js"></script>
+  <script>
+    // Diagnóstico de carregamento do SDK
+    window._mpSDKLoaded = typeof MercadoPago !== 'undefined';
+    window._mpSDKError = null;
+    console.log('[MP SDK] carregado:', window._mpSDKLoaded, '| MercadoPago:', typeof MercadoPago);
+  </script>
 </head>
 <body>
 
@@ -2846,16 +2851,29 @@ async function initMpBrick() {
 
   container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
 
-  // Aguarda o SDK do MP estar disponível (máx 8s)
-  let tries = 0;
-  while (typeof MercadoPago === 'undefined' && tries < 40) {
-    await new Promise(r => setTimeout(r, 200));
-    tries++;
-  }
+  // Verifica se SDK carregou (flag definida logo após o script no head)
+  console.log('[MP Brick] iniciando — SDK disponível:', typeof MercadoPago !== 'undefined', '| flag:', window._mpSDKLoaded);
 
   if (typeof MercadoPago === 'undefined') {
-    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:13px">Não foi possível carregar o formulário de pagamento.<br>Verifique sua conexão e tente novamente, ou use Pix/Boleto.</div>';
-    return;
+    // Tenta carregar o SDK dinamicamente
+    container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
+    console.log('[MP Brick] tentando carregar SDK dinamicamente...');
+
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://sdk.mercadopago.com/v2/mercadopago.js';
+      script.onload  = () => { console.log('[MP SDK] carregado dinamicamente OK'); resolve(); };
+      script.onerror = (e) => { console.error('[MP SDK] falha ao carregar:', e); reject(new Error('Não foi possível carregar o SDK do Mercado Pago. Tente desativar extensões do navegador (ex: ad blocker) e recarregue a página.')); };
+      document.head.appendChild(script);
+    }).catch(err => {
+      showBrickFallback(container, err.message);
+      return null;
+    });
+
+    if (typeof MercadoPago === 'undefined') {
+      showBrickFallback(container, 'SDK bloqueado. Desative extensões como ad blocker e tente novamente, ou use Pix/Boleto.');
+      return;
+    }
   }
 
   try {
