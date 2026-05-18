@@ -2780,9 +2780,42 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+<script>
+// ── Lazy loaders para bibliotecas pesadas ──────────────────────────
+// pdf.js (~500KB): carrega só quando usuário faz upload de PDF
+let _pdfjsLoading = false;
+function _loadPdfJs() {
+  if (typeof pdfjsLib !== 'undefined' || _pdfjsLoading) return Promise.resolve();
+  _pdfjsLoading = true;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.crossOrigin = 'anonymous';
+    s.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      resolve();
+    };
+    s.onerror = () => reject(new Error('Falha ao carregar pdf.js'));
+    document.head.appendChild(s);
+  });
+}
+
+// jsPDF (~250KB): carrega só quando usuário clica em Exportar PDF
+let _jspdfLoading = false;
+function _loadJsPDF() {
+  if (typeof jspdf !== 'undefined' || _jspdfLoading) return Promise.resolve();
+  _jspdfLoading = true;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.crossOrigin = 'anonymous';
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Falha ao carregar jsPDF'));
+    document.head.appendChild(s);
+  });
+}
+</script>
 <script>
 // ===== NAVIGATION =====
 function _applyPage(id) {
@@ -4683,8 +4716,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===== PARSER V3 ENGINE =====
-if(typeof pdfjsLib!=='undefined')
-  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// pdf.js worker configurado dinamicamente em _loadPdfJs()
 
 const MAX_FILES=5;
 const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
@@ -5893,14 +5925,12 @@ function eAddFile(file){
   const entry={name:file.name,content:null,type:null,detected:null,status:'loading'};
   eFiles.push(entry);eRenderFileList();
   if(ext==='pdf'){
-    if(typeof pdfjsLib==='undefined'){
-      eShowErr('Biblioteca PDF ainda carregando. Aguarde 2 segundos e tente novamente.');
-      entry.status='err';eRenderFileList();return;
-    }
     const r=new FileReader();
     r.onload=async e=>{
       try {
         await validatePDFMagicBytes(e.target.result);
+        // Carrega pdf.js só agora, quando realmente precisamos
+        await _loadPdfJs();
         entry.content=e.target.result;entry.type='pdf';entry.detected={format:'pdf',bank:'PDF'};entry.status='ok';
       } catch(err) {
         entry.status='err';
@@ -6282,11 +6312,7 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
   const dbgHd=document.getElementById('pDbgHd');
   if(dbgHd){dbgHd.style.display='flex';document.getElementById('pDbgBd').style.display='';}
 }
-function gerarRelatorioPDF() {
-  if (typeof jspdf === 'undefined' || !jspdf || !jspdf.jsPDF) {
-    alert('O módulo de PDF ainda está carregando. Aguarde alguns segundos e tente novamente.');
-    return;
-  }
+async function gerarRelatorioPDF() {
   const c = _eConsolidated;
   const sources = _eSources;
   if (!c || !sources) { alert('Dados da análise não encontrados. Refaça a análise.'); return; }
@@ -6295,6 +6321,7 @@ function gerarRelatorioPDF() {
   if (btn) { btn.textContent = '⏳ Gerando PDF...'; btn.style.opacity = '0.7'; btn.disabled = true; }
 
   try {
+    await _loadJsPDF();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210, M = 14, CW = W - M * 2;
