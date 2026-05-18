@@ -4637,10 +4637,14 @@ function openQuiz() {
   // Inicia após carregamento — delay escalonado para parecer orgânico
   const delays = [800, 2200, 3800, 5000];
   delays.forEach((d, i) => setTimeout(() => { addDetection(); }, d));
-  // Continua em loop
+  // Continua em loop — guarda referência para poder cancelar
+  let _detectionInterval = null;
   setTimeout(() => {
-    setInterval(addDetection, 3500);
+    _detectionInterval = setInterval(addDetection, 3500);
   }, 6000);
+  window._stopDetectionFeed = () => {
+    if (_detectionInterval) { clearInterval(_detectionInterval); _detectionInterval = null; }
+  };
 })();
 
 // ── FIM FEED DETECÇÕES ────────────────────────────────────────────────────────
@@ -5070,14 +5074,33 @@ async function eParsePDF(buffer){
   try {
     const loadTask = pdfjsLib.getDocument({data:copy});
     const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error('PDF timeout')), ENGINE_CONFIG.PDF_TIMEOUT_MS));
-    pdf = await Promise.race([loadTask.promise, timeout]);
-  } catch(e) {
-    throw new Error('PDF corrompido ou ilegivel: ' + e.message);
+    try {
+      pdf = await Promise.race([loadTask.promise, timeout]);
+    } catch(e) {
+      throw new Error('PDF corrompido ou ilegivel: ' + e.message);
+    }
+    if (pdf.numPages > ENGINE_CONFIG.PDF_MAX_PAGES) {
+      throw new Error('PDF com mais de ' + ENGINE_CONFIG.PDF_MAX_PAGES + ' paginas. Exporte apenas o periodo necessario.');
+    }
+    let text='';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const tc=await page.getTextContent();
+      let lastY=null,line='';
+      for(const item of tc.items){
+        const y=Math.round(item.transform[5]);
+        if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}
+        line+=(item.str||'')+' ';
+        lastY=y;
+      }
+      if(line.trim())text+=line.trim()+'\n';
+      page.cleanup(); // libera recursos canvas/stream da página
+    }
+    return text;
+  } finally {
+    if(pdf) await pdf.destroy(); // destrói documento PDF.js e libera memória do worker
   }
-  if (pdf.numPages > ENGINE_CONFIG.PDF_MAX_PAGES) {
-    throw new Error('PDF com mais de ' + ENGINE_CONFIG.PDF_MAX_PAGES + ' paginas. Exporte apenas o periodo necessario.');
-  }
-  let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const tc=await page.getTextContent();let lastY=null,line='';for(const item of tc.items){const y=Math.round(item.transform[5]);if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}line+=(item.str||'')+' ';lastY=y;}if(line.trim())text+=line.trim()+'\n';}return text;}
+}
 function eParsePDFText(text){
   const lines=text.split('\n').filter(l=>l.trim());
   const txns=[];
@@ -5979,6 +6002,9 @@ async function eRunAll(){
   }
 
   if(parsed.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
+
+  // ── Libera buffers dos arquivos originais — não são mais necessários ──
+  eFiles.forEach(f => { f.content = null; });
 
   // ── Etapa 2: agrupar por banco+conta ──
   // Arquivos do mesmo banco e mesma conta → um único resultado consolidado
