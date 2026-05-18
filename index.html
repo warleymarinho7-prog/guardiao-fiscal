@@ -2780,9 +2780,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script>
 // ===== NAVIGATION =====
 function _applyPage(id) {
@@ -6243,6 +6243,10 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
   if(dbgHd){dbgHd.style.display='flex';document.getElementById('pDbgBd').style.display='';}
 }
 function gerarRelatorioPDF() {
+  if (typeof jspdf === 'undefined' || !jspdf || !jspdf.jsPDF) {
+    alert('O módulo de PDF ainda está carregando. Aguarde alguns segundos e tente novamente.');
+    return;
+  }
   const c = _eConsolidated;
   const sources = _eSources;
   if (!c || !sources) { alert('Dados da análise não encontrados. Refaça a análise.'); return; }
