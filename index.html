@@ -2182,6 +2182,15 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="act-bar" id="actBar" style="display:none">
         <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
         <span class="act-msg" id="actMsg">Pronto para analisar</span>
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;width:100%">
+          <label for="rendaDeclaradaInput" style="font-family:Manrope,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda mensal declarada (opcional)</label>
+          <div style="position:relative;flex:1">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
+            <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
+              style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Manrope,sans-serif;box-sizing:border-box"
+              title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
+          </div>
+        </div>
         <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
       </div>
     </div>
@@ -5248,6 +5257,7 @@ function detectarCircularidade(txns) {
 // Series de Pix proximos ao threshold para evitar notificacao
 function detectarSplitPix(txns) {
   const pixAltos = txns.filter(t =>
+    t.date instanceof Date && !isNaN(t.date) &&
     t.value >= ENGINE_CONFIG.SPLIT_PIX_MIN &&
     t.value < ENGINE_CONFIG.PIX_LIMIT &&
     normalizeDesc(t.desc).includes('pix')
@@ -5421,7 +5431,8 @@ function scoreDeAlertas(alertas) {
   ));
 }
 
-function eAnalyzeSingle(txns, bank) {
+function eAnalyzeSingle(txns, bank, rendaDeclarada) {
+  rendaDeclarada = rendaDeclarada || 0;
   if (!txns || txns.length === 0) return null;
 
   // P6: Validar transacoes antes de processar
@@ -5487,28 +5498,36 @@ function eAnalyzeSingle(txns, bank) {
   const circularidade = detectarCircularidade(txns);
   const splitPix = detectarSplitPix(txns);
 
-  // ── Cálculo de score com pesos ponderados ──────────────────
+  // ── Cálculo de score com pesos ponderados — Motor v4 ──────────
+  // v4: [FIX-1] IHH só em créditos não-formais | [FIX-2] F7 compatibilidade renda peso 25
+  //     [FIX-3] Comercial recorrente = suspicious parcial | [FIX-4] F8 consumo baixo
+  //     [FIX-5] Thresholds compatibilidade graduados
   let score = 0;
   const fatores = [];
 
-  // F1 — Proporção de créditos suspeitos (peso 40)
-  // Usa apenas créditos de risco real (exclui internos confirmados/prováveis)
+  // [FIX-3] Comercial recorrente sem CNPJ visível conta 50% como suspeito
+  const _comercialRecorTotal = recorrentes
+    .filter(r => r.ocorrencias >= 2 && r.total > 0)
+    .filter(r => { const d = r.desc.toLowerCase(); return d.includes('recebimento') || d.includes('serviço') || d.includes('servico') || d.includes('nota fiscal') || d.includes('honorar'); })
+    .reduce((a, r) => a + r.total, 0);
+  const suspTotalV4 = suspTotal + _comercialRecorTotal * 0.5;
+
+  // F1 — Proporção de créditos suspeitos (peso reduzido 40→30 para abrir espaço ao F7)
   const totalCreditsRisco = creditsRisco.reduce((a, t) => a + t.value, 0);
-  const infRatio = totalCreditsRisco > 0 ? suspTotal / totalCreditsRisco : 0;
-  const f1 = Math.round(infRatio * 40);
-  if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa clara` });
+  const infRatio = totalCreditsRisco > 0 ? suspTotalV4 / totalCreditsRisco : 0;
+  const f1 = Math.round(Math.min(30, infRatio * 30));
+  if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa fiscal clara` });
   score += f1;
 
-  // F2 — Movimentação Pix mensal consolidada acima do limite e-Financeira (peso 20)
-  // Baseado em total crédito+débito Pix por mês (modelo real da e-Financeira para PF)
-  const f2 = Math.min(20, monthsOverLimit * 7);
+  // F2 — Movimentação Pix mensal consolidada acima do limite e-Financeira (peso 15, era 20)
+  const f2 = Math.min(15, monthsOverLimit * 5);
   if (f2 > 0) fatores.push({
     peso: f2,
     motivo: `Movimentação Pix consolidada (crédito+débito) acima de R$${ENGINE_CONFIG.PIX_LIMIT_PF.toLocaleString('pt-BR')} em ${monthsOverLimit} mês(es) — perfil reportável ao e-Financeira`
   });
   score += f2;
 
-  // F2b — Padrão trimestral elevado (peso 8)
+  // F2b — Padrão trimestral elevado (peso 8, sem alteração)
   const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
   if (trimestresElevados > 0) {
     const f2b = Math.min(8, trimestresElevados * 4);
@@ -5516,56 +5535,85 @@ function eAnalyzeSingle(txns, bank) {
     fatores.push({ peso: f2b, motivo: `Padrão trimestral elevado: ${trimestresElevados} trimestre(s) com média mensal acima do limite e-Financeira` });
   }
 
-  // F3 — Depósito em espécie (peso 20)
+  // F3 — Depósito em espécie (peso 15, era 20)
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
-  const f3 = Math.round(Math.min(20, especieRatio * 80));
-  if (f3 > 0) fatores.push({ peso: f3, motivo: `${Math.round(especieRatio * 100)}% das entradas em espécie` });
+  const f3 = Math.round(Math.min(15, especieRatio * 60));
+  if (f3 > 0) fatores.push({ peso: f3, motivo: `${Math.round(especieRatio * 100)}% das entradas em espécie (R$${especieTotal.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})})` });
   score += f3;
 
-  // F4 — Atividade comercial oculta (peso 15)
+  // F4 — Atividade comercial oculta (peso 15, sem alteração)
   const f4 = Math.min(15, comercialOculta.length * 5);
-  if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente` });
+  if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente sem vínculo declarado` });
   score += f4;
 
-  // F5 — Anomalia temporal com perfil historico (peso 15)
+  // F5 — Anomalia temporal com perfil histórico (peso 15, sem alteração)
   const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
-  // Usar media do perfil historico (3 meses) como referencia adicional
   const mediaRef = perfil.avgCredits > 0 ? perfil.avgCredits : mediaHistorica;
   const ratioAtual = mediaRef > 0 && totalCredits > 0 ? totalCredits / mediaRef : 1;
   const f5 = pctPico >= 3 ? 15 : pctPico >= 2 ? 10 : pctPico >= 1.5 ? 5 : 0;
   if (f5 > 0) fatores.push({
     peso: f5,
-    motivo: 'Pico de ' + (Math.round(pctPico * 10)/10) + 'x acima da media historica' +
-      (perfil.avgCredits > 0 ? ' (media ref: ' + fmtBRL(Math.round(perfil.avgCredits)) + ')' : '')
+    motivo: 'Pico de ' + (Math.round(pctPico * 10)/10) + 'x acima da média histórica' +
+      (perfil.avgCredits > 0 ? ' (média ref: ' + fmtBRL(Math.round(perfil.avgCredits)) + ')' : '')
   });
   score += f5;
-  // F5b — Razao creditos totais vs media historica (peso 8)
   if (ratioAtual >= 1.8 && perfil.avgCredits > 0) {
     const f5b = ratioAtual >= 3 ? 8 : ratioAtual >= 2 ? 5 : 3;
     score += f5b;
     fatores.push({
       peso: f5b,
-      motivo: 'Creditos totais ' + (Math.round(ratioAtual * 10)/10) + 'x acima da media historica — ' +
-        'Media: ' + fmtBRL(Math.round(perfil.avgCredits)) + ' | Atual: ' + fmtBRL(Math.round(totalCredits))
+      motivo: 'Créditos totais ' + (Math.round(ratioAtual * 10)/10) + 'x acima da média histórica — ' +
+        'Média: ' + fmtBRL(Math.round(perfil.avgCredits)) + ' | Atual: ' + fmtBRL(Math.round(totalCredits))
     });
   }
 
-  // F6 — Bônus por investimentos e aluguel
-  if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos não declarados' }); }
-  if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel' }); }
+  // F6 — Investimentos e aluguel não declarados (sem alteração)
+  if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos — verificar declaração' }); }
+  if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel identificado' }); }
 
-  // F7 — Circularidade financeira (peso 12)
+  // F6c — Circularidade financeira (peso 12, sem alteração)
   if (circularidade.length > 0) {
-    const f7 = Math.min(12, circularidade.length * 6);
-    score += f7;
-    fatores.push({ peso: f7, motivo: `${circularidade.length} entrada(s) com saída rápida (possível circularidade)` });
+    const f6c = Math.min(12, circularidade.length * 6);
+    score += f6c;
+    fatores.push({ peso: f6c, motivo: `${circularidade.length} entrada(s) com saída rápida (possível circularidade financeira)` });
   }
 
-  // F8 — Split de Pix abaixo do threshold (peso 10)
+  // F6d — Split de Pix abaixo do threshold (peso 10, sem alteração)
   if (splitPix.length > 0) {
-    const f8 = Math.min(10, splitPix.length * 5);
-    score += f8;
-    fatores.push({ peso: f8, motivo: `${splitPix.length} série(s) de Pix fracionados próximos a R$${ENGINE_CONFIG.PIX_LIMIT.toLocaleString('pt-BR')}` });
+    const f6d = Math.min(10, splitPix.length * 5);
+    score += f6d;
+    fatores.push({ peso: f6d, motivo: `${splitPix.length} série(s) de Pix fracionados próximos a R$${ENGINE_CONFIG.PIX_LIMIT.toLocaleString('pt-BR')}` });
+  }
+
+  // [FIX-2 + FIX-5] F7 — Compatibilidade com renda declarada (NOVO — peso 25)
+  // Gradação: >2x leve (+7), >3x moderado (+15), >6x crítico (+25)
+  if (rendaDeclarada > 0) {
+    const _mesesN = Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
+    const _movMedia = totalCredits / _mesesN;
+    const _compatRatio = _movMedia / rendaDeclarada;
+    let _f7 = 0, _compatNivel = '';
+    if (_compatRatio > 6)      { _f7 = 25; _compatNivel = 'severa'; }
+    else if (_compatRatio > 3) { _f7 = 15; _compatNivel = 'moderada'; }
+    else if (_compatRatio > 2) { _f7 =  7; _compatNivel = 'leve'; }
+    if (_f7 > 0) {
+      score += _f7;
+      fatores.push({
+        peso: _f7,
+        motivo: `Incompatibilidade ${_compatNivel}: movimentação média de ${fmtBRL(_movMedia)}/mês é ${_compatRatio.toFixed(1)}x a renda declarada de ${fmtBRL(rendaDeclarada)}/mês`
+      });
+    }
+  }
+
+  // [FIX-4] F8 — Consumo anormalmente baixo = provável conta auxiliar (NOVO — peso 8)
+  // Saídas < 5% das entradas com movimentação > 10x salário mínimo = sinal forte
+  const _indiceConsumoScore = totalCredits > 0 ? totalDebits / totalCredits : 1;
+  const _movMensalScore = totalCredits / Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
+  if (_indiceConsumoScore < 0.05 && _movMensalScore > 14120) { // 10x SM 2024
+    score += 8;
+    fatores.push({
+      peso: 8,
+      motivo: `Saídas representam apenas ${Math.round(_indiceConsumoScore * 100)}% das entradas — padrão atípico que pode indicar uso de conta auxiliar não analisada`
+    });
   }
 
   score = Math.min(100, Math.max(0, Math.round(score)));
@@ -5617,7 +5665,9 @@ function eAnalyzeSingle(txns, bank) {
     txnsDescartadas,
     // Schema canonico
     tipoAnalise: 'indicador_compatibilidade_fiscal',
-    versaoEngine: 'v3.2',
+    versaoEngine: 'v4.0',
+    rendaDeclarada: rendaDeclarada || 0,
+    mesesAnalisados: Object.keys(monthly).filter(k => k !== 'unk').length,
   };
 }
 
@@ -5879,6 +5929,11 @@ async function eRunAll(){
   if(ready.length===0)return;
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
+  // Captura renda declarada do campo (opcional — ativa F7 compatibilidade)
+  const _rInput = document.getElementById('rendaDeclaradaInput');
+  // Leitura robusta — aceita vírgula como decimal (R$ 5.000,00 → 5000)
+  const _rawRenda = _rInput ? _rInput.value.replace(/\./g,'').replace(',','.').trim() : '';
+  window._rendaDeclaradaMensal = _rawRenda ? Math.max(0, parseFloat(_rawRenda) || 0) : 0;
   const results=[];
   const parsed=[]; // {txns, bank, conta, banco, label}
 
@@ -5948,7 +6003,7 @@ async function eRunAll(){
     // Label mostra banco + conta + formatos usados
     const fmtLabel=g.formatos.length>1?` [${g.formatos.join('+')}]`:'';
     const bankLabel=g.conta?`${g.banco} ···${g.conta.slice(-4)}${fmtLabel}`:g.banco+fmtLabel;
-    const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel);
+    const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel,window._rendaDeclaradaMensal||0);
     if(r) results.push(r);
   }
 
@@ -6018,6 +6073,19 @@ function eRenderPreview(c, sources) {
   // Métricas rápidas (4 cards)
   const pixPct = c.totalCredits > 0 ? Math.round(c.pixTotal / c.totalCredits * 100) : 0;
   const icConsumo = Math.round((c.indiceConsumo || 0) * 100);
+  // BUG-6: aviso de extrato curto quando meses analisados < 3
+  const _mesesMin = sources.reduce((min, r) => Math.min(min, r.mesesAnalisados || 12), 12);
+  if (_mesesMin < 3 && c.rendaDeclarada > 0) {
+    const _avisoEl = document.getElementById('pAlertList');
+    if (_avisoEl) {
+      const _avisoDiv = document.createElement('div');
+      _avisoDiv.className = 'alert-item alert-yellow';
+      _avisoDiv.style.cssText = 'margin-top:8px;padding:10px 14px;border-radius:10px;font-size:12px;display:flex;gap:10px;align-items:flex-start';
+      _avisoDiv.innerHTML = '<span>⚠️</span><span><strong>Extrato com menos de 3 meses</strong> — o índice de compatibilidade com a renda pode estar distorcido. Para maior precisão, use um extrato com 3+ meses de movimentação.</span>';
+      if (_avisoEl.firstChild) _avisoEl.insertBefore(_avisoDiv, _avisoEl.firstChild);
+      else _avisoEl.appendChild(_avisoDiv);
+    }
+  }
   document.getElementById('pvMetrics').innerHTML = `
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Total créditos</div>
@@ -6147,7 +6215,7 @@ function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v2\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v4.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
 }
 
@@ -6618,6 +6686,8 @@ function gerarRelatorioPDF() {
 function eResetAll(){
   eFiles=[];eAllTxns=[];eActiveBankTab='all';
   _eConsolidated=null;_eSources=null;
+  window._rendaDeclaradaMensal=0;
+  const _ri=document.getElementById('rendaDeclaradaInput');if(_ri)_ri.value='';
   document.getElementById('fileList').innerHTML='';
   document.getElementById('limitBar').style.display='none';
   document.getElementById('actBar').style.display='none';
