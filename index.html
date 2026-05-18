@@ -19,7 +19,6 @@
 html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body { overflow-x: hidden; }
 
-  
 :root {
   /* Azul-petróleo profundo — referência Nubank/Linear */
   --bg:      #0b1120;
@@ -2864,6 +2863,14 @@ async function initMpBrick() {
     const bricksBuilder = mp.bricks();
     const amountVal = currentPlan === 'pro' ? 29.90 : 34.90;
 
+    // Timeout de segurança — se o Brick não renderizar em 15s, mostra fallback
+    const brickTimeout = setTimeout(() => {
+      if (container && container.innerHTML.includes('Carregando')) {
+        console.warn('[MP Brick] timeout — renderização não completou');
+        showBrickFallback(container, 'Tempo limite excedido ao carregar o formulário.');
+      }
+    }, 15000);
+
     _mpBrick = await bricksBuilder.create('cardPayment', 'mpBrickContainer', {
       initialization: {
         amount: amountVal,
@@ -2871,15 +2878,8 @@ async function initMpBrick() {
       },
       customization: {
         visual: {
-          style: {
-            theme: 'dark',
-            customVariables: {
-              baseColor:       '#3B82F6',
-              buttonTextColor: '#ffffff',
-              borderRadiusFull:'10px',
-            },
-          },
-          hideFormTitle:   true,
+          style: { theme: 'dark' },
+          hideFormTitle: true,
           hidePaymentButton: false,
         },
         paymentMethods: {
@@ -2887,28 +2887,39 @@ async function initMpBrick() {
         },
       },
       callbacks: {
-        onReady: () => {},
-        onSubmit: async (cardData) => { await processCardPayment(cardData); },
+        onReady: () => {
+          clearTimeout(brickTimeout);
+          console.log('[MP Brick] pronto');
+        },
+        onSubmit: async (cardData) => {
+          clearTimeout(brickTimeout);
+          await processCardPayment(cardData);
+        },
         onError: (err) => {
-          console.error('[MP Brick error]', JSON.stringify(err));
-          const errEl = document.getElementById('mpPayErr');
-          if (errEl) {
-            errEl.textContent = 'Erro no formulário: ' + (err?.message || JSON.stringify(err));
-            errEl.style.display = 'block';
-          }
+          clearTimeout(brickTimeout);
+          console.error('[MP Brick onError]', JSON.stringify(err));
+          const cause = err?.cause?.[0]?.description || err?.message || JSON.stringify(err);
+          showBrickFallback(container, cause);
         },
       },
     });
   } catch (e) {
-    console.error('[MP Brick init error]', e);
-    const msg = e?.message || String(e);
-    if (container) container.innerHTML = `
-      <div style="text-align:center;padding:20px;font-size:13px">
-        <div style="color:var(--red);margin-bottom:12px">Erro ao carregar o formulário de cartão.</div>
-        <div style="color:var(--muted);font-size:11px;margin-bottom:12px">${msg}</div>
-        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
-      </div>`;
+    console.error('[MP Brick catch]', e);
+    showBrickFallback(container, e?.message || String(e));
   }
+}
+
+function showBrickFallback(container, msg) {
+  if (!container) return;
+  container.innerHTML = `
+    <div style="text-align:center;padding:20px;font-size:13px">
+      <div style="color:var(--red);margin-bottom:8px;font-weight:600">Não foi possível carregar o formulário de cartão.</div>
+      <div style="color:var(--muted);font-size:11px;margin-bottom:16px;line-height:1.5">${msg || 'Erro desconhecido'}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="_mpBrick=null;initMpBrick()" style="padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Tentar novamente</button>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+      </div>
+    </div>`;
 }
 
 // ── Processa pagamento por cartão via Edge Function ───────────
