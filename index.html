@@ -2976,10 +2976,10 @@ async function processCardPayment(cardData) {
 
     if (data.status === 'approved') {
       // Pagamento aprovado — mostrar sucesso
-      if (_mpBrick) { try { _mpBrick.unmount(); } catch(_) {} _mpBrick = null; }
+      if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) { console.warn('[MP Brick] unmount:', e.message); } _mpBrick = null; }
       showCheckoutSuccess();
     } else if (data.status === 'in_process' || data.status === 'pending') {
-      if (_mpBrick) { try { _mpBrick.unmount(); } catch(_) {} _mpBrick = null; }
+      if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) { console.warn('[MP Brick] unmount:', e.message); } _mpBrick = null; }
       document.getElementById('stepPay').querySelector('.modal-title').textContent = 'Pagamento em análise';
       document.getElementById('stepPay').querySelector('.modal-sub').textContent = 'Seu pagamento está sendo processado. Assim que aprovado você receberá acesso por e-mail.';
     } else if (data.init_point) {
@@ -3006,7 +3006,7 @@ function showCheckoutSuccess() {
 
 // ── Destroy brick ao fechar modal ────────────────────────────
 function closeCheckoutDirect() {
-  if (_mpBrick) { try { _mpBrick.unmount(); } catch(_) {} _mpBrick = null; }
+  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) { console.warn('[MP Brick] unmount:', e.message); } _mpBrick = null; }
   const el = document.getElementById('checkoutOverlay');
   if (el) el.classList.remove('show');
   document.body.style.overflow = '';
@@ -3276,7 +3276,7 @@ try {
   const { createClient } = supabase;
   sb = createClient(SUPA_URL, SUPA_KEY);
 } catch(e) {
-  console.warn('[GuardiaoFiscal] Supabase nao disponivel:', e.message);
+  console.warn('[GuardiaoFiscal] Supabase não disponível:', e.message);
 }
 
 // Popula navAuthArea imediatamente (sem esperar Supabase) para evitar flash de UI vazia
