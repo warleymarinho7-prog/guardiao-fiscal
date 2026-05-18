@@ -1673,12 +1673,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- ESQUERDA: copy + CTA -->
     <div class="split-left">
-      <div class="hero-tag">🛡️ Proteção fiscal preventiva · e-Financeira</div>
-      <h1>Sua movimentação<br>bancária pode revelar<br><em>sinais que merecem atenção.</em></h1>
-      <p>Movimentações bancárias relevantes podem ser cruzadas com sua declaração de IR. O Guardião Fiscal mostra — antes de você declarar — se sua movimentação levanta sinais de risco.</p>
+      <div class="hero-tag">🛡️ Motor de análise fiscal · e-Financeira · LGPD</div>
+      <h1>Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em></h1>
+      <p>A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.</p>
       <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
-        <span class="badge">🔒 Arquivos 100% locais</span>
-        <span class="badge">📊 Score com causa</span>
+        <span class="badge">🔒 Processamento 100% local</span>
+        <span class="badge">📊 40+ verificações fiscais</span>
         <span class="badge">✅ Grátis para começar</span>
       </div>
       <div class="split-cta">
@@ -1691,8 +1691,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <!-- Mini métricas -->
       <div style="display:flex;gap:24px;margin-top:40px;padding-top:28px;border-top:1px solid var(--border)">
         <div>
-          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">6</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">fatores fiscais</div>
+          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
         </div>
         <div>
           <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
@@ -1701,6 +1701,19 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div>
           <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
+        </div>
+      </div>
+
+      <!-- O que cruzamos -->
+      <div style="margin-top:28px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">// cruzamentos realizados</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📊 Pix × renda declarada</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">💸 Espécie × e-Financeira</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🔄 Padrões recorrentes</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📈 Anomalia temporal</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🏢 Atividade comercial</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🔁 Circularidade financeira</div>
         </div>
       </div>
     </div>
@@ -1814,13 +1827,42 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
   </div>
 
+  <!-- Bloco: O que o Guardião cruza — mobile (desktop fica na institucional) -->
+  <div style="padding:0 16px 8px;display:none" id="algoritmoBlocoMobile" class="algoritmo-mobile-show">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:20px 16px;margin-bottom:8px">
+      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px">// o que analisamos</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">📊</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Compatibilidade financeira</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Renda declarada × movimentação real no período</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">🔄</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Padrões de Pix e TED</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Recebimentos recorrentes sem origem declarada</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">💸</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Movimentações em espécie</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Depósitos em dinheiro que ativam critérios do e-Financeira</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">📈</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Anomalia temporal</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Picos atípicos de movimentação comparados ao histórico</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">🏢</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Atividade comercial oculta</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Padrões recorrentes compatíveis com serviços não declarados</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="hero">
-    <div class="hero-tag">🛡️ Proteção fiscal preventiva · e-Financeira</div>
-    <h1>Sua movimentação bancária<br>pode revelar<br><em>sinais que merecem atenção.</em></h1>
-    <p>Movimentações bancárias relevantes podem ser cruzadas com sua declaração de IR. O Guardião Fiscal mostra — antes de você declarar — se sua movimentação levanta sinais de risco.</p>
+    <div class="hero-tag">🛡️ Motor de análise fiscal · e-Financeira · LGPD</div>
+    <h1>Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em></h1>
+    <p>A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.</p>
     <div class="hero-badges">
-      <span class="badge">🔒 Arquivos 100% locais</span>
-      <span class="badge">📊 Score com causa</span>
+      <span class="badge">🔒 Processamento 100% local</span>
+      <span class="badge">📊 40+ verificações fiscais</span>
       <span class="badge">✅ Grátis para começar</span>
     </div>
     <div style="margin-top:24px">
@@ -1829,8 +1871,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
       <div style="text-align:center">
-        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">6</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">fatores fiscais</div>
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
       </div>
       <div style="text-align:center">
         <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
@@ -2399,26 +2441,100 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <p style="font-size:14px;color:var(--muted);line-height:1.65;margin:0">O resultado sempre inclui <strong style="color:var(--muted2);font-weight:600">a causa</strong> do score — não apenas um número, mas o motivo específico pelo qual aquele fator elevou o risco.</p>
     </div>
 
-    <!-- Seção 3: Quem fez -->
+    <!-- Seção 3: Exemplo real de análise -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 6px">Exemplo real de análise</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 20px">Veja o tipo de inconsistência que o motor detecta automaticamente no seu extrato.</p>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+        <div style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">🚨</span>
+          <div>
+            <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:#f87171">Incompatibilidade de renda detectada</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Critério e-Financeira — peso alto no score</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:13px;color:var(--muted2)">Movimentação no período</span>
+            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:#f87171">R$ 84.000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:13px;color:var(--muted2)">Renda declarada (estimada)</span>
+            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:var(--text)">R$ 32.000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--muted2)">Divergência detectada</span>
+            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:#f87171">+162%</span>
+          </div>
+        </div>
+        <div style="background:rgba(239,68,68,0.04);border-top:1px solid rgba(239,68,68,0.1);padding:12px 18px">
+          <div style="font-size:12px;color:var(--muted2);line-height:1.6"><strong style="color:#f87171;font-weight:600">Recomendação:</strong> Verificar origem das entradas e reunir documentação comprobatória antes da declaração.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+        <div style="background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">⚠️</span>
+          <div>
+            <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:#fbbf24">Padrão comercial recorrente detectado</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Possível atividade sem nota fiscal</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:13px;color:var(--muted2)">Identificamos <strong style="color:var(--text)">7 recebimentos</strong> com valor médio de <strong style="color:var(--text)">R$ 926</strong> do mesmo remetente ao longo de 4 meses — periodicidade mensal detectada.</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.6">Padrão compatível com prestação de serviços não declarada. A Receita Federal identifica esse tipo de recorrência via cruzamento e-Financeira.</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">* Dados fictícios para fins ilustrativos. O motor analisa seu extrato real com a mesma lógica.</div>
+    </div>
+
+    <!-- Seção 4: LGPD e Segurança -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">🔒 Segurança e privacidade</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Processamento 100% local</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Seu extrato é lido diretamente no seu navegador. Nenhum arquivo é enviado a servidores externos.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não armazenamos dados bancários</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Transações, saldos e movimentações nunca são salvos em nenhum banco de dados nosso.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não compartilhamos com terceiros</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Suas informações fiscais não são vendidas, compartilhadas ou acessadas por ninguém além de você.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Direito à explicação das decisões automatizadas garantido. Você pode contestar qualquer resultado.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não acessamos a Receita Federal</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">O Guardião Fiscal não tem acesso à sua declaração nem ao sistema da Receita. A análise é baseada exclusivamente no seu extrato.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção 5: Quem fez -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
       <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Quem está por trás</h2>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O Guardião Fiscal é um produto independente desenvolvido por um construtor de software brasileiro. Não é uma empresa tradicional, não tem time de vendas, não depende de investidores.</p>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0">A motivação é direta: a maioria das ferramentas fiscais disponíveis no Brasil é voltada para contadores e empresas, não para o contribuinte pessoa física que quer entender seu próprio risco antes de entregar a declaração.</p>
     </div>
 
-    <!-- Seção 4: O que não somos -->
+    <!-- Seção 6: O que não somos -->
     <div style="background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.12);border-radius:14px;padding:22px 24px;margin-bottom:40px">
       <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px">⚠️ Importante entender</div>
-      <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0 0 10px">O Guardião Fiscal é uma ferramenta de simulação educacional e preventiva. <strong style="color:var(--muted2);font-weight:600">Não substitui um contador</strong> e não tem como acessar sua declaração na Receita Federal.</p>
+      <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0 0 10px">O Guardião Fiscal é uma ferramenta de diagnóstico educacional e preventivo. <strong style="color:var(--muted2);font-weight:600">Não substitui um contador</strong> e não tem acesso à sua declaração na Receita Federal.</p>
       <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0">O score gerado indica <em>áreas de atenção potencial</em> com base nos critérios conhecidos do e-Financeira. Para situações específicas — herança, venda de imóvel, empréstimo familiar — a orientação de um contador é indispensável.</p>
     </div>
 
     <!-- CTA final -->
     <div style="text-align:center;padding-top:8px">
-      <button onclick="openQuiz()" style="padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px" onmouseover="this.style.background='#2563eb';this.style.color='#fff'" onmouseout="this.style.background='var(--green)';this.style.color='#000'">
-        📋 Fazer o quiz gratuito →
+      <button onclick="showPage('extrato')" style="padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px" onmouseover="this.style.background='#2563eb';this.style.color='#fff'" onmouseout="this.style.background='var(--green)';this.style.color='#000'">
+        ⚠️ Verificar meu extrato agora →
       </button>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">Nenhum cadastro necessário · Resultado em 2 minutos</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">🔒 Processamento local · Nenhum dado enviado · Grátis para começar</div>
     </div>
 
   </div>
