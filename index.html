@@ -2695,7 +2695,7 @@ let currentPlan = 'pro';
 
 
 // ===== PRO FREE MODE FUNCTIONS =====
-const PRO_FREE_MODE = true; // mude para false para reativar cobrança
+const PRO_FREE_MODE = false; // cobrança ativa — R$29,90/mês
 
 function showProFreeBanner() {
   showPage('planos');
@@ -2739,6 +2739,12 @@ function initProFreeMode() {
 }
 
 function openCheckout(plan) {
+  // Se usuário já tem plano ativo — vai direto para análise
+  if (_currentUser?._plano === 'pro' || (_currentUser?._plano === 'avulso' && plan === 'avulso')) {
+    if (_eConsolidated) { eUnlockResult(); return; }
+    showPage('extrato'); return;
+  }
+
   // MODO PRO GRATUITO — bypass só para o plano Pro, nunca para avulso
   if (PRO_FREE_MODE && plan !== 'avulso') {
     if (_eConsolidated) {
@@ -3253,6 +3259,27 @@ setUser(null);
 function setUser(user) {
   _currentUser = user;
   const area = document.getElementById('navAuthArea');
+
+  // Busca plano do banco quando usuário loga
+  if (user && sb) {
+    sb.from('profiles')
+      .select('plano, expires_at')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        const plano = data.plano;
+        const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
+        const isExpired = expiresAt && expiresAt < new Date();
+        // Se tem plano ativo e não expirou — libera acesso direto
+        if ((plano === 'pro' || plano === 'avulso') && !isExpired) {
+          _currentUser._plano = plano;
+          // Se já tem análise feita e está no extrato — desbloqueia resultado
+          if (_eConsolidated) eUnlockResult();
+        }
+      })
+      .catch(() => {});
+  }
   if (user) {
     const rawName = user.user_metadata?.nome || user.email.split('@')[0];
     const firstName = rawName.split(' ')[0]; // só primeiro nome
