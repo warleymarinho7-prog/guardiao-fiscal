@@ -3503,14 +3503,7 @@ function _initSupabase() {
     console.warn('[GuardiaoFiscal] Supabase não disponível:', e.message);
   }
 }
-// Com async, supabase pode não estar pronto ainda — aguarda
-if (typeof supabase !== 'undefined') {
-  _initSupabase();
-} else {
-  window.addEventListener('load', _initSupabase, { once: true });
-}
-
-// Popula navAuthArea imediatamente (sem esperar Supabase) para evitar flash de UI vazia
+// Popula navAuthArea imediatamente para evitar flash de UI vazia
 setUser(null);
 
 // Inicializa sessão ao carregar — aguarda Supabase se carregando async
@@ -3521,7 +3514,6 @@ async function _initSession() {
     if (session) setUser(session.user);
     sb.auth.onAuthStateChange((_event, session) => {
       setUser(session ? session.user : null);
-      // Fecha qualquer overlay de auth aberto ao logar/deslogar
       if (session) closeAllOverlays();
     });
     handleMpReturn();
@@ -3529,10 +3521,17 @@ async function _initSession() {
     console.warn('[GuardiaoFiscal] Erro ao inicializar sessao:', e.message);
   }
 }
-if (sb) {
+
+// Ponto único de inicialização — evita instância dupla do GoTrueClient
+function _bootSupabase() {
+  _initSupabase();
   _initSession();
+}
+
+if (typeof supabase !== 'undefined') {
+  _bootSupabase();
 } else {
-  window.addEventListener('load', () => { _initSupabase(); _initSession(); }, { once: true });
+  window.addEventListener('load', _bootSupabase, { once: true });
 }
 
 function setUser(user) {
