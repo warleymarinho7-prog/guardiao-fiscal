@@ -1392,6 +1392,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   border-radius: 5px;
   font-family: Manrope, sans-serif;
 }
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1720,6 +1728,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- DIREITA: quiz desktop -->
     <div class="split-right">
+      <!-- Demo de detecções ao vivo — aparece antes do quiz -->
+      <div id="liveDetectDemo" style="margin-bottom:16px">
+        <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite"></span>
+          // detecções em tempo real
+        </div>
+        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:hidden"></div>
+      </div>
       <div class="sim-wrap">
         <div class="tabs">
           <button class="tab active" id="tabQ" onclick="switchSimTab('perguntas')">
@@ -4556,7 +4572,69 @@ function openQuiz() {
   }, 80);
 }
 
-// ── Inicialização da UI — aguarda DOM pronto ──
+// ── FEED DE DETECÇÕES AO VIVO (demo animada na home) ─────────────────────────
+(function() {
+  const detections = [
+    { type: 'red',    icon: '🚨', label: 'Incompatibilidade de renda',       val: '+162% acima do declarado' },
+    { type: 'yellow', icon: '⚠️', label: 'Pix recorrentes sem origem',        val: 'R$ 32.880 em 4 meses' },
+    { type: 'red',    icon: '🚨', label: 'Atividade comercial não declarada', val: '7 recebimentos mensais' },
+    { type: 'yellow', icon: '⚠️', label: 'Movimentação em espécie',           val: '18% das entradas' },
+    { type: 'red',    icon: '🚨', label: 'Anomalia temporal detectada',       val: 'Pico 340% acima da média' },
+    { type: 'yellow', icon: '⚠️', label: 'Circularidade financeira',          val: 'Saída = entrada em 2 dias' },
+    { type: 'green',  icon: '✅', label: 'Renda formal identificada',         val: 'Holerite + depósito consistente' },
+    { type: 'red',    icon: '🚨', label: 'Split Pix detectado',               val: '6 Pix abaixo de R$5k no mesmo dia' },
+    { type: 'yellow', icon: '⚠️', label: 'Índice de consumo elevado',         val: 'Saídas = 134% das entradas' },
+    { type: 'green',  icon: '✅', label: 'Score de coerência fiscal',         val: '23/100 — perfil compatível' },
+  ];
+
+  const colors = {
+    red:    { bg: 'rgba(239,68,68,0.07)',   border: 'rgba(239,68,68,0.18)',   text: '#f87171' },
+    yellow: { bg: 'rgba(245,158,11,0.07)',  border: 'rgba(245,158,11,0.18)',  text: '#fbbf24' },
+    green:  { bg: 'rgba(16,185,129,0.07)',  border: 'rgba(16,185,129,0.18)', text: '#34d399' },
+  };
+
+  let idx = 0;
+  const MAX_ITEMS = 4;
+
+  function addDetection() {
+    const feed = document.getElementById('detectFeed');
+    if (!feed) return;
+
+    const d = detections[idx % detections.length];
+    const c = colors[d.type];
+    idx++;
+
+    const el = document.createElement('div');
+    el.style.cssText = `display:flex;align-items:center;gap:8px;padding:8px 10px;background:${c.bg};border:1px solid ${c.border};border-radius:8px;animation:slideIn 0.35s ease;flex-shrink:0`;
+    el.innerHTML = `
+      <span style="font-size:13px;flex-shrink:0">${d.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:600;color:${c.text};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.label}</div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:1px">${d.val}</div>
+      </div>
+      <span style="font-size:9px;color:var(--muted);flex-shrink:0;font-family:Inter,sans-serif">agora</span>`;
+
+    feed.insertBefore(el, feed.firstChild);
+
+    // Remove excesso
+    while (feed.children.length > MAX_ITEMS) {
+      const last = feed.lastChild;
+      last.style.opacity = '0';
+      last.style.transition = 'opacity 0.3s';
+      setTimeout(() => last.remove(), 300);
+    }
+  }
+
+  // Inicia após carregamento — delay escalonado para parecer orgânico
+  const delays = [800, 2200, 3800, 5000];
+  delays.forEach((d, i) => setTimeout(() => { addDetection(); }, d));
+  // Continua em loop
+  setTimeout(() => {
+    setInterval(addDetection, 3500);
+  }, 6000);
+})();
+
+// ── FIM FEED DETECÇÕES ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   renderQ();
   mRenderQ();
