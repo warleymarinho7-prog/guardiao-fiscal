@@ -2475,33 +2475,40 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
     </div>
 
-    <!-- STEP 2: Pagamento — Mercado Pago -->
+    <!-- STEP 2: Pagamento — MP Bricks embutido -->
     <div class="modal-step" id="stepPay">
       <div class="modal-title" id="checkoutTitle">Pagamento seguro</div>
-      <div class="modal-sub" id="checkoutSub">Você será redirecionado ao checkout do Mercado Pago.<br>Pix, cartão de crédito e boleto disponíveis.</div>
+      <div class="modal-sub" id="checkoutSub">Pague com cartão direto aqui — sem sair do site.</div>
 
-      <!-- bloco central MP -->
-      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;margin:4px 0 16px;text-align:center">
-        <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:14px">
-          <span style="font-size:28px">🔒</span>
-          <div style="text-align:left">
-            <div style="font-family:Manrope,sans-serif;font-weight:700;font-size:14px;color:var(--text)">Mercado Pago</div>
-            <div style="font-size:11px;color:var(--muted)">Checkout seguro · SSL · PCI DSS</div>
-          </div>
-        </div>
-        <div style="font-size:12px;color:var(--muted2);line-height:1.7;margin-bottom:18px">
-          💳 Cartão de crédito (parcelado)<br>
-          🟢 Pix (aprovação imediata)<br>
-          📄 Boleto bancário (1 dia útil)
-        </div>
-        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
-        <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
-          <span id="btnMpTxt">Ir para o pagamento →</span>
-        </button>
+      <!-- Tabs: Cartão | Pix/Boleto -->
+      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin:12px 0 16px">
+        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">💳 Cartão</button>
+        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">🟢 Pix / Boleto</button>
       </div>
 
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:Manrope,sans-serif;font-size:12px" onclick="goToAccount()">← Voltar</button>
-      <div class="security-note" style="margin-top:12px">🔒 Seus dados de pagamento nunca passam pelos nossos servidores</div>
+      <!-- Cartão: MP Brick -->
+      <div id="payPaneCartao">
+        <div id="mpBrickContainer" style="min-height:320px"></div>
+        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin:10px 0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+      </div>
+
+      <!-- Pix / Boleto: redirect -->
+      <div id="payPaneOutros" style="display:none">
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+          <div style="font-size:13px;color:var(--muted2);line-height:1.8;margin-bottom:18px">
+            🟢 <strong style="color:var(--text)">Pix</strong> — aprovação imediata<br>
+            📄 <strong style="color:var(--text)">Boleto</strong> — 1 dia útil
+          </div>
+          <div id="mpPayErrOutros" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+          <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
+            <span id="btnMpTxt">Gerar Pix / Boleto →</span>
+          </button>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px">Você será redirecionado ao Mercado Pago para concluir</div>
+        </div>
+      </div>
+
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:Manrope,sans-serif;font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
+      <div class="security-note" style="margin-top:12px">🔒 Pagamento processado diretamente pelo Mercado Pago · PCI DSS</div>
     </div>
 
     <!-- STEP 3: Sucesso -->
@@ -2578,6 +2585,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://sdk.mercadopago.com/v2/mercadopago.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
@@ -2772,8 +2780,195 @@ function openCheckout(plan) {
   document.body.style.overflow = 'hidden';
 }
 
-// ── MERCADO PAGO — CHECKOUT REAL ──────────────────────────────────────────
+// ── MERCADO PAGO — PUBLIC KEY ─────────────────────────────────
+const MP_PUBLIC_KEY = 'APP_USR-6669676347624001-051418-6d7943acbf07677dc68ba94140670092-250068613';
+let _mpInstance = null;
+let _mpBrick    = null;
 
+function getMpInstance() {
+  if (!_mpInstance) _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+  return _mpInstance;
+}
+
+// ── Troca entre aba Cartão e Pix/Boleto ──────────────────────
+function switchPayTab(tab) {
+  const paneCartao = document.getElementById('payPaneCartao');
+  const paneOutros = document.getElementById('payPaneOutros');
+  const tabC = document.getElementById('tabCartao');
+  const tabO = document.getElementById('tabOutros');
+
+  if (tab === 'cartao') {
+    paneCartao.style.display = 'block';
+    paneOutros.style.display = 'none';
+    tabC.style.background = 'var(--surface)';
+    tabC.style.color      = 'var(--text)';
+    tabO.style.background = 'transparent';
+    tabO.style.color      = 'var(--muted)';
+    // Inicializa o Brick se ainda não foi iniciado
+    if (!_mpBrick) initMpBrick();
+  } else {
+    paneCartao.style.display = 'none';
+    paneOutros.style.display = 'block';
+    tabC.style.background = 'transparent';
+    tabC.style.color      = 'var(--muted)';
+    tabO.style.background = 'var(--surface)';
+    tabO.style.color      = 'var(--text)';
+  }
+}
+
+// ── Inicializa o MP Card Payment Brick ───────────────────────
+async function initMpBrick() {
+  const container = document.getElementById('mpBrickContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
+
+  try {
+    const mp = getMpInstance();
+    const bricksBuilder = mp.bricks();
+
+    const p = plans[currentPlan];
+    const amountVal = currentPlan === 'pro' ? 29.90 : 34.90;
+
+    _mpBrick = await bricksBuilder.create('cardPayment', 'mpBrickContainer', {
+      initialization: {
+        amount: amountVal,
+        payer: {
+          email: _currentUser?.email || '',
+        },
+      },
+      customization: {
+        visual: {
+          style: {
+            theme: 'dark',
+            customVariables: {
+              baseColor:          '#3B82F6',
+              buttonTextColor:    '#ffffff',
+              fontSizeExtraSmall: '11px',
+              fontSizeMedium:     '14px',
+              borderRadiusFull:   '10px',
+            },
+          },
+          hideFormTitle: true,
+          hidePaymentButton: false,
+        },
+        paymentMethods: {
+          maxInstallments: currentPlan === 'pro' ? 1 : 3,
+        },
+      },
+      callbacks: {
+        onReady: () => {
+          // Brick pronto — nada a fazer
+        },
+        onSubmit: async (cardData) => {
+          await processCardPayment(cardData);
+        },
+        onError: (err) => {
+          console.error('[MP Brick]', err);
+          const errEl = document.getElementById('mpPayErr');
+          if (errEl) {
+            errEl.textContent = 'Erro no formulário de pagamento: ' + (err.message || JSON.stringify(err));
+            errEl.style.display = 'block';
+          }
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[MP Brick init]', e);
+    if (container) container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:13px">Erro ao carregar formulário. Tente a opção Pix/Boleto ou recarregue a página.</div>';
+  }
+}
+
+// ── Processa pagamento por cartão via Edge Function ───────────
+async function processCardPayment(cardData) {
+  const errEl = document.getElementById('mpPayErr');
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    if (!sb) throw new Error('Serviço de autenticação indisponível.');
+    const { data: { session }, error: sessErr } = await sb.auth.getSession();
+    if (sessErr || !session) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const res = await fetch(
+      `${SUPA_URL}/functions/v1/create-mp-preference`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          plan: currentPlan,
+          paymentMethod: 'card',
+          cardData,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+
+    if (data.status === 'approved') {
+      // Pagamento aprovado — mostrar sucesso
+      if (_mpBrick) { try { _mpBrick.unmount(); } catch(_) {} _mpBrick = null; }
+      showCheckoutSuccess();
+    } else if (data.status === 'in_process' || data.status === 'pending') {
+      if (_mpBrick) { try { _mpBrick.unmount(); } catch(_) {} _mpBrick = null; }
+      document.getElementById('stepPay').querySelector('.modal-title').textContent = 'Pagamento em análise';
+      document.getElementById('stepPay').querySelector('.modal-sub').textContent = 'Seu pagamento está sendo processado. Assim que aprovado você receberá acesso por e-mail.';
+    } else if (data.init_point) {
+      // Fallback: redireciona para MP se a Edge Function retornar init_point
+      window.location.href = data.init_point;
+    } else {
+      throw new Error(data.error || 'Pagamento não aprovado. Verifique os dados do cartão.');
+    }
+  } catch (e) {
+    if (errEl) {
+      errEl.textContent = e.message || 'Erro ao processar pagamento. Tente novamente.';
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function showCheckoutSuccess() {
+  setCheckoutStep(3);
+  const plan = plans[currentPlan];
+  document.getElementById('successMsg').textContent =
+    `Seu acesso ao ${plan.name} foi ativado. Pode fechar este painel e usar a análise.`;
+  if (_eConsolidated) setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 2000);
+}
+
+// ── Destroy brick ao fechar modal ────────────────────────────
+function closeCheckoutDirect() {
+  if (_mpBrick) { try { _mpBrick.unmount(); } catch(_) {} _mpBrick = null; }
+  const el = document.getElementById('checkoutOverlay');
+  if (el) el.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ── setCheckoutStep: inicializa tab cartão quando vai para step 2 ──
+const _origSetCheckoutStep = typeof setCheckoutStep === 'function' ? setCheckoutStep : null;
+
+function setCheckoutStep(n) {
+  ['stepAccount','stepPay','stepSuccess'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i + 1 === n);
+  });
+  ['csn1','csn2','csn3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i + 1 <= n);
+  });
+  // Quando entra no step 2, inicializa a aba cartão
+  if (n === 2) {
+    setTimeout(() => switchPayTab('cartao'), 100);
+  }
+}
+
+// ── MERCADO PAGO — CHECKOUT PRO (Pix/Boleto redirect) ────────
 async function goToMercadoPago() {
   const btn = document.getElementById('btnMpTxt');
   const errEl = document.getElementById('mpPayErr');
@@ -2878,25 +3073,7 @@ async function handleMpReturn() {
 
 // ──────────────────────────────────────────────────────────────────────────
 
-function setCheckoutStep(n) {
-  // steps content
-  ['stepAccount','stepPay','stepSuccess'].forEach((id,i) => {
-    document.getElementById(id).classList.toggle('active', i+1 === n);
-  });
-  // stepper indicators
-  [1,2,3].forEach(i => {
-    const el = document.getElementById('cst' + i);
-    el.classList.remove('active','done');
-    if (i === n) el.classList.add('active');
-    else if (i < n) el.classList.add('done');
-  });
-  // update done num to checkmark
-  [1,2,3].forEach(i => {
-    const num = document.getElementById('csn' + i);
-    if (i < n) num.textContent = '✓';
-    else num.textContent = i;
-  });
-}
+// setCheckoutStep: definida acima com suporte a MP Bricks
 
 async function goToPay() {
   const name = document.getElementById('coName').value.trim();
@@ -2958,10 +3135,7 @@ function shake(id) {
 function closeCheckout(e) {
   if (e.target === document.getElementById('checkoutOverlay')) closeCheckoutDirect();
 }
-function closeCheckoutDirect() {
-  document.getElementById('checkoutOverlay').classList.remove('show');
-  document.body.style.overflow = '';
-}
+// closeCheckoutDirect: definida acima com unmount do Brick
 
 // switchPtab, formatCard, formatExpiry, copyPixKey removidos — checkout delegado ao Mercado Pago
 
