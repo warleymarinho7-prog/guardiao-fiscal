@@ -1813,12 +1813,27 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <h1>Sua movimentação bancária<br>pode revelar<br><em>sinais que merecem atenção.</em></h1>
     <p>Movimentações bancárias relevantes podem ser cruzadas com sua declaração de IR. O Guardião Fiscal mostra — antes de você declarar — se sua movimentação levanta sinais de risco.</p>
     <div class="hero-badges">
-      <span class="badge">🔒 Dados 100% no seu dispositivo</span>
-      <span class="badge">⚡ Resultado em 2 minutos</span>
-      <span class="badge">✅ Gratuito para começar</span>
+      <span class="badge">🔒 Arquivos 100% locais</span>
+      <span class="badge">📊 Score com causa</span>
+      <span class="badge">✅ Grátis para começar</span>
     </div>
     <div style="margin-top:24px">
       <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">🔍 Verificar meu perfil fiscal →</button>
+    </div>
+    <!-- Mini métricas mobile — iguais ao desktop -->
+    <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
+      <div style="text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">6</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">fatores fiscais</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">bancos suportados</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
+      </div>
     </div>
   </div>
 
@@ -4112,7 +4127,11 @@ function openQuiz() {
   renderQ();
   // Scroll suave até o simulador
   setTimeout(() => {
-    document.querySelector('.sim-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const isMobile = window.innerWidth < 1100;
+    const target = isMobile
+      ? document.getElementById('quizWrap')
+      : document.querySelector('.sim-wrap');
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 80);
 }
 
