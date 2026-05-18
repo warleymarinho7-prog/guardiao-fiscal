@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; frame-src https://*.mercadopago.com https://*.mercadolibre.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
@@ -2861,7 +2861,7 @@ async function initMpBrick() {
 
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://sdk.mercadopago.com/v2/mercadopago.js';
+      script.src = 'https://sdk.mercadopago.com/js/v2';
       script.onload  = () => { console.log('[MP SDK] carregado dinamicamente OK'); resolve(); };
       script.onerror = (e) => { console.error('[MP SDK] falha ao carregar:', e); reject(new Error('Não foi possível carregar o SDK do Mercado Pago. Tente desativar extensões do navegador (ex: ad blocker) e recarregue a página.')); };
       document.head.appendChild(script);
