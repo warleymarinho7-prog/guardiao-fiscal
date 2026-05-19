@@ -2776,9 +2776,30 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+</script>
 <script>
+
+// ── LAZY LOADERS ──────────────────────────────────────────────────
+let _pdfjsLoading = !1;
+
+function _loadPdfJs() {
+  return "undefined" != typeof pdfjsLib || _pdfjsLoading ? Promise.resolve() : (_pdfjsLoading = !0, new Promise((e, t) => {
+    const n = document.createElement("script");
+    n.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", n.crossOrigin = "anonymous", n.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js", e()
+    }, n.onerror = () => t(new Error("Falha ao carregar pdf.js")), document.head.appendChild(n)
+  }))
+}
+let _jspdfLoading = !1;
+
+function _loadJsPDF() {
+  return "undefined" != typeof jspdf || _jspdfLoading ? Promise.resolve() : (_jspdfLoading = !0, new Promise((e, t) => {
+    const n = document.createElement("script");
+    n.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", n.crossOrigin = "anonymous", n.onload = e, n.onerror = () => t(new Error("Falha ao carregar jsPDF")), document.head.appendChild(n)
+  }))
+}
+
+
 
 // ===== NAVIGATION =====
 function _applyPage(id) {
@@ -4674,8 +4695,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===== PARSER V3 ENGINE =====
-if(typeof pdfjsLib!=='undefined')
-  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// workerSrc: gerenciado por _loadPdfJs()
 
 const MAX_FILES=5;
 const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
@@ -5074,6 +5094,7 @@ function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTR
 function eGetTag(str,name){const r=new RegExp(`<${name}>([^<]+)`,'i');const m=str.match(r);return m?m[1].trim():null;}
 function eParseGeneric(lines){if(lines.length<2)return[];const sep=eDetectSep(lines[0]);const hdr=eSplitCSV(lines[0],sep).map(c=>c.toLowerCase().replace(/"/g,'').trim());const ci=h=>{for(const n of h){const i=hdr.findIndex(x=>x.includes(n));if(i>=0)return i;}return -1;};const iDt=ci(['data','date','dt lançamento','dt mov']);const iDsc=ci(['descrição','descricao','histórico','historico','memo','title','nome','name']);const iVl=ci(['valor','value','amount','vlr']);const iCr=ci(['crédito','credito','créd']);const iDb=ci(['débito','debito','déb']);return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l,sep);if(c.length<2)return null;const date=iDt>=0?eParseDate(c[iDt]):eParseDate(c[0]);const desc=iDsc>=0?c[iDsc].replace(/"/g,'').trim():c[1]?.trim()||'';let value=0;if(iVl>=0)value=eParseBRL(c[iVl]);else if(iCr>=0&&iDb>=0){const cr=eParseBRL(c[iCr]||''),db=eParseBRL(c[iDb]||'');value=cr>0?cr:-Math.abs(db);}else for(let j=c.length-1;j>=0;j--){const v=eParseBRL(c[j]);if(!isNaN(v)&&v!==0){value=v;break}}return desc?{date,desc,value}:null;}).filter(Boolean);}
 async function eParsePDF(buffer){
+  await _loadPdfJs();
   const copy=buffer.slice(0);
   let pdf;
   try {
@@ -6251,7 +6272,8 @@ if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1
   const dbgHd=document.getElementById('pDbgHd');
   if(dbgHd){dbgHd.style.display='flex';document.getElementById('pDbgBd').style.display='';}
 }
-function gerarRelatorioPDF() {
+async function gerarRelatorioPDF() {
+  await _loadJsPDF();
   if (typeof jspdf === 'undefined' || !jspdf || !jspdf.jsPDF) {
     alert('O módulo de PDF ainda está carregando. Aguarde alguns segundos e tente novamente.');
     return;
@@ -6726,6 +6748,8 @@ function eResetAll(){
 }
 
 // extrato step 1 — handled by Supabase auth above
+
+
 
 
 
