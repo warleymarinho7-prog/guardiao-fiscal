@@ -2779,6 +2779,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script>
+
 // ===== NAVIGATION =====
 function _applyPage(id) {
   const target = document.getElementById('page-' + id);
@@ -4577,7 +4578,7 @@ function openQuiz() {
 }
 
 // ── FEED DE DETECÇÕES AO VIVO (demo animada na home) ─────────────────────────
-(function() {
+(window.requestIdleCallback || (cb => setTimeout(cb, 200)))(function() { (function() {
   const detections = [
     { type: 'red',    icon: '🚨', label: 'Incompatibilidade de renda',       val: '+162% acima do declarado' },
     { type: 'yellow', icon: '⚠️', label: 'Pix recorrentes sem origem',        val: 'R$ 32.880 em 4 meses' },
@@ -4646,13 +4647,16 @@ function openQuiz() {
       if (!_feedInterval) { _feedInterval = setInterval(addDetection, 3500); }
     }
   });
-})();
+})(); });
 
 // ── FIM FEED DETECÇÕES ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   renderQ();
-  mRenderQ();
-  initProFreeMode();
+  // mRenderQ e initProFreeMode diferidos — não bloqueiam o primeiro frame
+  (window.requestIdleCallback || (cb => setTimeout(cb, 300)))(function() {
+    mRenderQ();
+    initProFreeMode();
+  });
   // Anima o dashboard mockup no hero desktop
   setTimeout(() => {
     const bar = document.getElementById('mockBar');
@@ -6722,6 +6726,7 @@ function eResetAll(){
 }
 
 // extrato step 1 — handled by Supabase auth above
+
 
 
 </script>
