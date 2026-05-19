@@ -1,0 +1,2794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1628">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { overflow-x: hidden; }
+
+:root {
+  /* Azul-petróleo profundo — referência Nubank/Linear */
+  --bg:      #0b1120;
+  --surface: #111827;
+  --surface2:#18212f;
+  --border:  #1e2d40;
+  --border2: #263548;
+
+  /* Sky-blue para ações/links — confiança fintech */
+  --green:  #3b82f6;
+  --green2: #2563eb;
+
+  /* Emerald para positivo/sucesso */
+  --accent: #10b981;
+
+  /* Amarelo âmbar suave */
+  --yellow: #d97706;
+
+  /* Vermelho menos agressivo */
+  --red: #ef4444;
+
+  /* Hierarquia de texto */
+  --text:   #f8fafc;
+  --text2:  #e2e8f0;
+  --muted:  #64748b;
+  --muted2: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.72;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 1100px 600px at 50% -200px, rgba(59,130,246,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 500px at 100% 30%, rgba(59,130,246,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 500px 400px at 0% 85%, rgba(16,185,129,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== NAV ===== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(11,17,32,0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(30,45,64,0.8);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: Manrope, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.logo-svg { width: 28px; height: 32px; flex-shrink: 0; }
+.logo-wordmark { display: flex; flex-direction: column; line-height: 1.1; }
+.logo-top { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.logo-bottom { font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 0.5px; text-transform: uppercase; }
+
+.logo span { color: var(--green); }
+
+.nav-links {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-link:hover { color: var(--text2); background: rgba(255,255,255,0.05); }
+.nav-link.active { color: var(--text); }
+
+.nav-btn-login {
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.2);
+  color: var(--green);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn-login:hover { background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.35); }
+
+/* ===== PAGES ===== */
+.page { display: none; padding-top: 60px; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ===== HOME PAGE ===== */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 88px 24px 56px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(59,130,246,0.07);
+  border: 1px solid rgba(59,130,246,0.18);
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+}
+
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.8); }
+}
+
+.hero h1 {
+  font-family: Manrope, sans-serif;
+  font-size: clamp(26px,6.5vw,48px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.hero h1 em { font-style: normal; color: var(--green); opacity: 0.95; }
+.hero p { font-size: 16px; color: var(--muted2); line-height: 1.8; max-width: 480px; margin: 0 auto 36px; letter-spacing: 0.01em; font-weight: 400; }
+
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.badge {
+  font-size: 12px;
+  color: var(--muted2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ===== SIMULADOR ===== */
+.sim-wrap {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 0 12px 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.tabs {
+  display: flex;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 6px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: none;
+  font-family: Manrope, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--muted);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+.tbadge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.tbadge-green { background: rgba(0,230,118,0.15); color: var(--green); }
+.tbadge-yellow { background: rgba(255,193,7,0.12); color: var(--yellow); }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+
+.panel-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.steps { display: flex; gap: 5px; }
+.step-dot {
+  height: 2px; border-radius: 2px;
+  transition: all 0.4s ease;
+  background: var(--border);
+  flex: 1;
+}
+.step-dot.done { background: rgba(59,130,246,0.4); }
+.step-dot.active { background: var(--green); box-shadow: none; }
+
+.q-body { padding: 32px 28px 24px; }
+.q-num { font-family:'Inter',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
+.q-title { font-family:Manrope,sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
+.q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
+
+.options { display:flex; flex-direction:column; gap:10px; }
+
+.opt {
+  display:flex; align-items:center; gap:14px;
+  padding:15px 18px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  cursor:pointer; transition:all 0.2s ease;
+  text-align:left; width:100%; color:var(--text);
+  font-family:'Inter','DM Sans',sans-serif; position:relative;
+  min-height: 58px;
+}
+.opt:hover { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.04); transform:translateX(3px); box-shadow:0 2px 12px rgba(16,185,129,0.06); }
+.opt.sel { border-color:var(--green); background:rgba(16,185,129,0.08); box-shadow:0 0 0 1px rgba(16,185,129,0.2); }
+
+.opt-radio {
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid var(--border2);
+  flex-shrink:0; transition:all 0.18s;
+  display:flex; align-items:center; justify-content:center;
+}
+.opt.sel .opt-radio { border-color:var(--green); background:var(--green); }
+
+.opt-text { flex:1; }
+.opt-label { font-size:15px; font-weight:500; line-height:1.4; color:var(--text); }
+.opt-desc { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.55; font-weight:400; }
+
+.risk-pill {
+  font-size:10px; font-family:'Inter',sans-serif; font-weight:600;
+  letter-spacing:0.2px; padding:3px 9px; border-radius:6px; flex-shrink:0;
+}
+.rp-green { background:rgba(16,185,129,0.1); color:#6ee7b7; }
+.rp-yellow { background:rgba(245,158,11,0.1); color:#fcd34d; }
+.rp-red { background:rgba(248,113,113,0.1); color:#fca5a5; }
+
+.panel-footer {
+  padding:22px 28px 28px;
+  border-top:1px solid rgba(255,255,255,0.05);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+
+.btn-back {
+  padding:13px 20px;
+  background:transparent; border:1px solid var(--border);
+  border-radius:12px; color:var(--muted2);
+  font-family:'Inter',sans-serif; font-size:14px;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-back:hover { color:var(--text); border-color:var(--border2); }
+.btn-back:disabled { opacity:0.3; cursor:default; }
+
+.btn-next {
+  flex:1; padding:14px;
+  background:var(--green); border:none; border-radius:11px;
+  color:#000; font-family:Manrope,sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+  opacity:0.35; pointer-events:none;
+  min-height: 48px;
+}
+.btn-next.on { opacity:1; pointer-events:all; }
+.btn-next.on:hover { background:#2563eb; box-shadow:0 6px 20px rgba(59,130,246,0.3); transform:translateY(-1px); }
+
+/* RESULT */
+#resultPanel { display:none; }
+#resultPanel.show { display:block; }
+
+.result-box {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px; overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+
+.result-hero {
+  padding:32px 24px; text-align:center;
+  border-bottom:1px solid var(--border); position:relative;
+}
+.result-glow {
+  position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+  width:280px; height:280px; border-radius:50%;
+  filter:blur(80px); opacity:0.1; pointer-events:none;
+}
+.result-sublabel { font-family:'Inter',sans-serif; font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
+.result-emoji { font-size:64px; display:block; margin-bottom:14px; }
+.result-level { font-family:Manrope,sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
+.result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
+.score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
+.score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+.score-label { font-size:11px; color:var(--muted); font-family:Manrope,sans-serif; }
+
+.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
+.alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
+.alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+.alert-red { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.12); }
+.alert-yellow { background:rgba(252,211,77,0.06); border:1px solid rgba(252,211,77,0.12); }
+.alert-green { background:rgba(110,231,183,0.06); border:1px solid rgba(110,231,183,0.12); }
+
+/* UPGRADE CTA NO RESULTADO */
+.result-upgrade {
+  padding:20px 22px;
+  border-bottom:1px solid var(--border);
+}
+
+.upgrade-label {
+  font-family:Manrope,sans-serif; font-size:10px; font-weight:600;
+  letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:14px;
+}
+
+.upgrade-cards {
+  display:flex; gap:10px; flex-direction:column;
+}
+
+.upgrade-card {
+  padding:20px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:var(--surface2);
+  cursor:pointer;
+  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  width:100%;
+  text-align:left;
+}
+.upgrade-card:hover { border-color:rgba(59,130,246,0.25); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+.upgrade-card.featured { border-color:rgba(59,130,246,0.3); background:rgba(59,130,246,0.04); }
+
+.uc-icon {
+  width:40px; height:40px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.uc-icon-avulso { background:rgba(255,193,7,0.1); }
+.uc-icon-pro { background:rgba(0,230,118,0.1); }
+
+.uc-info { flex:1; }
+.uc-name { font-family:Manrope,sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
+.uc-desc { font-size:11px; color:var(--muted2); line-height:1.4; }
+
+.uc-price { text-align:right; flex-shrink:0; }
+.uc-value { font-family:Manrope,sans-serif; font-size:16px; font-weight:800; color:var(--green); }
+.uc-period { font-size:10px; color:var(--muted); }
+
+.best-tag {
+  font-size:9px; font-family:Manrope,sans-serif; font-weight:700;
+  background:var(--green); color:#000;
+  padding:2px 7px; border-radius:4px; letter-spacing:0.5px;
+  margin-bottom:4px; display:inline-block;
+}
+
+.result-cta { padding:16px 22px 22px; }
+.btn-restart {
+  width:100%; padding:12px;
+  background:transparent; border:1px solid var(--border);
+  border-radius:10px; color:var(--muted);
+  font-family:'Inter',sans-serif; font-size:13px;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-restart:hover { color:var(--text); border-color:var(--border2); }
+.alert-paywall{background:rgba(59,130,246,0.06);border:1px dashed rgba(59,130,246,0.3);border-radius:14px;padding:20px 18px;text-align:center;margin-top:8px}
+.apw-lock{font-size:28px;margin-bottom:8px}
+.apw-title{font-family:Manrope,sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.apw-desc{font-size:13px;color:var(--muted2);line-height:1.65;margin-bottom:16px;max-width:340px;margin-left:auto;margin-right:auto}
+.apw-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#000;cursor:pointer;margin-bottom:8px;transition:opacity .2s}
+.apw-btn:hover{opacity:.88}
+.apw-or{font-size:11px;color:var(--muted);margin:6px 0}
+.apw-btn-sec{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s}
+.apw-btn-sec:hover{border-color:var(--green);color:var(--green)}
+.alert-item strong{font-weight:600;display:block;margin-bottom:2px;color:var(--text)}
+
+/* ===== EXTRATO FLOW ===== */
+.ext-flow { display:flex; flex-direction:column; gap:14px; }
+
+/* step card genérico */
+.ext-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px; overflow:hidden;
+}
+
+.ext-card-header {
+  padding:18px 22px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+}
+
+.ext-step-num {
+  width:28px; height:28px; border-radius:8px;
+  background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:Manrope,sans-serif; font-size:12px; font-weight:700; color:var(--green);
+  flex-shrink:0;
+}
+.ext-step-num.done { background:var(--green); color:#000; }
+.ext-step-num.locked { background:rgba(90,112,144,0.1); border-color:var(--border); color:var(--muted); }
+
+.ext-step-info { flex:1; }
+.ext-step-title { font-family:Manrope,sans-serif; font-size:14px; font-weight:700; }
+.ext-step-sub { font-size:12px; color:var(--muted2); margin-top:2px; }
+
+.ext-card-body { padding:20px 22px; }
+
+/* upload zone */
+.upload-zone {
+  border:2px dashed var(--border2);
+  border-radius:12px;
+  padding:32px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+}
+.upload-zone:hover { border-color:rgba(0,230,118,0.4); background:rgba(0,230,118,0.02); }
+.upload-zone.has-file { border-color:rgba(0,230,118,0.5); background:rgba(0,230,118,0.04); border-style:solid; }
+.upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+
+.upload-icon { font-size:32px; margin-bottom:10px; display:block; }
+.upload-title { font-family:Manrope,sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
+.upload-sub { font-size:12px; color:var(--muted2); line-height:1.6; }
+
+.banks-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; justify-content:center; }
+.bank-chip {
+  font-size:11px; color:var(--muted2);
+  background:var(--surface2); border:1px solid var(--border);
+  padding:4px 10px; border-radius:6px;
+}
+
+/* file selected state */
+.file-selected {
+  display:none;
+  align-items:center; gap:12px;
+  padding:14px 16px;
+  background:rgba(0,230,118,0.06);
+  border:1px solid rgba(0,230,118,0.2);
+  border-radius:10px; margin-top:12px;
+}
+.file-selected.show { display:flex; }
+.file-name { font-size:13px; font-weight:500; flex:1; }
+.file-remove { font-size:12px; color:var(--muted); cursor:pointer; }
+.file-remove:hover { color:var(--red); }
+
+/* analyzing */
+.analyzing-block {
+  display:none; text-align:center; padding:8px 0 4px;
+}
+.analyzing-block.show { display:block; }
+.analyzing-bar {
+  height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:10px;
+}
+.analyzing-fill {
+  height:100%; background:var(--green); border-radius:2px;
+  animation:analyzeProgress 2.5s ease forwards;
+}
+@keyframes analyzeProgress {
+  0% { width:0%; }
+  60% { width:75%; }
+  90% { width:92%; }
+  100% { width:100%; }
+}
+.analyzing-label { font-size:12px; color:var(--muted2); font-family:Manrope,sans-serif; }
+
+/* PAYWALL result */
+.paywall-result {
+  display:none;
+}
+.paywall-result.show { display:block; }
+
+.paywall-preview {
+  position:relative; overflow:hidden; border-radius:12px; margin-bottom:16px;
+}
+
+.preview-content {
+  padding:16px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  filter:blur(4px);
+  user-select:none; pointer-events:none;
+}
+
+.preview-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.preview-row:last-child { border:none; }
+.preview-label { color:var(--muted2); }
+.preview-val { font-family:Manrope,sans-serif; font-weight:700; }
+.preview-val.red { color:var(--red); }
+.preview-val.yellow { color:var(--yellow); }
+.preview-val.green { color:var(--green); }
+
+.paywall-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(8,14,26,0.3) 0%, rgba(8,14,26,0.97) 60%);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  padding:20px; border-radius:12px;
+}
+
+.lock-icon { font-size:28px; margin-bottom:8px; }
+.paywall-msg {
+  font-family:Manrope,sans-serif; font-size:15px; font-weight:700;
+  text-align:center; margin-bottom:4px;
+}
+.paywall-sub { font-size:12px; color:var(--muted2); text-align:center; margin-bottom:16px; line-height:1.5; }
+
+.paywall-actions { display:flex; flex-direction:column; gap:8px; width:100%; }
+.btn-unlock-avulso {
+  width:100%; padding:12px 10px;
+  background:rgba(255,193,7,0.12); border:1px solid rgba(255,193,7,0.3);
+  border-radius:10px; color:var(--yellow);
+  font-family:Manrope,sans-serif; font-size:12px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+  line-height:1.4; text-align:center;
+}
+.btn-unlock-avulso:hover { background:rgba(255,193,7,0.2); }
+.btn-unlock-pro {
+  width:100%; padding:12px 10px;
+  background:var(--green); border:none; border-radius:10px;
+  color:#000; font-family:Manrope,sans-serif; font-size:12px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+  line-height:1.4; text-align:center;
+}
+.btn-unlock-pro:hover { background:#2563eb; }
+
+/* ===== PLANOS PAGE ===== */
+.plans-page {
+  max-width:1080px; margin:0 auto; padding:64px 32px 112px;
+  position:relative; z-index:1;
+}
+
+.page-title {
+  font-family:Manrope,sans-serif; font-size:clamp(30px,4vw,46px);
+  font-weight:800; letter-spacing:-2px; text-align:center; margin-bottom:16px;
+  color:var(--text);
+}
+.page-sub { font-size:16px; color:var(--muted2); text-align:center; margin-bottom:44px; line-height:1.7; max-width:500px; margin-left:auto; margin-right:auto; }
+
+.plans-grid {
+  display:flex; flex-direction:column; gap:20px;
+}
+
+.plan-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:32px 28px;
+  position:relative;
+  transition:all 0.2s;
+}
+.plan-card:hover { border-color:rgba(16,185,129,0.3); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.25); }
+.plan-card.featured {
+  border-color:rgba(0,230,118,0.4);
+  background:linear-gradient(135deg, rgba(0,230,118,0.04), var(--surface));
+}
+
+.plan-popular {
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+  background:var(--green); color:#000;
+  font-family:Manrope,sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:1px; padding:3px 14px; border-radius:20px;
+  white-space:nowrap;
+}
+
+.plan-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
+.plan-icon { font-size:32px; margin-bottom:8px; display:block; }
+.plan-name { font-family:Manrope,sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; }
+.plan-tagline { font-size:12px; color:var(--muted2); margin-top:2px; }
+
+.plan-price { text-align:right; }
+.plan-value { font-family:Manrope,sans-serif; font-size:32px; font-weight:800; color:var(--green); line-height:1; letter-spacing:-1px; }
+.plan-period { font-size:11px; color:var(--muted); margin-top:2px; }
+.plan-free { font-family:Manrope,sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
+
+.plan-features { display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
+.plan-feat {
+  display:flex; align-items:flex-start; gap:12px;
+  font-size:14px; color:var(--muted2); line-height:1.6;
+  padding: 3px 0;
+  font-weight:400;
+}
+.feat-icon { font-size:14px; flex-shrink:0; }
+.feat-ok { color:var(--text); }
+
+.btn-plan {
+  width:100%; padding:16px;
+  border-radius:16px;
+  font-family:Manrope,sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all 0.25s ease; border:none;
+  min-height: 56px;
+  letter-spacing:0.01em;
+}
+.btn-plan-free { background:var(--surface2); color:var(--muted2); border:1px solid var(--border); }
+.btn-plan-free:hover { color:var(--text); }
+.btn-plan-avulso { background:rgba(255,193,7,0.1); color:var(--yellow); border:1px solid rgba(255,193,7,0.25); }
+.btn-plan-avulso:hover { background:rgba(255,193,7,0.2); }
+.btn-plan-pro { background:var(--green); color:#fff; }
+.btn-plan-pro:hover { background:#2563eb; box-shadow:0 6px 20px rgba(59,130,246,0.3); transform:translateY(-1px); }
+
+/* ===== CHECKOUT STEPPER ===== */
+.co-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.co-step-num {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--surface2); border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:Manrope,sans-serif; font-size:11px; font-weight:700;
+  color:var(--muted); transition:all 0.3s;
+}
+.co-step.active .co-step-num { background:var(--green); border-color:var(--green); color:#000; }
+.co-step.done .co-step-num { background:rgba(0,230,118,0.15); border-color:rgba(0,230,118,0.4); color:var(--green); }
+.co-step-label { font-size:10px; color:var(--muted); font-family:Manrope,sans-serif; font-weight:600; white-space:nowrap; }
+.co-step.active .co-step-label { color:var(--text); }
+.co-step.done .co-step-label { color:var(--green); }
+.co-step-line { flex:1; height:1px; background:var(--border); margin-bottom:14px; }
+
+/* ===== CHECKOUT MODAL ===== */
+.overlay {
+  display:none; position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(4,9,18,0.85);
+  backdrop-filter:blur(8px);
+  z-index:200;
+  align-items:flex-end;
+  justify-content:center;
+}
+.overlay.show { display:flex; }
+
+@media(min-width:600px) {
+  .overlay { align-items:center; }
+}
+
+.modal {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:28px 28px 0 0;
+  padding:36px 32px 52px;
+  width:100%; max-width:500px;
+  position:relative;
+  animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1);
+  max-height:92vh;
+  overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.4);
+}
+
+@media(min-width:600px) {
+  .modal { border-radius:20px; }
+}
+
+@keyframes slideUp {
+  from { transform:translateY(40px); opacity:0; }
+  to { transform:translateY(0); opacity:1; }
+}
+
+.modal-close {
+  position:absolute; top:16px; right:16px;
+  width:30px; height:30px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:14px; color:var(--muted);
+  transition:all 0.2s;
+}
+.modal-close:hover { color:var(--text); }
+
+.modal-step { display:none; }
+.modal-step.active { display:block; }
+
+.modal-title { font-family:Manrope,sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.modal-sub { font-size:13px; color:var(--muted2); margin-bottom:24px; line-height:1.6; }
+
+/* Order summary */
+.order-summary {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.os-icon { font-size:24px; }
+.os-info { flex:1; }
+.os-name { font-family:Manrope,sans-serif; font-size:14px; font-weight:700; }
+.os-desc { font-size:12px; color:var(--muted2); margin-top:2px; }
+.os-price { font-family:Manrope,sans-serif; font-size:18px; font-weight:800; color:var(--green); }
+
+/* form */
+.form-label {
+  font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+  letter-spacing:0.3px; color:var(--muted2);
+  display:block; margin-bottom:8px;
+}
+.form-input {
+  width:100%; padding:14px 18px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; color:var(--text);
+  font-family:'Inter','DM Sans',sans-serif; font-size:15px;
+  outline:none; transition:all 0.2s; margin-bottom:16px;
+  min-height: 50px;
+  letter-spacing:0.01em;
+}
+.form-input:focus { border-color:rgba(16,185,129,0.5); box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
+.form-input:focus { border-color:rgba(0,230,118,0.4); }
+.form-input::placeholder { color:var(--muted); }
+
+.form-row { display:flex; gap:10px; }
+.form-row .form-group { flex:1; }
+.form-group { display:flex; flex-direction:column; }
+
+.pix-block {
+  background:rgba(59,130,246,0.04);
+  border:1px solid rgba(59,130,246,0.15);
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  margin-bottom:16px;
+}
+.pix-title { font-family:Manrope,sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
+.pix-key {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:8px; padding:10px 14px;
+  font-family:monospace; font-size:13px; color:var(--green);
+  letter-spacing:1px; margin-bottom:12px;
+}
+.pix-note { font-size:12px; color:var(--muted2); line-height:1.6; }
+
+.payment-tabs {
+  display:flex; gap:6px; margin-bottom:18px;
+}
+.ptab {
+  flex:1; padding:10px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:9px; cursor:pointer; transition:all 0.2s;
+  font-family:Manrope,sans-serif; font-size:11px; font-weight:600;
+  color:var(--muted); text-align:center;
+}
+.ptab.active { border-color:rgba(0,230,118,0.4); color:var(--green); background:rgba(0,230,118,0.06); }
+
+.ptab-content { display:none; }
+.ptab-content.active { display:block; }
+
+.btn-pay {
+  width:100%; padding:16px;
+  background:var(--green); border:none; border-radius:14px;
+  color:#fff; font-family:Manrope,sans-serif; font-size:15px; font-weight:700;
+  cursor:pointer; transition:all 0.2s; margin-top:4px;
+  min-height: 54px;
+  letter-spacing:0.01em;
+}
+.btn-pay:hover { box-shadow:0 8px 28px rgba(59,130,246,0.35); transform:translateY(-1px); filter:brightness(1.1); }
+
+.security-note {
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; color:var(--muted); margin-top:12px;
+  justify-content:center;
+}
+
+/* success step */
+.success-block { text-align:center; padding:16px 0; }
+.success-icon { font-size:52px; display:block; margin-bottom:16px; }
+.success-title { font-family:Manrope,sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
+.success-sub { font-size:13px; color:var(--muted2); line-height:1.7; margin-bottom:24px; }
+
+.divider {
+  display:flex; align-items:center; gap:12px;
+  margin:16px 0; color:var(--muted); font-size:12px;
+}
+.divider::before, .divider::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* ===== LOGIN MODAL ===== */
+.login-modal-title { font-family:Manrope,sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+
+/* ===== ANIMATIONS ===== */
+/* ===== PARSER V3 — MULTI-EXTRATO ===== */
+.drop-zone{border:2px dashed var(--border2);border-radius:12px;
+  padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.drop-zone:hover,.drop-zone.drag{border-color:rgba(0,217,110,0.5);background:rgba(0,217,110,0.03)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-ico{font-size:36px;margin-bottom:10px;display:block}
+.dz-ttl{font-family:Manrope,sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.dz-sub{font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
+.chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
+.limit-bar{display:flex;align-items:center;gap:10px;margin-top:16px;
+  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
+.limit-dots{display:flex;gap:5px}
+.ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
+.ldot.used{background:rgba(0,217,110,0.15);border:1px solid rgba(0,217,110,0.3)}
+.ldot.full{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
+.limit-txt{font-size:12px;color:var(--muted2)}
+.limit-txt strong{color:var(--text);font-weight:600}
+.file-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.file-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px}
+.file-item.ok{border-color:rgba(0,217,110,0.25)}
+.file-item.err{border-color:rgba(240,79,96,0.3);background:rgba(240,79,96,0.05)}
+.file-ico{font-size:18px;flex-shrink:0}
+.file-info{flex:1;min-width:0}
+.file-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-bank{font-size:11px;color:var(--muted2);margin-top:1px}
+.file-rm{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 8px;
+  border-radius:6px;transition:all 0.15s;border:1px solid transparent;flex-shrink:0}
+.file-rm:hover{color:var(--red);border-color:rgba(240,79,96,0.3)}
+.file-status{font-size:10px;font-family:Manrope,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
+.fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
+.fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
+.act-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.prog-ext{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
+.act-msg{font-size:12px;color:var(--muted2);flex:1}
+.btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:9px;
+  color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;opacity:0.35;pointer-events:none}
+.btn-go.on{opacity:1;pointer-events:all}
+.btn-go.on:hover{background:#2563eb}
+.err-ext{display:none;padding:12px 16px;margin:0 0 12px;
+  background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.25);
+  border-radius:9px;font-size:13px;color:var(--red)}
+.err-ext.show{display:block}
+/* resultado parser */
+.ov-top{padding:28px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px}
+.ov-emoji{font-size:48px;flex-shrink:0;line-height:1}
+.ov-level{font-family:Manrope,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.15}
+.ov-sub{font-size:12px;color:var(--muted2);margin-top:5px;letter-spacing:0.2px}
+.p-score-wrap{padding:20px 24px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.12)}
+.p-score-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.p-score-lbl{font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;letter-spacing:0.8px;text-transform:uppercase}
+.p-score-val{font-family:Manrope,sans-serif;font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1}
+.p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.p-bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
+.p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.p-stat{padding:16px 20px;background:var(--surface)}
+.p-sl{font-size:10px;font-family:'Inter',sans-serif;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.p-sv{font-family:Manrope,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.p-sn{font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.4}
+.sources{padding:16px 22px;border-bottom:1px solid var(--border)}
+.src-ttl{font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.src-list{display:flex;flex-direction:column;gap:7px}
+.src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:9px;font-size:13px}
+.src-bank{flex:1;font-weight:500}
+.src-txns{font-size:11px;color:var(--muted2)}
+.src-val{font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--green)}
+.src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.p-alerts{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.pal{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6}
+.pal-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.pal strong{font-weight:600;display:block;margin-bottom:1px}
+.p-red{background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.2)}
+.p-yel{background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2)}
+.p-grn{background:rgba(0,217,110,0.07);border:1px solid rgba(0,217,110,0.15)}
+.p-blu{background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.15)}
+.bank-tabs{display:flex;gap:1px;background:var(--border);overflow-x:auto;border-bottom:1px solid var(--border)}
+.bank-tabs::-webkit-scrollbar{height:0}
+.btab{padding:11px 16px;font-family:Manrope,sans-serif;font-size:12px;font-weight:600;
+  color:var(--muted);background:var(--surface);cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;flex-shrink:0}
+.btab.on{color:var(--green);background:var(--surface2)}
+.p-txn-wrap{padding:16px 22px}
+.p-txn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.p-txn-ttl{font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.p-flt{display:flex;gap:5px}
+.pfb{font-size:11px;font-family:Manrope,sans-serif;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
+.pfb.on{background:rgba(240,79,96,0.12);border-color:rgba(240,79,96,0.3);color:var(--red)}
+.p-txn-list{display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto}
+.p-txn-list::-webkit-scrollbar{width:3px}
+.p-txn-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.pti{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:var(--surface2);border:1px solid transparent;font-size:12px}
+.pti.s{border-color:rgba(240,79,96,0.25);background:rgba(240,79,96,0.06)}
+.pti.a{border-color:rgba(245,166,35,0.2);background:rgba(245,166,35,0.05)}
+.pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.pdr{background:var(--red)}.pdy{background:var(--yellow)}.pdg{background:var(--green)}.pdm{background:var(--muted)}
+.ptinfo{flex:1;min-width:0}
+.ptd{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptt{font-size:10px;color:var(--muted2)}
+.ptv{font-family:Manrope,sans-serif;font-size:12px;font-weight:700;white-space:nowrap}
+.ptv.p{color:var(--green)}.ptv.n{color:var(--muted2)}
+.ptf{font-size:9px;font-family:Manrope,sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ptf.r{background:rgba(240,79,96,0.15);color:var(--red)}
+.ptf.y{background:rgba(245,166,35,0.15);color:var(--yellow)}
+.ptbank{font-size:9px;color:var(--muted);white-space:nowrap}
+.p-dbg-hd{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.p-dbg-ttl{font-family:Manrope,sans-serif;font-size:11px;color:var(--muted);font-weight:600}
+.p-dbg-bd{display:none;padding:14px 22px;border-top:1px solid var(--border)}
+.p-dbg-bd.open{display:block}
+pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
+.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.btn-nova:hover{color:var(--text);border-color:var(--muted)}
+@media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}.p-sv{font-size:19px}}
+
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  25% { transform:translateX(-6px); }
+  75% { transform:translateX(6px); }
+}
+
+/* ===== RESPONSIVO — DESKTOP ===== */
+@media (min-width: 768px) {
+
+  /* Nav mais espaçosa */
+  nav { padding: 16px 48px; }
+  .nav-links { display: flex; }
+  .nav-link { font-size: 14px; padding: 8px 16px; }
+  .nav-btn-login { font-size: 13px; padding: 9px 20px; }
+  .logo { font-size: 18px; }
+  
+
+  /* Hero mais generoso */
+  .hero { padding: 72px 32px 48px; max-width: 680px; }
+  .hero h1 { font-size: 44px; letter-spacing: -2px; }
+  .hero p { font-size: 16px; max-width: 480px; }
+  .hero-tag { font-size: 12px; padding: 7px 18px; }
+  .badge { font-size: 13px; padding: 6px 16px; }
+
+  /* Simulador centralizado com mais largura */
+  .sim-wrap { max-width: 660px; padding: 0 28px 96px; }
+
+  /* Tabs maiores */
+  .tab { font-size: 13px; padding: 12px 16px; }
+  .tbadge { font-size: 10px; }
+
+  /* Panel com mais respiro */
+  .panel-header { padding: 22px 28px 16px; }
+  .panel-label { font-size: 11px; }
+  .q-body { padding: 28px; }
+  .q-num { font-size: 12px; margin-bottom: 10px; }
+  .q-title { font-size: 20px; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .q-sub { font-size: 14px; margin-bottom: 24px; }
+
+  /* Opções mais confortáveis */
+  .opt { padding: 16px 18px; gap: 14px; }
+  .opt-label { font-size: 14px; }
+  .opt-desc { font-size: 12px; }
+  .opt-radio { width: 20px; height: 20px; }
+  .risk-pill { font-size: 10px; padding: 4px 9px; }
+
+  .panel-footer { padding: 18px 28px; }
+  .btn-back { padding: 13px 20px; font-size: 14px; }
+  .btn-next { font-size: 14px; padding: 14px; }
+
+  /* Resultado */
+  .result-hero { padding: 40px 32px; }
+  .result-emoji { font-size: 56px; }
+  .result-level { font-size: 30px; }
+  .result-desc { font-size: 14px; }
+  .alerts { padding: 22px 28px; }
+  .alert-item { font-size: 13px; padding: 14px 16px; }
+  .result-upgrade { padding: 24px 28px; }
+  .upgrade-cards { flex-direction: row; }
+  .upgrade-card { flex: 1; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .uc-price { text-align: left; }
+  .result-cta { padding: 20px 28px 28px; }
+
+  /* Planos em grid lado a lado */
+  .plans-page { max-width: 1100px; padding: 56px 32px 80px; }
+  .page-title { font-size: 36px; }
+  .page-sub { font-size: 15px; margin-bottom: 40px; }
+  .plans-grid { flex-direction: row; align-items: stretch; gap: 20px; }
+  .plan-card { flex: 1; }
+  .plan-name { font-size: 20px; }
+  .plan-value { font-size: 32px; }
+  .plan-feat { font-size: 14px; }
+  .btn-plan { font-size: 14px; padding: 15px; }
+
+  /* Extrato */
+  .ext-card-body { padding: 24px 28px; }
+  .ext-card-header { padding: 20px 28px 16px; }
+  .ext-step-title { font-size: 15px; }
+  .upload-zone { padding: 40px 24px; }
+  .upload-icon { font-size: 36px; }
+  .upload-title { font-size: 15px; }
+
+  /* Paywall */
+  .paywall-msg { font-size: 17px; }
+
+  /* Modal maior no desktop */
+  .modal { padding: 36px 32px 44px; max-width: 520px; }
+  .modal-title { font-size: 22px; }
+  .modal-sub { font-size: 14px; }
+  .form-input { font-size: 15px; padding: 14px 18px; }
+  .form-label { font-size: 12px; }
+  .btn-pay { font-size: 15px; padding: 16px; }
+  .os-name { font-size: 15px; }
+  .os-price { font-size: 20px; }
+  .ptab { font-size: 13px; padding: 12px; }
+  .pix-title { font-size: 16px; }
+  .pix-key { font-size: 14px; }
+
+  /* Stepper checkout */
+  .co-step-label { font-size: 11px; }
+  .co-step-num { width: 32px; height: 32px; font-size: 12px; }
+}
+
+@media (min-width: 1024px) {
+  .hero { padding: 88px 40px 56px; }
+  .hero h1 { font-size: 52px; }
+  .sim-wrap { max-width: 680px; }
+  .plans-page { max-width: 1000px; }
+}
+
+/* ===== SPLIT HERO LAYOUT — DESKTOP WIDE ===== */
+@media (min-width: 1100px) {
+  /* Wrapper que contém hero + simulador lado a lado */
+  #page-home > .hero,
+  #page-home > #quizWrap {
+    display: none; /* esconde versão mobile no desktop */
+  }
+
+  /* Layout split visível só no desktop */
+  .split-home { display: flex !important; }
+}
+
+/* Split home — sempre renderizado, escondido no mobile */
+.split-home {
+  display: none;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 80px 48px 80px;
+  gap: 64px;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+.split-left {
+  flex: 1;
+  min-width: 0;
+  padding-top: 24px;
+  max-width: 520px;
+}
+
+.split-left .hero-tag {
+  display: inline-flex;
+  margin-bottom: 28px;
+}
+
+.split-left h1 {
+  font-family: Manrope, sans-serif;
+  font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.split-left h1 em { font-style: normal; color: var(--green); }
+
+.split-left p {
+  font-size: 16px;
+  color: var(--muted2);
+  line-height: 1.8;
+  margin-bottom: 32px;
+  max-width: 420px;
+}
+
+.split-left .hero-badges {
+  justify-content: flex-start;
+  margin-bottom: 36px;
+}
+
+.split-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+}
+
+.split-cta-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 28px;
+  background: var(--green);
+  border: none;
+  border-radius: 14px;
+  color: #000;
+  font-family: Manrope, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+.split-cta-primary:hover { background: #1d4ed8; box-shadow: 0 8px 28px rgba(59,130,246,0.3); transform: translateY(-1px); }
+
+.split-cta-quiz {
+  width: 100%;
+  padding: 13px 24px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: Manrope, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.split-cta-quiz:hover { background: var(--surface2); border-color: var(--green); color: var(--green); }
+
+.split-cta-sec {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Dashboard mockup — lado direito */
+.split-right {
+  flex: 1;
+  min-width: 0;
+  max-width: 540px;
+  position: relative;
+}
+.split-right .sim-wrap {
+  max-width: 100%;
+  padding: 0 0 48px;
+}
+
+.dash-mockup {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 32px 80px rgba(0,0,0,0.45),
+    0 8px 24px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+/* Glow atrás do dashboard */
+.dash-mockup::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: -60px; right: -60px; bottom: -60px;
+  background: radial-gradient(ellipse 500px 400px at 50% 30%, rgba(59,130,246,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dash-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.15);
+}
+.dash-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dash-title {
+  font-family: Manrope, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-left: 4px;
+}
+
+.dash-score-block {
+  padding: 24px 22px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.1);
+}
+.dash-score-label {
+  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dash-score-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.dash-score-num {
+  font-family: Manrope, sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1;
+}
+.dash-score-badge {
+  font-family: Manrope, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+.dash-bar-bg {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dash-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+.dash-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.dash-stat {
+  padding: 14px 16px;
+  background: var(--surface);
+}
+.dash-stat-label {
+  font-size: 9px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.dash-stat-val {
+  font-family: Manrope, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.dash-alerts {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.dash-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.dash-alert strong {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 1px;
+  font-size: 12px;
+}
+.dash-alert span {
+  font-size: 11px;
+  opacity: 0.75;
+}
+.da-red { background: rgba(240,79,96,0.08); border: 1px solid rgba(240,79,96,0.18); }
+.da-yel { background: rgba(245,166,35,0.07); border: 1px solid rgba(245,166,35,0.16); }
+.da-grn { background: rgba(0,217,110,0.06); border: 1px solid rgba(0,217,110,0.14); }
+
+.dash-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.1);
+}
+.dash-footer-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+}
+.dash-footer-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--green);
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.18);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-family: Manrope, sans-serif;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page.active { animation: fadeUp 0.4s ease both; }
+.q-slide { animation: fadeUp 0.3s ease both; }
+
+/* disclaimer */
+.disclaimer {
+  text-align:center; font-size:11px; color:var(--muted);
+  margin-top:20px; line-height:1.7; padding:0 8px;
+}
+
+/* ===== NAV MOBILE — HAMBURGER ===== */
+.nav-hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px;
+  transition: all 0.2s;
+}
+.nav-hamburger:hover { background: rgba(255,255,255,0.05); }
+.nav-hamburger span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: var(--muted2);
+  border-radius: 2px;
+  transition: all 0.25s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* Mobile drawer */
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 99;
+}
+.nav-drawer.open { display: block; }
+.nav-drawer-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+.nav-drawer-panel {
+  position: absolute;
+  top: 0; right: 0;
+  width: 240px;
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 72px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nav-drawer-link {
+  display: block;
+  width: 100%;
+  padding: 13px 16px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-drawer-link:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.nav-drawer-link.active { color: var(--green); background: rgba(59,130,246,0.06); }
+.nav-drawer-divider { height: 1px; background: var(--border); margin: 8px 0; }
+.nav-drawer-auth {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .nav-hamburger { display: none; }
+  .nav-drawer { display: none !important; }
+}
+
+
+/* navAuthArea: visível no desktop, escondido no mobile (drawer tem o Entrar) */
+@media (max-width: 767px) {
+  #navAuthArea { display: none !important; }
+  #navAuthArea * { display: none !important; }
+
+  /* === BASE === */
+  body { font-size: 15px; }
+  .page { padding-top: 56px; }
+
+  /* === NAV === */
+  nav { padding: 12px 16px; }
+
+  /* === HERO MOBILE === */
+  .hero { padding: 72px 16px 40px; }
+  .hero h1 { font-size: clamp(24px, 7vw, 36px); letter-spacing: -1px; }
+  .hero p { font-size: 14px; }
+  .hero-badges { flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .split-cta { gap: 10px; }
+  .split-cta-primary, .split-cta-quiz {
+    width: 100%; font-size: 15px; padding: 14px 20px;
+  }
+
+  /* === SIM-WRAP / QUIZ === */
+  .sim-wrap { padding: 0 12px 48px; max-width: 100%; box-sizing: border-box; }
+  .tabs { flex-wrap: wrap; }
+  .tab { font-size: 12px; padding: 8px 10px; }
+  /* quiz body e opções mais compactos no mobile */
+  .q-body { padding: 20px 16px 16px; }
+  .q-title { font-size: 17px; }
+  .q-sub { font-size: 13px; margin-bottom: 16px; }
+  .opt { padding: 12px 14px; gap: 10px; min-height: 52px; }
+  .opt-label { font-size: 14px; }
+  .opt-desc { font-size: 12px; }
+  .risk-pill { font-size: 9px; padding: 2px 7px; max-width: 72px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel-footer { padding: 14px 16px 18px; }
+  .btn-back { padding: 12px 16px; font-size: 13px; min-width: 72px; }
+  .btn-next { padding: 13px; font-size: 14px; }
+
+  /* === PAGE-EXTRATO === */
+  #page-extrato .sim-wrap {
+    max-width: 100% !important;
+    padding: 16px 12px 48px !important;
+    box-sizing: border-box;
+  }
+
+  /* Intro emocional */
+  #page-extrato h2 { font-size: clamp(20px, 6vw, 28px) !important; }
+  #page-extrato p { font-size: 14px !important; }
+
+  /* Grid benefícios 2→1 col */
+  #page-extrato .sim-wrap > div [style*="grid-template-columns:repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Grids 2 colunas dentro de extrato → 1 col em < 480px */
+  #page-extrato [style*="grid-template-columns:1fr 1fr"],
+  #page-extrato [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Botões de upload PDF/CSV/OFX — 1 col */
+  #page-extrato [style*="grid-template-columns:1fr 1fr 1fr"],
+  #page-extrato [style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Drop zone */
+  .drop-zone { padding: 20px 12px; }
+  .chips { gap: 4px; }
+  .chip { font-size: 10px; padding: 3px 7px; }
+
+  /* Ext cards */
+  .ext-card-header { padding: 14px 16px 10px; }
+  .ext-card-body { padding: 14px 16px; }
+  .ext-step-title { font-size: 14px; }
+
+  /* Resultado extrato */
+  .p-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  .bank-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* === PLANOS === */
+  .plans-page { padding: 32px 16px 64px !important; }
+  .plans-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .plan-card { padding: 20px 16px !important; }
+
+  /* === PAGE-INSTITUCIONAL === */
+  #page-institucional > div {
+    padding: 40px 16px 60px !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  #page-institucional h1 { font-size: clamp(22px, 6vw, 32px) !important; }
+  #page-institucional [style*="grid-template-columns:repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* === CHECKOUT / LOGIN MODAL === */
+  .modal { padding: 24px 16px !important; margin: 0 !important;
+           border-radius: 16px 16px 0 0 !important; }
+  .overlay { align-items: flex-end !important; }
+  .form-row { flex-direction: column; gap: 0; }
+
+  /* === RESULTADO QUIZ === */
+  #resultPanel { padding: 16px 12px; }
+  .apw-btn, .apw-btn-sec { font-size: 13px; padding: 12px 16px; }
+
+  /* === GERAL === */
+  * { -webkit-tap-highlight-color: transparent; }
+  button, a { touch-action: manipulation; }
+}
+
+@media (max-width: 380px) {
+  .hero h1 { font-size: 22px; }
+  #page-extrato [style*="grid-template-columns:1fr 1fr 1fr"],
+  #page-extrato [style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  .ext-card-header { gap: 8px; }
+  .ext-step-title { font-size: 13px; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="logo" onclick="showPage('home')">
+    <svg class="logo-svg" viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="rgba(14,165,233,0.15)" stroke="#3b82f6" stroke-width="1.5"/>
+      <path d="M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z" fill="#0f1720"/>
+      <rect x="23" y="43" width="9" height="21" rx="2.5" fill="#3b82f6" opacity="0.38"/>
+      <rect x="36" y="33" width="9" height="31" rx="2.5" fill="#3b82f6" opacity="0.7"/>
+      <rect x="49" y="23" width="9" height="41" rx="2.5" fill="#3b82f6"/>
+    </svg>
+    <div class="logo-wordmark">
+      <span class="logo-top">Guardião</span>
+      <span class="logo-bottom">Fiscal</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link" onclick="showPage('home')">Início</button>
+    <button class="nav-link" onclick="showPage('extrato')">Análise de Extrato</button>
+    <button class="nav-link" onclick="showPage('planos')">Planos</button>
+    <button class="nav-link" onclick="showPage('institucional')">Institucional</button>
+  </div>
+  <!-- Auth area sempre visível — populada pelo JS (setUser) -->
+  <div id="navAuthArea" style="display:flex;align-items:center;gap:8px"></div>
+  <!-- Hamburger mobile (só aparece em <768px) -->
+  <button class="nav-hamburger" id="navHamburger" onclick="toggleDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="navDrawer" style="display:none">
+  <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
+  <div class="nav-drawer-panel">
+    <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()">🏠 Início</button>
+    <button class="nav-drawer-link" id="drawerPlanos" onclick="showPage('planos');closeDrawer()">💎 Planos</button>
+    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()">🛡️ Institucional</button>
+    <div class="nav-drawer-divider"></div>
+    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()">📄 Análise de Extrato</button>
+    <div class="nav-drawer-divider"></div>
+    <div class="nav-drawer-auth" id="drawerAuthArea">
+      <button class="nav-btn-login" style="width:100%;text-align:center;padding:12px" onclick="openLogin();closeDrawer()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOME PAGE ===== -->
+<div class="page active" id="page-home">
+
+  <!-- ===== SPLIT HERO — desktop wide (≥1100px) ===== -->
+  <div class="split-home">
+
+    <!-- ESQUERDA: copy + CTA -->
+    <div class="split-left">
+      <div class="hero-tag">🛡️ Motor de análise fiscal · e-Financeira · LGPD</div>
+      <h1>Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em></h1>
+      <p>A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.</p>
+      <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
+        <span class="badge">🔒 Processamento 100% local</span>
+        <span class="badge">📊 40+ verificações fiscais</span>
+        <span class="badge">✅ Grátis para começar</span>
+      </div>
+      <div class="split-cta">
+        <button class="split-cta-primary" onclick="showPage('extrato')">
+          Analisar meu extrato →
+        </button>
+        <div class="split-cta-sec">🔒 Dados processados localmente · Nenhum arquivo enviado a servidores</div>
+      </div>
+
+      <!-- Mini métricas -->
+      <div style="display:flex;gap:24px;margin-top:40px;padding-top:28px;border-top:1px solid var(--border)">
+        <div>
+          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
+        </div>
+        <div>
+          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">bancos suportados</div>
+        </div>
+        <div>
+          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
+        </div>
+      </div>
+
+      <!-- O que cruzamos -->
+      <div style="margin-top:28px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">// cruzamentos realizados</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📊 Pix × renda declarada</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">💸 Espécie × e-Financeira</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🔄 Padrões recorrentes</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📈 Anomalia temporal</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🏢 Atividade comercial</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🔁 Circularidade financeira</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIREITA: quiz desktop -->
+    <div class="split-right">
+      <!-- Demo de detecções ao vivo — aparece antes do quiz -->
+      <div id="liveDetectDemo" style="margin-bottom:16px">
+        <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite"></span>
+          // detecções em tempo real
+        </div>
+        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:hidden"></div>
+      </div>
+      <div class="sim-wrap">
+        <div class="tabs">
+          <button class="tab active" id="tabQ" onclick="switchSimTab('perguntas')">
+            📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
+          </button>
+        </div>
+        <div id="simPerguntas">
+          <div class="panel" id="questionPanel">
+            <div class="panel-header">
+              <div class="panel-label">// análise de risco fiscal</div>
+              <div class="steps" id="stepsBar"></div>
+            </div>
+            <div class="q-body" id="qBody"></div>
+            <div class="panel-footer">
+              <button class="btn-back" id="btnBack" onclick="prevQ()" disabled>← Voltar</button>
+              <button class="btn-next" id="btnNext" onclick="nextQ()">Continuar →</button>
+            </div>
+          </div>
+          <div id="resultPanel">
+            <div class="result-box">
+              <div class="result-hero" id="resultHero"></div>
+              <div class="alerts" id="resultAlerts"></div>
+              <div class="result-upgrade">
+                <div class="upgrade-label">// ativar monitoramento real</div>
+                <div class="upgrade-cards">
+                  <button class="upgrade-card" onclick="openCheckout('avulso')">
+                    <div class="uc-icon uc-icon-avulso">📄</div>
+                    <div class="uc-info">
+                      <div class="uc-name">Análise Avulsa</div>
+                      <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
+                    </div>
+                    <div class="uc-price">
+                      <div class="uc-value">R$34,90</div>
+                      <div class="uc-period">uso único</div>
+                    </div>
+                  </button>
+                  <button class="upgrade-card featured" onclick="openCheckout('pro')">
+                    <div class="uc-icon uc-icon-pro">🛡️</div>
+                    <div class="uc-info">
+                      <div class="best-tag">MELHOR CUSTO</div>
+                      <div class="uc-name">Plano Pro</div>
+                      <div class="uc-desc"><span id="ucProText">Análises ilimitadas + múltiplos extratos + histórico</span></div>
+                    </div>
+                    <div class="uc-price">
+                      <div class="uc-value">R$29,90</div>
+                      <div class="uc-period">/mês</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+              <div class="result-cta">
+                <button class="btn-restart" onclick="restart()">Refazer simulação</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- FIM SPLIT HERO -->
+
+  <!-- QUIZ MOBILE — IDs únicos, renderizado pelo JS separado -->
+  <div class="sim-wrap" id="quizWrap">
+    <div class="tabs">
+      <button class="tab active">📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span></button>
+    </div>
+    <div class="panel" id="mQuestionPanel">
+      <div class="panel-header">
+        <div class="panel-label">// análise de risco fiscal</div>
+        <div class="steps" id="mStepsBar"></div>
+      </div>
+      <div class="q-body" id="mQBody"></div>
+      <div class="panel-footer">
+        <button class="btn-back" id="mBtnBack" onclick="mPrevQ()" disabled>← Voltar</button>
+        <button class="btn-next" id="mBtnNext" onclick="mNextQ()">Continuar →</button>
+      </div>
+    </div>
+    <div id="mResultPanel" style="display:none">
+      <div class="result-box">
+        <div class="result-hero" id="mResultHero"></div>
+        <div class="alerts" id="mResultAlerts"></div>
+        <div class="result-upgrade">
+          <div class="upgrade-label">// ativar monitoramento real</div>
+          <div class="upgrade-cards">
+            <button class="upgrade-card" onclick="openCheckout('avulso')">
+              <div class="uc-icon uc-icon-avulso">📄</div>
+              <div class="uc-info"><div class="uc-name">Análise Avulsa</div><div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div></div>
+              <div class="uc-price"><div class="uc-value">R$34,90</div><div class="uc-period">uso único</div></div>
+            </button>
+            <button class="upgrade-card featured" onclick="openCheckout('pro')">
+              <div class="uc-icon uc-icon-pro">🛡️</div>
+              <div class="uc-info"><div class="best-tag">MELHOR CUSTO</div><div class="uc-name">Plano Pro</div><div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div></div>
+              <div class="uc-price"><div class="uc-value">R$29,90</div><div class="uc-period">/mês</div></div>
+            </button>
+          </div>
+        </div>
+        <div class="result-cta">
+          <button class="btn-restart" onclick="mRestart()">Refazer simulação</button>
+        </div>
+      </div>
+    </div>
+    <!-- Botão abaixo do quiz — leva ao fluxo de extrato -->
+    <div style="margin-top:16px;padding:0 4px 8px">
+      <button onclick="showPage('extrato')" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
+    </div>
+  </div>
+
+  <!-- Bloco: O que o Guardião cruza — mobile (desktop fica na institucional) -->
+  <div style="padding:0 16px 8px;display:none" id="algoritmoBlocoMobile" class="algoritmo-mobile-show">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:20px 16px;margin-bottom:8px">
+      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px">// o que analisamos</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">📊</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Compatibilidade financeira</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Renda declarada × movimentação real no período</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">🔄</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Padrões de Pix e TED</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Recebimentos recorrentes sem origem declarada</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">💸</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Movimentações em espécie</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Depósitos em dinheiro que ativam critérios do e-Financeira</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">📈</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Anomalia temporal</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Picos atípicos de movimentação comparados ao histórico</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:15px;flex-shrink:0">🏢</span>
+          <div><div style="font-size:13px;font-weight:600;color:var(--text)">Atividade comercial oculta</div><div style="font-size:12px;color:var(--muted2);margin-top:2px">Padrões recorrentes compatíveis com serviços não declarados</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag">🛡️ Motor de análise fiscal · e-Financeira · LGPD</div>
+    <h1>Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em></h1>
+    <p>A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.</p>
+    <div class="hero-badges">
+      <span class="badge">🔒 Processamento 100% local</span>
+      <span class="badge">📊 40+ verificações fiscais</span>
+      <span class="badge">✅ Grátis para começar</span>
+    </div>
+    <div style="margin-top:24px">
+      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">🔍 Verificar meu perfil fiscal →</button>
+    </div>
+    <!-- Mini métricas mobile — iguais ao desktop -->
+    <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
+      <div style="text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">bancos suportados</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== PLANOS PAGE ===== -->
+<div class="page" id="page-extrato">
+  <div class="sim-wrap" style="max-width:min(600px,100%);padding-top:32px;box-sizing:border-box;padding-left:16px;padding-right:16px">
+    <!-- Introdução emocional -->
+    <div style="padding-bottom:32px;border-bottom:1px solid var(--border);margin-bottom:32px">
+      <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">Scanner fiscal</div>
+      <h2 style="font-family:Manrope,sans-serif;font-size:clamp(22px,4vw,32px);font-weight:800;color:var(--text);margin:0 0 14px;letter-spacing:-1px;line-height:1.2">Descubra inconsistências financeiras<br><em style="font-style:normal;color:var(--accent)">antes da Receita Federal.</em></h2>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 24px;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
+
+      <!-- Benefícios -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">🔍</div>
+          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">⚠️</div>
+          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">📊</div>
+          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">📄</div>
+          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
+        </div>
+      </div>
+
+      <!-- Segurança -->
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,217,110,0.05);border:1px solid rgba(0,217,110,0.15);border-radius:10px">
+        <span style="font-size:20px;flex-shrink:0">🔒</span>
+        <div>
+          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text)">Seus dados não saem do seu dispositivo</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:2px">Processamento 100% local · LGPD · Sem upload para servidores</div>
+        </div>
+      </div>
+    </div>
+      <!-- extrato flow v3 — multi-extrato -->
+  <div id="simExtrato" style="display:block;">
+
+    <!-- STEP 1: conta -->
+    <div class="ext-card" id="extStep1">
+      <div class="ext-card-header">
+        <div class="ext-step-num" id="s1num">1</div>
+        <div class="ext-step-info">
+          <div class="ext-step-title" id="extStep1Title">Crie sua conta gratuita</div>
+          <div class="ext-step-sub">Para salvar sua análise e acessar depois</div>
+        </div>
+      </div>
+      <div class="ext-card-body">
+        <!-- tabs login/cadastro -->
+        <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:16px">
+          <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
+          <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
+        </div>
+        <!-- cadastro pane -->
+        <div id="extCadPane">
+          <div class="form-group">
+            <label class="form-label" for="extEmail">E-mail</label>
+            <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="extSenha">Senha</label>
+            <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('extSenhaMeter', this.value)">
+            <div id="extSenhaMeter"></div>
+          </div>
+        </div>
+        <!-- login pane -->
+        <div id="extLogPane" style="display:none">
+          <div class="form-group">
+            <label class="form-label" for="extLoginEmail">E-mail</label>
+            <input class="form-input" type="email" id="extLoginEmail" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="extLoginSenha">Senha</label>
+            <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha">
+          </div>
+        </div>
+        <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+        <button class="btn-next on" style="width:100%;margin-top:4px" onclick="extStep1Done()">
+          <span id="extAuthBtnTxt">Criar conta e continuar →</span>
+        </button>
+        <div class="security-note" style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
+          🔒 Gratuito — sem cobrança neste passo
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: upload multi-extrato -->
+    <div class="ext-card" id="extStep2" style="opacity:0.45;pointer-events:none">
+      <div class="ext-card-header">
+        <div class="ext-step-num locked" id="s2num">2</div>
+        <div class="ext-step-info">
+          <div class="ext-step-title">Enviar extrato para análise</div>
+          <div class="ext-step-sub">Até 5 arquivos · CSV · OFX · PDF · Múltiplos bancos</div>
+        </div>
+      </div>
+      <div class="ext-card-body">
+
+        <!-- O que será analisado -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">O que a engine detecta</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+            <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Renda incompatível</div>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação acima do declarado no IR — principal gatilho do e-Financeira</div>
+            </div>
+            <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Pix e espécie recorrentes</div>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Recebimentos frequentes sem nota fiscal — padrão de autônomo informal detectado</div>
+            </div>
+            <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Variação patrimonial</div>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Gastos ou investimentos acima da capacidade financeira declarada</div>
+            </div>
+            <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Anomalia temporal</div>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Picos de movimentação fora do padrão histórico — z-score por período</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;padding:8px 12px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.5">
+            A Receita Federal usa mais de 160 filtros automatizados e IA para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira para identificar os mesmos sinais — antes da sua declaração ser entregue.
+          </div>
+        </div>
+
+        <!-- Formatos suportados -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Formatos e bancos suportados</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Nubank CSV</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Inter CSV</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Itaú OFX</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Bradesco OFX</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Banco do Brasil</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Caixa</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Santander</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ PDF bancário</span>
+            <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--border);color:var(--muted2)">+ 17 bancos via OFX</span>
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5">Você pode enviar até <strong style="color:var(--text)">5 extratos</strong> de bancos diferentes — a engine consolida tudo e analisa o perfil completo.</div>
+        </div>
+
+        <!-- Upload de arquivos -->
+        <div style="margin-bottom:12px">
+
+          <!-- Input real — oculto, ativado pelos botões abaixo -->
+          <input type="file" id="efi" aria-label="Selecionar extratos bancários"
+                 accept=".csv,.ofx,.pdf,.txt,.qfx" multiple
+                 onchange="eOnSel(event)"
+                 style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+
+          <!-- Três botões de tipo -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+            <button onclick="document.getElementById('efi').click()"
+                    style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
+              <span style="font-size:24px">📄</span>
+              <span style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700">PDF</span>
+              <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Extrato em PDF<br>de qualquer banco</span>
+            </button>
+            <button onclick="document.getElementById('efi').click()"
+                    style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
+              <span style="font-size:24px">📊</span>
+              <span style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700">CSV</span>
+              <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Nubank, Inter<br>e outros bancos</span>
+            </button>
+            <button onclick="document.getElementById('efi').click()"
+                    style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
+              <span style="font-size:24px">🏦</span>
+              <span style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700">OFX</span>
+              <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Itaú, Bradesco<br>BB, Caixa, Santander</span>
+            </button>
+          </div>
+
+          <!-- Zona de arrastar (mantida funcional) -->
+          <div class="drop-zone" id="dz"
+               ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)"
+               onclick="document.getElementById('efi').click()"
+               style="padding:18px;cursor:pointer">
+            <span class="dz-ico" id="dzIco">📂</span>
+            <div class="dz-ttl" id="dzTtl">Ou arraste os arquivos aqui</div>
+            <div class="dz-sub">Até 5 extratos · bancos diferentes · análise consolidada</div>
+          </div>
+
+          <!-- Como exportar de cada banco -->
+          <details style="margin-top:12px">
+            <summary style="font-size:12px;color:var(--muted2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px">
+              <span style="font-size:14px">ℹ️</span>
+              <span>Como exportar o extrato do meu banco?</span>
+            </summary>
+            <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Nubank</strong><br>
+                App → Extrato → Exportar → CSV
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Inter</strong><br>
+                App → Extrato → Exportar planilha → CSV
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Itaú</strong><br>
+                Internet Banking → Extrato → Exportar OFX
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Bradesco</strong><br>
+                Internet Banking → Extrato → Arquivo OFX
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Banco do Brasil</strong><br>
+                Internet Banking → Extrato → Exportar CSV
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Caixa / Santander</strong><br>
+                Internet Banking → Extrato → Salvar OFX
+              </div>
+            </div>
+            <div style="margin-top:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+              <strong style="color:var(--text);font-weight:600">Qualquer banco</strong> — Se o seu banco não estiver listado, exporte o extrato em PDF pelo internet banking ou aplicativo. Nossa engine extrai as transações automaticamente.
+            </div>
+          </details>
+        </div>
+        <!-- O que o motor detecta — reforço antes do upload -->
+        <div style="margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">// 40+ verificações automáticas</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
+          </div>
+        </div>
+
+        <div class="limit-bar" id="limitBar" style="display:none">
+          <div class="limit-dots" id="ldots"></div>
+          <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos</div>
+          <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
+        </div>
+        <div class="file-list" id="fileList"></div>
+        <div class="err-ext" id="errExt"></div>
+
+        <!-- Segurança e LGPD -->
+        <div style="margin-top:16px;padding:14px 16px;background:rgba(0,217,110,0.04);border:1px solid rgba(0,217,110,0.15);border-radius:10px">
+          <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Seus dados estão protegidos</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">100% local</strong> — o arquivo é lido diretamente no seu navegador</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">Sem upload</strong> — nenhum dado bancário é enviado a servidores</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">LGPD art. 13.709/2018</strong> — processamento conforme a lei</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">Não substitui contador</strong> — ferramenta educacional e preventiva</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="act-bar" id="actBar" style="display:none">
+        <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
+        <span class="act-msg" id="actMsg">Pronto para analisar</span>
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;width:100%">
+          <label for="rendaDeclaradaInput" style="font-family:Manrope,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda mensal declarada (opcional)</label>
+          <div style="position:relative;flex:1">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
+            <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
+              style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Manrope,sans-serif;box-sizing:border-box"
+              title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
+          </div>
+        </div>
+        <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: resultado com paywall -->
+    <div class="ext-card" id="extStep3" style="display:none">
+      <div class="ext-card-header">
+        <div class="ext-step-num locked" id="s3num">3</div>
+        <div class="ext-step-info">
+          <div class="ext-step-title">Resultado da análise</div>
+          <div class="ext-step-sub" id="s3sub">Desbloqueie para ver os detalhes completos</div>
+        </div>
+      </div>
+
+<!-- LGPD + METODOLOGIA -->
+    <div style="max-width:540px;margin:16px auto 0;padding:0 16px">
+      <div style="border-top:1px solid var(--border);padding-top:20px;display:flex;flex-direction:column;gap:12px">
+
+        <!-- metodologia -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.75">
+            O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira — identifica padrões de movimentação que merecem atenção antes da sua declaração de IR. A análise usa os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas. Identificamos os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
+          </div>
+        </div>
+
+        <!-- LGPD -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7">
+            <strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</strong>.
+          </div>
+        </div>
+
+        <!-- aviso legal -->
+        <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
+          oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
+          Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
+          <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
+        </div>
+      </div>
+    </div>
+      <div class="ext-card-body" id="extResultBody">
+        <div id="paywallBlock">
+
+          <!-- ── PRÉVIA REAL (preenchida pelo JS após análise) ── -->
+          <div id="previewReal" style="display:none">
+
+            <!-- Score e nível — VISÍVEL -->
+            <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:12px">
+    <div style="font-size:10px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <div id="pvEmoji" style="font-size:32px;flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div id="pvLevel" style="font-family:Manrope,sans-serif;font-size:clamp(15px,4vw,20px);font-weight:800;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        <div id="pvSub" style="font-size:11px;color:var(--muted2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <div style="flex-shrink:0;text-align:right">
+        <div id="pvScore" style="font-family:Manrope,sans-serif;font-size:28px;font-weight:800;letter-spacing:-2px"></div>
+        <div style="font-size:10px;color:var(--muted)">risco fiscal</div>
+      </div>
+    </div>
+    <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden">
+      <div id="pvBarFill" style="height:100%;border-radius:6px;width:0%;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div>
+    </div>
+            </div>
+
+            <!-- Métricas rápidas — VISÍVEL -->
+            <div id="pvMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px"></div>
+
+            <!-- 2 primeiros alertas — VISÍVEL -->
+            <div id="pvAlerts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+
+            <!-- Restante bloqueado -->
+            <div style="position:relative;border-radius:14px;overflow:hidden">
+    <!-- preview borrada do que vem depois -->
+    <div style="filter:blur(5px);pointer-events:none;user-select:none;padding:16px;background:var(--surface2);border:1px solid var(--border);border-radius:14px">
+      <div style="height:12px;background:rgba(255,255,255,0.08);border-radius:6px;margin-bottom:8px;width:80%"></div>
+      <div style="height:12px;background:rgba(255,255,255,0.05);border-radius:6px;margin-bottom:8px;width:60%"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <div style="height:40px;flex:1;background:rgba(248,113,113,0.12);border-radius:8px"></div>
+        <div style="height:40px;flex:1;background:rgba(245,158,11,0.1);border-radius:8px"></div>
+        <div style="height:40px;flex:1;background:rgba(59,130,246,0.08);border-radius:8px"></div>
+      </div>
+      <div style="height:12px;background:rgba(255,255,255,0.06);border-radius:6px;margin-top:12px;width:90%"></div>
+      <div style="height:12px;background:rgba(255,255,255,0.04);border-radius:6px;margin-top:6px;width:70%"></div>
+    </div>
+    <!-- overlay de lock -->
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(11,17,32,0.1) 0%,rgba(11,17,32,0.95) 50%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px;border-radius:14px">
+      <div style="font-size:24px;margin-bottom:6px">🔒</div>
+      <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
+      <div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:16px;line-height:1.5">Desbloqueie para ver cada transação de risco com valor exato, relatório PDF e orientação fiscal personalizada.</div>
+      <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
+      <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — R$34,90</button>
+    </div>
+            </div>
+
+          </div>
+
+          <!-- Estado inicial (antes de analisar) -->
+          <div id="previewPlaceholder" style="text-align:center;padding:32px 20px;color:var(--muted)">
+            <div style="font-size:32px;margin-bottom:12px">📂</div>
+            <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">Faça upload do extrato acima</div>
+            <div style="font-size:12px;line-height:1.6">O resultado aparecerá aqui após a análise.<br>Seus dados ficam 100% no seu dispositivo.</div>
+          </div>
+
+        </div>
+        <!-- resultado real (visível após pagamento) -->
+        <div id="realResultBlock" style="display:none">
+          <div class="ov-top">
+            <div class="ov-emoji" id="ovEmoji">🟡</div>
+            <div>
+    <div class="ov-level" id="ovLevel">—</div>
+    <div class="ov-sub" id="ovSub">—</div>
+            </div>
+          </div>
+          <div class="p-score-wrap">
+            <div class="p-score-row">
+    <span class="p-score-lbl">Índice de risco fiscal consolidado</span>
+    <span class="p-score-val" id="pScoreVal">0%</span>
+            </div>
+            <div class="p-bar-bg"><div class="p-bar-fill" id="pBarFill" style="width:0%"></div></div>
+          </div>
+          <div class="p-stats" id="pStatsGrid"></div>
+          <div class="sources"><div class="src-ttl">// Extratos analisados</div><div class="src-list" id="srcList"></div></div>
+          <div class="p-alerts" id="pAlertList"></div>
+          <div class="bank-tabs" id="bankTabs"></div>
+          <div class="p-txn-wrap">
+            <div class="p-txn-hd">
+    <span class="p-txn-ttl">Transações</span>
+    <div class="p-flt">
+      <button class="pfb on" id="pfAll" onclick="eFilt('all')">Todas</button>
+      <button class="pfb" id="pfRisk" onclick="eFilt('risk')">⚠ Risco</button>
+    </div>
+            </div>
+            <div class="p-txn-list" id="pTxnList"></div>
+          </div>
+          <div class="p-dbg-hd" onclick="eToggleDbg()" id="pDbgHd" style="display:none">
+            <span class="p-dbg-ttl">🔧 Debug — dados do parser</span>
+            <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
+          </div>
+          <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
+          <div style="padding:4px 0 0;display:flex;flex-direction:column;gap:8px">
+            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;line-height:1.4" id="btnExportPDF">
+              📄 Exportar relatório em PDF
+            </button>
+            <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</div>
+
+<div class="page" id="page-planos">
+  <div class="plans-page">
+    <div class="page-title">Veja o que a Receita vê — antes dela.</div>
+    <div class="page-sub">Se existe uma inconsistência no seu extrato, o Guardião Fiscal encontra antes que vire problema.</div>
+
+    <div class="plans-grid">
+
+      <!-- Gratuito -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div>
+            <div class="plan-icon">✦</div>
+            <div class="plan-name">Gratuito</div>
+            <div class="plan-tagline">Diagnóstico inicial sem compromisso</div>
+          </div>
+          <div class="plan-price">
+            <div class="plan-free">R$0</div>
+            <div class="plan-period">para sempre</div>
+          </div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Simulador de risco fiscal completo</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Termômetro Verde / Atenção / Elevado / Crítico</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Diagnóstico com os critérios do e-Financeira</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Análise de extrato bancário real</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF exportável</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
+        </div>
+        <button class="btn-plan btn-plan-free" onclick="openQuiz()">Usar grátis →</button>
+      </div>
+
+      <!-- Avulso -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div>
+            <div class="plan-icon">📄</div>
+            <div class="plan-name">Análise Avulsa</div>
+            <div class="plan-tagline">Análise completa quando precisar</div>
+          </div>
+          <div class="plan-price">
+            <div class="plan-value">R$34,90</div>
+            <div class="plan-period">uso único</div>
+          </div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Gratuito</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análise completa do extrato bancário real</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score de risco com explicação causal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV, OFX e PDF (25 bancos)</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
+          <div class="plan-feat"><span class="feat-icon">—</span> Monitoramento contínuo</div>
+        </div>
+        <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — R$34,90 →</button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
+          💡 Pelo mesmo valor você assina o Pro por 1 mês e faz análises ilimitadas
+        </div>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan-card featured">
+        <div class="plan-popular">⭐ MAIS POPULAR</div>
+        <div class="plan-header">
+          <div>
+            <div class="plan-icon">🛡️</div>
+            <div class="plan-name">Pro</div>
+            <div class="plan-tagline">Monitoramento fiscal o ano todo</div>
+          </div>
+          <div class="plan-price">
+            <div class="plan-value">R$29,90</div>
+            <div class="plan-period">/mês</div>
+          </div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Avulso</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas — monitore o ano todo</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Múltiplos extratos por análise (até 5 arquivos)</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico de risco — veja sua evolução fiscal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos quando seu risco muda</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF exportável</div>
+        </div>
+        <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Acessar Pro Grátis →</span></button>
+      </div>
+
+    </div>
+    <!-- Tabela comparativa de profundidade -->
+    <div style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border)">
+      <div style="font-family:Manrope,sans-serif;font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:20px">O que cada plano detecta</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:2px solid var(--border)">
+              <th style="text-align:left;padding:10px 12px;color:var(--muted);font-weight:600;font-family:Inter,sans-serif">Verificação</th>
+              <th style="text-align:center;padding:10px 12px;color:var(--muted);font-weight:600;font-family:Inter,sans-serif">Gratuito</th>
+              <th style="text-align:center;padding:10px 12px;color:var(--muted);font-weight:600;font-family:Inter,sans-serif">Avulso</th>
+              <th style="text-align:center;padding:10px 12px;color:var(--green);font-weight:700;font-family:Manrope,sans-serif">Pro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Simulador de risco (quiz)</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análise de extrato bancário real</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Cruzamento Pix × renda declarada</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Detecção de atividade comercial oculta</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Anomalia temporal (picos suspeitos)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Score de coerência fiscal (0–100)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Relatório PDF completo</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análises ilimitadas</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Múltiplos extratos por análise</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Monitoramento contínuo (ano todo)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bloco de urgência -->
+      <div style="margin-top:28px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:18px 20px;text-align:center">
+        <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#f87171;margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
+        <div style="font-size:13px;color:var(--muted2);line-height:1.65">Após notificação da Receita Federal, multas e juros se aplicam automaticamente — e a retificação não elimina a penalidade. A análise preventiva custa menos de R$35.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== INSTITUCIONAL PAGE ===== -->
+<div class="page" id="page-institucional">
+  <div style="max-width:min(720px,100%);margin:0 auto;padding:60px 24px 80px;box-sizing:border-box">
+
+    <!-- Header -->
+    <div style="margin-bottom:48px">
+      <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Sobre o projeto</div>
+      <h1 style="font-family:Manrope,sans-serif;font-size:clamp(26px,5vw,40px);font-weight:800;color:var(--text);letter-spacing:-1.5px;line-height:1.15;margin:0 0 16px">O que é o<br><em style="font-style:normal;color:var(--accent)">Guardião Fiscal</em></h1>
+      <p style="font-size:16px;color:var(--muted2);line-height:1.7;margin:0;max-width:560px">Uma ferramenta independente que ajuda contribuintes a identificar inconsistências entre movimentação bancária e declaração de IR — antes que a Receita Federal identifique.</p>
+    </div>
+
+    <!-- Seção 1: Por que isso existe -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Por que isso existe</h2>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O e-Financeira determina que instituições financeiras reportem movimentações relevantes de pessoas físicas. Movimentações nesse perfil podem ser cruzadas com os dados da sua declaração de IR.</p>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O problema: a maioria das pessoas só descobre a inconsistência quando recebe a notificação de malha fina — depois que a declaração foi entregue. Nesse ponto, a margem de manobra é muito menor.</p>
+      <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:18px 20px;margin-top:20px">
+        <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">A lógica do Guardião Fiscal</div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.65;margin:0">Cruzar seus extratos com os critérios do e-Financeira <em>antes</em> de entregar a declaração. Se houver inconsistência, você descobre com tempo para corrigir ou reunir documentação.</p>
+      </div>
+    </div>
+
+    <!-- Seção 2: Como funciona tecnicamente -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Como funciona</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
+          <div style="font-size:22px;margin-bottom:8px">🔒</div>
+          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Processamento local</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.6">Seus extratos são lidos diretamente no seu navegador. Nenhum arquivo é enviado a servidores.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
+          <div style="font-size:22px;margin-bottom:8px">📊</div>
+          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Engine de risco v3</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.6">Score de 0 a 100 com 6 fatores ponderados: compatibilidade, consumo, espécie, concentração, anomalia temporal e perfil.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
+          <div style="font-size:22px;margin-bottom:8px">🏦</div>
+          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">25 bancos suportados</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.6">Importação de extratos em CSV, OFX e PDF — incluindo Nubank, Inter, Bradesco, Itaú, BB e outros.</div>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.65;margin:0">O resultado sempre inclui <strong style="color:var(--muted2);font-weight:600">a causa</strong> do score — não apenas um número, mas o motivo específico pelo qual aquele fator elevou o risco.</p>
+    </div>
+
+    <!-- Seção 3: Exemplo real de análise -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 6px">Exemplo real de análise</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 20px">Veja o tipo de inconsistência que o motor detecta automaticamente no seu extrato.</p>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+        <div style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">🚨</span>
+          <div>
+            <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:#f87171">Incompatibilidade de renda detectada</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Critério e-Financeira — peso alto no score</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:13px;color:var(--muted2)">Movimentação no período</span>
+            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:#f87171">R$ 84.000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:13px;color:var(--muted2)">Renda declarada (estimada)</span>
+            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:var(--text)">R$ 32.000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--muted2)">Divergência detectada</span>
+            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:#f87171">+162%</span>
+          </div>
+        </div>
+        <div style="background:rgba(239,68,68,0.04);border-top:1px solid rgba(239,68,68,0.1);padding:12px 18px">
+          <div style="font-size:12px;color:var(--muted2);line-height:1.6"><strong style="color:#f87171;font-weight:600">Recomendação:</strong> Verificar origem das entradas e reunir documentação comprobatória antes da declaração.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+        <div style="background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">⚠️</span>
+          <div>
+            <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:#fbbf24">Padrão comercial recorrente detectado</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Possível atividade sem nota fiscal</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:13px;color:var(--muted2)">Identificamos <strong style="color:var(--text)">7 recebimentos</strong> com valor médio de <strong style="color:var(--text)">R$ 926</strong> do mesmo remetente ao longo de 4 meses — periodicidade mensal detectada.</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.6">Padrão compatível com prestação de serviços não declarada. A Receita Federal identifica esse tipo de recorrência via cruzamento e-Financeira.</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:4px">* Dados fictícios para fins ilustrativos. O motor analisa seu extrato real com a mesma lógica.</div>
+    </div>
+
+    <!-- Seção 4: LGPD e Segurança -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">🔒 Segurança e privacidade</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Processamento 100% local</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Seu extrato é lido diretamente no seu navegador. Nenhum arquivo é enviado a servidores externos.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não armazenamos dados bancários</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Transações, saldos e movimentações nunca são salvos em nenhum banco de dados nosso.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não compartilhamos com terceiros</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Suas informações fiscais não são vendidas, compartilhadas ou acessadas por ninguém além de você.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Direito à explicação das decisões automatizadas garantido. Você pode contestar qualquer resultado.</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não acessamos a Receita Federal</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">O Guardião Fiscal não tem acesso à sua declaração nem ao sistema da Receita. A análise é baseada exclusivamente no seu extrato.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção 5: Quem fez -->
+    <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
+      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Quem está por trás</h2>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O Guardião Fiscal é um produto independente desenvolvido por um construtor de software brasileiro. Não é uma empresa tradicional, não tem time de vendas, não depende de investidores.</p>
+      <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0">A motivação é direta: a maioria das ferramentas fiscais disponíveis no Brasil é voltada para contadores e empresas, não para o contribuinte pessoa física que quer entender seu próprio risco antes de entregar a declaração.</p>
+    </div>
+
+    <!-- Seção 6: O que não somos -->
+    <div style="background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.12);border-radius:14px;padding:22px 24px;margin-bottom:40px">
+      <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px">⚠️ Importante entender</div>
+      <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0 0 10px">O Guardião Fiscal é uma ferramenta de diagnóstico educacional e preventivo. <strong style="color:var(--muted2);font-weight:600">Não substitui um contador</strong> e não tem acesso à sua declaração na Receita Federal.</p>
+      <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0">O score gerado indica <em>áreas de atenção potencial</em> com base nos critérios conhecidos do e-Financeira. Para situações específicas — herança, venda de imóvel, empréstimo familiar — a orientação de um contador é indispensável.</p>
+    </div>
+
+    <!-- CTA final -->
+    <div style="text-align:center;padding-top:8px">
+      <button onclick="showPage('extrato')" style="padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px" onmouseover="this.style.background='#2563eb';this.style.color='#fff'" onmouseout="this.style.background='var(--green)';this.style.color='#000'">
+        ⚠️ Verificar meu extrato agora →
+      </button>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">🔒 Processamento local · Nenhum dado enviado · Grátis para começar</div>
+    </div>
+
+  </div>
+</div>
+<!-- ===== CHECKOUT MODAL ===== -->
+<div class="overlay" id="checkoutOverlay" onclick="closeCheckout(event)">
+  <div class="modal" id="checkoutModal">
+    <button class="modal-close" onclick="closeCheckoutDirect()">✕</button>
+
+    <!-- STEPPER -->
+    <div id="checkoutStepper" style="display:flex;align-items:center;gap:6px;margin-bottom:24px">
+      <div class="co-step active" id="cst1">
+        <div class="co-step-num" id="csn1">1</div>
+        <div class="co-step-label">Sua conta</div>
+      </div>
+      <div class="co-step-line"></div>
+      <div class="co-step" id="cst2">
+        <div class="co-step-num" id="csn2">2</div>
+        <div class="co-step-label">Pagamento</div>
+      </div>
+      <div class="co-step-line"></div>
+      <div class="co-step" id="cst3">
+        <div class="co-step-num" id="csn3">3</div>
+        <div class="co-step-label">Acesso</div>
+      </div>
+    </div>
+
+    <!-- resumo do plano (sempre visível) -->
+    <div class="order-summary" id="orderSummary" style="margin-bottom:20px"></div>
+
+    <!-- STEP 1: Criar conta -->
+    <div class="modal-step active" id="stepAccount">
+      <div class="modal-title">Crie sua conta</div>
+      <div class="modal-sub">Primeiro defina seu acesso. O pagamento é no próximo passo.</div>
+
+      <div class="form-group">
+        <label class="form-label" for="coName">Nome completo</label>
+        <input class="form-input" type="text" id="coName" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="coEmail">E-mail</label>
+        <input class="form-input" type="email" id="coEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="coSenha">Senha</label>
+        <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
+        <div id="coSenhaMeter"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:20px">
+        <label class="form-label" for="coSenha2">Confirmar senha</label>
+        <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha">
+      </div>
+
+      <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
+
+      <div class="divider">já tem conta?</div>
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:Manrope,sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
+        Entrar com e-mail e senha
+      </button>
+      <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
+    </div>
+
+    <!-- STEP 2: Pagamento — MP Bricks embutido -->
+    <div class="modal-step" id="stepPay">
+      <div class="modal-title" id="checkoutTitle">Pagamento seguro</div>
+      <div class="modal-sub" id="checkoutSub">Pague com cartão direto aqui — sem sair do site.</div>
+
+      <!-- Tabs: Cartão | Pix/Boleto -->
+      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin:12px 0 16px">
+        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">💳 Cartão</button>
+        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">🟢 Pix / Boleto</button>
+      </div>
+
+      <!-- Cartão: MP Brick -->
+      <div id="payPaneCartao">
+        <div id="mpBrickContainer" style="min-height:320px"></div>
+        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin:10px 0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+      </div>
+
+      <!-- Pix / Boleto: redirect -->
+      <div id="payPaneOutros" style="display:none">
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+          <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
+            🟢 <strong style="color:var(--text)">Pix</strong> — aprovação imediata · qualquer banco<br>
+            📄 <strong style="color:var(--text)">Boleto</strong> — vence em 1 dia útil · qualquer banco<br>
+            <span style="font-size:11px;color:var(--muted)">Não é necessário ter conta no Mercado Pago</span>
+          </div>
+          <div id="mpPayErrOutros" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+          <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
+            <span id="btnMpTxt">Gerar Pix ou Boleto →</span>
+          </button>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px">⚠️ Você será redirecionado para gerar o código de pagamento</div>
+        </div>
+      </div>
+
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:Manrope,sans-serif;font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
+      <div class="security-note" style="margin-top:12px">🔒 Pagamento processado diretamente pelo Mercado Pago · PCI DSS</div>
+    </div>
+
+    <!-- STEP 3: Sucesso -->
+    <div class="modal-step" id="stepSuccess">
+      <div class="success-block">
+        <span class="success-icon">🎉</span>
+        <div class="success-title">Tudo pronto!</div>
+        <div class="success-sub" id="successMsg"></div>
+        <button class="btn-pay" onclick="closeCheckoutDirect()">Acessar minha área →</button>
+        <div class="security-note" style="margin-top:14px">Um e-mail de confirmação foi enviado para você.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LOGIN MODAL ===== -->
+<div class="overlay" id="loginOverlay" onclick="closeLogin(event)">
+  <div class="modal" id="loginModal">
+    <button class="modal-close" onclick="closeLoginDirect()">✕</button>
+
+    <!-- tabs -->
+    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
+      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="authLoginPane">
+      <div class="modal-title">Entrar na sua conta</div>
+      <div class="modal-sub">Acesse suas análises e histórico fiscal.</div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label" for="loginEmail">E-mail</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginSenha">Senha</label>
+        <input class="form-input" type="password" id="loginSenha" placeholder="Sua senha">
+      </div>
+      <div id="loginErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+      <button class="btn-pay" style="margin-bottom:14px" onclick="doLogin()">
+        <span id="loginBtnTxt">Entrar →</span>
+      </button>
+      <div class="security-note" style="margin-top:8px;text-align:center">
+        Não tem conta? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('cadastro')">Criar conta grátis →</span>
+      </div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="authCadastroPane" style="display:none">
+      <div class="modal-title">Criar conta gratuita</div>
+      <div class="modal-sub">Salve suas análises e acesse de qualquer lugar.</div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label" for="cadNome">Nome</label>
+        <input class="form-input" type="text" id="cadNome" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cadEmail">E-mail</label>
+        <input class="form-input" type="email" id="cadEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cadSenha">Senha</label>
+        <input class="form-input" type="password" id="cadSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('cadSenhaMeter', this.value)">
+        <div id="cadSenhaMeter"></div>
+      </div>
+      <div id="cadErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+      <div id="cadOk" style="display:none;color:var(--accent);font-size:13px;margin-bottom:10px;text-align:center;padding:10px;background:rgba(16,185,129,0.08);border-radius:8px"></div>
+      <button class="btn-pay" onclick="doCadastro()">
+        <span id="cadBtnTxt">Criar conta →</span>
+      </button>
+      <div class="security-note" style="margin-top:10px;text-align:center">🔒 Gratuito — sem cobrança</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="loaders.js"></script>
+  <script src="nav.js"></script>
+  <script src="plans.js"></script>
+  <script src="security-auth.js"></script>
+  <script src="checkout.js"></script>
+  <script src="quiz-desktop.js"></script>
+  <script src="quiz-mobile.js"></script>
+  <script src="dedup.js"></script>
+  <script src="parsers.js"></script>
+  <script src="engine.js"></script>
+  <script src="extrato-ui.js"></script>
+  <script src="pdf-export.js"></script>
+  <script src="init.js"></script>
+
+</body>
+</html>
