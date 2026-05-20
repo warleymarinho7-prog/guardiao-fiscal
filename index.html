@@ -2853,8 +2853,6 @@ function _applyPage(id) {
 function showPage(id) {
   const current = document.querySelector('.page.active')?.id?.replace('page-', '');
   if (current === id) return;
-  // Para o feed ao sair da home, reinicia ao voltar
-  if (current === 'home' && id !== 'home') window._stopDetectionFeed?.();
   try { history.pushState({ page: id }, '', '#' + id); } catch(e) {}
   _applyPage(id);
 }
@@ -4696,15 +4694,10 @@ function openQuiz() {
   window._stopDetectionFeed = () => {
     if (_detectionInterval) { clearInterval(_detectionInterval); _detectionInterval = null; }
   };
-  // Para o feed automaticamente quando sai da home — evita acúmulo em background
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) window._stopDetectionFeed?.();
-  });
 })();
 
 // ── FIM FEED DETECÇÕES ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-  // Renderiza só o quiz do dispositivo atual — evita 2x reflow no init
   const _isMobile = window.innerWidth < 1100;
   if (_isMobile) mRenderQ(); else renderQ();
   initProFreeMode();
@@ -4726,8 +4719,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== PARSER V3 ENGINE =====
 // pdf.js worker configurado dinamicamente em _loadPdfJs()
-// PERF: engine compilado em idle — browser renderiza UI primeiro, engine carrega quando ocioso
-(window.requestIdleCallback || (cb => setTimeout(cb, 100)))(function() {
 
 const MAX_FILES=5;
 const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
@@ -4776,11 +4767,10 @@ function aggregateMonthly(txns) {
       credits: 0, debits: 0,
       cashIn: 0,  cashOut: 0,
       pixIn: 0,   pixOut: 0,
-      pixConsolidado: 0,
+      pixConsolidado: 0,  // crédito + débito Pix (modelo e-Financeira)
       especie: 0,
       formal: 0,
-      // PERF: não armazena array de txns por mês — evita duplicar todas as transações em memória
-      count: 0
+      txns: [], count: 0
     };
     const b = months[key];
     const v = Math.abs(t.value);
@@ -4796,6 +4786,7 @@ function aggregateMonthly(txns) {
       if (d.includes('saque')) b.cashOut += v;
     }
     b.pixConsolidado = b.pixIn + b.pixOut;
+    b.txns.push(t);
     b.count++;
   }
   return months;
@@ -4908,11 +4899,8 @@ let eActiveBankTab='all';
 let _eConsolidated=null;
 let _eSources=null;
 
-// PERF: instâncias reutilizáveis — Intl.NumberFormat é pesado para criar a cada chamada
-const _fmtBRLInstance = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
-const _fmtDateInstance = new Intl.DateTimeFormat('pt-BR');
-const fmtBRL=v=>_fmtBRLInstance.format(v);
-const fmtDate=d=>d?_fmtDateInstance.format(d):'—';
+const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
+const fmtDate=d=>d?d.toLocaleDateString('pt-BR'):'—';
 
 function eParseBRL(s){
   if(!s)return 0;
@@ -5314,7 +5302,6 @@ function analiseTemporal(monthly) {
 // ── DETECCAO DE CIRCULARIDADE FINANCEIRA ─────────────────────
 // Dinheiro que entra e sai em <= CIRCULAR_HOURS horas
 function detectarCircularidade(txns) {
-  // PERF: cap 500 — evita O(n²) em extratos longos
   const sample = txns.length > 500 ? txns.slice(-500) : txns;
   const sorted = sample.slice().sort((a, b) => (a.date || 0) - (b.date || 0));
   const eventos = [];
@@ -5437,7 +5424,6 @@ function isInternalTransfer(txn, allTxns, _byValue) {
   //    (débitos não inflam o score de risco de renda)
   if (txn.value <= 0) return null;
 
-  // PERF: usa índice se disponível, senão fallback para array completo
   const k = Math.abs(txn.value).toFixed(2);
   const candidates = _byValue ? (_byValue.get(k) || []) : allTxns;
 
@@ -5483,7 +5469,6 @@ function isInternalTransfer(txn, allTxns, _byValue) {
 // Aplica detecção interna no array de transações classificadas
 // Retorna array com campo internalMove e riskWeight ajustado
 function applyInternalDetection(classified) {
-  // PERF: índice por valor — constrói uma vez O(n), evita 3x filter O(n) por transação
   const _byValue = new Map();
   for (const t of classified) {
     const k = Math.abs(t.value).toFixed(2);
@@ -6326,18 +6311,11 @@ function eRenderTxns(filter){
   let list=eActiveBankTab==='all'?[...eAllTxns]:eAllTxns.filter(t=>t.bank===eActiveBankTab);
   if(filter==='risk')list=list.filter(t=>t.risk!=='normal');
   list.sort((a,b)=>{const o={suspicious:0,attention:1,normal:2};if(o[a.risk]!==o[b.risk])return o[a.risk]-o[b.risk];return b.value-a.value;});
-  // PERF: limita DOM a 200 itens — evita travar com extratos longos
-  const LIMIT = 200;
-  const visible = list.slice(0, LIMIT);
-  const extra = list.length - LIMIT;
-  const extraNote = extra > 0
-    ? `<div style="text-align:center;color:var(--muted);padding:12px;font-size:12px">+ ${extra} transações ocultas — use o filtro 🔴 Riscos para ver as mais relevantes</div>`
-    : '';
-  document.getElementById('pTxnList').innerHTML=(visible.map(t=>{
+  document.getElementById('pTxnList').innerHTML=list.map(t=>{
     const dc=t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
     const cls=t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
     return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${t.flag}</span>`:''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
-  }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>')+extraNote;
+  }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>';
 }
 function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
 function eToggleDbg(){const b=document.getElementById('pDbgBd'),open=b.classList.toggle('open');document.getElementById('pDbgTog').textContent=open?'▲ recolher':'▼ ver';}
@@ -6818,8 +6796,6 @@ function eResetAll(){
 }
 
 // extrato step 1 — handled by Supabase auth above
-
-}); // fim requestIdleCallback engine
 
 
 </script>
