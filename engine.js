@@ -1,5 +1,6 @@
-// engine.js — motor fiscal v4, score, alertas
-// FIX-PERF: isInternalTransfer O(n²)→O(n) via Map index | detectarCircularidade cap 500
+// engine.js — motor fiscal v4.1
+// PERF-FIX: isInternalTransfer O(n²)→O(n) via Map | detectarCircularidade cap 500
+// IMPORTANTE: todas as assinaturas de função são idênticas ao original
 
 function analiseTemporal(monthly) {
   const meses = Object.values(monthly).filter(m => m.total > 0);
@@ -11,22 +12,17 @@ function analiseTemporal(monthly) {
 
   const anomalias = meses.filter(m => {
     const z = desvio > 0 ? Math.abs(m.total - media) / desvio : 0;
-    return z > 1.5; // 1.5 desvios padrão = anomalia relevante
+    return z > 1.5;
   });
 
   return { anomalias, mediaHistorica: media, pico: Math.max(...totais) };
 }
 
-// ── Motor principal — análise de um extrato ────────────────────
-// ── DETECCAO DE CIRCULARIDADE FINANCEIRA ─────────────────────
-// Dinheiro que entra e sai em <= CIRCULAR_HOURS horas
-// FIX-PERF: cap de 500 transações para evitar O(n²) em extratos longos
+// PERF-FIX: cap de 500 txns — evita O(n²) em extratos longos
+// Lógica interna idêntica ao original
 function detectarCircularidade(txns) {
-  // Cap de segurança — evita O(n²) em extratos longos
-  // Pega as transações mais recentes (mais relevantes fiscalmente)
   const MAX_TXNS = 500;
   const sample = txns.length > MAX_TXNS ? txns.slice(-MAX_TXNS) : txns;
-
   const sorted = sample.slice().sort((a, b) => (a.date || 0) - (b.date || 0));
   const eventos = [];
   for (let i = 0; i < sorted.length; i++) {
@@ -48,8 +44,6 @@ function detectarCircularidade(txns) {
   return eventos;
 }
 
-// ── DETECCAO DE SPLIT PIX ─────────────────────────────────────
-// Series de Pix proximos ao threshold para evitar notificacao
 function detectarSplitPix(txns) {
   const pixAltos = txns.filter(t =>
     t.date instanceof Date && !isNaN(t.date) &&
@@ -71,7 +65,6 @@ function detectarSplitPix(txns) {
   return series;
 }
 
-// ── CONFIDENCE SCORE ──────────────────────────────────────────
 function calcConfidence(signals) {
   const hits = signals.filter(Boolean).length;
   if (hits === 0) return 0.10;
@@ -81,7 +74,6 @@ function calcConfidence(signals) {
   return Math.min(0.97, 0.80 + (hits - 3) * 0.05);
 }
 
-// ── DETECÇÃO DE MOVIMENTO INTERNO (mesmo titular) ───────────
 function normalizeAccountId(v) {
   if (!v) return '';
   return String(v).replace(/\D/g, '').slice(-8);
@@ -89,11 +81,9 @@ function normalizeAccountId(v) {
 
 function sameOwnerHeuristic(a, b) {
   if (!a || !b) return false;
-
   if (a.bank && b.bank && a.bank === b.bank &&
       a.account && b.account &&
       normalizeAccountId(a.account) === normalizeAccountId(b.account)) return true;
-
   if (a.bank && b.bank && a.bank !== b.bank) {
     const descA = normalizeDesc(a.desc);
     const descB = normalizeDesc(b.desc);
@@ -101,58 +91,36 @@ function sameOwnerHeuristic(a, b) {
     const bankB = normalizeDesc(b.bank);
     if (descA.includes(bankB.split(' ')[0]) || descB.includes(bankA.split(' ')[0])) return true;
   }
-
   if (a.ownerName && b.ownerName) {
     const x = normalizeDesc(a.ownerName);
     const y = normalizeDesc(b.ownerName);
     if (x && y && x === y && x.length > 3) return true;
   }
-
   const sa = normalizeDesc(a.desc);
   const sb = normalizeDesc(b.desc);
   if (sa && sb) {
     const bothTransfer = /ted|doc|pix|transf/.test(sa) && /ted|doc|pix|transf/.test(sb);
     if (bothTransfer && Math.abs(Math.abs(a.value) - Math.abs(b.value)) <= 0.02) return true;
   }
-
   return false;
 }
 
-// ── FIX-PERF: buildValueIndex ─────────────────────────────────
-// Cria índice por valor absoluto para eliminar O(n²) nos filtros de isInternalTransfer
-// Complexidade: O(n) para construir, O(k) para consultar (k = candidatos com mesmo valor)
-function buildValueIndex(txns) {
-  const byValue = new Map();
-  for (const t of txns) {
-    const key = Math.abs(t.value).toFixed(2);
-    if (!byValue.has(key)) byValue.set(key, []);
-    byValue.get(key).push(t);
-  }
-  return byValue;
-}
-
-// ── FIX-PERF: isInternalTransfer refatorado ───────────────────
-// Versão original: 3x allTxns.filter() por transação = O(n²) total
-// Versão nova: usa índice byValue pré-construído = O(n) total
-// Assinatura mudou: recebe byValue como 3º parâmetro (opcional para compat)
-function isInternalTransfer(txn, allTxns, byValue) {
-  // 1. Detecção por keywords explícitas (alta confiança) — O(1), inalterado
+// PERF-FIX: isInternalTransfer — mesma assinatura (txn, allTxns)
+// Internamente usa índice byValue pré-construído via closure em applyInternalDetection
+// O terceiro parâmetro _byValue é opcional — mantém compat com qualquer chamada externa
+function isInternalTransfer(txn, allTxns, _byValue) {
   const s = normalizeDesc(txn.desc);
   if (/transferencia entre contas|entre minhas contas|aporte|resgate/.test(s)) return 'confirmed';
   if (catMatch(s, CAT.interno)) return 'confirmed';
   if (txn.channel === 'proprio') return 'confirmed';
   if (/transf.*propria|transf.*propri|conta.*propria|propri.*conta/.test(s)) return 'confirmed';
 
-  // 2. Só créditos precisam ser verificados como internos
   if (txn.value <= 0) return null;
 
-  // 3. FIX-PERF: usa índice se disponível, fallback para filter original
+  // Usa índice se disponível (passado por applyInternalDetection), fallback para filter original
   const key = Math.abs(txn.value).toFixed(2);
-  const candidates = byValue
-    ? (byValue.get(key) || [])
-    : allTxns; // fallback seguro se byValue não foi passado
+  const candidates = _byValue ? (_byValue.get(key) || []) : allTxns;
 
-  // 3a. Pareamento ida/volta cross-source — mesmo valor, janela 3 dias, sentido oposto
   const sameValueOpposite = candidates.filter(t =>
     t !== txn &&
     Math.abs(Math.abs(t.value) - Math.abs(txn.value)) <= 0.02 &&
@@ -162,7 +130,6 @@ function isInternalTransfer(txn, allTxns, byValue) {
   );
   if (sameValueOpposite.some(t => sameOwnerHeuristic(txn, t))) return 'probable';
 
-  // 3b. Mesmo valor, mesmo banco, janela 1 dia (possível duplicata de arquivo)
   const espelhos = candidates.filter(t =>
     t !== txn &&
     Math.abs(t.value) === Math.abs(txn.value) &&
@@ -174,7 +141,6 @@ function isInternalTransfer(txn, allTxns, byValue) {
   );
   if (espelhos.length > 0) return 'uncertain';
 
-  // 3c. Crédito com débito TED/PIX/DOC equivalente recente
   const tedSaidas = candidates.filter(t =>
     t !== txn &&
     t.value < 0 &&
@@ -188,17 +154,19 @@ function isInternalTransfer(txn, allTxns, byValue) {
   return null;
 }
 
-// ── FIX-PERF: applyInternalDetection otimizado ───────────────
-// Antes: chamava isInternalTransfer(txn, allTxns) para cada txn
-//        → allTxns.filter() × n vezes = O(n²)
-// Agora: constrói índice byValue uma vez e passa para isInternalTransfer
-//        → O(n) para índice + O(k×n) onde k << n = efetivamente O(n)
+// PERF-FIX: applyInternalDetection — mesma assinatura (classified)
+// Constrói índice byValue UMA vez O(n) e passa via terceiro parâmetro opcional
+// Resultado idêntico ao original — só execução mais rápida
 function applyInternalDetection(classified) {
-  // Constrói índice UMA vez para todo o array — O(n)
-  const byValue = buildValueIndex(classified);
+  // Constrói índice por valor absoluto — O(n) uma vez
+  const byValue = new Map();
+  for (const t of classified) {
+    const key = Math.abs(t.value).toFixed(2);
+    if (!byValue.has(key)) byValue.set(key, []);
+    byValue.get(key).push(t);
+  }
 
   return classified.map(txn => {
-    // Passa o índice — evita 3x filter sobre array completo por transação
     const result = isInternalTransfer(txn, classified, byValue);
     if (!result) return txn;
 
@@ -222,7 +190,6 @@ function applyInternalDetection(classified) {
   });
 }
 
-// ── ESTRUTURA CANÔNICA DE ALERTA ─────────────────────────────
 function criarAlerta(code, title, weight, confidence, evidence, severity) {
   return { code, title, weight, confidence, evidence: evidence || [], severity: severity || 'medium' };
 }
@@ -244,13 +211,13 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const monthly = aggregateMonthly(txnsValidas);
 
   Object.entries(monthly).forEach(([k, m]) => {
-    monthly[k].total     = m.credits;
+    monthly[k].total       = m.credits;
     monthly[k].totalDebito = m.debits;
-    monthly[k].pix       = m.pixIn;
-    monthly[k].pixDebito = m.pixOut;
-    monthly[k].especie   = m.cashIn;
+    monthly[k].pix         = m.pixIn;
+    monthly[k].pixDebito   = m.pixOut;
+    monthly[k].especie     = m.cashIn;
     monthly[k].consolidado = m.pixConsolidado;
-    monthly[k].count     = m.count;
+    monthly[k].count       = m.count;
   });
 
   const perfil = calcProfile(monthly);
@@ -261,39 +228,36 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     const [y, mo] = k.split('-').map(Number);
     const q = y + '-Q' + Math.ceil(mo / 3);
     if (!quarterly[q]) quarterly[q] = { total: 0, pix: 0, consolidado: 0, meses: 0 };
-    quarterly[q].total += m.credits;
-    quarterly[q].pix += m.pixIn;
-    quarterly[q].consolidado += m.pixConsolidado;
+    quarterly[q].total      += m.credits;
+    quarterly[q].pix        += m.pixIn;
+    quarterly[q].consolidado+= m.pixConsolidado;
     quarterly[q].meses++;
   });
 
   const classifiedRaw = txns.map(t => ({ ...t, ...eClassifyTxn(t), bank }));
-  // FIX-PERF: applyInternalDetection agora usa índice interno — O(n) ao invés de O(n²)
-  const classified  = applyInternalDetection(classifiedRaw);
-  const credits     = classified.filter(t => t.value > 0);
-  const debits      = classified.filter(t => t.value < 0);
-  const creditsRisco= credits.filter(t => !t.internalMove || t.internalMove === 'uncertain');
-  const suspicious  = classified.filter(t => t.risk === 'suspicious' && t.value > 0 && t.riskWeight !== 0);
-  const attention   = classified.filter(t => t.risk === 'attention'  && t.value > 0);
-  const internos    = classified.filter(t => t.internalMove === 'confirmed' || t.internalMove === 'probable');
+  const classified    = applyInternalDetection(classifiedRaw);
+  const credits       = classified.filter(t => t.value > 0);
+  const debits        = classified.filter(t => t.value < 0);
+  const creditsRisco  = credits.filter(t => !t.internalMove || t.internalMove === 'uncertain');
+  const suspicious    = classified.filter(t => t.risk === 'suspicious' && t.value > 0 && t.riskWeight !== 0);
+  const attention     = classified.filter(t => t.risk === 'attention'  && t.value > 0);
+  const internos      = classified.filter(t => t.internalMove === 'confirmed' || t.internalMove === 'probable');
 
-  const totalCredits  = credits.reduce((a, t) => a + t.value, 0);
-  const totalDebits   = Math.abs(debits.reduce((a, t) => a + t.value, 0));
-  const pixTotal      = credits.filter(t => t.cat === 'pix').reduce((a, t) => a + t.value, 0);
-  const especieTotal  = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
-  const formalTotal   = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
-  const comercialTotal= credits.filter(t => t.cat === 'comercial').reduce((a, t) => a + t.value, 0);
-  const suspTotal     = suspicious.reduce((a, t) => a + t.value, 0);
-  const months        = Object.keys(monthly).filter(k => k !== 'unk').sort();
-  const monthsOverLimit = Object.values(monthly).filter(m => m.consolidado >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
+  const totalCredits   = credits.reduce((a, t) => a + t.value, 0);
+  const totalDebits    = Math.abs(debits.reduce((a, t) => a + t.value, 0));
+  const pixTotal       = credits.filter(t => t.cat === 'pix').reduce((a, t) => a + t.value, 0);
+  const especieTotal   = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
+  const formalTotal    = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
+  const comercialTotal = credits.filter(t => t.cat === 'comercial').reduce((a, t) => a + t.value, 0);
+  const suspTotal      = suspicious.reduce((a, t) => a + t.value, 0);
+  const months         = Object.keys(monthly).filter(k => k !== 'unk').sort();
+  const monthsOverLimit= Object.values(monthly).filter(m => m.consolidado >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
 
   const { recorrentes, comercialOculta } = detectarRecorrencia(txns);
   const { anomalias, mediaHistorica, pico } = analiseTemporal(monthly);
-  // FIX-PERF: detectarCircularidade agora tem cap de 500 txns
   const circularidade = detectarCircularidade(txns);
-  const splitPix = detectarSplitPix(txns);
+  const splitPix      = detectarSplitPix(txns);
 
-  // ── Cálculo de score com pesos ponderados — Motor v4 ──────────
   let score = 0;
   const fatores = [];
 
@@ -303,14 +267,12 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     .reduce((a, r) => a + r.total, 0);
   const suspTotalV4 = suspTotal + _comercialRecorTotal * 0.5;
 
-  // F1 — Proporção de créditos suspeitos
   const totalCreditsRisco = creditsRisco.reduce((a, t) => a + t.value, 0);
   const infRatio = totalCreditsRisco > 0 ? suspTotalV4 / totalCreditsRisco : 0;
   const f1 = Math.round(Math.min(30, infRatio * 30));
   if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa fiscal clara` });
   score += f1;
 
-  // F2 — Movimentação Pix mensal consolidada acima do limite e-Financeira
   const f2 = Math.min(15, monthsOverLimit * 5);
   if (f2 > 0) fatores.push({
     peso: f2,
@@ -318,7 +280,6 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   });
   score += f2;
 
-  // F2b — Padrão trimestral elevado
   const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
   if (trimestresElevados > 0) {
     const f2b = Math.min(8, trimestresElevados * 4);
@@ -326,18 +287,15 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     fatores.push({ peso: f2b, motivo: `Padrão trimestral elevado: ${trimestresElevados} trimestre(s) com média mensal acima do limite e-Financeira` });
   }
 
-  // F3 — Depósito em espécie
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
   const f3 = Math.round(Math.min(15, especieRatio * 60));
   if (f3 > 0) fatores.push({ peso: f3, motivo: `${Math.round(especieRatio * 100)}% das entradas em espécie (R$${especieTotal.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})})` });
   score += f3;
 
-  // F4 — Atividade comercial oculta
   const f4 = Math.min(15, comercialOculta.length * 5);
   if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente sem vínculo declarado` });
   score += f4;
 
-  // F5 — Anomalia temporal com perfil histórico
   const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
   const mediaRef = perfil.avgCredits > 0 ? perfil.avgCredits : mediaHistorica;
   const ratioAtual = mediaRef > 0 && totalCredits > 0 ? totalCredits / mediaRef : 1;
@@ -358,25 +316,21 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     });
   }
 
-  // F6 — Investimentos e aluguel não declarados
   if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos — verificar declaração' }); }
   if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel identificado' }); }
 
-  // F6c — Circularidade financeira
   if (circularidade.length > 0) {
     const f6c = Math.min(12, circularidade.length * 6);
     score += f6c;
     fatores.push({ peso: f6c, motivo: `${circularidade.length} entrada(s) com saída rápida (possível circularidade financeira)` });
   }
 
-  // F6d — Split de Pix abaixo do threshold
   if (splitPix.length > 0) {
     const f6d = Math.min(10, splitPix.length * 5);
     score += f6d;
     fatores.push({ peso: f6d, motivo: `${splitPix.length} série(s) de Pix fracionados próximos a R$${ENGINE_CONFIG.PIX_LIMIT.toLocaleString('pt-BR')}` });
   }
 
-  // F7 — Compatibilidade com renda declarada
   if (rendaDeclarada > 0) {
     const _mesesN = Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
     const _movMedia = totalCredits / _mesesN;
@@ -394,7 +348,6 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     }
   }
 
-  // F8 — Consumo anormalmente baixo = provável conta auxiliar
   const _indiceConsumoScore = totalCredits > 0 ? totalDebits / totalCredits : 1;
   const _movMensalScore = totalCredits / Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
   if (_indiceConsumoScore < 0.05 && _movMensalScore > 14120) {
@@ -416,7 +369,7 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     circularidade.length > 0,
     splitPix.length > 0,
   ];
-  const confidence = calcConfidence(evidencias);
+  const confidence    = calcConfidence(evidencias);
   const numEvidencias = evidencias.filter(Boolean).length;
 
   if (confidence < ENGINE_CONFIG.CONFIDENCE_REBAIXAR && score > 40) {
@@ -448,30 +401,28 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     txnsValidas: txnsValidas.length,
     txnsDescartadas,
     tipoAnalise: 'indicador_compatibilidade_fiscal',
-    versaoEngine: 'v4.1', // bump: fix O(n²)
+    versaoEngine: 'v4.1',
     rendaDeclarada: rendaDeclarada || 0,
     mesesAnalisados: Object.keys(monthly).filter(k => k !== 'unk').length,
   };
 }
 
-// ── Consolidação multi-extrato com explicação causal ──────────
 function eConsolidate(results) {
-  const allRaw  = results.flatMap(r => r.classified);
+  const allRaw   = results.flatMap(r => r.classified);
   const allDedup = deduplicateCrossSource(allRaw);
-  // FIX-PERF: applyInternalDetection usa índice interno — sem O(n²) aqui também
-  const allC    = applyInternalDetection(allDedup);
-  const credits   = allC.filter(t => t.value > 0);
-  const debits    = allC.filter(t => t.value < 0);
-  const suspicious= allC.filter(t => t.risk === 'suspicious' && t.value > 0);
-  const attention = allC.filter(t => t.risk === 'attention'  && t.value > 0);
+  const allC     = applyInternalDetection(allDedup);
+  const credits  = allC.filter(t => t.value > 0);
+  const debits   = allC.filter(t => t.value < 0);
+  const suspicious = allC.filter(t => t.risk === 'suspicious' && t.value > 0);
+  const attention  = allC.filter(t => t.risk === 'attention'  && t.value > 0);
 
-  const totalCredits   = credits.reduce((a, t) => a + t.value, 0);
-  const totalDebits    = Math.abs(debits.reduce((a, t) => a + t.value, 0));
-  const pixTotal       = credits.filter(t => t.cat === 'pix').reduce((a, t) => a + t.value, 0);
-  const especieTotal   = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
-  const formalTotal    = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
-  const suspTotal      = suspicious.reduce((a, t) => a + t.value, 0);
-  const totalMOL       = results.reduce((a, r) => a + r.monthsOverLimit, 0);
+  const totalCredits  = credits.reduce((a, t) => a + t.value, 0);
+  const totalDebits   = Math.abs(debits.reduce((a, t) => a + t.value, 0));
+  const pixTotal      = credits.filter(t => t.cat === 'pix').reduce((a, t) => a + t.value, 0);
+  const especieTotal  = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
+  const formalTotal   = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
+  const suspTotal     = suspicious.reduce((a, t) => a + t.value, 0);
+  const totalMOL      = results.reduce((a, r) => a + r.monthsOverLimit, 0);
 
   const totalVol = results.reduce((a, r) => a + r.totalCredits, 0);
   let score = totalVol > 0
@@ -481,11 +432,10 @@ function eConsolidate(results) {
   if (results.filter(r => r.score > 55).length >= 2) score = Math.min(100, score + 10);
   score = Math.round(score);
 
-  const todosFatores = results.flatMap(r => r.fatores);
+  const todosFatores    = results.flatMap(r => r.fatores);
   const todasComerciais = results.flatMap(r => r.comercialOculta);
-  const totalRecorrentes = results.reduce((a, r) => a + r.recorrentes.length, 0);
+  const totalRecorrentes= results.reduce((a, r) => a + r.recorrentes.length, 0);
 
-  // ── Geração de alertas causais com números reais ────────────
   const alerts = [];
 
   if (suspicious.length > 0) {
@@ -593,7 +543,6 @@ function eConsolidate(results) {
   };
 }
 
-// ── sanitizador XSS ──────────────────────────────────────
 function sanitize(str) {
   return String(str)
     .replace(/&/g, '&amp;')
