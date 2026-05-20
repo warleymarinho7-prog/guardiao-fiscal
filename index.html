@@ -4726,6 +4726,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== PARSER V3 ENGINE =====
 // pdf.js worker configurado dinamicamente em _loadPdfJs()
+// PERF: engine compilado em idle — browser renderiza UI primeiro, engine carrega quando ocioso
+(window.requestIdleCallback || (cb => setTimeout(cb, 100)))(function() {
 
 const MAX_FILES=5;
 const SRC_COLORS=['#00d96e','#4d9fff','#f5a623','#c084fc','#fb7185'];
@@ -6816,6 +6818,8 @@ function eResetAll(){
 }
 
 // extrato step 1 — handled by Supabase auth above
+
+}); // fim requestIdleCallback engine
 
 
 </script>
