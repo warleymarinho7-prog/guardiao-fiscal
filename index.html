@@ -6227,6 +6227,15 @@ let eActiveBankTab='all';
 let _eConsolidated=null;
 let _eSources=null;
 
+function sanitize(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 function eDov(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
 function eDlv(){document.getElementById('dz').classList.remove('drag')}
 function eDrp(e){e.preventDefault();eDlv();Array.from(e.dataTransfer.files).forEach(eAddFile)}
