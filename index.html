@@ -6045,7 +6045,7 @@ async function eRunAll(){
     const fmtLabel=g.formatos.length>1?` [${g.formatos.join('+')}]`:'';
     const bankLabel=g.conta?`${g.banco} ···${g.conta.slice(-4)}${fmtLabel}`:g.banco+fmtLabel;
     const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel,window._rendaDeclaradaMensal||0);
-    if(r) results.push(r);
+    if(r){results.push(r);window._debugMotor=r;} // debug — remover após calibração
   }
 
   if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
