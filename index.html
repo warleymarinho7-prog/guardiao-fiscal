@@ -4768,22 +4768,43 @@ function aggregateMonthly(txns) {
 }
 
 // ── PERFIL HISTÓRICO (médias 3/6/12 meses) ───────────────────
+// ── Helpers estatísticos ──────────────────────────────────────
+// Mediana: mais robusta que média quando há outliers (ex: mês com herança, rescisão, venda de bem)
+function _median(arr) {
+  if (!arr || arr.length === 0) return 0;
+  const s = arr.slice().sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 !== 0 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+// Desvio absoluto mediano (MAD) — mais robusto que desvio padrão com outliers
+function _mad(arr, med) {
+  if (!arr || arr.length === 0) return 0;
+  const m = med !== undefined ? med : _median(arr);
+  return _median(arr.map(v => Math.abs(v - m)));
+}
+
 function calcProfile(months) {
   const keys = Object.keys(months).filter(k => k !== 'unk').sort();
-  const values = keys.map(k => months[k].credits + months[k].debits);
+  const values  = keys.map(k => months[k].credits + months[k].debits);
   const credits = keys.map(k => months[k].credits);
   const pixVals = keys.map(k => months[k].pixConsolidado);
 
-  const avg = (arr) => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+  const avg  = (arr) => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
   const last = (arr, n) => arr.slice(-n);
 
+  const medCredits = _median(credits);
+  const madCredits = _mad(credits, medCredits);
+
   return {
-    avgTotal3:  avg(last(values, 3)),
-    avgTotal6:  avg(last(values, 6)),
-    avgTotal12: avg(last(values, 12)),
-    avgCredits: avg(credits),
-    avgPix:     avg(pixVals),
-    totalMeses: keys.length,
+    avgTotal3:   avg(last(values, 3)),
+    avgTotal6:   avg(last(values, 6)),
+    avgTotal12:  avg(last(values, 12)),
+    avgCredits:  avg(credits),
+    // Mediana e MAD: baseline robusta contra outliers (venda de bem, herança, 13º acumulado)
+    medCredits,
+    madCredits,
+    avgPix:      avg(pixVals),
+    totalMeses:  keys.length,
     mesCritico: keys.reduce((best, k) => {
       const v = months[k].credits + months[k].debits;
       return (!best || v > (months[best].credits + months[best].debits)) ? k : best;
@@ -4868,12 +4889,6 @@ function deduplicateCrossSource(allTxns) {
     return true;
   });
 }
-let eFiles=[];
-let eAllTxns=[];
-let eActiveBankTab='all';
-let _eConsolidated=null;
-let _eSources=null;
-
 const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
 const fmtDate=d=>d?d.toLocaleDateString('pt-BR'):'—';
 
@@ -5163,6 +5178,57 @@ function catMatch(desc, cats) {
   return cats.some(k => d.includes(k));
 }
 
+// ── Classificação por natureza econômica ─────────────────────
+// Determina a NATUREZA do crédito antes de calcular risco.
+// Isso evita falsos positivos: um reembolso, empréstimo ou venda de bem
+// tem aparência de "crédito suspeito" mas não é renda nova tributável.
+//
+// Naturezas: renda_trabalho | renda_capital | transf_propria |
+//            emprestimo | devolucao_reembolso | alienacao_bem |
+//            receita_recorrente | indefinida
+const NATUREZA_KW = {
+  renda_trabalho: [
+    'salário','salario','holerite','folha pgto','pagamento folha','fgts','inss','irrf',
+    'pro-labore','pró-labore','beneficio','benefício','aposentadoria','pensão','pensao',
+    'rendimento prev','13 salario','13° salario','férias','ferias','rescisão','rescisao',
+    'clt','rpa ','mei ','honorarios','honorários',
+  ],
+  renda_capital: [
+    'dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca',
+    'resgate rdb','resgate fundo','rendimento aplicacao','rendimento poupanca',
+    'tesouro direto','tesouro selic','tesouro ipca','btc','bitcoin','cripto','ethereum',
+  ],
+  transf_propria: [
+    'entre contas','conta própria','conta propria','transferência interna','transf interna',
+    'tid própria','tid propria','portabilidade','conta corrente propria','mesma titularidade',
+  ],
+  emprestimo: [
+    'empréstimo','emprestimo','crédito pessoal','credito pessoal','financiamento recebido',
+    'cdc ','fgts emprestimo','adiantamento salario','antecipação','antecipacao',
+    'cheque especial','limite','liberação crédito','liberacao credito',
+  ],
+  devolucao_reembolso: [
+    'reembolso','ressarcimento','devolução','devolucao','estorno','cancelamento',
+    'chargeback','restituição','restituicao','reemb.','devol.','refund',
+    'cashback','volta ','retorno ','crédito cancelamento',
+  ],
+  alienacao_bem: [
+    'venda imóvel','venda imovel','venda veículo','venda veiculo','venda carro',
+    'venda moto','alienação','alienacao','escritura','cartório','cartorio',
+    'leilão','leilao','consórcio recebido','consoricio recebido',
+  ],
+};
+
+function detectNatureza(desc) {
+  const d = desc.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  for (const [natureza, kws] of Object.entries(NATUREZA_KW)) {
+    if (kws.some(k => d.includes(k.normalize('NFD').replace(/[̀-ͯ]/g, '')))) {
+      return natureza;
+    }
+  }
+  return 'indefinida';
+}
+
 // ── Classificador semântico de transação ───────────────────────
 function detectChannel(desc) {
   // Identifica o canal da transação para schema canônico
@@ -5178,51 +5244,71 @@ function detectChannel(desc) {
 }
 
 function eClassifyTxn(t) {
-  const d = normalizeDesc(t.desc);
-  const v = t.value;
+  const d       = normalizeDesc(t.desc);
+  const v       = t.value;
   const channel = detectChannel(t.desc);
+  // Natureza econômica — determina o "porquê" do crédito antes de avaliar risco
+  const natureza = v > 0 ? detectNatureza(t.desc) : 'saida';
 
-  if (v <= 0) return { risk: 'normal', flag: null, cat: 'saida', channel };
+  if (v <= 0) return { risk: 'normal', flag: null, cat: 'saida', channel, natureza };
 
-  // Transferência entre contas do próprio titular — não infla risco
-  if (channel === 'proprio' || catMatch(d, CAT.interno))
-    return { risk: 'normal', flag: null, cat: 'interno', channel };
+  // ── Naturezas que não constituem renda nova tributável ──────
+  // Transferência própria: dinheiro mudando de conta, não de patrimônio
+  if (channel === 'proprio' || catMatch(d, CAT.interno) || natureza === 'transf_propria')
+    return { risk: 'normal', flag: null, cat: 'interno', channel, natureza };
 
-  // Renda formal — baixo risco
-  if (catMatch(d, CAT.formal)) return { risk: 'normal', flag: 'Renda formal', cat: 'formal', channel };
+  // Empréstimo recebido: passivo, não renda — não vai à malha fina por si só
+  if (natureza === 'emprestimo')
+    return { risk: 'normal', flag: 'Empréstimo', cat: 'emprestimo', channel, natureza };
 
-  // Investimentos — atenção (precisam ser declarados)
-  if (catMatch(d, CAT.invest)) return { risk: 'attention', flag: 'Investimento', cat: 'invest', channel };
+  // Devolução/reembolso: retorno de dinheiro já tributado
+  if (natureza === 'devolucao_reembolso')
+    return { risk: 'normal', flag: 'Reembolso', cat: 'reembolso', channel, natureza };
+
+  // Alienação de bem: tributação via ganho de capital (declarado separado)
+  // Mantém atenção pois exige DARF de ganho de capital se houver lucro
+  if (natureza === 'alienacao_bem')
+    return { risk: 'attention', flag: 'Venda de bem', cat: 'alienacao', channel, natureza };
+
+  // ── Renda do trabalho — baixo risco, já declarável via holerite ──
+  if (catMatch(d, CAT.formal) || natureza === 'renda_trabalho')
+    return { risk: 'normal', flag: 'Renda formal', cat: 'formal', channel, natureza };
+
+  // ── Renda de capital — atenção (declaração obrigatória) ──────
+  if (catMatch(d, CAT.invest) || natureza === 'renda_capital')
+    return { risk: 'attention', flag: 'Investimento', cat: 'invest', channel, natureza };
 
   // Aluguel recebido — atenção
-  if (catMatch(d, CAT.aluguel)) return { risk: 'attention', flag: 'Aluguel', cat: 'aluguel', channel };
+  if (catMatch(d, CAT.aluguel))
+    return { risk: 'attention', flag: 'Aluguel', cat: 'aluguel', channel, natureza };
 
-  // Atividade comercial — suspeito se recorrente
-  if (catMatch(d, CAT.comercial)) return { risk: 'attention', flag: 'Comercial', cat: 'comercial' };
+  // Atividade comercial — atenção
+  if (catMatch(d, CAT.comercial))
+    return { risk: 'attention', flag: 'Comercial', cat: 'comercial', channel, natureza };
 
   // Depósito em espécie — alto risco
   if (catMatch(d, CAT.especie)) {
-    if (v >= 3000) return { risk: 'suspicious', flag: 'Espécie ≥ R$3k', cat: 'especie' };
-    return { risk: 'attention', flag: 'Espécie', cat: 'especie' };
+    if (v >= 3000) return { risk: 'suspicious', flag: 'Espécie ≥ R$3k', cat: 'especie', channel, natureza };
+    return { risk: 'attention', flag: 'Espécie', cat: 'especie', channel, natureza };
   }
 
-  // Pix recebido
-  const isPix = catMatch(d, CAT.pix) || (d.includes('pix') && v > 0);
+  // Pix recebido — risco gradual por valor
+  const isPix   = catMatch(d, CAT.pix) || (d.includes('pix') && v > 0);
   const isTransf = catMatch(d, CAT.transf) || (d.includes('transf') && v > 0 && !catMatch(d, CAT.interno));
 
   if (isPix || isTransf) {
-    if (v >= 10000) return { risk: 'suspicious', flag: 'Pix ≥ R$10k', cat: 'pix' };
-    if (v >= 5000)  return { risk: 'suspicious', flag: 'Pix ≥ R$5k',  cat: 'pix' };
-    if (v >= 2000)  return { risk: 'attention',  flag: 'Pix relevante', cat: 'pix' };
-    if (v >= 500)   return { risk: 'attention',  flag: 'Pix', cat: 'pix' };
-    return { risk: 'normal', flag: null, cat: 'pix' };
+    if (v >= 10000) return { risk: 'suspicious', flag: 'Pix ≥ R$10k', cat: 'pix', channel, natureza };
+    if (v >= 5000)  return { risk: 'suspicious', flag: 'Pix ≥ R$5k',  cat: 'pix', channel, natureza };
+    if (v >= 2000)  return { risk: 'attention',  flag: 'Pix relevante', cat: 'pix', channel, natureza };
+    if (v >= 500)   return { risk: 'attention',  flag: 'Pix', cat: 'pix', channel, natureza };
+    return { risk: 'normal', flag: null, cat: 'pix', channel, natureza };
   }
 
-  // Crédito genérico alto
-  if (v >= 15000) return { risk: 'suspicious', flag: 'Crédito alto', cat: 'outros' };
-  if (v >= 5000)  return { risk: 'attention',  flag: 'Valor relevante', cat: 'outros' };
+  // Crédito genérico alto — natureza indefinida é onde mora o risco real
+  if (v >= 15000) return { risk: 'suspicious', flag: 'Crédito alto', cat: 'outros', channel, natureza };
+  if (v >= 5000)  return { risk: 'attention',  flag: 'Valor relevante', cat: 'outros', channel, natureza };
 
-  return { risk: 'normal', flag: null, cat: 'outros' };
+  return { risk: 'normal', flag: null, cat: 'outros', channel, natureza };
 }
 
 // ── Detecção de recorrência comportamental ─────────────────────
@@ -5255,25 +5341,52 @@ function detectarRecorrencia(txns) {
     });
 
   // Recorrência com ticket parecido = sinal de atividade comercial
-  const comercialOculta = recorrentes.filter(r => r.desvioPct < 0.3 && r.count >= 6 && r.media >= 200);
+  // Threshold mais seletivo: exige 8+ ocorrências (antes era 6) e valor médio >= R$400
+  // para reduzir falsos positivos em autônomos com clientes fixos declaráveis
+  const _kwEmpresa = ['ltda','s/a','sa ','me ','eireli','mei ','cnpj','empresa','comercio','servicos','consultoria','industria'];
+  const _temVinculoDeclaravel = d => _kwEmpresa.some(k => d.toLowerCase().includes(k));
+  const comercialOculta = recorrentes.filter(r =>
+    r.desvioPct < 0.25 &&   // ticket ainda mais regular (era 0.30)
+    r.count >= 8 &&          // mais ocorrências exigidas (era 6)
+    r.media >= 400 &&        // valor mínimo maior (era 200)
+    !_temVinculoDeclaravel(r.desc) // não conta se parece empresa/CNPJ declarável
+  );
   return { recorrentes, comercialOculta };
 }
 
-// ── Análise temporal — variação mensal (z-score simplificado) ──
+// ── Análise temporal — variação mensal com mediana + MAD ─────
+// Usa mediana como baseline e MAD como dispersão — robusto contra outliers pontuais
+// (ex: mês de rescisão, venda de bem, herança não distorce a "normalidade" do histórico)
 function analiseTemporal(monthly) {
   const meses = Object.values(monthly).filter(m => m.total > 0);
-  if (meses.length < 2) return { anomalias: [], mediaHistorica: 0, pico: 0 };
+  if (meses.length < 2) return { anomalias: [], mediaHistorica: 0, mediaMediana: 0, pico: 0 };
 
   const totais = meses.map(m => m.total);
-  const media = totais.reduce((a, v) => a + v, 0) / totais.length;
+
+  // Baseline robusta: mediana em vez de média
+  const mediana = _median(totais);
+  const mad     = _mad(totais, mediana);
+
+  // Fallback para desvio padrão clássico se MAD = 0 (todos os meses iguais)
+  const media  = totais.reduce((a, v) => a + v, 0) / totais.length;
   const desvio = Math.sqrt(totais.reduce((a, v) => a + Math.pow(v - media, 2), 0) / totais.length);
 
   const anomalias = meses.filter(m => {
-    const z = desvio > 0 ? Math.abs(m.total - media) / desvio : 0;
-    return z > 1.5; // 1.5 desvios padrão = anomalia relevante
+    // Anomalia via MAD-z: |x - mediana| / (1.4826 * MAD)
+    const zMad = mad > 0 ? Math.abs(m.total - mediana) / (1.4826 * mad) : 0;
+    const zClassico = desvio > 0 ? Math.abs(m.total - media) / desvio : 0;
+    const z = mad > 0 ? zMad : zClassico;
+    return z > 1.8;
   });
 
-  return { anomalias, mediaHistorica: media, pico: Math.max(...totais) };
+  return {
+    anomalias,
+    mediaHistorica: mediana,
+    mediaMedia:     media,
+    pico: Math.max(...totais),
+    // Pico excluindo créditos de natureza neutra (para F5 não ser disparado por empréstimo/alienação)
+    picoRisco: Math.max(...totais), // será recalculado no motor com txns classificadas
+  };
 }
 
 // ── Motor principal — análise de um extrato ────────────────────
@@ -5545,8 +5658,14 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const classified  = applyInternalDetection(classifiedRaw);
   const credits     = classified.filter(t => t.value > 0);
   const debits      = classified.filter(t => t.value < 0);
-  // Internos confirmados/prováveis excluídos do cálculo de risco
-  const creditsRisco= credits.filter(t => !t.internalMove || t.internalMove === 'uncertain');
+  // Naturezas que não constituem renda nova tributável — excluídas do cálculo de risco F1
+  const _naturezasNeutras = new Set(['transf_propria','emprestimo','devolucao_reembolso','interno','saida']);
+  // Internos confirmados/prováveis + naturezas neutras excluídos do cálculo de risco
+  const creditsRisco = credits.filter(t =>
+    (!t.internalMove || t.internalMove === 'uncertain') &&
+    !_naturezasNeutras.has(t.natureza) &&
+    t.cat !== 'interno' && t.cat !== 'emprestimo' && t.cat !== 'reembolso'
+  );
   const suspicious  = classified.filter(t => t.risk === 'suspicious' && t.value > 0 && t.riskWeight !== 0);
   const attention   = classified.filter(t => t.risk === 'attention'  && t.value > 0);
   const internos    = classified.filter(t => t.internalMove === 'confirmed' || t.internalMove === 'probable');
@@ -5594,7 +5713,23 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     .reduce((a, r) => a + r.total, 0);
   const suspTotalV4 = suspTotal + _comercialRecorTotal * 0.5;
   const infRatio = totalCreditsRisco > 0 ? suspTotalV4 / totalCreditsRisco : 0;
-  const f1 = Math.round(Math.min(30, infRatio * 30));
+  // Quando renda declarada explica uma parte significativa da movimentação,
+  // limitar F1 — o autônomo pode ter créditos não identificáveis mas cobertos pela declaração
+  const _nMesesF1 = Object.keys(monthly).filter(k=>k!=='unk').length || 1;
+  const _cobertura = rendaDeclarada > 0 && totalCreditsRisco > 0
+    ? (rendaDeclarada * _nMesesF1) / totalCreditsRisco
+    : 0;
+  const _rendaExplicaMovim = _cobertura >= 0.6;
+  const _rendaCobreTotal   = _cobertura >= 0.8; // renda cobre 80%+ → F1 irrelevante
+  const f1raw = Math.round(Math.min(30, infRatio * 30));
+  const _circularidadeAlta = circularidade.length >= 3;
+  const f1 = _rendaCobreTotal
+    ? 0                                                // renda cobre 80%+: sem F1
+    : _rendaExplicaMovim
+      ? Math.min(8, Math.round(f1raw * 0.5))          // renda cobre 60%+: F1 reduzido
+      : _circularidadeAlta
+        ? Math.round(f1raw * 0.7)                     // circularidade captura parte
+        : f1raw;
   if (f1 > 0) {
     _fator(f1,
       `${Math.round(infRatio * 100)}% das entradas sem origem fiscal identificável`,
@@ -5606,10 +5741,18 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   }
 
   // F2 — Pix mensal acima do limite e-Financeira
-  const f2 = Math.min(15, monthsOverLimit * 5);
+  // Desconta peso quando renda declarada já explica o volume (autônomo/MEI legítimo)
+  const _nMesesF2 = Math.max(1, Object.keys(monthly).filter(k=>k!=='unk').length);
+  const _pixMediaMensal = Object.values(monthly).reduce((a,m)=>a+m.pixConsolidado,0) / _nMesesF2;
+  const _rendaCobre = rendaDeclarada > 0 && _pixMediaMensal <= rendaDeclarada * 1.3;
+  const _pesoF2base = Math.min(15, monthsOverLimit * 5);
+  // Reduz 60% do peso se renda declarada cobre o volume de Pix
+  // Quando renda declarada cobre o volume de Pix: gera alerta mas peso mínimo (2pts)
+  // pois o risco fiscal real é baixo — o autônomo é declarável
+  const f2 = _rendaCobre ? Math.min(2, _pesoF2base) : _pesoF2base;
   if (f2 > 0) {
     _fator(f2,
-      `Pix consolidado acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)} em ${monthsOverLimit} mês(es)`,
+      `Pix consolidado acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)} em ${monthsOverLimit} mês(es)${_rendaCobre ? ' (parcialmente coberto pela renda declarada)' : ''}`,
       'Bancos são obrigados por lei a reportar à Receita toda movimentação mensal de Pix acima de R$5.000. Isso acontece automaticamente, sem necessidade de denúncia.',
       'Não é risco se o volume de Pix for compatível com a renda declarada ou com atividade profissional documentada (MEI, autônomo com notas).',
       monthsOverLimit >= 3 ? 0.95 : 0.75,
@@ -5620,20 +5763,14 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   // F2b — Padrão trimestral elevado
   // Anti-dupla-contagem: só ativa se F2 não cobriu todos os trimestres
   const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
-  if (trimestresElevados > 0 && !_jaContado(['pix_limit_' + monthsOverLimit])) {
+  // F2b trimestral: só aciona se renda NÃO cobre — evitar dupla penalização
+  // de autônomo legítimo que já foi suavizado em F2
+  if (trimestresElevados > 0 && !_rendaCobre) {
     const f2b = Math.min(8, trimestresElevados * 4);
-    _fator(f2b,
+    const _jaF2 = _jaContado(['pix_limit_' + monthsOverLimit]);
+    _fator(_jaF2 ? Math.round(f2b * 0.5) : f2b,
       `Padrão de Pix elevado em ${trimestresElevados} trimestre(s) consecutivo(s)`,
       'Movimentação consistentemente alta por múltiplos trimestres indica padrão estrutural, não evento isolado — o que aumenta a relevância do cruzamento pelo e-Financeira.',
-      'Não é risco se o padrão for consistente com atividade profissional declarada.',
-      0.7,
-      ['trim_' + trimestresElevados]
-    );
-  } else if (trimestresElevados > 0) {
-    const f2b = Math.min(8, trimestresElevados * 4);
-    _fator(f2b,
-      `Padrão de Pix elevado em ${trimestresElevados} trimestre(s) consecutivo(s)`,
-      'Movimentação consistentemente alta por múltiplos trimestres indica padrão estrutural, não evento isolado.',
       'Não é risco se o padrão for consistente com atividade profissional declarada.',
       0.7,
       ['trim_' + trimestresElevados]
@@ -5642,6 +5779,7 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
 
   // F3 — Depósito em espécie
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
+  const _especieAlta = especieRatio > 0.3;
   const f3 = Math.round(Math.min(15, especieRatio * 60));
   if (f3 > 0) {
     _fator(f3,
@@ -5655,8 +5793,26 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
 
   // F4 — Atividade comercial recorrente sem vínculo declarado
   // Anti-dupla-contagem: verifica se os padrões já foram contados em F1
+  // F4: padrão comercial oculto — reduz peso quando renda declarada é compatível
+  // com o volume total dos padrões detectados (autônomo com clientes declaráveis)
+  const _totalComercOculto = comercialOculta.reduce((a,r)=>a+r.total,0);
+  const _nMesesF4 = Math.max(1, Object.keys(monthly).filter(k=>k!=='unk').length);
+  const _comercMediaMensal = _totalComercOculto / _nMesesF4;
+  const _f4RendaCobre = rendaDeclarada > 0 && _comercMediaMensal <= rendaDeclarada * 1.5;
   const _comercOcultoNovo = comercialOculta.filter(r => !_jaContado(['comrc_' + r.desc]));
-  const f4 = Math.min(15, _comercOcultoNovo.length * 5);
+  const _f4base = Math.min(15, _comercOcultoNovo.length * 5);
+  // Reduz 70% quando renda declarada já cobre; 40% quando F7 já punirá a incompatibilidade
+  const _f7Ativo = rendaDeclarada > 0;
+  // Quando F2 já está ativo com peso cheio: F4 reduzido (evitar acumulação excessiva)
+  const _f2Cheio = !_rendaCobre && monthsOverLimit > 0;
+  const _f7f2Dupla = _f2Cheio && _f7Ativo; // F2 + F7 ambos ativos = dupla captura
+  const f4 = _f4RendaCobre
+    ? Math.round(_f4base * 0.3)
+    : _f7f2Dupla
+      ? Math.min(5, Math.round(_f4base * 0.35)) // F2+F7 já cobrem: F4 mínimo
+      : _f2Cheio
+        ? Math.min(8, Math.round(_f4base * 0.6))
+        : (_f7Ativo ? Math.round(_f4base * 0.6) : _f4base);
   if (f4 > 0) {
     _fator(f4,
       `${_comercOcultoNovo.length} padrão(ões) de recebimento recorrente com ticket regular`,
@@ -5668,12 +5824,51 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   }
 
   // F5 — Anomalia temporal
-  // Anti-dupla-contagem: pico mensal e volume total são sinais distintos mas correlacionados
-  // — apenas o mais relevante dos dois é contado com peso cheio
-  const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
-  const mediaRef = perfil.avgCredits > 0 ? perfil.avgCredits : mediaHistorica;
-  const ratioAtual = mediaRef > 0 && totalCredits > 0 ? totalCredits / mediaRef : 1;
-  const f5 = pctPico >= 3 ? 15 : pctPico >= 2 ? 10 : pctPico >= 1.5 ? 5 : 0;
+  // Calcula pico apenas sobre créditos de natureza de risco (exclui empréstimo, reembolso, alienação)
+  // para não punir eventos documentáveis pontuais (venda de imóvel, 13o, PLR, empréstimo)
+  // Pico: soma apenas créditos de natureza de risco (exclui neutros)
+  // Isso evita que empréstimo pontual ou venda de imóvel dispare F5
+  // MAS mantém 13o/PLR/férias como renda_trabalho que SÃO fiscalmente relevantes (declaráveis)
+  const _naturezasNeutrasPico = new Set(['transf_propria','emprestimo','devolucao_reembolso','interno','saida','reembolso','alienacao_bem']);
+  const _creditsRiscoPorMes = {};
+  classified.filter(t => t.value > 0 && !_naturezasNeutrasPico.has(t.natureza) && t.cat !== 'interno' && t.cat !== 'emprestimo' && t.cat !== 'reembolso').forEach(t => {
+    const k = t.date instanceof Date
+      ? t.date.getFullYear() + '-' + String(t.date.getMonth()+1).padStart(2,'0')
+      : 'unk';
+    _creditsRiscoPorMes[k] = (_creditsRiscoPorMes[k] || 0) + t.value;
+  });
+  const _totaisRisco = Object.values(_creditsRiscoPorMes);
+  const _picoRisco   = _totaisRisco.length > 0 ? Math.max(..._totaisRisco) : pico;
+  const _medRisco    = _totaisRisco.length > 0 ? _median(_totaisRisco) : mediaHistorica;
+  const pctPico = (_medRisco > 0 ? _picoRisco / _medRisco : mediaHistorica > 0 ? pico / mediaHistorica : 1);
+  // Usa mediana como referência principal — mais robusta contra meses atípicos pontuais
+  // Se mediana = 0 (extrato curto), cai para média histórica como fallback
+  const mediaRef = (perfil.medCredits > 0 ? perfil.medCredits : perfil.avgCredits > 0 ? perfil.avgCredits : mediaHistorica);
+  // Comparar média mensal excluindo alienação de bem (venda imóvel não é renda recorrente)
+  const _nMesesAtual = Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
+  const _totalSemAlienacao = classified
+    .filter(t => t.value > 0 && t.natureza !== 'alienacao_bem' && t.cat !== 'interno' && t.cat !== 'emprestimo')
+    .reduce((a,t)=>a+t.value,0);
+  const _mediaAtual  = _totalSemAlienacao / _nMesesAtual;
+  const ratioAtual   = mediaRef > 0 && _mediaAtual > 0 ? _mediaAtual / mediaRef : 1;
+  // Para créditos de natureza renda_trabalho no mês de pico, usar threshold maior
+  // (13o+PLR+férias podem gerar pico 4-5x sem risco real — são declaráveis)
+  const _mesPico = Object.entries(_creditsRiscoPorMes).sort(([,a],[,b])=>b-a)[0]?.[0];
+  const _txnsMesPico = _mesPico ? classified.filter(t => {
+    if (!t.date || t.value <= 0) return false;
+    const k = t.date.getFullYear()+'-'+String(t.date.getMonth()+1).padStart(2,'0');
+    return k === _mesPico;
+  }) : [];
+  const _picoEhRendaTrabalho = _txnsMesPico.length > 0 &&
+    _txnsMesPico.filter(t=>t.natureza==='renda_trabalho').reduce((a,t)=>a+t.value,0) /
+    _txnsMesPico.filter(t=>t.value>0).reduce((a,t)=>a+t.value,0.001) > 0.6;
+  // Threshold maior se pico dominado por renda_trabalho (13o, PLR, férias)
+  // renda_trabalho: 13o+PLR+férias no mesmo mês = 3-5x normal, não é risco
+  // Threshold muito alto para não penalizar (7x = seria mês com 6 salários, aí sim anormal)
+  const _threshold5 = _picoEhRendaTrabalho ? {t1:8, t2:6, t3:4} : {t1:3, t2:2, t3:1.5};
+  const _f5raw = pctPico >= _threshold5.t1 ? 15 : pctPico >= _threshold5.t2 ? 10 : pctPico >= _threshold5.t3 ? 5 : 0;
+  // Aplica redução adicional de 60% para pico dominado por renda_trabalho (documentável)
+  const f5 = _picoEhRendaTrabalho ? Math.round(_f5raw * 0.4) : _f5raw;
   if (f5 > 0) {
     _fator(f5,
       `Pico de ${(Math.round(pctPico * 10)/10)}x acima da média histórica do extrato`,
@@ -5705,6 +5900,20 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
         ['anomalia_volume']
       );
     }
+  }
+
+  // F6a — Alienação de bem (venda de imóvel, veículo, etc.)
+  // Não é renda recorrente, mas exige DARF de ganho de capital — item de atenção
+  const _alienacoes = classified.filter(t => t.value > 0 && t.natureza === 'alienacao_bem');
+  if (_alienacoes.length > 0 && !_jaContado(['alienacao'])) {
+    const _totalAlienacao = _alienacoes.reduce((a,t)=>a+t.value,0);
+    _fator(5,
+      `Alienação de bem detectada — ${fmtBRL(_totalAlienacao)} em ${_alienacoes.length} operação(ões)`,
+      'Venda de imóvel, veículo ou outros bens exige recolhimento de DARF de ganho de capital (15–22,5%) até o último dia útil do mês seguinte. A Receita Federal recebe automaticamente informações de cartórios e DETRANs.',
+      'Não é risco se o bem foi vendido pelo mesmo valor de compra (sem ganho de capital) ou se se enquadra nas isenções (imóvel único abaixo de R$440k, reinvestimento em imóvel em 180 dias).',
+      0.7,
+      ['alienacao']
+    );
   }
 
   // F6 — Investimentos e aluguel
@@ -5755,12 +5964,22 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   // F7 — Compatibilidade com renda declarada
   if (rendaDeclarada > 0) {
     const _mesesN = Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
-    const _movMedia = totalCredits / _mesesN;
+    // Exclui créditos de natureza neutra do cálculo de renda média
+    // alienacao_bem mantida: DARF de ganho de capital é obrigação fiscal real
+    // alienacao_bem excluída: venda de imóvel não é renda recorrente (tem DARF separado)
+    const _naturezasNeutrasF7 = new Set(['transf_propria','emprestimo','devolucao_reembolso','interno','reembolso','alienacao_bem']);
+    const _totalRendaTributavel = classified
+      .filter(t => t.value > 0 && !_naturezasNeutrasF7.has(t.natureza) && t.cat !== 'interno' && t.cat !== 'emprestimo' && t.cat !== 'reembolso')
+      .reduce((a,t) => a + t.value, 0);
+    const _movMedia = _totalRendaTributavel / _mesesN;
     const _compatRatio = _movMedia / rendaDeclarada;
     let _f7 = 0, _compatNivel = '', _conf7 = 0;
-    if (_compatRatio > 6)      { _f7 = 25; _compatNivel = 'severa';   _conf7 = 0.95; }
-    else if (_compatRatio > 3) { _f7 = 15; _compatNivel = 'moderada'; _conf7 = 0.85; }
-    else if (_compatRatio > 2) { _f7 =  7; _compatNivel = 'leve';     _conf7 = 0.7;  }
+    if (_compatRatio > 6)      { _f7 = 20; _compatNivel = 'severa';   _conf7 = 0.95; }
+    else if (_compatRatio > 3) { _f7 = 12; _compatNivel = 'moderada'; _conf7 = 0.85; }
+    else if (_compatRatio > 2) { _f7 =  6; _compatNivel = 'leve';     _conf7 = 0.7;  }
+    // Quando circularidade alta: a incompatibilidade de renda é consequência da conta passagem
+    // já capturada por F6c — reduzir F7 para evitar dupla penalização
+    if (circularidade.length >= 4) _f7 = Math.round(_f7 * 0.6);
     if (_f7 > 0) {
       _fator(_f7,
         `Movimentação média de ${fmtBRL(_movMedia)}/mês é ${_compatRatio.toFixed(1)}x a renda declarada`,
@@ -5785,9 +6004,10 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     );
   }
 
-  // [v6-FIX-B] Escala logarítmica
+  // Escala logarítmica — denominador calibrado em 100pts brutos = 100% no display
+  // (era 142, mas comprimia demais a faixa alta — perfis médios chegavam a 80%+)
   const _rawScore = score;
-  score = Math.round(100 * Math.log(1 + _rawScore) / Math.log(1 + 142));
+  score = Math.round(100 * Math.log(1 + _rawScore) / Math.log(1 + 160));
   score = Math.min(100, Math.max(0, score));
 
   // Confidence score — baseado em número de fatores corroborados
@@ -6000,16 +6220,13 @@ function eConsolidate(results) {
 
 
 // ── sanitizador XSS ──────────────────────────────────────
-function sanitize(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
-}
 
-// ── UI extrato ──
+let eFiles=[];
+let eAllTxns=[];
+let eActiveBankTab='all';
+let _eConsolidated=null;
+let _eSources=null;
+
 function eDov(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
 function eDlv(){document.getElementById('dz').classList.remove('drag')}
 function eDrp(e){e.preventDefault();eDlv();Array.from(e.dataTransfer.files).forEach(eAddFile)}
@@ -6221,7 +6438,6 @@ async function eRunAll(){
 }
 
 
-// ── Renderiza prévia real no paywallBlock ──────────────────────────
 function eRenderPreview(c, sources) {
   // Mostra preview real, esconde placeholder
   document.getElementById('previewReal').style.display = 'block';
@@ -6356,7 +6572,7 @@ function eUnlockResult(){
   document.getElementById('ovEmoji').textContent=emoji;
   document.getElementById('ovLevel').textContent=level;
   document.getElementById('ovLevel').style.color=color;
-  document.getElementById('ovSub').textContent=`${sources.length} extrato(s) · ${c.totalTxns} transações · Motor fiscal v3`;
+  document.getElementById('ovSub').textContent=`${sources.length} extrato(s) · ${c.totalTxns} transações · Motor fiscal v8`;
   document.getElementById('pScoreVal').textContent=c.score+'%';
   document.getElementById('pScoreVal').style.color=color;
   document.getElementById('pBarFill').style.background=color;
@@ -6394,7 +6610,7 @@ function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v4.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v8.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
 }
 
@@ -6599,7 +6815,7 @@ async function gerarRelatorioPDF() {
     doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...C.muted);
-    doc.text('Score de Coerência Fiscal · Motor v3 · ' + sources.length + ' fonte(s)', barX, Y + 28);
+    doc.text('Score de Coerência Fiscal · Motor v8 · ' + sources.length + ' fonte(s)', barX, Y + 28);
     doc.text('Índice calculado por 6 fatores ponderados: compatibilidade, Pix, espécie, recorrência, anomalia temporal e perfil.', barX, Y + 33, { maxWidth: barW });
 
     Y += 46;
