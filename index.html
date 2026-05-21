@@ -4696,7 +4696,8 @@ const ENGINE_CONFIG = {
   SPLIT_PIX_WINDOW: 7,
   // Circularidade
   CIRCULAR_RATIO:   0.85,
-  CIRCULAR_HOURS:   72,
+  CIRCULAR_HOURS:   24,   // [v6-FIX-D] era 72h — salário+despesas confundia com circularidade
+  CIRCULAR_MIN_VALUE: 3000, // [v6-FIX-D] ignorar entradas abaixo de R$3k
   // PDF seguranca
   PDF_MAX_PAGES:    60,
   PDF_TIMEOUT_MS:   15000,
@@ -5207,8 +5208,11 @@ function eClassifyTxn(t) {
 // ── Detecção de recorrência comportamental ─────────────────────
 function detectarRecorrencia(txns) {
   // Agrupa por descrição normalizada e detecta padrões de frequência
+  // [v6-FIX-F] Excluir créditos formais (salário, FGTS) da análise de recorrência comercial
+  const _formalKw = ['salario','salário','fgts','rescisao','rescisão','folha pagamento','pagamento salario','pagamento salário','13 salario','13 salário','ferias','férias'];
+  const _isFormal = d => _formalKw.some(k => d.toLowerCase().includes(k));
   const grupos = {};
-  txns.filter(t => t.value > 0).forEach(t => {
+  txns.filter(t => t.value > 0 && !_isFormal(t.desc)).forEach(t => {
     const chave = t.desc.toLowerCase()
       .replace(/\d{2}\/\d{2}\/\d{4}/g, '')
       .replace(/\d{2}\/\d{2}/g, '')
@@ -5256,18 +5260,28 @@ function analiseTemporal(monthly) {
 // ── DETECCAO DE CIRCULARIDADE FINANCEIRA ─────────────────────
 // Dinheiro que entra e sai em <= CIRCULAR_HOURS horas
 function detectarCircularidade(txns) {
+  // [v6-FIX-E] Converter date string DD/MM/YYYY para timestamp antes de comparar
+  function toTs(d) {
+    if (!d) return 0;
+    if (typeof d === 'number') return d;
+    const p = String(d).split('/');
+    if (p.length === 3) return new Date(+p[2], +p[1]-1, +p[0]).getTime();
+    return new Date(d).getTime() || 0;
+  }
   const sample = txns.length > 500 ? txns.slice(-500) : txns;
-  const sorted = sample.slice().sort((a, b) => (a.date || 0) - (b.date || 0));
+  const sorted = sample.slice().sort((a, b) => toTs(a.date) - toTs(b.date));
   const eventos = [];
   for (let i = 0; i < sorted.length; i++) {
     const t = sorted[i];
     if (t.value <= 0) continue;
+    if (t.value < ENGINE_CONFIG.CIRCULAR_MIN_VALUE) continue; // ignorar entradas pequenas
     // procurar saida equivalente nas proximas CIRCULAR_HOURS horas
+    const tTs = toTs(t.date);
     let saidaAcum = 0;
     for (let j = i + 1; j < sorted.length; j++) {
       const u = sorted[j];
       if (!u.date || !t.date) break;
-      const diffH = (u.date - t.date) / 3600000;
+      const diffH = (toTs(u.date) - tTs) / 3600000;
       if (diffH > ENGINE_CONFIG.CIRCULAR_HOURS) break;
       if (u.value < 0) saidaAcum += Math.abs(u.value);
     }
@@ -5533,127 +5547,225 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const circularidade = detectarCircularidade(txns);
   const splitPix = detectarSplitPix(txns);
 
-  // ── Cálculo de score com pesos ponderados — Motor v4 ──────────
-  // v4: [FIX-1] IHH só em créditos não-formais | [FIX-2] F7 compatibilidade renda peso 25
-  //     [FIX-3] Comercial recorrente = suspicious parcial | [FIX-4] F8 consumo baixo
-  //     [FIX-5] Thresholds compatibilidade graduados
+  // ── Motor v7 — anti-dupla-contagem + explicações auditáveis ──
+  // Cada transação recebe riskSource único. Fatores têm confiança explícita.
+  // Relatório: acesse via resultado.fatores[i].{peso, motivo, porqueImporta, quandoNaoERisco, confianca}
+
   let score = 0;
   const fatores = [];
 
-  // [FIX-3] Comercial recorrente sem CNPJ visível conta 50% como suspeito
-  // [v6-FIX-A] threshold >= 3 ocorrências — evita falso positivo em CLT
+  // Mapa de IDs já contados — evita dupla contagem do mesmo evento
+  const _contados = new Set();
+  function _marcar(ids) { ids.forEach(id => _contados.add(id)); }
+  function _jaContado(ids) { return ids.some(id => _contados.has(id)); }
+  function _fator(peso, motivo, porqueImporta, quandoNaoERisco, confianca, ids) {
+    _marcar(ids || []);
+    fatores.push({ peso, motivo, porqueImporta, quandoNaoERisco, confianca: confianca || 1 });
+    score += peso;
+  }
+
+  // F1 — Créditos sem justificativa fiscal clara
+  // Anti-dupla-contagem: IDs das transações suspicious marcados aqui, não recontados em F4
+  const totalCreditsRisco = creditsRisco.reduce((a, t) => a + t.value, 0);
+  const _suspIds = suspicious.map((t, i) => 'susp_' + i);
   const _comercialRecorTotal = recorrentes
     .filter(r => r.ocorrencias >= 3 && r.total > 0)
     .filter(r => { const d = r.desc.toLowerCase(); return d.includes('recebimento') || d.includes('serviço') || d.includes('servico') || d.includes('nota fiscal') || d.includes('honorar'); })
     .reduce((a, r) => a + r.total, 0);
   const suspTotalV4 = suspTotal + _comercialRecorTotal * 0.5;
-
-  // F1 — Proporção de créditos suspeitos (peso reduzido 40→30 para abrir espaço ao F7)
-  const totalCreditsRisco = creditsRisco.reduce((a, t) => a + t.value, 0);
   const infRatio = totalCreditsRisco > 0 ? suspTotalV4 / totalCreditsRisco : 0;
   const f1 = Math.round(Math.min(30, infRatio * 30));
-  if (f1 > 0) fatores.push({ peso: f1, motivo: `${Math.round(infRatio * 100)}% dos créditos sem justificativa fiscal clara` });
-  score += f1;
-
-  // F2 — Movimentação Pix mensal consolidada acima do limite e-Financeira (peso 15, era 20)
-  const f2 = Math.min(15, monthsOverLimit * 5);
-  if (f2 > 0) fatores.push({
-    peso: f2,
-    motivo: `Movimentação Pix consolidada (crédito+débito) acima de R$${ENGINE_CONFIG.PIX_LIMIT_PF.toLocaleString('pt-BR')} em ${monthsOverLimit} mês(es) — perfil reportável ao e-Financeira`
-  });
-  score += f2;
-
-  // F2b — Padrão trimestral elevado (peso 8, sem alteração)
-  const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
-  if (trimestresElevados > 0) {
-    const f2b = Math.min(8, trimestresElevados * 4);
-    score += f2b;
-    fatores.push({ peso: f2b, motivo: `Padrão trimestral elevado: ${trimestresElevados} trimestre(s) com média mensal acima do limite e-Financeira` });
+  if (f1 > 0) {
+    _fator(f1,
+      `${Math.round(infRatio * 100)}% das entradas sem origem fiscal identificável`,
+      'A Receita Federal cruza automaticamente as entradas bancárias com o que foi declarado. Créditos sem justificativa clara (salário, nota fiscal, CNPJ) são o principal gatilho de malha fina.',
+      'Não é risco se as entradas forem salário identificado, transferências entre contas próprias ou reembolsos documentados.',
+      infRatio > 0.4 ? 0.9 : infRatio > 0.2 ? 0.7 : 0.5,
+      _suspIds
+    );
   }
 
-  // F3 — Depósito em espécie (peso 15, era 20)
+  // F2 — Pix mensal acima do limite e-Financeira
+  const f2 = Math.min(15, monthsOverLimit * 5);
+  if (f2 > 0) {
+    _fator(f2,
+      `Pix consolidado acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)} em ${monthsOverLimit} mês(es)`,
+      'Bancos são obrigados por lei a reportar à Receita toda movimentação mensal de Pix acima de R$5.000. Isso acontece automaticamente, sem necessidade de denúncia.',
+      'Não é risco se o volume de Pix for compatível com a renda declarada ou com atividade profissional documentada (MEI, autônomo com notas).',
+      monthsOverLimit >= 3 ? 0.95 : 0.75,
+      ['pix_limit_' + monthsOverLimit]
+    );
+  }
+
+  // F2b — Padrão trimestral elevado
+  // Anti-dupla-contagem: só ativa se F2 não cobriu todos os trimestres
+  const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
+  if (trimestresElevados > 0 && !_jaContado(['pix_limit_' + monthsOverLimit])) {
+    const f2b = Math.min(8, trimestresElevados * 4);
+    _fator(f2b,
+      `Padrão de Pix elevado em ${trimestresElevados} trimestre(s) consecutivo(s)`,
+      'Movimentação consistentemente alta por múltiplos trimestres indica padrão estrutural, não evento isolado — o que aumenta a relevância do cruzamento pelo e-Financeira.',
+      'Não é risco se o padrão for consistente com atividade profissional declarada.',
+      0.7,
+      ['trim_' + trimestresElevados]
+    );
+  } else if (trimestresElevados > 0) {
+    const f2b = Math.min(8, trimestresElevados * 4);
+    _fator(f2b,
+      `Padrão de Pix elevado em ${trimestresElevados} trimestre(s) consecutivo(s)`,
+      'Movimentação consistentemente alta por múltiplos trimestres indica padrão estrutural, não evento isolado.',
+      'Não é risco se o padrão for consistente com atividade profissional declarada.',
+      0.7,
+      ['trim_' + trimestresElevados]
+    );
+  }
+
+  // F3 — Depósito em espécie
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
   const f3 = Math.round(Math.min(15, especieRatio * 60));
-  if (f3 > 0) fatores.push({ peso: f3, motivo: `${Math.round(especieRatio * 100)}% das entradas em espécie (R$${especieTotal.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})})` });
-  score += f3;
+  if (f3 > 0) {
+    _fator(f3,
+      `${Math.round(especieRatio * 100)}% das entradas em dinheiro físico — ${fmtBRL(especieTotal)}`,
+      'Depósitos em espécie são um dos critérios diretos do e-Financeira. Qualquer depósito em dinheiro acima de R$2.000/mês é registrado pelo banco e pode ser cruzado com a declaração.',
+      'Não é risco se o valor for compatível com saques anteriores (troco de retirada) ou atividade reconhecidamente em dinheiro como feira, mercado ou aluguel residencial.',
+      especieRatio > 0.3 ? 0.9 : 0.65,
+      ['especie_total']
+    );
+  }
 
-  // F4 — Atividade comercial oculta (peso 15, sem alteração)
-  const f4 = Math.min(15, comercialOculta.length * 5);
-  if (f4 > 0) fatores.push({ peso: f4, motivo: `${comercialOculta.length} padrão(ões) de atividade comercial recorrente sem vínculo declarado` });
-  score += f4;
+  // F4 — Atividade comercial recorrente sem vínculo declarado
+  // Anti-dupla-contagem: verifica se os padrões já foram contados em F1
+  const _comercOcultoNovo = comercialOculta.filter(r => !_jaContado(['comrc_' + r.desc]));
+  const f4 = Math.min(15, _comercOcultoNovo.length * 5);
+  if (f4 > 0) {
+    _fator(f4,
+      `${_comercOcultoNovo.length} padrão(ões) de recebimento recorrente com ticket regular`,
+      'Recebimentos repetidos do mesmo pagador com valor similar são interpretados pelo sistema da Receita como prestação de serviço. Se não houver nota fiscal ou registro de MEI/autônomo, pode ser caracterizado como omissão de receita.',
+      'Não é risco se os recebimentos forem salário, pensão, aluguel declarado, reembolso recorrente ou transferência entre contas próprias.',
+      _comercOcultoNovo.length >= 2 ? 0.8 : 0.6,
+      _comercOcultoNovo.map(r => 'comrc_' + r.desc)
+    );
+  }
 
-  // F5 — Anomalia temporal com perfil histórico (peso 15, sem alteração)
+  // F5 — Anomalia temporal
+  // Anti-dupla-contagem: pico mensal e volume total são sinais distintos mas correlacionados
+  // — apenas o mais relevante dos dois é contado com peso cheio
   const pctPico = mediaHistorica > 0 ? pico / mediaHistorica : 1;
   const mediaRef = perfil.avgCredits > 0 ? perfil.avgCredits : mediaHistorica;
   const ratioAtual = mediaRef > 0 && totalCredits > 0 ? totalCredits / mediaRef : 1;
   const f5 = pctPico >= 3 ? 15 : pctPico >= 2 ? 10 : pctPico >= 1.5 ? 5 : 0;
-  if (f5 > 0) fatores.push({
-    peso: f5,
-    motivo: 'Pico de ' + (Math.round(pctPico * 10)/10) + 'x acima da média histórica' +
-      (perfil.avgCredits > 0 ? ' (média ref: ' + fmtBRL(Math.round(perfil.avgCredits)) + ')' : '')
-  });
-  score += f5;
-  if (ratioAtual >= 1.8 && perfil.avgCredits > 0) {
+  if (f5 > 0) {
+    _fator(f5,
+      `Pico de ${(Math.round(pctPico * 10)/10)}x acima da média histórica do extrato`,
+      'Um mês com movimentação muito acima do padrão chama atenção no cruzamento automático da Receita — especialmente se não houver explicação como 13º, férias ou venda de bem.',
+      'Não é risco se o pico coincidir com recebimento pontual documentável: venda de imóvel, herança, rescisão, 13º salário ou empréstimo.',
+      pctPico >= 3 ? 0.85 : 0.65,
+      ['anomalia_pico']
+    );
+  }
+  // F5b — volume total acima da média histórica (peso reduzido para evitar dupla contagem com F5)
+  if (ratioAtual >= 1.8 && perfil.avgCredits > 0 && !_jaContado(['anomalia_pico'])) {
     const f5b = ratioAtual >= 3 ? 8 : ratioAtual >= 2 ? 5 : 3;
-    score += f5b;
-    fatores.push({
-      peso: f5b,
-      motivo: 'Créditos totais ' + (Math.round(ratioAtual * 10)/10) + 'x acima da média histórica — ' +
-        'Média: ' + fmtBRL(Math.round(perfil.avgCredits)) + ' | Atual: ' + fmtBRL(Math.round(totalCredits))
-    });
+    _fator(f5b,
+      `Volume total ${(Math.round(ratioAtual * 10)/10)}x acima da média histórica`,
+      'O volume acumulado do período é significativamente maior que o histórico do próprio extrato — sinal de mudança de patamar de renda não declarada.',
+      'Não é risco se o período analisado incluir recebimentos atípicos documentáveis.',
+      0.6,
+      ['anomalia_volume']
+    );
+  } else if (ratioAtual >= 1.8 && perfil.avgCredits > 0) {
+    // F5 já foi contado — F5b entra com peso reduzido para não duplicar
+    const f5b = Math.round((ratioAtual >= 3 ? 8 : ratioAtual >= 2 ? 5 : 3) * 0.5);
+    if (f5b > 0) {
+      _fator(f5b,
+        `Volume total ${(Math.round(ratioAtual * 10)/10)}x acima da média (sinal adicional ao pico mensal)`,
+        'Combinação de pico mensal e volume total elevado reforça o padrão de risco.',
+        'Não é risco se houver documentação do recebimento atípico.',
+        0.55,
+        ['anomalia_volume']
+      );
+    }
   }
 
-  // F6 — Investimentos e aluguel não declarados (sem alteração)
-  if (classified.some(t => t.flag === 'Investimento')) { score += 8; fatores.push({ peso: 8, motivo: 'Rendimentos de investimentos — verificar declaração' }); }
-  if (classified.some(t => t.flag === 'Aluguel'))       { score += 6; fatores.push({ peso: 6, motivo: 'Recebimento de aluguel identificado' }); }
+  // F6 — Investimentos e aluguel
+  if (classified.some(t => t.flag === 'Investimento') && !_jaContado(['invest'])) {
+    _fator(8,
+      'Rendimentos de investimentos identificados no extrato',
+      'Rendimentos de renda fixa, dividendos e ganhos de capital devem ser declarados separadamente no IR. A instituição financeira já reporta esses dados à Receita.',
+      'Não é risco se os rendimentos já estiverem incluídos na declaração de IR.',
+      0.75,
+      ['invest']
+    );
+  }
+  if (classified.some(t => t.flag === 'Aluguel') && !_jaContado(['aluguel'])) {
+    _fator(6,
+      'Recebimento de aluguel identificado',
+      'Receitas de aluguel devem ser declaradas mensalmente na ficha "Rendimentos Tributáveis Recebidos de Pessoa Física/Jurídica". A omissão é um dos itens mais cruzados pela Receita.',
+      'Não é risco se o aluguel já estiver declarado ou se o valor estiver abaixo do limite de isenção.',
+      0.7,
+      ['aluguel']
+    );
+  }
 
-  // F6c — Circularidade financeira (peso 12, sem alteração)
+  // F6c — Circularidade financeira
+  // Anti-dupla-contagem: circularidade e split-pix são sinais distintos, ambos permitidos
   if (circularidade.length > 0) {
     const f6c = Math.min(12, circularidade.length * 6);
-    score += f6c;
-    fatores.push({ peso: f6c, motivo: `${circularidade.length} entrada(s) com saída rápida (possível circularidade financeira)` });
+    _fator(f6c,
+      `${circularidade.length} entrada(s) com saída equivalente no mesmo dia`,
+      'Dinheiro que entra e sai em poucas horas em valor similar pode indicar conta usada como passagem — prática monitorada pelo COAF e pela Receita Federal.',
+      'Não é risco se for pagamento recebido e repassado no mesmo dia por motivo documentável (ex: repasse de condomínio, grupo de compra, rateio).',
+      circularidade.length >= 3 ? 0.8 : 0.55,
+      circularidade.map((_, i) => 'circ_' + i)
+    );
   }
 
-  // F6d — Split de Pix abaixo do threshold (peso 10, sem alteração)
-  if (splitPix.length > 0) {
+  // F6d — Split de Pix
+  if (splitPix.length > 0 && !_jaContado(splitPix.map((_, i) => 'circ_' + i))) {
     const f6d = Math.min(10, splitPix.length * 5);
-    score += f6d;
-    fatores.push({ peso: f6d, motivo: `${splitPix.length} série(s) de Pix fracionados próximos a R$${ENGINE_CONFIG.PIX_LIMIT.toLocaleString('pt-BR')}` });
+    _fator(f6d,
+      `${splitPix.length} série(s) de Pix fracionados próximos ao limite de R$${ENGINE_CONFIG.PIX_LIMIT.toLocaleString('pt-BR')}`,
+      'Pix enviados em valores ligeiramente abaixo do limite de notificação, em sequência rápida, são um padrão conhecido de tentativa de evasão do e-Financeira — monitorado automaticamente.',
+      'Não é risco se os pagamentos fracionados tiverem destinatários distintos com finalidade clara (ex: rateio de despesa entre pessoas diferentes).',
+      splitPix.length >= 2 ? 0.85 : 0.6,
+      splitPix.map((_, i) => 'split_' + i)
+    );
   }
 
-  // [FIX-2 + FIX-5] F7 — Compatibilidade com renda declarada (NOVO — peso 25)
-  // Gradação: >2x leve (+7), >3x moderado (+15), >6x crítico (+25)
+  // F7 — Compatibilidade com renda declarada
   if (rendaDeclarada > 0) {
     const _mesesN = Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
     const _movMedia = totalCredits / _mesesN;
     const _compatRatio = _movMedia / rendaDeclarada;
-    let _f7 = 0, _compatNivel = '';
-    if (_compatRatio > 6)      { _f7 = 25; _compatNivel = 'severa'; }
-    else if (_compatRatio > 3) { _f7 = 15; _compatNivel = 'moderada'; }
-    else if (_compatRatio > 2) { _f7 =  7; _compatNivel = 'leve'; }
+    let _f7 = 0, _compatNivel = '', _conf7 = 0;
+    if (_compatRatio > 6)      { _f7 = 25; _compatNivel = 'severa';   _conf7 = 0.95; }
+    else if (_compatRatio > 3) { _f7 = 15; _compatNivel = 'moderada'; _conf7 = 0.85; }
+    else if (_compatRatio > 2) { _f7 =  7; _compatNivel = 'leve';     _conf7 = 0.7;  }
     if (_f7 > 0) {
-      score += _f7;
-      fatores.push({
-        peso: _f7,
-        motivo: `Incompatibilidade ${_compatNivel}: movimentação média de ${fmtBRL(_movMedia)}/mês é ${_compatRatio.toFixed(1)}x a renda declarada de ${fmtBRL(rendaDeclarada)}/mês`
-      });
+      _fator(_f7,
+        `Movimentação média de ${fmtBRL(_movMedia)}/mês é ${_compatRatio.toFixed(1)}x a renda declarada`,
+        'A Receita compara diretamente o volume de créditos bancários com o que foi declarado como renda. Uma diferença acima de 2x é sinal de alerta direto no sistema.',
+        'Não é risco se parte da movimentação for de empréstimos recebidos, herança, venda de bens ou outras entradas não tributáveis devidamente documentadas.',
+        _conf7,
+        ['compat_renda']
+      );
     }
   }
 
-  // [FIX-4] F8 — Consumo anormalmente baixo = provável conta auxiliar (NOVO — peso 8)
-  // Saídas < 5% das entradas com movimentação > 10x salário mínimo = sinal forte
+  // F8 — Conta auxiliar (consumo muito baixo)
   const _indiceConsumoScore = totalCredits > 0 ? totalDebits / totalCredits : 1;
   const _movMensalScore = totalCredits / Math.max(1, Object.keys(monthly).filter(k => k !== 'unk').length);
-  if (_indiceConsumoScore < 0.05 && _movMensalScore > 14120) { // 10x SM 2024
-    score += 8;
-    fatores.push({
-      peso: 8,
-      motivo: `Saídas representam apenas ${Math.round(_indiceConsumoScore * 100)}% das entradas — padrão atípico que pode indicar uso de conta auxiliar não analisada`
-    });
+  if (_indiceConsumoScore < 0.05 && _movMensalScore > 14120) {
+    _fator(8,
+      `Saídas representam apenas ${Math.round(_indiceConsumoScore * 100)}% das entradas`,
+      'Uma conta com muito mais entrada do que saída pode indicar que é usada apenas para receber e transferir — padrão de conta auxiliar ou de passagem que a Receita identifica no cruzamento.',
+      'Não é risco se a conta for usada exclusivamente para recebimento e os valores forem transferidos para outra conta própria identificável.',
+      0.65,
+      ['consumo_baixo']
+    );
   }
 
-  // [v6-FIX-B] Escala logarítmica — diferencia perfis altos sem saturar precocemente
-  // Soma bruta pode atingir ~142pts; log preserva ordenação e abre espaço no topo
+  // [v6-FIX-B] Escala logarítmica
   const _rawScore = score;
   score = Math.round(100 * Math.log(1 + _rawScore) / Math.log(1 + 142));
   score = Math.min(100, Math.max(0, score));
@@ -5705,7 +5817,7 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     txnsDescartadas,
     // Schema canonico
     tipoAnalise: 'indicador_compatibilidade_fiscal',
-    versaoEngine: 'v4.0',
+    versaoEngine: 'v7.0',
     rendaDeclarada: rendaDeclarada || 0,
     mesesAnalisados: Object.keys(monthly).filter(k => k !== 'unk').length,
   };
