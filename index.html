@@ -5541,7 +5541,7 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const fatores = [];
 
   // [FIX-3] Comercial recorrente sem CNPJ visível conta 50% como suspeito
-  // [v5-FIX-A] threshold elevado para >= 3 ocorrências — evita falso positivo em CLT
+  // [v6-FIX-A] threshold >= 3 ocorrências — evita falso positivo em CLT
   const _comercialRecorTotal = recorrentes
     .filter(r => r.ocorrencias >= 3 && r.total > 0)
     .filter(r => { const d = r.desc.toLowerCase(); return d.includes('recebimento') || d.includes('serviço') || d.includes('servico') || d.includes('nota fiscal') || d.includes('honorar'); })
@@ -5638,28 +5638,6 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
         motivo: `Incompatibilidade ${_compatNivel}: movimentação média de ${fmtBRL(_movMedia)}/mês é ${_compatRatio.toFixed(1)}x a renda declarada de ${fmtBRL(rendaDeclarada)}/mês`
       });
     }
-  } else {
-    // [v5-FIX-C] F7 alternativo por coeficiente de variação quando renda não informada
-    // CV alto = créditos muito irregulares = sinal de renda informal não estruturada
-    const _mesesCV = Object.keys(monthly).filter(k => k !== 'unk');
-    if (_mesesCV.length >= 3) {
-      const _vals = _mesesCV.map(k => monthly[k].credits || 0);
-      const _media = _vals.reduce((a, v) => a + v, 0) / _vals.length;
-      if (_media > 0) {
-        const _desvio = Math.sqrt(_vals.reduce((a, v) => a + Math.pow(v - _media, 2), 0) / _vals.length);
-        const _cv = _desvio / _media;
-        let _f7cv = 0;
-        if (_cv > 2.5)      { _f7cv = 15; }
-        else if (_cv > 1.5) { _f7cv =  8; }
-        if (_f7cv > 0) {
-          score += _f7cv;
-          fatores.push({
-            peso: _f7cv,
-            motivo: `Créditos mensais com alta irregularidade (variação ${(_cv).toFixed(1)}x) — padrão compatível com renda informal não estruturada`
-          });
-        }
-      }
-    }
   }
 
   // [FIX-4] F8 — Consumo anormalmente baixo = provável conta auxiliar (NOVO — peso 8)
@@ -5674,9 +5652,8 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     });
   }
 
-  // [v5-FIX-B] Escala logarítmica — evita saturação precoce em 100%
-  // Soma bruta pode chegar a ~142pts; log normaliza preservando ordenação
-  // score_final = round(100 * ln(1 + raw) / ln(1 + 142))
+  // [v6-FIX-B] Escala logarítmica — diferencia perfis altos sem saturar precocemente
+  // Soma bruta pode atingir ~142pts; log preserva ordenação e abre espaço no topo
   const _rawScore = score;
   score = Math.round(100 * Math.log(1 + _rawScore) / Math.log(1 + 142));
   score = Math.min(100, Math.max(0, score));
