@@ -1763,7 +1763,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                       <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
                     </div>
                     <div class="uc-price">
-                      <div class="uc-value">R$34,90</div>
+                      <div class="uc-value" id="splitAvulsoPrice1"></div>
                       <div class="uc-period">uso único</div>
                     </div>
                   </button>
@@ -1775,7 +1775,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                       <div class="uc-desc"><span id="ucProText">Análises ilimitadas + múltiplos extratos + histórico</span></div>
                     </div>
                     <div class="uc-price">
-                      <div class="uc-value">R$29,90</div>
+                      <div class="uc-value" id="splitProPrice1"></div>
                       <div class="uc-period">/mês</div>
                     </div>
                   </button>
@@ -1818,12 +1818,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <button class="upgrade-card" onclick="openCheckout('avulso')">
               <div class="uc-icon uc-icon-avulso">📄</div>
               <div class="uc-info"><div class="uc-name">Análise Avulsa</div><div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div></div>
-              <div class="uc-price"><div class="uc-value">R$34,90</div><div class="uc-period">uso único</div></div>
+              <div class="uc-price"><div class="uc-value" id="splitAvulsoPrice2"></div><div class="uc-period">uso único</div></div>
             </button>
             <button class="upgrade-card featured" onclick="openCheckout('pro')">
               <div class="uc-icon uc-icon-pro">🛡️</div>
               <div class="uc-info"><div class="best-tag">MELHOR CUSTO</div><div class="uc-name">Plano Pro</div><div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div></div>
-              <div class="uc-price"><div class="uc-value">R$29,90</div><div class="uc-period">/mês</div></div>
+              <div class="uc-price"><div class="uc-value" id="splitProPrice2"></div><div class="uc-period">/mês</div></div>
             </button>
           </div>
         </div>
@@ -2279,7 +2279,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
       <div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:16px;line-height:1.5">Desbloqueie para ver cada transação de risco com valor exato, relatório PDF e orientação fiscal personalizada.</div>
       <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
-      <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — R$34,90</button>
+      <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
     </div>
             </div>
 
@@ -2382,7 +2382,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <div class="plan-tagline">Análise completa quando precisar</div>
           </div>
           <div class="plan-price">
-            <div class="plan-value">R$34,90</div>
+            <div class="plan-value" id="planAvulsoPrice"></div>
             <div class="plan-period">uso único</div>
           </div>
         </div>
@@ -2394,7 +2394,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Monitoramento contínuo</div>
         </div>
-        <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — R$34,90 →</button>
+        <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — <span id="planAvulsoCta"></span> →</button>
         <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
           💡 Pelo mesmo valor você assina o Pro por 1 mês e faz análises ilimitadas
         </div>
@@ -2410,7 +2410,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <div class="plan-tagline">Monitoramento fiscal o ano todo</div>
           </div>
           <div class="plan-price">
-            <div class="plan-value">R$29,90</div>
+            <div class="plan-value" id="planProPrice"></div>
             <div class="plan-period">/mês</div>
           </div>
         </div>
@@ -2899,21 +2899,41 @@ function switchSimTab(tab) {
   document.getElementById('tabQ').classList.toggle('active', true);
 }
 
+// ===== PREÇOS — fonte única de verdade =====
+// Para alterar qualquer preço, mude APENAS aqui.
+const PRICES = {
+  avulso: { value: 47.90, label: 'R$47,90' },
+  pro:    { value: 29.90, label: 'R$29,90' },
+};
+
 // ===== CHECKOUT =====
 const plans = {
   avulso: {
     icon: '📄', name: 'Análise Avulsa', desc: '1 análise completa por extrato + relatório PDF',
-    price: 'R$34,90', period: 'uso único',
+    price: PRICES.avulso.label, period: 'uso único',
     successMsg: 'Sua análise avulsa está ativa! Acesse "Extrato" no menu para fazer o upload e ver os resultados.'
   },
   pro: {
     icon: '🛡️', name: 'Plano Pro', desc: 'Análises ilimitadas + múltiplos extratos + histórico',
-    price: 'R$29,90', period: '/mês',
+    price: PRICES.pro.label, period: '/mês',
     successMsg: 'Bem-vindo ao Pro! Acesso completo liberado — análises ilimitadas e múltiplos extratos disponíveis agora.'
   }
 };
 
 let currentPlan = 'pro';
+
+// Injeta PRICES em todos os elementos HTML que exibem preço.
+// Chamada no DOMContentLoaded — fonte única de verdade para qualquer alteração futura.
+function _initPrices() {
+  const av = PRICES.avulso.label;
+  const pr = PRICES.pro.label;
+  // Cards de upgrade (quiz desktop + mobile)
+  ['splitAvulsoPrice1','splitAvulsoPrice2','paywallAvulsoPrice','planAvulsoPrice','planAvulsoCta']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = av; });
+  ['splitProPrice1','splitProPrice2','planProPrice']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = pr; });
+}
+document.addEventListener('DOMContentLoaded', _initPrices);
 
 
 // ===== PRO FREE MODE FUNCTIONS =====
@@ -3096,7 +3116,7 @@ async function initMpBrick() {
   try {
     const mp = getMpInstance();
     const bricksBuilder = mp.bricks();
-    const amountVal = currentPlan === 'pro' ? 29.90 : 34.90;
+    const amountVal = PRICES[currentPlan]?.value ?? PRICES.avulso.value;
 
     // Timeout de segurança — se o Brick não renderizar em 15s, mostra fallback
     const brickTimeout = setTimeout(() => {
@@ -6157,7 +6177,13 @@ async function eRunAll(){
     const fmtLabel=g.formatos.length>1?` [${g.formatos.join('+')}]`:'';
     const bankLabel=g.conta?`${g.banco} ···${g.conta.slice(-4)}${fmtLabel}`:g.banco+fmtLabel;
     const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel,window._rendaDeclaradaMensal||0);
-    if(r){results.push(r);window._debugMotor=r;} // debug — remover após calibração
+    if(r){
+      results.push(r);
+      // Expõe dados de debug apenas em ambiente local
+      if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){
+        window._debugMotor=r;
+      }
+    }
   }
 
   if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
