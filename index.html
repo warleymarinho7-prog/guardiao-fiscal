@@ -3474,6 +3474,17 @@ async function validatePDFMagicBytes(buffer) {
 
 // ── Sanitização de conteúdo de texto de extrato ──
 // Remove scripts, tags HTML e caracteres de controle do conteúdo dos arquivos
+// ── sanitize — escapa HTML para evitar XSS em innerHTML ──
+function sanitize(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function sanitizeFileContent(text) {
   return text
     .replace(/<script[\s\S]*?<\/script>/gi, '')  // remove blocos script
