@@ -13,7 +13,7 @@
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -89,7 +89,7 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 16px;
   cursor: pointer;
@@ -181,7 +181,7 @@ nav {
 }
 
 .hero h1 {
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(26px,6.5vw,48px);
   font-weight: 800;
   line-height: 1.15;
@@ -236,7 +236,7 @@ nav {
   padding: 11px;
   border-radius: 12px;
   border: none;
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -294,8 +294,8 @@ nav {
 .step-dot.active { background: var(--green); box-shadow: none; }
 
 .q-body { padding: 32px 28px 24px; }
-.q-num { font-family:'Inter',sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
-.q-title { font-family:Manrope,sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
+.q-num { font-family:Inter,sans-serif; font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
+.q-title { font-family:Inter,sans-serif; font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
 .q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
 
 .options { display:flex; flex-direction:column; gap:10px; }
@@ -327,7 +327,7 @@ nav {
 .opt-desc { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.55; font-weight:400; }
 
 .risk-pill {
-  font-size:10px; font-family:'Inter',sans-serif; font-weight:600;
+  font-size:10px; font-family:Inter,sans-serif; font-weight:600;
   letter-spacing:0.2px; padding:3px 9px; border-radius:6px; flex-shrink:0;
 }
 .rp-green { background:rgba(16,185,129,0.1); color:#6ee7b7; }
@@ -344,7 +344,7 @@ nav {
   padding:13px 20px;
   background:transparent; border:1px solid var(--border);
   border-radius:12px; color:var(--muted2);
-  font-family:'Inter',sans-serif; font-size:14px;
+  font-family:Inter,sans-serif; font-size:14px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-back:hover { color:var(--text); border-color:var(--border2); }
@@ -353,7 +353,7 @@ nav {
 .btn-next {
   flex:1; padding:14px;
   background:var(--green); border:none; border-radius:11px;
-  color:#000; font-family:Manrope,sans-serif; font-size:14px; font-weight:700;
+  color:#000; font-family:Inter,sans-serif; font-size:14px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   opacity:0.35; pointer-events:none;
   min-height: 48px;
@@ -381,13 +381,13 @@ nav {
   width:280px; height:280px; border-radius:50%;
   filter:blur(80px); opacity:0.1; pointer-events:none;
 }
-.result-sublabel { font-family:'Inter',sans-serif; font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
+.result-sublabel { font-family:Inter,sans-serif; font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
-.result-level { font-family:Manrope,sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
+.result-level { font-family:Inter,sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
 .result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
 .score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
 .score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
-.score-label { font-size:11px; color:var(--muted); font-family:Manrope,sans-serif; }
+.score-label { font-size:11px; color:var(--muted); font-family:Inter,sans-serif; }
 
 .alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
 .alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
@@ -403,7 +403,7 @@ nav {
 }
 
 .upgrade-label {
-  font-family:Manrope,sans-serif; font-size:10px; font-weight:600;
+  font-family:Inter,sans-serif; font-size:10px; font-weight:600;
   letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:14px;
 }
 
@@ -436,15 +436,15 @@ nav {
 .uc-icon-pro { background:rgba(0,230,118,0.1); }
 
 .uc-info { flex:1; }
-.uc-name { font-family:Manrope,sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
+.uc-name { font-family:Inter,sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
 .uc-desc { font-size:11px; color:var(--muted2); line-height:1.4; }
 
 .uc-price { text-align:right; flex-shrink:0; }
-.uc-value { font-family:Manrope,sans-serif; font-size:16px; font-weight:800; color:var(--green); }
+.uc-value { font-family:Inter,sans-serif; font-size:16px; font-weight:800; color:var(--green); }
 .uc-period { font-size:10px; color:var(--muted); }
 
 .best-tag {
-  font-size:9px; font-family:Manrope,sans-serif; font-weight:700;
+  font-size:9px; font-family:Inter,sans-serif; font-weight:700;
   background:var(--green); color:#000;
   padding:2px 7px; border-radius:4px; letter-spacing:0.5px;
   margin-bottom:4px; display:inline-block;
@@ -455,18 +455,18 @@ nav {
   width:100%; padding:12px;
   background:transparent; border:1px solid var(--border);
   border-radius:10px; color:var(--muted);
-  font-family:'Inter',sans-serif; font-size:13px;
+  font-family:Inter,sans-serif; font-size:13px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-restart:hover { color:var(--text); border-color:var(--border2); }
 .alert-paywall{background:rgba(59,130,246,0.06);border:1px dashed rgba(59,130,246,0.3);border-radius:14px;padding:20px 18px;text-align:center;margin-top:8px}
 .apw-lock{font-size:28px;margin-bottom:8px}
-.apw-title{font-family:Manrope,sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.apw-title{font-family:Inter,sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
 .apw-desc{font-size:13px;color:var(--muted2);line-height:1.65;margin-bottom:16px;max-width:340px;margin-left:auto;margin-right:auto}
-.apw-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#000;cursor:pointer;margin-bottom:8px;transition:opacity .2s}
+.apw-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;font-family:Inter,sans-serif;font-size:14px;font-weight:700;color:#000;cursor:pointer;margin-bottom:8px;transition:opacity .2s}
 .apw-btn:hover{opacity:.88}
 .apw-or{font-size:11px;color:var(--muted);margin:6px 0}
-.apw-btn-sec{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s}
+.apw-btn-sec{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s}
 .apw-btn-sec:hover{border-color:var(--green);color:var(--green)}
 .alert-item strong{font-weight:600;display:block;margin-bottom:2px;color:var(--text)}
 
@@ -490,14 +490,14 @@ nav {
   width:28px; height:28px; border-radius:8px;
   background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.2);
   display:flex; align-items:center; justify-content:center;
-  font-family:Manrope,sans-serif; font-size:12px; font-weight:700; color:var(--green);
+  font-family:Inter,sans-serif; font-size:12px; font-weight:700; color:var(--green);
   flex-shrink:0;
 }
 .ext-step-num.done { background:var(--green); color:#000; }
 .ext-step-num.locked { background:rgba(90,112,144,0.1); border-color:var(--border); color:var(--muted); }
 
 .ext-step-info { flex:1; }
-.ext-step-title { font-family:Manrope,sans-serif; font-size:14px; font-weight:700; }
+.ext-step-title { font-family:Inter,sans-serif; font-size:14px; font-weight:700; }
 .ext-step-sub { font-size:12px; color:var(--muted2); margin-top:2px; }
 
 .ext-card-body { padding:20px 22px; }
@@ -517,7 +517,7 @@ nav {
 .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
 
 .upload-icon { font-size:32px; margin-bottom:10px; display:block; }
-.upload-title { font-family:Manrope,sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
+.upload-title { font-family:Inter,sans-serif; font-size:14px; font-weight:700; margin-bottom:4px; }
 .upload-sub { font-size:12px; color:var(--muted2); line-height:1.6; }
 
 .banks-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; justify-content:center; }
@@ -559,7 +559,7 @@ nav {
   90% { width:92%; }
   100% { width:100%; }
 }
-.analyzing-label { font-size:12px; color:var(--muted2); font-family:Manrope,sans-serif; }
+.analyzing-label { font-size:12px; color:var(--muted2); font-family:Inter,sans-serif; }
 
 /* PAYWALL result */
 .paywall-result {
@@ -587,7 +587,7 @@ nav {
 }
 .preview-row:last-child { border:none; }
 .preview-label { color:var(--muted2); }
-.preview-val { font-family:Manrope,sans-serif; font-weight:700; }
+.preview-val { font-family:Inter,sans-serif; font-weight:700; }
 .preview-val.red { color:var(--red); }
 .preview-val.yellow { color:var(--yellow); }
 .preview-val.green { color:var(--green); }
@@ -601,7 +601,7 @@ nav {
 
 .lock-icon { font-size:28px; margin-bottom:8px; }
 .paywall-msg {
-  font-family:Manrope,sans-serif; font-size:15px; font-weight:700;
+  font-family:Inter,sans-serif; font-size:15px; font-weight:700;
   text-align:center; margin-bottom:4px;
 }
 .paywall-sub { font-size:12px; color:var(--muted2); text-align:center; margin-bottom:16px; line-height:1.5; }
@@ -611,7 +611,7 @@ nav {
   width:100%; padding:12px 10px;
   background:rgba(255,193,7,0.12); border:1px solid rgba(255,193,7,0.3);
   border-radius:10px; color:var(--yellow);
-  font-family:Manrope,sans-serif; font-size:12px; font-weight:700;
+  font-family:Inter,sans-serif; font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   line-height:1.4; text-align:center;
 }
@@ -619,7 +619,7 @@ nav {
 .btn-unlock-pro {
   width:100%; padding:12px 10px;
   background:var(--green); border:none; border-radius:10px;
-  color:#000; font-family:Manrope,sans-serif; font-size:12px; font-weight:700;
+  color:#000; font-family:Inter,sans-serif; font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   line-height:1.4; text-align:center;
 }
@@ -632,7 +632,7 @@ nav {
 }
 
 .page-title {
-  font-family:Manrope,sans-serif; font-size:clamp(30px,4vw,46px);
+  font-family:Inter,sans-serif; font-size:clamp(30px,4vw,46px);
   font-weight:800; letter-spacing:-2px; text-align:center; margin-bottom:16px;
   color:var(--text);
 }
@@ -659,20 +659,20 @@ nav {
 .plan-popular {
   position:absolute; top:-11px; left:50%; transform:translateX(-50%);
   background:var(--green); color:#000;
-  font-family:Manrope,sans-serif; font-size:10px; font-weight:700;
+  font-family:Inter,sans-serif; font-size:10px; font-weight:700;
   letter-spacing:1px; padding:3px 14px; border-radius:20px;
   white-space:nowrap;
 }
 
 .plan-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
 .plan-icon { font-size:32px; margin-bottom:8px; display:block; }
-.plan-name { font-family:Manrope,sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; }
+.plan-name { font-family:Inter,sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.3px; }
 .plan-tagline { font-size:12px; color:var(--muted2); margin-top:2px; }
 
 .plan-price { text-align:right; }
-.plan-value { font-family:Manrope,sans-serif; font-size:32px; font-weight:800; color:var(--green); line-height:1; letter-spacing:-1px; }
+.plan-value { font-family:Inter,sans-serif; font-size:32px; font-weight:800; color:var(--green); line-height:1; letter-spacing:-1px; }
 .plan-period { font-size:11px; color:var(--muted); margin-top:2px; }
-.plan-free { font-family:Manrope,sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
+.plan-free { font-family:Inter,sans-serif; font-size:22px; font-weight:800; color:var(--muted2); }
 
 .plan-features { display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
 .plan-feat {
@@ -687,7 +687,7 @@ nav {
 .btn-plan {
   width:100%; padding:16px;
   border-radius:16px;
-  font-family:Manrope,sans-serif; font-size:14px; font-weight:700;
+  font-family:Inter,sans-serif; font-size:14px; font-weight:700;
   cursor:pointer; transition:all 0.25s ease; border:none;
   min-height: 56px;
   letter-spacing:0.01em;
@@ -705,12 +705,12 @@ nav {
   width:28px; height:28px; border-radius:50%;
   background:var(--surface2); border:1px solid var(--border2);
   display:flex; align-items:center; justify-content:center;
-  font-family:Manrope,sans-serif; font-size:11px; font-weight:700;
+  font-family:Inter,sans-serif; font-size:11px; font-weight:700;
   color:var(--muted); transition:all 0.3s;
 }
 .co-step.active .co-step-num { background:var(--green); border-color:var(--green); color:#000; }
 .co-step.done .co-step-num { background:rgba(0,230,118,0.15); border-color:rgba(0,230,118,0.4); color:var(--green); }
-.co-step-label { font-size:10px; color:var(--muted); font-family:Manrope,sans-serif; font-weight:600; white-space:nowrap; }
+.co-step-label { font-size:10px; color:var(--muted); font-family:Inter,sans-serif; font-weight:600; white-space:nowrap; }
 .co-step.active .co-step-label { color:var(--text); }
 .co-step.done .co-step-label { color:var(--green); }
 .co-step-line { flex:1; height:1px; background:var(--border); margin-bottom:14px; }
@@ -765,7 +765,7 @@ nav {
 .modal-step { display:none; }
 .modal-step.active { display:block; }
 
-.modal-title { font-family:Manrope,sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.modal-title { font-family:Inter,sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
 .modal-sub { font-size:13px; color:var(--muted2); margin-bottom:24px; line-height:1.6; }
 
 /* Order summary */
@@ -781,13 +781,13 @@ nav {
 }
 .os-icon { font-size:24px; }
 .os-info { flex:1; }
-.os-name { font-family:Manrope,sans-serif; font-size:14px; font-weight:700; }
+.os-name { font-family:Inter,sans-serif; font-size:14px; font-weight:700; }
 .os-desc { font-size:12px; color:var(--muted2); margin-top:2px; }
-.os-price { font-family:Manrope,sans-serif; font-size:18px; font-weight:800; color:var(--green); }
+.os-price { font-family:Inter,sans-serif; font-size:18px; font-weight:800; color:var(--green); }
 
 /* form */
 .form-label {
-  font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+  font-family:Inter,sans-serif; font-size:12px; font-weight:600;
   letter-spacing:0.3px; color:var(--muted2);
   display:block; margin-bottom:8px;
 }
@@ -816,7 +816,7 @@ nav {
   text-align:center;
   margin-bottom:16px;
 }
-.pix-title { font-family:Manrope,sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
+.pix-title { font-family:Inter,sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
 .pix-key {
   background:var(--surface2); border:1px solid var(--border);
   border-radius:8px; padding:10px 14px;
@@ -832,7 +832,7 @@ nav {
   flex:1; padding:10px;
   background:var(--surface2); border:1px solid var(--border);
   border-radius:9px; cursor:pointer; transition:all 0.2s;
-  font-family:Manrope,sans-serif; font-size:11px; font-weight:600;
+  font-family:Inter,sans-serif; font-size:11px; font-weight:600;
   color:var(--muted); text-align:center;
 }
 .ptab.active { border-color:rgba(0,230,118,0.4); color:var(--green); background:rgba(0,230,118,0.06); }
@@ -843,7 +843,7 @@ nav {
 .btn-pay {
   width:100%; padding:16px;
   background:var(--green); border:none; border-radius:14px;
-  color:#fff; font-family:Manrope,sans-serif; font-size:15px; font-weight:700;
+  color:#fff; font-family:Inter,sans-serif; font-size:15px; font-weight:700;
   cursor:pointer; transition:all 0.2s; margin-top:4px;
   min-height: 54px;
   letter-spacing:0.01em;
@@ -859,7 +859,7 @@ nav {
 /* success step */
 .success-block { text-align:center; padding:16px 0; }
 .success-icon { font-size:52px; display:block; margin-bottom:16px; }
-.success-title { font-family:Manrope,sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
+.success-title { font-family:Inter,sans-serif; font-size:22px; font-weight:800; margin-bottom:8px; }
 .success-sub { font-size:13px; color:var(--muted2); line-height:1.7; margin-bottom:24px; }
 
 .divider {
@@ -871,7 +871,7 @@ nav {
 }
 
 /* ===== LOGIN MODAL ===== */
-.login-modal-title { font-family:Manrope,sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+.login-modal-title { font-family:Inter,sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
 
 /* ===== ANIMATIONS ===== */
 /* ===== PARSER V3 — MULTI-EXTRATO ===== */
@@ -880,7 +880,7 @@ nav {
 .drop-zone:hover,.drop-zone.drag{border-color:rgba(0,217,110,0.5);background:rgba(0,217,110,0.03)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .dz-ico{font-size:36px;margin-bottom:10px;display:block}
-.dz-ttl{font-family:Manrope,sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.dz-ttl{font-family:Inter,sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
 .dz-sub{font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.6}
 .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
 .chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
@@ -906,7 +906,7 @@ nav {
 .file-rm{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 8px;
   border-radius:6px;transition:all 0.15s;border:1px solid transparent;flex-shrink:0}
 .file-rm:hover{color:var(--red);border-color:rgba(240,79,96,0.3)}
-.file-status{font-size:10px;font-family:Manrope,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.file-status{font-size:10px;font-family:Inter,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
 .fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
 .fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
 .fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
@@ -915,7 +915,7 @@ nav {
 .prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
 .act-msg{font-size:12px;color:var(--muted2);flex:1}
 .btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:9px;
-  color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;
+  color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;
   cursor:pointer;transition:all 0.2s;white-space:nowrap;opacity:0.35;pointer-events:none}
 .btn-go.on{opacity:1;pointer-events:all}
 .btn-go.on:hover{background:#2563eb}
@@ -926,26 +926,26 @@ nav {
 /* resultado parser */
 .ov-top{padding:28px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px}
 .ov-emoji{font-size:48px;flex-shrink:0;line-height:1}
-.ov-level{font-family:Manrope,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.15}
+.ov-level{font-family:Inter,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.15}
 .ov-sub{font-size:12px;color:var(--muted2);margin-top:5px;letter-spacing:0.2px}
 .p-score-wrap{padding:20px 24px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.12)}
 .p-score-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
-.p-score-lbl{font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;letter-spacing:0.8px;text-transform:uppercase}
-.p-score-val{font-family:Manrope,sans-serif;font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1}
+.p-score-lbl{font-size:11px;color:var(--muted);font-family:Inter,sans-serif;letter-spacing:0.8px;text-transform:uppercase}
+.p-score-val{font-family:Inter,sans-serif;font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1}
 .p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
 .p-bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
 .p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
 .p-stat{padding:16px 20px;background:var(--surface)}
-.p-sl{font-size:10px;font-family:'Inter',sans-serif;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
-.p-sv{font-family:Manrope,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.p-sl{font-size:10px;font-family:Inter,sans-serif;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.p-sv{font-family:Inter,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px}
 .p-sn{font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.4}
 .sources{padding:16px 22px;border-bottom:1px solid var(--border)}
-.src-ttl{font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.src-ttl{font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
 .src-list{display:flex;flex-direction:column;gap:7px}
 .src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:9px;font-size:13px}
 .src-bank{flex:1;font-weight:500}
 .src-txns{font-size:11px;color:var(--muted2)}
-.src-val{font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--green)}
+.src-val{font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--green)}
 .src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .p-alerts{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
 .pal{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6}
@@ -957,14 +957,14 @@ nav {
 .p-blu{background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.15)}
 .bank-tabs{display:flex;gap:1px;background:var(--border);overflow-x:auto;border-bottom:1px solid var(--border)}
 .bank-tabs::-webkit-scrollbar{height:0}
-.btab{padding:11px 16px;font-family:Manrope,sans-serif;font-size:12px;font-weight:600;
+.btab{padding:11px 16px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;
   color:var(--muted);background:var(--surface);cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;flex-shrink:0}
 .btab.on{color:var(--green);background:var(--surface2)}
 .p-txn-wrap{padding:16px 22px}
 .p-txn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.p-txn-ttl{font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.p-txn-ttl{font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
 .p-flt{display:flex;gap:5px}
-.pfb{font-size:11px;font-family:Manrope,sans-serif;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
+.pfb{font-size:11px;font-family:Inter,sans-serif;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
 .pfb.on{background:rgba(240,79,96,0.12);border-color:rgba(240,79,96,0.3);color:var(--red)}
 .p-txn-list{display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto}
 .p-txn-list::-webkit-scrollbar{width:3px}
@@ -977,18 +977,18 @@ nav {
 .ptinfo{flex:1;min-width:0}
 .ptd{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptt{font-size:10px;color:var(--muted2)}
-.ptv{font-family:Manrope,sans-serif;font-size:12px;font-weight:700;white-space:nowrap}
+.ptv{font-family:Inter,sans-serif;font-size:12px;font-weight:700;white-space:nowrap}
 .ptv.p{color:var(--green)}.ptv.n{color:var(--muted2)}
-.ptf{font-size:9px;font-family:Manrope,sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ptf{font-size:9px;font-family:Inter,sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
 .ptf.r{background:rgba(240,79,96,0.15);color:var(--red)}
 .ptf.y{background:rgba(245,166,35,0.15);color:var(--yellow)}
 .ptbank{font-size:9px;color:var(--muted);white-space:nowrap}
 .p-dbg-hd{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.p-dbg-ttl{font-family:Manrope,sans-serif;font-size:11px;color:var(--muted);font-weight:600}
+.p-dbg-ttl{font-family:Inter,sans-serif;font-size:11px;color:var(--muted);font-weight:600}
 .p-dbg-bd{display:none;padding:14px 22px;border-top:1px solid var(--border)}
 .p-dbg-bd.open{display:block}
 pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
-.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:Inter,sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
 @media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}.p-sv{font-size:19px}}
 
@@ -1140,7 +1140,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 }
 
 .split-left h1 {
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(32px, 3.5vw, 52px);
   font-weight: 800;
   line-height: 1.1;
@@ -1180,7 +1180,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   border: none;
   border-radius: 14px;
   color: #000;
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -1196,7 +1196,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   border: 1px solid var(--border);
   border-radius: 12px;
   color: var(--text);
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -1255,7 +1255,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 }
 .dash-dot { width: 10px; height: 10px; border-radius: 50%; }
 .dash-title {
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: var(--muted);
@@ -1284,14 +1284,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   margin-bottom: 12px;
 }
 .dash-score-num {
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 48px;
   font-weight: 800;
   letter-spacing: -3px;
   line-height: 1;
 }
 .dash-score-badge {
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 700;
   padding: 4px 10px;
@@ -1330,7 +1330,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   margin-bottom: 4px;
 }
 .dash-stat-val {
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -1386,7 +1386,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   border: 1px solid rgba(59,130,246,0.18);
   padding: 3px 8px;
   border-radius: 5px;
-  font-family: Manrope, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -1694,15 +1694,15 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <!-- Mini métricas -->
       <div style="display:flex;gap:24px;margin-top:40px;padding-top:28px;border-top:1px solid var(--border)">
         <div>
-          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+          <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
         </div>
         <div>
-          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+          <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">bancos suportados</div>
         </div>
         <div>
-          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+          <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
         </div>
       </div>
@@ -1725,7 +1725,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="split-right">
       <!-- Demo de detecções ao vivo — aparece antes do quiz -->
       <div id="liveDetectDemo" style="margin-bottom:16px">
-        <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
           // detecções em tempo real
         </div>
@@ -1834,14 +1834,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
     <!-- Botão abaixo do quiz — leva ao fluxo de extrato -->
     <div style="margin-top:16px;padding:0 4px 8px">
-      <button onclick="showPage('extrato')" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
+      <button onclick="showPage('extrato')" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
     </div>
   </div>
 
   <!-- Bloco: O que o Guardião cruza — mobile (desktop fica na institucional) -->
   <div style="padding:0 16px 8px;display:none" id="algoritmoBlocoMobile" class="algoritmo-mobile-show">
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:20px 16px;margin-bottom:8px">
-      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px">// o que analisamos</div>
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px">// o que analisamos</div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <span style="font-size:15px;flex-shrink:0">📊</span>
@@ -1877,20 +1877,20 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <span class="badge">✅ Grátis para começar</span>
     </div>
     <div style="margin-top:24px">
-      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">🔍 Verificar meu perfil fiscal →</button>
+      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">🔍 Verificar meu perfil fiscal →</button>
     </div>
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
       <div style="text-align:center">
-        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+        <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
       </div>
       <div style="text-align:center">
-        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+        <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">bancos suportados</div>
       </div>
       <div style="text-align:center">
-        <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+        <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
       </div>
     </div>
@@ -1903,30 +1903,30 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="sim-wrap" style="max-width:min(600px,100%);padding-top:32px;box-sizing:border-box;padding-left:16px;padding-right:16px">
     <!-- Introdução emocional -->
     <div style="padding-bottom:32px;border-bottom:1px solid var(--border);margin-bottom:32px">
-      <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">Scanner fiscal</div>
-      <h2 style="font-family:Manrope,sans-serif;font-size:clamp(22px,4vw,32px);font-weight:800;color:var(--text);margin:0 0 14px;letter-spacing:-1px;line-height:1.2">Descubra inconsistências financeiras<br><em style="font-style:normal;color:var(--accent)">antes da Receita Federal.</em></h2>
+      <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:14px">Scanner fiscal</div>
+      <h2 style="font-family:Inter,sans-serif;font-size:clamp(22px,4vw,32px);font-weight:800;color:var(--text);margin:0 0 14px;letter-spacing:-1px;line-height:1.2">Descubra inconsistências financeiras<br><em style="font-style:normal;color:var(--accent)">antes da Receita Federal.</em></h2>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 24px;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
 
       <!-- Benefícios -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
           <div style="font-size:18px;margin-bottom:6px">🔍</div>
-          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
           <div style="font-size:18px;margin-bottom:6px">⚠️</div>
-          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
           <div style="font-size:18px;margin-bottom:6px">📊</div>
-          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
           <div style="font-size:18px;margin-bottom:6px">📄</div>
-          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
         </div>
       </div>
@@ -1935,7 +1935,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,217,110,0.05);border:1px solid rgba(0,217,110,0.15);border-radius:10px">
         <span style="font-size:20px;flex-shrink:0">🔒</span>
         <div>
-          <div style="font-family:Manrope,sans-serif;font-size:12px;font-weight:700;color:var(--text)">Seus dados não saem do seu dispositivo</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text)">Seus dados não saem do seu dispositivo</div>
           <div style="font-size:11px;color:var(--muted2);margin-top:2px">Processamento 100% local · LGPD · Sem upload para servidores</div>
         </div>
       </div>
@@ -1955,8 +1955,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="ext-card-body">
         <!-- tabs login/cadastro -->
         <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:16px">
-          <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
-          <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
+          <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
+          <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
         </div>
         <!-- cadastro pane -->
         <div id="extCadPane">
@@ -2004,22 +2004,22 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- O que será analisado -->
         <div style="margin-bottom:20px">
-          <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">O que a engine detecta</div>
+          <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">O que a engine detecta</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
             <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
-              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Renda incompatível</div>
+              <div style="font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:var(--text);margin-bottom:3px">Renda incompatível</div>
               <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação acima do declarado no IR — principal gatilho do e-Financeira</div>
             </div>
             <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
-              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Pix e espécie recorrentes</div>
+              <div style="font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:var(--text);margin-bottom:3px">Pix e espécie recorrentes</div>
               <div style="font-size:11px;color:var(--muted2);line-height:1.5">Recebimentos frequentes sem nota fiscal — padrão de autônomo informal detectado</div>
             </div>
             <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
-              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Variação patrimonial</div>
+              <div style="font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:var(--text);margin-bottom:3px">Variação patrimonial</div>
               <div style="font-size:11px;color:var(--muted2);line-height:1.5">Gastos ou investimentos acima da capacidade financeira declarada</div>
             </div>
             <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
-              <div style="font-size:12px;font-weight:600;font-family:Manrope,sans-serif;color:var(--text);margin-bottom:3px">Anomalia temporal</div>
+              <div style="font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:var(--text);margin-bottom:3px">Anomalia temporal</div>
               <div style="font-size:11px;color:var(--muted2);line-height:1.5">Picos de movimentação fora do padrão histórico — z-score por período</div>
             </div>
           </div>
@@ -2030,7 +2030,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- Formatos suportados -->
         <div style="margin-bottom:16px">
-          <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Formatos e bancos suportados</div>
+          <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Formatos e bancos suportados</div>
           <div style="display:flex;flex-wrap:wrap;gap:5px">
             <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Nubank CSV</span>
             <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)">✓ Inter CSV</span>
@@ -2061,7 +2061,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                     onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
                     onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
               <span style="font-size:24px">📄</span>
-              <span style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700">PDF</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:700">PDF</span>
               <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Extrato em PDF<br>de qualquer banco</span>
             </button>
             <button onclick="document.getElementById('efi').click()"
@@ -2069,7 +2069,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                     onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
                     onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
               <span style="font-size:24px">📊</span>
-              <span style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700">CSV</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:700">CSV</span>
               <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Nubank, Inter<br>e outros bancos</span>
             </button>
             <button onclick="document.getElementById('efi').click()"
@@ -2077,7 +2077,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                     onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
                     onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
               <span style="font-size:24px">🏦</span>
-              <span style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700">OFX</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:700">OFX</span>
               <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Itaú, Bradesco<br>BB, Caixa, Santander</span>
             </button>
           </div>
@@ -2152,7 +2152,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- Segurança e LGPD -->
         <div style="margin-top:16px;padding:14px 16px;background:rgba(0,217,110,0.04);border:1px solid rgba(0,217,110,0.15);border-radius:10px">
-          <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Seus dados estão protegidos</div>
+          <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Seus dados estão protegidos</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
             <div style="display:flex;gap:6px;align-items:flex-start">
               <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
@@ -2178,11 +2178,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
         <span class="act-msg" id="actMsg">Pronto para analisar</span>
         <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;width:100%">
-          <label for="rendaDeclaradaInput" style="font-family:Manrope,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda mensal declarada (opcional)</label>
+          <label for="rendaDeclaradaInput" style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda mensal declarada (opcional)</label>
           <div style="position:relative;flex:1">
             <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
             <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
-              style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Manrope,sans-serif;box-sizing:border-box"
+              style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box"
               title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
           </div>
         </div>
@@ -2206,7 +2206,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- metodologia -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
+          <div style="font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">📋 Metodologia</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.75">
             O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira — identifica padrões de movimentação que merecem atenção antes da sua declaração de IR. A análise usa os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas. Identificamos os gatilhos conhecidos de malha fina: omissão de renda, Pix informais acima de R$5.000/mês, incompatibilidade patrimonial e deduções sem comprovante.
           </div>
@@ -2214,7 +2214,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         <!-- LGPD -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-family:Manrope,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
+          <div style="font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">🔒 Privacidade e LGPD</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.7">
             <strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</strong>.
           </div>
@@ -2236,15 +2236,15 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
             <!-- Score e nível — VISÍVEL -->
             <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:12px">
-    <div style="font-size:10px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
+    <div style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <div id="pvEmoji" style="font-size:32px;flex-shrink:0"></div>
       <div style="flex:1;min-width:0">
-        <div id="pvLevel" style="font-family:Manrope,sans-serif;font-size:clamp(15px,4vw,20px);font-weight:800;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        <div id="pvLevel" style="font-family:Inter,sans-serif;font-size:clamp(15px,4vw,20px);font-weight:800;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
         <div id="pvSub" style="font-size:11px;color:var(--muted2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
       </div>
       <div style="flex-shrink:0;text-align:right">
-        <div id="pvScore" style="font-family:Manrope,sans-serif;font-size:28px;font-weight:800;letter-spacing:-2px"></div>
+        <div id="pvScore" style="font-family:Inter,sans-serif;font-size:28px;font-weight:800;letter-spacing:-2px"></div>
         <div style="font-size:10px;color:var(--muted)">risco fiscal</div>
       </div>
     </div>
@@ -2276,7 +2276,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <!-- overlay de lock -->
     <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(11,17,32,0.1) 0%,rgba(11,17,32,0.95) 50%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px;border-radius:14px">
       <div style="font-size:24px;margin-bottom:6px">🔒</div>
-      <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
+      <div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
       <div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:16px;line-height:1.5">Desbloqueie para ver cada transação de risco com valor exato, relatório PDF e orientação fiscal personalizada.</div>
       <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
       <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
@@ -2288,7 +2288,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <!-- Estado inicial (antes de analisar) -->
           <div id="previewPlaceholder" style="text-align:center;padding:32px 20px;color:var(--muted)">
             <div style="font-size:32px;margin-bottom:12px">📂</div>
-            <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">Faça upload do extrato acima</div>
+            <div style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">Faça upload do extrato acima</div>
             <div style="font-size:12px;line-height:1.6">O resultado aparecerá aqui após a análise.<br>Seus dados ficam 100% no seu dispositivo.</div>
           </div>
 
@@ -2329,7 +2329,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
           <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
           <div style="padding:4px 0 0;display:flex;flex-direction:column;gap:8px">
-            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;line-height:1.4" id="btnExportPDF">
+            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;line-height:1.4" id="btnExportPDF">
               📄 Exportar relatório em PDF
             </button>
             <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
@@ -2428,7 +2428,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
     <!-- Tabela comparativa de profundidade -->
     <div style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border)">
-      <div style="font-family:Manrope,sans-serif;font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:20px">O que cada plano detecta</div>
+      <div style="font-family:Inter,sans-serif;font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:20px">O que cada plano detecta</div>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:13px">
           <thead>
@@ -2436,7 +2436,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <th style="text-align:left;padding:10px 12px;color:var(--muted);font-weight:600;font-family:Inter,sans-serif">Verificação</th>
               <th style="text-align:center;padding:10px 12px;color:var(--muted);font-weight:600;font-family:Inter,sans-serif">Gratuito</th>
               <th style="text-align:center;padding:10px 12px;color:var(--muted);font-weight:600;font-family:Inter,sans-serif">Avulso</th>
-              <th style="text-align:center;padding:10px 12px;color:var(--green);font-weight:700;font-family:Manrope,sans-serif">Pro</th>
+              <th style="text-align:center;padding:10px 12px;color:var(--green);font-weight:700;font-family:Inter,sans-serif">Pro</th>
             </tr>
           </thead>
           <tbody>
@@ -2456,7 +2456,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
       <!-- Bloco de urgência -->
       <div style="margin-top:28px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:18px 20px;text-align:center">
-        <div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#f87171;margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
+        <div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;color:#f87171;margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
         <div style="font-size:13px;color:var(--muted2);line-height:1.65">Após notificação da Receita Federal, multas e juros se aplicam automaticamente — e a retificação não elimina a penalidade. A análise preventiva custa menos de R$35.</div>
       </div>
     </div>
@@ -2470,39 +2470,39 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- Header -->
     <div style="margin-bottom:48px">
-      <div style="font-size:11px;font-family:Manrope,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Sobre o projeto</div>
-      <h1 style="font-family:Manrope,sans-serif;font-size:clamp(26px,5vw,40px);font-weight:800;color:var(--text);letter-spacing:-1.5px;line-height:1.15;margin:0 0 16px">O que é o<br><em style="font-style:normal;color:var(--accent)">Guardião Fiscal</em></h1>
+      <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Sobre o projeto</div>
+      <h1 style="font-family:Inter,sans-serif;font-size:clamp(26px,5vw,40px);font-weight:800;color:var(--text);letter-spacing:-1.5px;line-height:1.15;margin:0 0 16px">O que é o<br><em style="font-style:normal;color:var(--accent)">Guardião Fiscal</em></h1>
       <p style="font-size:16px;color:var(--muted2);line-height:1.7;margin:0;max-width:560px">Uma ferramenta independente que ajuda contribuintes a identificar inconsistências entre movimentação bancária e declaração de IR — antes que a Receita Federal identifique.</p>
     </div>
 
     <!-- Seção 1: Por que isso existe -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
-      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Por que isso existe</h2>
+      <h2 style="font-family:Inter,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Por que isso existe</h2>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O e-Financeira determina que instituições financeiras reportem movimentações relevantes de pessoas físicas. Movimentações nesse perfil podem ser cruzadas com os dados da sua declaração de IR.</p>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O problema: a maioria das pessoas só descobre a inconsistência quando recebe a notificação de malha fina — depois que a declaração foi entregue. Nesse ponto, a margem de manobra é muito menor.</p>
       <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:18px 20px;margin-top:20px">
-        <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">A lógica do Guardião Fiscal</div>
+        <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">A lógica do Guardião Fiscal</div>
         <p style="font-size:14px;color:var(--muted2);line-height:1.65;margin:0">Cruzar seus extratos com os critérios do e-Financeira <em>antes</em> de entregar a declaração. Se houver inconsistência, você descobre com tempo para corrigir ou reunir documentação.</p>
       </div>
     </div>
 
     <!-- Seção 2: Como funciona tecnicamente -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
-      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Como funciona</h2>
+      <h2 style="font-family:Inter,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Como funciona</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
           <div style="font-size:22px;margin-bottom:8px">🔒</div>
-          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Processamento local</div>
+          <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Processamento local</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.6">Seus extratos são lidos diretamente no seu navegador. Nenhum arquivo é enviado a servidores.</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
           <div style="font-size:22px;margin-bottom:8px">📊</div>
-          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Engine de risco v3</div>
+          <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Engine de risco v3</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.6">Score de 0 a 100 com 6 fatores ponderados: compatibilidade, consumo, espécie, concentração, anomalia temporal e perfil.</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
           <div style="font-size:22px;margin-bottom:8px">🏦</div>
-          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">25 bancos suportados</div>
+          <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">25 bancos suportados</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.6">Importação de extratos em CSV, OFX e PDF — incluindo Nubank, Inter, Bradesco, Itaú, BB e outros.</div>
         </div>
       </div>
@@ -2511,28 +2511,28 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- Seção 3: Exemplo real de análise -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
-      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 6px">Exemplo real de análise</h2>
+      <h2 style="font-family:Inter,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 6px">Exemplo real de análise</h2>
       <p style="font-size:13px;color:var(--muted);margin:0 0 20px">Veja o tipo de inconsistência que o motor detecta automaticamente no seu extrato.</p>
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
         <div style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
           <span style="font-size:16px">🚨</span>
           <div>
-            <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:#f87171">Incompatibilidade de renda detectada</div>
+            <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#f87171">Incompatibilidade de renda detectada</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Critério e-Financeira — peso alto no score</div>
           </div>
         </div>
         <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <span style="font-size:13px;color:var(--muted2)">Movimentação no período</span>
-            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:#f87171">R$ 84.000</span>
+            <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:800;color:#f87171">R$ 84.000</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <span style="font-size:13px;color:var(--muted2)">Renda declarada (estimada)</span>
-            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:var(--text)">R$ 32.000</span>
+            <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:800;color:var(--text)">R$ 32.000</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:13px;color:var(--muted2)">Divergência detectada</span>
-            <span style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;color:#f87171">+162%</span>
+            <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:800;color:#f87171">+162%</span>
           </div>
         </div>
         <div style="background:rgba(239,68,68,0.04);border-top:1px solid rgba(239,68,68,0.1);padding:12px 18px">
@@ -2544,7 +2544,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div style="background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
           <span style="font-size:16px">⚠️</span>
           <div>
-            <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:#fbbf24">Padrão comercial recorrente detectado</div>
+            <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#fbbf24">Padrão comercial recorrente detectado</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Possível atividade sem nota fiscal</div>
           </div>
         </div>
@@ -2558,7 +2558,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- Seção 4: LGPD e Segurança -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
-      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">🔒 Segurança e privacidade</h2>
+      <h2 style="font-family:Inter,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">🔒 Segurança e privacidade</h2>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
         <div style="display:flex;gap:12px;align-items:flex-start">
           <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
@@ -2585,21 +2585,21 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- Seção 5: Quem fez -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
-      <h2 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Quem está por trás</h2>
+      <h2 style="font-family:Inter,sans-serif;font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Quem está por trás</h2>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O Guardião Fiscal é um produto independente desenvolvido por um construtor de software brasileiro. Não é uma empresa tradicional, não tem time de vendas, não depende de investidores.</p>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0">A motivação é direta: a maioria das ferramentas fiscais disponíveis no Brasil é voltada para contadores e empresas, não para o contribuinte pessoa física que quer entender seu próprio risco antes de entregar a declaração.</p>
     </div>
 
     <!-- Seção 6: O que não somos -->
     <div style="background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.12);border-radius:14px;padding:22px 24px;margin-bottom:40px">
-      <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px">⚠️ Importante entender</div>
+      <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px">⚠️ Importante entender</div>
       <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0 0 10px">O Guardião Fiscal é uma ferramenta de diagnóstico educacional e preventivo. <strong style="color:var(--muted2);font-weight:600">Não substitui um contador</strong> e não tem acesso à sua declaração na Receita Federal.</p>
       <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0">O score gerado indica <em>áreas de atenção potencial</em> com base nos critérios conhecidos do e-Financeira. Para situações específicas — herança, venda de imóvel, empréstimo familiar — a orientação de um contador é indispensável.</p>
     </div>
 
     <!-- CTA final -->
     <div style="text-align:center;padding-top:8px">
-      <button onclick="showPage('extrato')" style="padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px" onmouseover="this.style.background='#2563eb';this.style.color='#fff'" onmouseout="this.style.background='var(--green)';this.style.color='#000'">
+      <button onclick="showPage('extrato')" style="padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px" onmouseover="this.style.background='#2563eb';this.style.color='#fff'" onmouseout="this.style.background='var(--green)';this.style.color='#000'">
         ⚠️ Verificar meu extrato agora →
       </button>
       <div style="font-size:12px;color:var(--muted);margin-top:8px">🔒 Processamento local · Nenhum dado enviado · Grátis para começar</div>
@@ -2659,7 +2659,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
 
       <div class="divider">já tem conta?</div>
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:Manrope,sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:Inter,sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
         Entrar com e-mail e senha
       </button>
       <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
@@ -2672,8 +2672,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
       <!-- Tabs: Cartão | Pix/Boleto -->
       <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin:12px 0 16px">
-        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">💳 Cartão</button>
-        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">🟢 Pix / Boleto</button>
+        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">💳 Cartão</button>
+        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">🟢 Pix / Boleto</button>
       </div>
 
       <!-- Cartão: MP Brick -->
@@ -2698,7 +2698,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
 
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:Manrope,sans-serif;font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:Inter,sans-serif;font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
       <div class="security-note" style="margin-top:12px">🔒 Pagamento processado diretamente pelo Mercado Pago · PCI DSS</div>
     </div>
 
@@ -2723,8 +2723,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- tabs -->
     <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
-      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
-      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
+      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
     </div>
 
     <!-- LOGIN -->
@@ -2955,7 +2955,7 @@ function initProFreeMode() {
     const banner = document.createElement('div');
     banner.id = 'proFreeBanner';
     banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
-    banner.innerHTML = '<div style="font-family:Manrope,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
+    banner.innerHTML = '<div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
     plansWrap.insertBefore(banner, plansWrap.firstChild);
   }
   // Atualiza badge aba extrato
@@ -3014,7 +3014,7 @@ function openCheckout(plan) {
       <div class="os-name">${p.name}</div>
       <div class="os-desc">${p.desc}</div>
     </div>
-    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:400"> ${p.period}</span></div>
+    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:Inter,sans-serif;font-weight:400"> ${p.period}</span></div>
   `;
 
   // Se já está logado, pula step 1 e vai direto para pagamento
@@ -3081,7 +3081,7 @@ async function initMpBrick() {
           O formulário de cartão está disponível apenas no site oficial.<br>
           <strong style="color:var(--text)">oguardiaofiscal.com.br</strong>
         </div>
-        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
       </div>`;
     return;
   }
@@ -3171,8 +3171,8 @@ function showBrickFallback(container, msg) {
       <div style="color:var(--red);margin-bottom:8px;font-weight:600">Não foi possível carregar o formulário de cartão.</div>
       <div style="color:var(--muted);font-size:11px;margin-bottom:16px;line-height:1.5">${msg || 'Erro desconhecido'}</div>
       <div style="display:flex;flex-direction:column;gap:8px">
-        <button onclick="_mpBrick=null;initMpBrick()" style="padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Tentar novamente</button>
-        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Manrope,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+        <button onclick="_mpBrick=null;initMpBrick()" style="padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer">🔄 Tentar novamente</button>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
       </div>
     </div>`;
 }
@@ -3920,7 +3920,7 @@ function renderQ() {
   body.innerHTML = `
     <div class="q-num">${q.tag}</div>
     <div class="q-title">${q.title}</div>
-    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Manrope,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
+    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
     <div class="options">
       ${q.opts.map((o,i) => {
         const isSel = isMulti ? multiSel.includes(i) : (sel?.index === i);
@@ -3998,7 +3998,7 @@ function nextQ() {
       'Calculando índice de coerência fiscal…',
     ];
     if (body) {
-      body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted2);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(cur-1) % msgs.length]}</div>`;
+      body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted2);font-family:Inter,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(cur-1) % msgs.length]}</div>`;
     }
     setTimeout(() => renderQ(), 250);
   } else {
@@ -4035,12 +4035,12 @@ function showResult() {
 
   if (rh) rh.innerHTML = `
     <div style="padding:28px 20px 24px;text-align:center">
-      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:20px">// processando análise</div>
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:20px">// processando análise</div>
       <div id="dScanAnim" style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto"></div>
       <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:8px;max-width:400px;margin-left:auto;margin-right:auto">
         <div id="dScanBar" style="height:100%;background:var(--green);border-radius:2px;width:0%;transition:width 0.4s ease"></div>
       </div>
-      <div id="dScanPct" style="font-family:Manrope,sans-serif;font-size:12px;color:var(--muted)">0%</div>
+      <div id="dScanPct" style="font-family:Inter,sans-serif;font-size:12px;color:var(--muted)">0%</div>
     </div>`;
   if (ra) ra.innerHTML = '';
 
@@ -4133,7 +4133,7 @@ function dRevealResult(pct, answers) {
   if (rh) rh.innerHTML = `
     <div class="result-glow" style="background:${color}"></div>
     <div style="padding:28px 28px 16px">
-      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center">// score de coerência fiscal</div>
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center">// score de coerência fiscal</div>
       <div style="display:flex;align-items:center;gap:24px">
         <div style="flex-shrink:0">
           <svg width="220" height="130" viewBox="0 0 220 130">
@@ -4147,7 +4147,7 @@ function dRevealResult(pct, answers) {
               style="transform-origin:${cx}px ${cy}px;transition:transform 1.4s cubic-bezier(0.4,0,0.2,1)"/>
             <circle cx="${cx}" cy="${cy}" r="5" fill="${color}"/>
             <text x="${cx}" y="${cy - 14}" text-anchor="middle"
-              style="font-family:Manrope,sans-serif;font-size:32px;font-weight:800;fill:${color};letter-spacing:-2px"
+              style="font-family:Inter,sans-serif;font-size:32px;font-weight:800;fill:${color};letter-spacing:-2px"
               id="dGaugeNum">0</text>
             <text x="${cx}" y="${cy + 4}" text-anchor="middle"
               style="font-family:Inter,sans-serif;font-size:10px;fill:#64748b;letter-spacing:1px">ÍNDICE</text>
@@ -4157,7 +4157,7 @@ function dRevealResult(pct, answers) {
           </svg>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
+          <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
           <div style="font-size:14px;color:var(--muted2);line-height:1.65">${desc}</div>
         </div>
       </div>
@@ -4203,7 +4203,7 @@ function dRevealResult(pct, answers) {
           ${lockedData.map(d => `
             <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
               <span style="color:var(--muted2)">${d.label}</span>
-              <span style="font-family:Manrope,sans-serif;font-weight:700;color:var(--red)">${d.val}</span>
+              <span style="font-family:Inter,sans-serif;font-weight:700;color:var(--red)">${d.val}</span>
             </div>`).join('')}
           ${bloqueados.map(a => `
             <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
@@ -4213,7 +4213,7 @@ function dRevealResult(pct, answers) {
         </div>
         <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,24,39,0.2) 0%,rgba(17,24,39,0.92) 55%);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px">
           <div style="font-size:20px;margin-bottom:6px">🔒</div>
-          <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${lockedData.length + bloqueados.length} padrões na sua simulação</div>
+          <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${lockedData.length + bloqueados.length} padrões na sua simulação</div>
           <div style="font-size:11px;color:var(--muted2);text-align:center;line-height:1.5">Confirme com seu extrato real para ver os detalhes exatos</div>
         </div>`;
       ra.appendChild(blurBlock);
@@ -4224,7 +4224,7 @@ function dRevealResult(pct, answers) {
       const ctaBlock = document.createElement('div');
       ctaBlock.style.cssText = 'margin-top:16px;opacity:0;transform:translateY(10px);transition:all 0.4s ease';
       ctaBlock.innerHTML = `
-        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color === '#00d96e' ? 'var(--green)' : color};border:none;border-radius:12px;color:${color === '#f04f60' ? '#fff' : '#000'};font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em">${ctaCopy}</button>
+        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color === '#00d96e' ? 'var(--green)' : color};border:none;border-radius:12px;color:${color === '#f04f60' ? '#fff' : '#000'};font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em">${ctaCopy}</button>
         <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Seus arquivos são processados localmente · Nenhum dado enviado</div>`;
       ra.appendChild(ctaBlock);
       setTimeout(() => { ctaBlock.style.opacity='1'; ctaBlock.style.transform='translateY(0)'; }, 30);
@@ -4262,7 +4262,7 @@ function mRenderQ() {
   body.innerHTML = `
     <div class="q-num">${q.tag}</div>
     <div class="q-title">${q.title}</div>
-    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Manrope,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
+    <div class="q-sub">${q.sub}${isMulti ? '<br><span style="font-size:11px;color:var(--green);font-family:Inter,sans-serif;font-weight:600;letter-spacing:0.5px;margin-top:5px;display:inline-block">✦ Selecione todas que se aplicam</span>' : ''}</div>
     <div class="options">
       ${q.opts.map((o,i) => {
         const isSel = isMulti ? multiSel.includes(i) : (mSel?.index === i);
@@ -4348,7 +4348,7 @@ function mNextQ() {
       'Calculando índice de coerência fiscal…',
     ];
     if (body) {
-      body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted2);font-family:Manrope,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(mCur-1) % msgs.length]}</div>`;
+      body.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted2);font-family:Inter,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.5px">${msgs[(mCur-1) % msgs.length]}</div>`;
     }
     setTimeout(() => mRenderQ(), 250);
   } else {
@@ -4387,12 +4387,12 @@ function mShowResult() {
 
   if (rh) rh.innerHTML = `
     <div style="padding:28px 20px 24px;text-align:center">
-      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:20px">// processando análise</div>
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:20px">// processando análise</div>
       <div id="mScanAnim" style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:24px"></div>
       <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:8px">
         <div id="mScanBar" style="height:100%;background:var(--green);border-radius:2px;width:0%;transition:width 0.4s ease"></div>
       </div>
-      <div id="mScanPct" style="font-family:Manrope,sans-serif;font-size:12px;color:var(--muted)">0%</div>
+      <div id="mScanPct" style="font-family:Inter,sans-serif;font-size:12px;color:var(--muted)">0%</div>
     </div>`;
   if (ra) ra.innerHTML = '';
 
@@ -4488,7 +4488,7 @@ function mRevealResult(pct) {
   if (rh) rh.innerHTML = `
     <div class="result-glow" style="background:${color}"></div>
     <div style="padding:28px 20px 16px">
-      <div style="font-family:Manrope,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center">// score de coerência fiscal</div>
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center">// score de coerência fiscal</div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
         <div style="width:100%;max-width:240px">
           <svg width="100%" viewBox="0 0 220 130">
@@ -4508,7 +4508,7 @@ function mRevealResult(pct) {
             <circle cx="${cx}" cy="${cy}" r="5" fill="${color}"/>
             <!-- score central -->
             <text x="${cx}" y="${cy - 14}" text-anchor="middle"
-              style="font-family:Manrope,sans-serif;font-size:32px;font-weight:800;fill:${color};letter-spacing:-2px"
+              style="font-family:Inter,sans-serif;font-size:32px;font-weight:800;fill:${color};letter-spacing:-2px"
               id="mGaugeNum">0</text>
             <text x="${cx}" y="${cy + 4}" text-anchor="middle"
               style="font-family:Inter,sans-serif;font-size:10px;fill:#64748b;letter-spacing:1px">ÍNDICE</text>
@@ -4522,7 +4522,7 @@ function mRevealResult(pct) {
           </svg>
         </div>
         <div style="text-align:center;padding:0 8px">
-          <div style="font-family:Manrope,sans-serif;font-size:18px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
+          <div style="font-family:Inter,sans-serif;font-size:18px;font-weight:800;color:${color};line-height:1.2;margin-bottom:8px">${level}</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.65">${desc}</div>
         </div>
       </div>
@@ -4572,12 +4572,12 @@ function mRevealResult(pct) {
         ${lockedData.map(d => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
             <span style="color:var(--muted2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${d.label}</span>
-            <span style="font-family:Manrope,sans-serif;font-weight:700;color:var(--red);flex-shrink:0;margin-left:8px">${d.val}</span>
+            <span style="font-family:Inter,sans-serif;font-weight:700;color:var(--red);flex-shrink:0;margin-left:8px">${d.val}</span>
           </div>`).join('')}
       </div>
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,24,39,0.2) 0%,rgba(17,24,39,0.92) 55%);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px">
         <div style="font-size:20px;margin-bottom:6px">🔒</div>
-        <div style="font-family:Manrope,sans-serif;font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${lockedData.length} padrões na sua simulação</div>
+        <div style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${lockedData.length} padrões na sua simulação</div>
         <div style="font-size:11px;color:var(--muted2);text-align:center;line-height:1.5">Confirme com seu extrato real para ver os detalhes exatos</div>
       </div>`;
     ra.appendChild(blurBlock);
@@ -4587,7 +4587,7 @@ function mRevealResult(pct) {
       const ctaBlock = document.createElement('div');
       ctaBlock.style.cssText = 'margin-top:16px;opacity:0;transform:translateY(10px);transition:all 0.4s ease';
       ctaBlock.innerHTML = `
-        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color === '#00d96e' ? 'var(--green)' : color};border:none;border-radius:12px;color:${color === '#f04f60' ? '#fff' : '#000'};font-family:Manrope,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em">${ctaCopy}</button>
+        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color === '#00d96e' ? 'var(--green)' : color};border:none;border-radius:12px;color:${color === '#f04f60' ? '#fff' : '#000'};font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em">${ctaCopy}</button>
         <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Seus arquivos são processados localmente · Nenhum dado enviado</div>`;
       ra.appendChild(ctaBlock);
       setTimeout(() => { ctaBlock.style.opacity='1'; ctaBlock.style.transform='translateY(0)'; }, 30);
@@ -6572,22 +6572,22 @@ function eRenderPreview(c, sources) {
   document.getElementById('pvMetrics').innerHTML = `
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Total créditos</div>
-      <div style="font-family:Manrope,sans-serif;font-size:16px;font-weight:800;color:var(--green)">${fmtBRL(c.totalCredits)}</div>
+      <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:var(--green)">${fmtBRL(c.totalCredits)}</div>
       <div style="font-size:10px;color:var(--muted);margin-top:2px">${c.creditCount} entradas</div>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Suspeitos</div>
-      <div style="font-family:Manrope,sans-serif;font-size:16px;font-weight:800;color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div>
+      <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div>
       <div style="font-size:10px;color:var(--muted);margin-top:2px">transações de risco</div>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Pix recebidos</div>
-      <div style="font-family:Manrope,sans-serif;font-size:16px;font-weight:800;color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${pixPct}%</div>
+      <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${pixPct}%</div>
       <div style="font-size:10px;color:var(--muted);margin-top:2px">das entradas</div>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Índice consumo</div>
-      <div style="font-family:Manrope,sans-serif;font-size:16px;font-weight:800;color:${icConsumo>=120?'var(--red)':icConsumo>=90?'var(--yellow)':'var(--green)'}">${icConsumo}%</div>
+      <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:${icConsumo>=120?'var(--red)':icConsumo>=90?'var(--yellow)':'var(--green)'}">${icConsumo}%</div>
       <div style="font-size:10px;color:var(--muted);margin-top:2px">saídas/entradas</div>
     </div>`;
 
@@ -6682,7 +6682,7 @@ function eUnlockResult(){
     <div class="src-item"><div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div>
     <span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
     <span class="src-val">${fmtBRL(r.totalCredits)}</span>
-    <span style="font-size:10px;font-family:Manrope,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
+    <span style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
 
   document.getElementById('pAlertList').innerHTML=c.alerts.map(a=>`
     <div class="pal ${a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu'}">
