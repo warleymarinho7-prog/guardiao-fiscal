@@ -6327,7 +6327,7 @@ function eAddFile(file){
   if(eFiles.find(f=>f.name===file.name)){eShowErr(`"${sanitize(file.name)}" já foi adicionado.`);return;}
   const MAX_SIZE = 10 * 1024 * 1024; // 10MB
   if(file.size > MAX_SIZE){eShowErr(`"${sanitize(file.name)}" excede o limite de 10MB.`);return;}
-  const allowedExt = ['pdf','csv','ofx','txt','xlsx'];
+  const allowedExt = ['pdf','csv','ofx','qfx','txt'];
   const ext = file.name.split('.').pop().toLowerCase();
   if(!allowedExt.includes(ext)){eShowErr(`Formato não suportado: .${sanitize(ext)}. Use PDF, CSV, OFX ou TXT.`);return;}
   const entry={name:file.name,content:null,type:null,detected:null,status:'loading'};
