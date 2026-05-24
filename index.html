@@ -12,6 +12,19 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','218671319021716');
+fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=218671319021716&ev=PageView&noscript=1"/></noscript>
+<!-- Fim Meta Pixel -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -2981,6 +2994,8 @@ function initProFreeMode() {
 }
 
 function openCheckout(plan) {
+  // Pixel — checkout iniciado
+  if(typeof fbq==='function') fbq('trackCustom','CheckoutStarted',{plan});
   // Se usuário já tem plano ativo — vai direto para análise
   if (_currentUser?._plano === 'pro' || (_currentUser?._plano === 'avulso' && plan === 'avulso')) {
     if (_eConsolidated) { eUnlockResult(); return; }
@@ -6415,6 +6430,8 @@ async function eRunAll(){
   if(ready.length===0)return;
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
+  // Pixel — análise iniciada
+  if(typeof fbq==='function') fbq('trackCustom','AnalysisStarted',{files:ready.length});
   // Captura renda declarada do campo (opcional — ativa F7 compatibilidade)
   const _rInput = document.getElementById('rendaDeclaradaInput');
   // Leitura robusta — aceita vírgula como decimal (R$ 5.000,00 → 5000)
