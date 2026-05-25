@@ -7391,6 +7391,595 @@ function eResetAll(){
 
 // extrato step 1 — handled by Supabase auth above
 
+// ═══════════════════════════════════════════════════════════════════
+// ██ MÓDULO: EXTRATOS SINTÉTICOS DE TESTE
+// ═══════════════════════════════════════════════════════════════════
+// Gera transações sintéticas para validar o motor sem usuários reais.
+// Cada perfil tem um score esperado. Rode gSyntheticTest() no console.
+// ───────────────────────────────────────────────────────────────────
+
+const SYNTHETIC_PROFILES = {
+
+  // ── PERFIL 1: CLT puro ──────────────────────────────────────────
+  // Salário fixo todo mês, poucos gastos variáveis.
+  // ESPERADO: score baixo (0–20). Motor não deve sinalizar risco.
+  clt_puro: {
+    label: 'CLT Puro — baixo risco esperado',
+    rendaDeclarada: 5000,
+    scoreEsperado: { min: 0, max: 25 },
+    txns: (() => {
+      const t = [];
+      for (let m = 1; m <= 6; m++) {
+        const mm = String(m).padStart(2,'0');
+        t.push({ date: new Date(`2024-${mm}-05`), desc: 'SALARIO EMPRESA LTDA', value: 5000 });
+        t.push({ date: new Date(`2024-${mm}-10`), desc: 'DEBITO ALUGUEL', value: -1500 });
+        t.push({ date: new Date(`2024-${mm}-15`), desc: 'PIX SUPERMERCADO', value: -800 });
+        t.push({ date: new Date(`2024-${mm}-20`), desc: 'PIX CONTA LUZ', value: -200 });
+        if (m === 12) t.push({ date: new Date(`2024-${mm}-20`), desc: '13 SALARIO', value: 5000 });
+      }
+      return t;
+    })(),
+  },
+
+  // ── PERFIL 2: Autônomo informal com alto Pix ─────────────────────
+  // Recebimentos irregulares via Pix, sem nota fiscal, sem renda declarada.
+  // ESPERADO: score elevado (55–85). F2 (pix limite) e F4 (comercial oculta) devem acionar.
+  autonomo_informal: {
+    label: 'Autônomo Informal — risco elevado esperado',
+    rendaDeclarada: 0,
+    scoreEsperado: { min: 45, max: 90 },
+    txns: (() => {
+      const t = [];
+      const clientes = ['JOAO SILVA', 'MARIA SOUZA', 'PEDRO COSTA', 'ANA LIMA'];
+      for (let m = 1; m <= 6; m++) {
+        const mm = String(m).padStart(2,'0');
+        clientes.forEach((c, i) => {
+          t.push({ date: new Date(`2024-${mm}-${String(5+i*4).padStart(2,'0')}`), desc: `PIX RECEBIDO ${c}`, value: 1800 + i * 200 });
+        });
+        t.push({ date: new Date(`2024-${mm}-28`), desc: 'PIX MERCADO', value: -600 });
+        t.push({ date: new Date(`2024-${mm}-25`), desc: 'PIX ALUGUEL', value: -1200 });
+      }
+      return t;
+    })(),
+  },
+
+  // ── PERFIL 3: MEI com espécie alta ──────────────────────────────
+  // Depósitos em dinheiro físico recorrentes. Renda declarada coerente.
+  // ESPERADO: score médio (25–55). F3 (espécie) deve acionar mas não explodir.
+  mei_especie: {
+    label: 'MEI com Espécie Alta — risco médio esperado',
+    rendaDeclarada: 4000,
+    scoreEsperado: { min: 20, max: 60 },
+    txns: (() => {
+      const t = [];
+      for (let m = 1; m <= 6; m++) {
+        const mm = String(m).padStart(2,'0');
+        t.push({ date: new Date(`2024-${mm}-05`), desc: 'DEPOSITO ESPECIE CAIXA', value: 2500 });
+        t.push({ date: new Date(`2024-${mm}-12`), desc: 'PIX RECEBIDO CLIENTE', value: 1200 });
+        t.push({ date: new Date(`2024-${mm}-20`), desc: 'SAQUE ESPECIE', value: -800 });
+        t.push({ date: new Date(`2024-${mm}-25`), desc: 'PIX FORNECEDOR', value: -900 });
+        t.push({ date: new Date(`2024-${mm}-28`), desc: 'PIX ALUGUEL PONTO', value: -600 });
+      }
+      return t;
+    })(),
+  },
+
+  // ── PERFIL 4: Incompatibilidade severa ───────────────────────────
+  // Movimentação 8x acima da renda declarada. Sem transações neutras.
+  // ESPERADO: score crítico (70–100). F7 (compatibilidade) severo.
+  incompatibilidade_severa: {
+    label: 'Incompatibilidade Severa — score crítico esperado',
+    rendaDeclarada: 3000,
+    scoreEsperado: { min: 60, max: 100 },
+    txns: (() => {
+      const t = [];
+      for (let m = 1; m <= 6; m++) {
+        const mm = String(m).padStart(2,'0');
+        t.push({ date: new Date(`2024-${mm}-02`), desc: 'PIX RECEBIDO EMPRESA', value: 12000 });
+        t.push({ date: new Date(`2024-${mm}-10`), desc: 'PIX RECEBIDO CLIENTE 2', value: 8000 });
+        t.push({ date: new Date(`2024-${mm}-18`), desc: 'PIX PAGAMENTO SERVICO', value: -4000 });
+        t.push({ date: new Date(`2024-${mm}-25`), desc: 'PIX SUPERMERCADO', value: -1500 });
+      }
+      return t;
+    })(),
+  },
+
+  // ── PERFIL 5: Anomalia temporal isolada ─────────────────────────
+  // Meses normais + 1 mês com pico inexplicado (10x a média).
+  // ESPERADO: score médio-alto (30–65). F5 (anomalia temporal) deve acionar pontualmente.
+  anomalia_temporal: {
+    label: 'Anomalia Temporal — F5 deve acionar',
+    rendaDeclarada: 5000,
+    scoreEsperado: { min: 25, max: 65 },
+    txns: (() => {
+      const t = [];
+      for (let m = 1; m <= 6; m++) {
+        const mm = String(m).padStart(2,'0');
+        if (m === 4) {
+          // Mês 4: pico inexplicado 10x
+          t.push({ date: new Date(`2024-${mm}-05`), desc: 'SALARIO EMPRESA LTDA', value: 5000 });
+          t.push({ date: new Date(`2024-${mm}-10`), desc: 'PIX RECEBIDO DESCONHECIDO', value: 48000 });
+          t.push({ date: new Date(`2024-${mm}-20`), desc: 'PIX PAGAMENTO', value: -3000 });
+        } else {
+          t.push({ date: new Date(`2024-${mm}-05`), desc: 'SALARIO EMPRESA LTDA', value: 5000 });
+          t.push({ date: new Date(`2024-${mm}-15`), desc: 'PIX MERCADO', value: -900 });
+          t.push({ date: new Date(`2024-${mm}-20`), desc: 'PIX ALUGUEL', value: -1400 });
+        }
+      }
+      return t;
+    })(),
+  },
+
+  // ── PERFIL 6: Split Pix (estruturação) ──────────────────────────
+  // Vários Pix logo abaixo de R$5.000 em sequência, mesmo remetente.
+  // ESPERADO: score médio-alto (35–75). F6d (split pix) deve acionar.
+  split_pix: {
+    label: 'Split Pix — estruturação detectada',
+    rendaDeclarada: 4000,
+    scoreEsperado: { min: 30, max: 75 },
+    txns: (() => {
+      const t = [];
+      for (let m = 1; m <= 6; m++) {
+        const mm = String(m).padStart(2,'0');
+        t.push({ date: new Date(`2024-${mm}-05`), desc: 'SALARIO EMPRESA', value: 4000 });
+        // 3 Pix abaixo de 5000 no mesmo dia, mesmo remetente
+        t.push({ date: new Date(`2024-${mm}-12`), desc: 'PIX RECEBIDO JOSE SANTOS', value: 4800 });
+        t.push({ date: new Date(`2024-${mm}-12`), desc: 'PIX RECEBIDO JOSE SANTOS', value: 4700 });
+        t.push({ date: new Date(`2024-${mm}-13`), desc: 'PIX RECEBIDO JOSE SANTOS', value: 4600 });
+        t.push({ date: new Date(`2024-${mm}-25`), desc: 'PIX PAGAMENTO DESPESAS', value: -5000 });
+      }
+      return t;
+    })(),
+  },
+};
+
+// ── Runner do teste sintético ──────────────────────────────────────
+// Uso: gSyntheticTest() no console do navegador
+// Retorna relatório com score obtido vs esperado e status PASS/FAIL
+window.gSyntheticTest = function(perfilKey) {
+  const perfis = perfilKey ? { [perfilKey]: SYNTHETIC_PROFILES[perfilKey] } : SYNTHETIC_PROFILES;
+  const resultados = [];
+
+  for (const [key, perfil] of Object.entries(perfis)) {
+    try {
+      const r = eAnalyzeSingle(perfil.txns, `[SINTÉTICO] ${perfil.label}`, perfil.rendaDeclarada || 0);
+      if (!r) { resultados.push({ key, status: 'ERRO', msg: 'eAnalyzeSingle retornou null' }); continue; }
+      const { min, max } = perfil.scoreEsperado;
+      const pass = r.score >= min && r.score <= max;
+      resultados.push({
+        key,
+        label: perfil.label,
+        scoreObtido: r.score,
+        scoreEsperado: `${min}–${max}`,
+        status: pass ? '✅ PASS' : '❌ FAIL',
+        fatoresAtivados: (r.fatores||[]).filter(f=>f.peso>0).map(f=>f.motivo?.slice(0,60)+'…'),
+        confidence: Math.round((r.confidence||0)*100)+'%',
+        numEvidencias: r.numEvidencias,
+      });
+    } catch(e) {
+      resultados.push({ key, status: '💥 EXCEÇÃO', msg: e.message });
+    }
+  }
+
+  console.group('%c🛡️ Guardião Fiscal — Teste Sintético', 'font-size:14px;font-weight:bold;color:#3b82f6');
+  resultados.forEach(r => {
+    const cor = r.status?.includes('PASS') ? '#00d96e' : r.status?.includes('FAIL') ? '#ef4444' : '#f5a623';
+    console.group(`%c${r.status} ${r.key}`, `color:${cor};font-weight:bold`);
+    console.log('Label:', r.label);
+    console.log('Score obtido:', r.scoreObtido, '| Esperado:', r.scoreEsperado);
+    console.log('Confiança:', r.confidence, '| Evidências:', r.numEvidencias);
+    if (r.fatoresAtivados?.length) console.log('Fatores ativados:', r.fatoresAtivados);
+    if (r.msg) console.warn('Erro:', r.msg);
+    console.groupEnd();
+  });
+  const pass = resultados.filter(r=>r.status?.includes('PASS')).length;
+  console.log(`%c\nResultado: ${pass}/${resultados.length} perfis dentro do range esperado`, 'font-weight:bold;font-size:13px');
+  console.groupEnd();
+
+  return resultados;
+};
+
+// Atalho rápido: testa um perfil específico
+// Ex: gSyntheticTest('clt_puro')  →  só o CLT
+// gSyntheticTest()                 →  todos os perfis
+window.gListProfiles = function() {
+  console.log('%c🛡️ Perfis disponíveis:', 'font-weight:bold;color:#3b82f6');
+  Object.entries(SYNTHETIC_PROFILES).forEach(([k, p]) => {
+    console.log(`  ${k} — ${p.label} (esperado: ${p.scoreEsperado.min}–${p.scoreEsperado.max})`);
+  });
+};
+
+
+// ═══════════════════════════════════════════════════════════════════
+// ██ MÓDULO: DIAGNÓSTICO DO MOTOR
+// ═══════════════════════════════════════════════════════════════════
+// Auditoria de calibração dos pesos e detecção de problemas.
+// Uso: gMotorDiag() no console após uma análise real ou sintética.
+// ───────────────────────────────────────────────────────────────────
+
+window.gMotorDiag = function(resultado) {
+  const r = resultado || window._debugMotor;
+  if (!r) {
+    console.warn('Rode uma análise primeiro ou passe o resultado: gMotorDiag(resultado)');
+    console.log('Dica: window._debugMotor fica disponível em localhost após análise');
+    return null;
+  }
+
+  const fatores = (r.fatores || []).filter(f => f.peso > 0);
+  const pesoTotal = fatores.reduce((a, f) => a + (f.peso || 0), 0);
+  const scoreRaw = pesoTotal; // antes da escala log
+  const scoreFinal = r.score;
+
+  console.group('%c🛡️ Guardião Fiscal — Diagnóstico do Motor', 'font-size:14px;font-weight:bold;color:#3b82f6');
+
+  // Resumo geral
+  console.group('%cResumo', 'font-weight:bold');
+  console.log('Score final (log-scale):', scoreFinal + '%');
+  console.log('Peso bruto (antes da escala):', scoreRaw + 'pts');
+  console.log('Confiança geral:', Math.round((r.confidence||0)*100) + '%');
+  console.log('Evidências corroboradas:', r.numEvidencias || 0);
+  console.log('Transações analisadas:', r.totalTxns);
+  console.log('Meses de extrato:', r.months);
+  console.groupEnd();
+
+  // Breakdown dos fatores
+  console.group('%cFatores Ativados (ordenados por peso)', 'font-weight:bold');
+  fatores.sort((a,b)=>(b.peso||0)-(a.peso||0)).forEach(f => {
+    const pct = pesoTotal > 0 ? Math.round((f.peso/pesoTotal)*100) : 0;
+    const bar = '█'.repeat(Math.round(pct/5)) + '░'.repeat(20-Math.round(pct/5));
+    console.log(
+      `%c${bar} ${pct}% (${f.peso}pts)%c ${(f.motivo||'').slice(0,70)}`,
+      'color:#3b82f6;font-family:monospace',
+      'color:inherit'
+    );
+    if (f.porqueImporta) console.log('  ↳', f.porqueImporta.slice(0,100));
+    if (f.confianca) console.log('  ↳ Confiança do fator:', Math.round(f.confianca*100)+'%');
+  });
+  console.groupEnd();
+
+  // Alertas de calibração
+  const alertasCalibracao = [];
+
+  // Detectar possível acumulação excessiva (F2+F7 dupla captura)
+  const f2 = fatores.find(f=>f.motivo?.includes('Pix') && f.motivo?.includes('limite'));
+  const f7 = fatores.find(f=>f.motivo?.includes('compatib') || f.motivo?.includes('renda declarada'));
+  if (f2 && f7) alertasCalibracao.push('⚠️  F2 + F7 ambos ativos — verificar se há dupla penalização de renda');
+
+  // Score alto com confiança baixa
+  if (scoreFinal > 50 && (r.confidence||0) < 0.35) alertasCalibracao.push('⚠️  Score alto com confiança baixa — possível falso positivo');
+
+  // Score máximo com poucos meses
+  if (scoreFinal > 70 && r.months < 3) alertasCalibracao.push('⚠️  Score crítico com extrato curto — resultado pode ser impreciso');
+
+  // Fator dominante > 60% do peso total
+  const dominant = fatores[0];
+  if (dominant && pesoTotal > 0 && (dominant.peso/pesoTotal) > 0.6) {
+    alertasCalibracao.push(`⚠️  Fator único domina ${Math.round(dominant.peso/pesoTotal*100)}% do score — verificar peso de "${(dominant.motivo||'').slice(0,40)}"`);
+  }
+
+  if (alertasCalibracao.length) {
+    console.group('%c⚠️ Alertas de Calibração', 'color:#f5a623;font-weight:bold');
+    alertasCalibracao.forEach(a => console.warn(a));
+    console.groupEnd();
+  } else {
+    console.log('%c✅ Nenhum alerta de calibração detectado', 'color:#00d96e');
+  }
+
+  // Índices financeiros calculados
+  console.group('%cÍndices Financeiros', 'font-weight:bold');
+  console.log('Total créditos:', fmtBRL(r.totalCredits));
+  console.log('Total débitos:', fmtBRL(r.totalDebits));
+  console.log('Pix total:', fmtBRL(r.pixTotal));
+  console.log('Índice espécie:', Math.round((r.indiceEspecie||0)*100)+'%');
+  console.log('Índice consumo:', Math.round((r.indiceConsumo||0)*100)+'%');
+  if (r.anomalias?.length) console.log('Anomalias temporais:', r.anomalias.length);
+  if (r.splitPix?.length) console.log('Split Pix detectados:', r.splitPix.length);
+  if (r.circularidade?.length) console.log('Padrões circulares:', r.circularidade.length);
+  console.groupEnd();
+
+  console.groupEnd();
+  return { scoreFinal, scoreRaw, fatores, alertasCalibracao, confidence: r.confidence };
+};
+
+
+// ═══════════════════════════════════════════════════════════════════
+// ██ MÓDULO: FEEDBACK DO USUÁRIO
+// ═══════════════════════════════════════════════════════════════════
+// Mecanismo "discordo deste resultado" — captura contestações reais.
+// Cada contestação é um dado: motor disse X, usuário disse que X não
+// reflete a realidade. Com volume, revela padrões de falso positivo.
+// ───────────────────────────────────────────────────────────────────
+
+// Estado interno do feedback
+window._gFeedback = {
+  sessao: null,         // resultado atual da análise
+  historico: [],        // feedbacks da sessão (em memória)
+};
+
+// ── Motivos pré-definidos de contestação ─────────────────────────
+const FEEDBACK_MOTIVOS = [
+  { id: 'falso_especie',    label: 'Espécie é troco de saques anteriores' },
+  { id: 'falso_pix',        label: 'Pix são transferências entre contas próprias' },
+  { id: 'falso_comercial',  label: 'Recebimentos recorrentes são salário/pensão' },
+  { id: 'falso_anomalia',   label: 'Pico foi herança, venda de bem ou rescisão' },
+  { id: 'falso_compat',     label: 'Movimentação inclui empréstimos/devoluções' },
+  { id: 'score_alto',       label: 'Score parece alto para minha situação' },
+  { id: 'score_baixo',      label: 'Score parece baixo — existe risco que não apareceu' },
+  { id: 'outro',            label: 'Outro motivo' },
+];
+
+// ── Renderiza o card de feedback no resultado ─────────────────────
+function gRenderFeedbackCard(containerEl, resultado) {
+  if (!containerEl || !resultado) return;
+  window._gFeedback.sessao = resultado;
+
+  const card = document.createElement('div');
+  card.id = 'gFeedbackCard';
+  card.style.cssText = [
+    'margin-top:20px',
+    'background:rgba(59,130,246,0.04)',
+    'border:1px solid rgba(59,130,246,0.15)',
+    'border-radius:14px',
+    'padding:18px 20px',
+    'font-family:Inter,sans-serif',
+  ].join(';');
+
+  card.innerHTML = `
+    <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">
+      // este resultado faz sentido para você?
+    </div>
+    <p style="font-size:13px;color:var(--muted2);line-height:1.6;margin:0 0 14px">
+      Seu feedback melhora a precisão do motor — se algum alerta não reflete sua realidade, nos conte.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button id="gFbBtnOk" onclick="gFeedbackSubmit('ok')"
+        style="padding:9px 18px;background:rgba(0,217,110,0.1);border:1px solid rgba(0,217,110,0.25);border-radius:9px;
+               color:#00d96e;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">
+        ✅ Faz sentido
+      </button>
+      <button id="gFbBtnDiscordo" onclick="gFeedbackAbrir()"
+        style="padding:9px 18px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:9px;
+               color:#ef4444;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s">
+        ✋ Discordo deste resultado
+      </button>
+    </div>
+    <div id="gFbDetalhes" style="display:none">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600">Qual parte não reflete sua realidade?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        ${FEEDBACK_MOTIVOS.map(m => `
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;
+                         background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+                         padding:7px 12px;font-size:12px;color:var(--muted2);transition:all 0.15s"
+                 onmouseover="this.style.borderColor='rgba(59,130,246,0.4)'"
+                 onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" value="${m.id}"
+                   style="accent-color:var(--green);cursor:pointer"
+                   onchange="gFeedbackCheckChange(this)">
+            ${m.label}
+          </label>
+        `).join('')}
+      </div>
+      <div id="gFbOutroWrap" style="display:none;margin-bottom:12px">
+        <textarea id="gFbOutroText" placeholder="Descreva o que não faz sentido..."
+          style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);
+                 border-radius:9px;color:var(--text2);font-family:Inter,sans-serif;font-size:13px;
+                 line-height:1.5;resize:vertical;min-height:72px;outline:none"
+          onfocus="this.style.borderColor='rgba(59,130,246,0.4)'"
+          onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+      <button onclick="gFeedbackEnviar()"
+        style="width:100%;padding:11px;background:var(--green);border:none;border-radius:10px;
+               color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.2s"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        Enviar feedback →
+      </button>
+    </div>
+    <div id="gFbSucesso" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:20px;margin-bottom:6px">🙏</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Obrigado pelo feedback</div>
+      <div style="font-size:12px;color:var(--muted)">Isso ajuda a calibrar o motor para perfis como o seu.</div>
+    </div>
+  `;
+
+  containerEl.appendChild(card);
+}
+
+// ── Handlers de interação do feedback ────────────────────────────
+window.gFeedbackAbrir = function() {
+  const d = document.getElementById('gFbDetalhes');
+  if (d) d.style.display = 'block';
+  // tracking
+  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordo', { score: window._gFeedback.sessao?.score });
+  if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordo');
+};
+
+window.gFeedbackCheckChange = function(el) {
+  const outroWrap = document.getElementById('gFbOutroWrap');
+  if (!outroWrap) return;
+  const checkboxes = document.querySelectorAll('#gFbDetalhes input[type=checkbox]');
+  const temOutro = Array.from(checkboxes).some(c => c.value === 'outro' && c.checked);
+  outroWrap.style.display = temOutro ? 'block' : 'none';
+};
+
+window.gFeedbackSubmit = function(tipo) {
+  const r = window._gFeedback.sessao;
+  const payload = {
+    tipo,
+    score: r?.score,
+    meses: r?.months,
+    numEvidencias: r?.numEvidencias,
+    confidence: r?.confidence,
+    fatores: (r?.fatores||[]).filter(f=>f.peso>0).map(f=>({ motivo: (f.motivo||'').slice(0,60), peso: f.peso })),
+    ts: new Date().toISOString(),
+    motivos: [],
+    texto: '',
+  };
+
+  window._gFeedback.historico.push(payload);
+
+  // Logar no console (visível no Clarity e em ferramentas de dev)
+  console.log('[GuardiaoFiscal] Feedback:', payload);
+
+  // tracking Meta
+  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackOk', { score: r?.score });
+  if (typeof clarity === 'function') clarity('event', 'FeedbackOk');
+
+  // Esconder card, mostrar agradecimento
+  const det = document.getElementById('gFbDetalhes');
+  const suc = document.getElementById('gFbSucesso');
+  const btns = document.getElementById('gFbDetalhes')?.parentElement?.querySelector('div[style*="flex"]');
+  if (btns) btns.style.display = 'none';
+  if (det) det.style.display = 'none';
+  if (suc) suc.style.display = 'block';
+
+  // Persistir no Supabase se usuário logado (fire-and-forget)
+  gFeedbackPersistir(payload).catch(e => console.warn('[Feedback] Erro ao persistir:', e));
+};
+
+window.gFeedbackEnviar = function() {
+  const checkboxes = document.querySelectorAll('#gFbDetalhes input[type=checkbox]:checked');
+  const motivos = Array.from(checkboxes).map(c => c.value);
+  const texto = document.getElementById('gFbOutroText')?.value?.trim() || '';
+
+  if (!motivos.length && !texto) {
+    alert('Selecione ao menos um motivo antes de enviar.');
+    return;
+  }
+
+  const r = window._gFeedback.sessao;
+  const payload = {
+    tipo: 'discordo',
+    score: r?.score,
+    meses: r?.months,
+    numEvidencias: r?.numEvidencias,
+    confidence: r?.confidence,
+    indiceEspecie: r?.indiceEspecie,
+    indiceConsumo: r?.indiceConsumo,
+    fatores: (r?.fatores||[]).filter(f=>f.peso>0).map(f=>({ motivo: (f.motivo||'').slice(0,60), peso: f.peso })),
+    motivos,
+    texto: texto.slice(0, 500),
+    ts: new Date().toISOString(),
+  };
+
+  window._gFeedback.historico.push(payload);
+  console.log('[GuardiaoFiscal] Feedback (discordo):', payload);
+
+  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordoEnviado', { score: r?.score, motivos });
+  if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordoEnviado');
+
+  const det = document.getElementById('gFbDetalhes');
+  const suc = document.getElementById('gFbSucesso');
+  const btnsRow = document.querySelector('#gFeedbackCard > div[style*="flex"]');
+  if (btnsRow) btnsRow.style.display = 'none';
+  if (det) det.style.display = 'none';
+  if (suc) suc.style.display = 'block';
+
+  gFeedbackPersistir(payload).catch(e => console.warn('[Feedback] Erro ao persistir:', e));
+};
+
+// ── Persistência no Supabase (tabela guardiao_feedback) ──────────
+// A tabela precisa existir: ver SQL abaixo nos comentários.
+// Se não existir, apenas loga — não quebra o fluxo.
+async function gFeedbackPersistir(payload) {
+  // SQL para criar a tabela no Supabase (rode uma vez no SQL Editor):
+  // --------------------------------------------------------------------
+  // create table if not exists guardiao_feedback (
+  //   id uuid default gen_random_uuid() primary key,
+  //   created_at timestamptz default now(),
+  //   user_id uuid references auth.users(id) on delete set null,
+  //   tipo text,
+  //   score int,
+  //   meses int,
+  //   num_evidencias int,
+  //   confidence float,
+  //   indice_especie float,
+  //   indice_consumo float,
+  //   motivos text[],
+  //   texto text,
+  //   fatores jsonb,
+  //   ts timestamptz
+  // );
+  // alter table guardiao_feedback enable row level security;
+  // create policy "insert_own" on guardiao_feedback for insert with check (auth.uid() = user_id or user_id is null);
+  // --------------------------------------------------------------------
+
+  if (typeof supabase === 'undefined') return; // Supabase não carregado
+
+  const userId = (await supabase.auth.getUser())?.data?.user?.id || null;
+
+  const { error } = await supabase.from('guardiao_feedback').insert([{
+    user_id: userId,
+    tipo: payload.tipo,
+    score: payload.score,
+    meses: payload.meses,
+    num_evidencias: payload.numEvidencias,
+    confidence: payload.confidence,
+    indice_especie: payload.indiceEspecie,
+    indice_consumo: payload.indiceConsumo,
+    motivos: payload.motivos || [],
+    texto: payload.texto || '',
+    fatores: payload.fatores || [],
+    ts: payload.ts,
+  }]);
+
+  if (error) {
+    // Tabela não existe ou RLS bloqueou — loga sem quebrar
+    console.warn('[Feedback] Supabase insert falhou (tabela não criada ainda?):', error.message);
+  } else {
+    console.log('[Feedback] Persistido no Supabase ✓');
+  }
+}
+
+// ── Hook: injeta o card de feedback após unlock do resultado ──────
+// Patcheia eUnlockResult para injetar o card automaticamente
+const _gOriginalUnlock = window.eUnlockResult || function(){};
+// O hook é feito via MutationObserver no realResultBlock
+// para não depender de patching da função (que pode ser redefinida)
+(function() {
+  const observer = new MutationObserver(() => {
+    const realBlock = document.getElementById('realResultBlock');
+    if (!realBlock || realBlock.style.display === 'none') return;
+    if (document.getElementById('gFeedbackCard')) return; // já existe
+
+    // Encontra o container de alertas ou usa o próprio realBlock
+    const target = document.getElementById('pAlertList')?.parentElement || realBlock;
+    const r = window._eConsolidated;
+    if (r) gRenderFeedbackCard(target, r);
+  });
+
+  // Observa o bloco de resultado
+  const waitBlock = setInterval(() => {
+    const el = document.getElementById('realResultBlock');
+    if (el) {
+      observer.observe(el, { attributes: true, attributeFilter: ['style'] });
+      clearInterval(waitBlock);
+    }
+  }, 500);
+})();
+
+// ── Exposição do histórico de feedbacks para análise ────────────
+// No console: gFeedbackHistorico() → array com todos os feedbacks da sessão
+window.gFeedbackHistorico = function() {
+  const h = window._gFeedback.historico;
+  if (!h.length) { console.log('Nenhum feedback registrado nesta sessão.'); return []; }
+  console.group('%c🛡️ Feedbacks da Sessão', 'font-weight:bold;color:#3b82f6');
+  h.forEach((f, i) => {
+    console.group(`Feedback #${i+1} — ${f.tipo} | score ${f.score}%`);
+    console.log(f);
+    console.groupEnd();
+  });
+  const discordos = h.filter(f=>f.tipo==='discordo');
+  if (discordos.length) {
+    const freq = {};
+    discordos.flatMap(f=>f.motivos||[]).forEach(m => freq[m]=(freq[m]||0)+1);
+    console.log('Motivos mais frequentes:', freq);
+  }
+  console.groupEnd();
+  return h;
+};
+
+// extrato step 1 — handled by Supabase auth above
+
 
 </script>
 </body>
