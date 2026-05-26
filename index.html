@@ -497,9 +497,9 @@ nav {
 }
 
 .ext-card-header {
-  padding:18px 22px 14px;
+  padding:14px 16px 12px;
   border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:12px;
+  display:flex; align-items:center; gap:10px;
 }
 
 .ext-step-num {
@@ -516,7 +516,7 @@ nav {
 .ext-step-title { font-family:Inter,sans-serif; font-size:14px; font-weight:700; }
 .ext-step-sub { font-size:12px; color:var(--muted2); margin-top:2px; }
 
-.ext-card-body { padding:20px 22px; }
+.ext-card-body { padding:16px; }
 
 /* upload zone */
 .upload-zone {
@@ -940,22 +940,22 @@ nav {
   border-radius:9px;font-size:13px;color:var(--red)}
 .err-ext.show{display:block}
 /* resultado parser */
-.ov-top{padding:28px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px}
-.ov-emoji{font-size:48px;flex-shrink:0;line-height:1}
-.ov-level{font-family:Inter,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.15}
-.ov-sub{font-size:12px;color:var(--muted2);margin-top:5px;letter-spacing:0.2px}
-.p-score-wrap{padding:20px 24px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.12)}
-.p-score-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
-.p-score-lbl{font-size:11px;color:var(--muted);font-family:Inter,sans-serif;letter-spacing:0.8px;text-transform:uppercase}
-.p-score-val{font-family:Inter,sans-serif;font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1}
+.ov-top{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;overflow:hidden}
+.ov-emoji{font-size:clamp(32px,8vw,48px);flex-shrink:0;line-height:1}
+.ov-level{font-family:Inter,sans-serif;font-size:clamp(16px,4.5vw,22px);font-weight:800;letter-spacing:-0.5px;line-height:1.15;word-break:break-word}
+.ov-sub{font-size:11px;color:var(--muted2);margin-top:5px;letter-spacing:0.2px;word-break:break-word}
+.p-score-wrap{padding:16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.12)}
+.p-score-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:8px}
+.p-score-lbl{font-size:10px;color:var(--muted);font-family:Inter,sans-serif;letter-spacing:0.6px;text-transform:uppercase;flex:1;min-width:0}
+.p-score-val{font-family:Inter,sans-serif;font-size:clamp(24px,7vw,36px);font-weight:800;letter-spacing:-2px;line-height:1;flex-shrink:0}
 .p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
 .p-bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
 .p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
-.p-stat{padding:16px 20px;background:var(--surface)}
+.p-stat{padding:12px 14px;background:var(--surface)}
 .p-sl{font-size:10px;font-family:Inter,sans-serif;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
-.p-sv{font-family:Inter,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.p-sv{font-family:Inter,sans-serif;font-size:clamp(15px,4.5vw,20px);font-weight:800;letter-spacing:-0.5px}
 .p-sn{font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.4}
-.sources{padding:16px 22px;border-bottom:1px solid var(--border)}
+.sources{padding:14px 16px;border-bottom:1px solid var(--border)}
 .src-ttl{font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
 .src-list{display:flex;flex-direction:column;gap:7px}
 .src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:9px;font-size:13px}
@@ -963,8 +963,8 @@ nav {
 .src-txns{font-size:11px;color:var(--muted2)}
 .src-val{font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--green)}
 .src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.p-alerts{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
-.pal{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;font-size:13px;line-height:1.6}
+.p-alerts{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.pal{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;word-break:break-word;overflow:hidden}
 .pal-ico{font-size:15px;flex-shrink:0;margin-top:1px}
 .pal strong{font-weight:600;display:block;margin-bottom:1px}
 .p-red{background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.2)}
@@ -976,7 +976,7 @@ nav {
 .btab{padding:11px 16px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;
   color:var(--muted);background:var(--surface);cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;flex-shrink:0}
 .btab.on{color:var(--green);background:var(--surface2)}
-.p-txn-wrap{padding:16px 22px}
+.p-txn-wrap{padding:14px 16px}
 .p-txn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .p-txn-ttl{font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
 .p-flt{display:flex;gap:5px}
@@ -1006,7 +1006,7 @@ nav {
 pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
 .btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:Inter,sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
-@media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}.p-sv{font-size:19px}}
+@media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}}
 
 
 @keyframes shake {
@@ -1615,6 +1615,29 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   #resultPanel { padding: 16px 12px; }
   .apw-btn, .apw-btn-sec { font-size: 13px; padding: 12px 16px; }
 
+  /* === RESULTADO EXTRATO COMPLETO — MOBILE === */
+  .ov-top { padding: 16px 14px; gap: 12px; }
+  .ov-emoji { font-size: 32px; }
+  .ov-level { font-size: clamp(14px,4vw,18px); }
+  .p-score-wrap { padding: 14px 12px; }
+  .p-score-val { font-size: clamp(22px,7vw,30px); }
+  .p-stat { padding: 10px 12px; }
+  .p-sl { font-size: 9px; letter-spacing: 0.4px; }
+  .p-sn { font-size: 10px; }
+  .p-alerts { padding: 12px; }
+  .pal { padding: 10px 12px; font-size: 12px; gap: 8px; }
+  .sources { padding: 12px; }
+  .src-item { font-size: 12px; padding: 8px 10px; }
+  .p-txn-wrap { padding: 12px; }
+  .pti { padding: 8px 9px; gap: 7px; }
+  .ptd { font-size: 11px; }
+  .ptv { font-size: 11px; }
+  .p-dbg-hd, .p-dbg-bd { padding: 10px 12px; }
+  /* box-sizing em todos os filhos do resultado */
+  #realResultBlock, #realResultBlock * { box-sizing: border-box; }
+  #realResultBlock { overflow: hidden; width: 100%; }
+
+
   /* === GERAL === */
   * { -webkit-tap-highlight-color: transparent; }
   button, a { touch-action: manipulation; }
@@ -1622,6 +1645,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
 @media (max-width: 380px) {
   .hero h1 { font-size: 22px; }
+  .ov-emoji { font-size: 28px; }
+  .ov-level { font-size: 14px; }
+  .p-score-val { font-size: 22px; letter-spacing: -1px; }
+  .p-sv { font-size: 14px; }
+  .p-stat { padding: 8px 10px; }
+  .p-score-lbl { font-size: 9px; }
+  .pal { font-size: 11px; padding: 8px 10px; }
+  .p-txn-wrap { padding: 10px; }
   #page-extrato [style*="grid-template-columns:1fr 1fr 1fr"],
   #page-extrato [style*="grid-template-columns: 1fr 1fr 1fr"] {
     grid-template-columns: 1fr !important;
@@ -2248,7 +2279,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div id="paywallBlock">
 
           <!-- ── PRÉVIA REAL (preenchida pelo JS após análise) ── -->
-          <div id="previewReal" style="display:none">
+          <div id="previewReal" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
             <!-- Score e nível — VISÍVEL -->
             <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:12px">
@@ -2270,7 +2301,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             </div>
 
             <!-- Métricas rápidas — VISÍVEL -->
-            <div id="pvMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px"></div>
+            <div id="pvMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-bottom:12px;overflow:hidden"></div>
 
             <!-- 2 primeiros alertas — VISÍVEL -->
             <div id="pvAlerts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
@@ -2310,7 +2341,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
         </div>
         <!-- resultado real (visível após pagamento) -->
-        <div id="realResultBlock" style="display:none">
+        <div id="realResultBlock" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
           <div class="ov-top">
             <div class="ov-emoji" id="ovEmoji">🟡</div>
             <div>
@@ -2327,8 +2358,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
           <div class="p-stats" id="pStatsGrid"></div>
           <div class="sources"><div class="src-ttl">// Extratos analisados</div><div class="src-list" id="srcList"></div></div>
-          <div class="p-alerts" id="pAlertList"></div>
-          <div id="pFatoresList" style="padding:0 22px 16px;"></div>
+          <div class="p-alerts" id="pAlertList" style="overflow:hidden;word-break:break-word"></div>
+          <div id="pFatoresList" style="padding:0 16px 16px;box-sizing:border-box;width:100%;overflow:hidden"></div>
           <div class="bank-tabs" id="bankTabs"></div>
           <div class="p-txn-wrap">
             <div class="p-txn-hd">
@@ -3029,14 +3060,18 @@ function openCheckout(plan) {
   const p = plans[plan];
 
   // resumo do plano
-  document.getElementById('orderSummary').innerHTML = `
-    <div class="os-icon">${p.icon}</div>
+  // [fix-xss] sanitize por defense-in-depth mesmo sendo dados hardcoded
+  const _os = document.getElementById('orderSummary');
+  if (_os) {
+    _os.innerHTML = `
+    <div class="os-icon">${sanitize(p.icon||'')}</div>
     <div class="os-info">
-      <div class="os-name">${p.name}</div>
-      <div class="os-desc">${p.desc}</div>
+      <div class="os-name">${sanitize(p.name||'')}</div>
+      <div class="os-desc">${sanitize(p.desc||'')}</div>
     </div>
-    <div class="os-price">${p.price}<span style="font-size:11px;color:var(--muted);font-family:Inter,sans-serif;font-weight:400"> ${p.period}</span></div>
+    <div class="os-price">${sanitize(p.price||'')}<span style="font-size:11px;color:var(--muted);font-family:Inter,sans-serif;font-weight:400"> ${sanitize(p.period||'')}</span></div>
   `;
+  }
 
   // Se já está logado, pula step 1 e vai direto para pagamento
   if (_currentUser) {
@@ -3521,6 +3556,9 @@ const MAX_TEXT_CHARS = 2_000_000; // 2MB de texto
 // ── Validação de nome de arquivo ──
 function validateFileName(name) {
   // Bloqueia path traversal e nomes suspeitos
+  if (!name || typeof name !== 'string') return false;
+  // [fix] Null bytes e caracteres de controle (< 0x20 exceto espaço)
+  if (/[\x00-\x1F\x7F]/.test(name)) return false;
   if (/[\/\\:*?"<>|]/.test(name)) return false;
   if (name.startsWith('.')) return false;
   if (name.length > 200) return false;
@@ -4995,7 +5033,8 @@ function isValidTxn(t) {
 
 // ── FINGERPRINT REFORÇADO (banco incluso) ────────────────────
 function txnFingerprintV2(t) {
-  const dateStr = t.date instanceof Date ? t.date.toISOString().slice(0,10) : String(t.date||'');
+  // [fix] instanceof Date não garante data válida — isNaN verifica
+  const dateStr = (t.date instanceof Date && !isNaN(t.date)) ? t.date.toISOString().slice(0,10) : String(t.date||'');
   const valStr  = Math.abs(t.value).toFixed(2);
   const descStr = normalizeDesc(t.desc).slice(0, 50);
   const bank    = normalizeDesc(t.bank || '').slice(0, 20);
@@ -5021,7 +5060,7 @@ function normalizeDesc(desc) {
 
 // ── DEDUPLICAÇÃO POR FINGERPRINT ─────────────────────────────
 function txnFingerprint(t, includeSign) {
-  const dateStr = t.date instanceof Date
+  const dateStr = (t.date instanceof Date && !isNaN(t.date))
     ? t.date.toISOString().slice(0, 10)
     : String(t.date || '');
   // Inclui sinal do valor para diferenciar crédito/débito de mesmo valor
@@ -5048,7 +5087,7 @@ function deduplicateCrossSource(allTxns) {
   const seen = new Set();
   return allTxns.filter(t => {
     // Fingerprint sem banco para capturar duplicatas cross-source
-    const dateStr = t.date instanceof Date ? t.date.toISOString().slice(0, 10) : String(t.date || '');
+    const dateStr = (t.date instanceof Date && !isNaN(t.date)) ? t.date.toISOString().slice(0, 10) : String(t.date || '');
     const valStr  = (t.value >= 0 ? '+' : '-') + Math.abs(t.value).toFixed(2);
     const descStr = normalizeDesc(t.desc).slice(0, 25);
     const fp = dateStr + '|' + valStr + '|' + descStr;
@@ -5523,7 +5562,17 @@ function eClassifyTxn(t) {
 function detectarRecorrencia(txns) {
   // Agrupa por descrição normalizada e detecta padrões de frequência
   // [v6-FIX-F] Excluir créditos formais (salário, FGTS) da análise de recorrência comercial
-  const _formalKw = ['salario','salário','fgts','rescisao','rescisão','folha pagamento','pagamento salario','pagamento salário','13 salario','13 salário','ferias','férias'];
+  // [fix-CLT] _formalKw expandido para cobrir todos os termos de renda formal
+  // Sem 'holerite', 'aposentadoria', 'pensao', etc → falso positivo F4
+  const _formalKw = [
+    'salario','salário','holerite','folha pgto','pagamento folha','folha pagamento',
+    'pagamento salario','pagamento salário','fgts','inss','irrf',
+    '13 salario','13 salário','13° salario','ferias','férias',
+    'rescisao','rescisão','pro-labore','pró-labore','clt',
+    'beneficio','benefício','aposentadoria','pensao','pensão',
+    'rendimento prev','inss previdencia','inss previdência',
+    'bolsa estagio','bolsa estágio','estagio remunerado','estágio remunerado',
+  ];
   const _isFormal = d => _formalKw.some(k => d.toLowerCase().includes(k));
   // [fix-bug4] Excluir entradas cross-bank: entrada Pix com saída de mesmo valor no mesmo dia
   // "PIX RECEBIDO NUBANK" no mesmo dia que "PIX ENVIADO NUBANK -5000" = transferência própria
@@ -6031,7 +6080,7 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const _crossBankDesconto = {};
   classified.filter(t => t.value < 0 && t.date instanceof Date && normalizeDesc(t.desc||'').includes('pix')).forEach(saida => {
     const entrPar = classified.filter(e =>
-      e.value > 0 && e.date instanceof Date &&
+      e.value > 0 && e.date instanceof Date && !isNaN(e.date) &&
       Math.abs(e.value - Math.abs(saida.value)) < 0.02 &&
       e.date.toISOString().slice(0,10) === saida.date.toISOString().slice(0,10) &&
       (e.internalMove === 'confirmed' || e.internalMove === 'probable' ||
