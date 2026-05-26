@@ -6680,9 +6680,18 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
 
 // ── Consolidação multi-extrato com explicação causal ──────────
 function eConsolidate(results) {
+  // [fix-bug] Guard: array vazio, null, undefined ou itens inválidos
+  if (!results || !Array.isArray(results)) return null;
+  const _rv = results.filter(r => r && r.classified && Array.isArray(r.classified));
+  if (_rv.length === 0) return {
+    score: 0, confidence: 0, alerts: [], fatores: [], comercialOculta: [],
+    totalCredits: 0, totalDebits: 0, pixTotal: 0, especieTotal: 0,
+    suspCount: 0, attCount: 0, monthsOverLimit: 0, months: 0,
+    tipoAnalise: 'indicador_compatibilidade_fiscal', versaoEngine: 'v7.0',
+  };
   // Deduplicação cruzada: remove transações idênticas que aparecem em múltiplos extratos
   // (ex: mesma TED exportada de dois bancos diferentes, ou CSV + OFX do mesmo banco)
-  const allRaw  = results.flatMap(r => r.classified);
+  const allRaw  = _rv.flatMap(r => r.classified);
   const allDedup = deduplicateCrossSource(allRaw);
   // Detecção de internos cross-source: TED saindo do banco A = crédito no banco B
   const allC    = applyInternalDetection(allDedup);
@@ -6697,22 +6706,22 @@ function eConsolidate(results) {
   const especieTotal   = credits.filter(t => t.cat === 'especie').reduce((a, t) => a + t.value, 0);
   const formalTotal    = credits.filter(t => t.cat === 'formal').reduce((a, t) => a + t.value, 0);
   const suspTotal      = suspicious.reduce((a, t) => a + t.value, 0);
-  const totalMOL       = results.reduce((a, r) => a + r.monthsOverLimit, 0);
+  const totalMOL       = _rv.reduce((a, r) => a + r.monthsOverLimit, 0);
 
   // Score consolidado ponderado por volume
-  const totalVol = results.reduce((a, r) => a + r.totalCredits, 0);
+  const totalVol = _rv.reduce((a, r) => a + r.totalCredits, 0);
   let score = totalVol > 0
-    ? results.reduce((a, r) => a + r.score * (r.totalCredits / totalVol), 0)
-    : results.reduce((a, r) => a + r.score, 0) / results.length;
+    ? _rv.reduce((a, r) => a + r.score * (r.totalCredits / totalVol), 0)
+    : _rv.reduce((a, r) => a + r.score, 0) / _rv.length;
 
   // Bônus se múltiplos extratos com score alto
-  if (results.filter(r => r.score > 55).length >= 2) score = Math.min(100, score + 10);
+  if (_rv.filter(r => r.score > 55).length >= 2) score = Math.min(100, score + 10);
   score = Math.round(score);
 
   // Todos os fatores de todos os extratos
-  const todosFatores = results.flatMap(r => r.fatores);
-  const todasComerciais = results.flatMap(r => r.comercialOculta);
-  const totalRecorrentes = results.reduce((a, r) => a + r.recorrentes.length, 0);
+  const todosFatores = _rv.flatMap(r => r.fatores);
+  const todasComerciais = _rv.flatMap(r => r.comercialOculta);
+  const totalRecorrentes = _rv.reduce((a, r) => a + r.recorrentes.length, 0);
 
   // ── Geração de alertas causais com números reais ────────────
   const alerts = [];
@@ -6800,7 +6809,7 @@ function eConsolidate(results) {
     alerts.push({
       type: 'green', icon: '✅',
       title: 'Perfil de créditos dentro do esperado',
-      text: `Nenhum crédito de alto risco encontrado nos ${results.length} extrato(s) analisados.`
+      text: `Nenhum crédito de alto risco encontrado nos ${_rv.length} extrato(s) analisados.`
     });
   }
 
@@ -7280,7 +7289,7 @@ function eRenderTxns(filter){
   document.getElementById('pTxnList').innerHTML=list.map(t=>{
     const dc=t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
     const cls=t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
-    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${t.flag}</span>`:''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
+    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${sanitize(t.flag||"")}</span>`:''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
   }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>';
 }
 function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
