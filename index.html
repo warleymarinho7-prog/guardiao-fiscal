@@ -4868,8 +4868,34 @@ const ENGINE_CONFIG = {
 // Consolida créditos + débitos por mês e por tipo de canal
 // A e-Financeira usa totais mensais, não transações isoladas
 function aggregateMonthly(txns) {
+  // [fix-XBK] Pré-computar pares cross-bank: Pix entrada+saída mesmo valor mesmo dia
+  // Esses pares não devem inflar o pixConsolidado (modelo e-Financeira)
+  const _pixCrossBankSet = new Set();
+  const _pixPorValorDia = {};
+  txns.forEach((t, idx) => {
+    if (!t.date || !(t.date instanceof Date) || isNaN(t.date)) return;
+    const isPix = normalizeDesc(t.desc||'').includes('pix');
+    if (!isPix) return;
+    const diaKey = t.date.toISOString().slice(0,10);
+    const valKey = Math.abs(t.value).toFixed(2) + '|' + diaKey;
+    if (!_pixPorValorDia[valKey]) _pixPorValorDia[valKey] = { pos: [], neg: [] };
+    if (t.value > 0) _pixPorValorDia[valKey].pos.push(idx);
+    else             _pixPorValorDia[valKey].neg.push(idx);
+  });
+  // Marcar pares: para cada valor+dia com entrada E saída Pix, é cross-bank
+  Object.values(_pixPorValorDia).forEach(({ pos, neg }) => {
+    if (pos.length > 0 && neg.length > 0) {
+      const n = Math.min(pos.length, neg.length);
+      for (let i = 0; i < n; i++) {
+        _pixCrossBankSet.add(pos[i]);
+        _pixCrossBankSet.add(neg[i]);
+      }
+    }
+  });
+
   const months = {};
-  for (const t of txns) {
+  for (let idx = 0; idx < txns.length; idx++) {
+    const t = txns[idx];
     if (!t.date || !(t.date instanceof Date) || isNaN(t.date)) continue;
     const key = t.date.getFullYear() + '-' + String(t.date.getMonth()+1).padStart(2,'0');
     if (!months[key]) months[key] = {
@@ -4877,6 +4903,7 @@ function aggregateMonthly(txns) {
       cashIn: 0,  cashOut: 0,
       pixIn: 0,   pixOut: 0,
       pixConsolidado: 0,  // crédito + débito Pix (modelo e-Financeira)
+      pixConsolidadoLiquido: 0, // idem excluindo cross-bank/internos
       especie: 0,
       formal: 0,
       txns: [], count: 0
@@ -4884,17 +4911,24 @@ function aggregateMonthly(txns) {
     const b = months[key];
     const v = Math.abs(t.value);
     const d = normalizeDesc(t.desc);
+    const isCrossBank = _pixCrossBankSet.has(idx);
     if (t.value > 0) {
       b.credits += v;
-      if (d.includes('pix'))  b.pixIn   += v;
+      if (d.includes('pix'))  { b.pixIn += v; }
       if (d.includes('saque') || d.includes('especie')) b.cashIn += v;
       if (d.includes('salario') || d.includes('holerite')) b.formal += v;
     } else {
       b.debits += v;
-      if (d.includes('pix'))  b.pixOut  += v;
+      if (d.includes('pix'))  { b.pixOut += v; }
       if (d.includes('saque')) b.cashOut += v;
     }
     b.pixConsolidado = b.pixIn + b.pixOut;
+    // Versão líquida: exclui pares cross-bank detectados
+    if (!isCrossBank) {
+      b.pixConsolidadoLiquido = (b.pixConsolidadoLiquido||0) + (d.includes('pix') ? v : 0);
+    } else {
+      b.pixConsolidadoLiquido = b.pixConsolidadoLiquido||0; // não incrementa
+    }
     b.txns.push(t);
     b.count++;
   }
@@ -5378,6 +5412,11 @@ const NATUREZA_KW = {
     'venda moto','alienação','alienacao','escritura','cartório','cartorio',
     'leilão','leilao','consórcio recebido','consoricio recebido',
   ],
+  aposta_jogo: [
+    'bet365','sportingbet','betano','pixbet','betnacional','estrela bet','esportiva bet',
+    'blaze','fortune tiger','vai de bet','betfair','superbet','galera bet','br4 bet',
+    'casino','cassino','jogo online','aposta esportiva','loteria','mega sena',
+  ],
 };
 
 function detectNatureza(desc) {
@@ -5486,8 +5525,31 @@ function detectarRecorrencia(txns) {
   // [v6-FIX-F] Excluir créditos formais (salário, FGTS) da análise de recorrência comercial
   const _formalKw = ['salario','salário','fgts','rescisao','rescisão','folha pagamento','pagamento salario','pagamento salário','13 salario','13 salário','ferias','férias'];
   const _isFormal = d => _formalKw.some(k => d.toLowerCase().includes(k));
+  // [fix-bug4] Excluir entradas cross-bank: entrada Pix com saída de mesmo valor no mesmo dia
+  // "PIX RECEBIDO NUBANK" no mesmo dia que "PIX ENVIADO NUBANK -5000" = transferência própria
+  const _crossBankIdx = new Set();
+  const _pixPorDiaValor = {};
+  txns.forEach((t, idx) => {
+    if (!t.date || !(t.date instanceof Date) || isNaN(t.date)) return;
+    const isPix = (t.desc||'').toLowerCase().includes('pix');
+    if (!isPix) return;
+    const chave = Math.abs(t.value).toFixed(2) + '|' + t.date.toISOString().slice(0,10);
+    if (!_pixPorDiaValor[chave]) _pixPorDiaValor[chave] = { pos: [], neg: [] };
+    if (t.value > 0) _pixPorDiaValor[chave].pos.push(idx);
+    else             _pixPorDiaValor[chave].neg.push(idx);
+  });
+  Object.values(_pixPorDiaValor).forEach(({ pos, neg }) => {
+    if (pos.length > 0 && neg.length > 0) {
+      const n = Math.min(pos.length, neg.length);
+      for (let i = 0; i < n; i++) { _crossBankIdx.add(pos[i]); _crossBankIdx.add(neg[i]); }
+    }
+  });
+  // Também excluir entradas com keywords de conta própria/transferência interna
+  const _propKw = ['conta propria','conta própria','propria conta','nubank propria','inter propria',
+                   'transferencia propria','transf propria','mesma titularidade','portabilidade'];
+  const _isPropria = d => _propKw.some(k => (d||'').toLowerCase().includes(k));
   const grupos = {};
-  txns.filter(t => t.value > 0 && !_isFormal(t.desc)).forEach(t => {
+  txns.filter((t, idx) => t.value > 0 && !_isFormal(t.desc) && !_crossBankIdx.has(idx) && !_isPropria(t.desc)).forEach(t => {
     const chave = t.desc.toLowerCase()
       .replace(/\d{2}\/\d{2}\/\d{4}/g, '')
       .replace(/\d{2}\/\d{2}/g, '')
@@ -5605,14 +5667,37 @@ function detectarSplitPix(txns) {
     normalizeDesc(t.desc).includes('pix')
   ).sort((a, b) => (a.date || 0) - (b.date || 0));
 
+  // [fix-F6] Extrair nome do remetente para comparar apenas split do mesmo remetente
+  // "PIX RECEBIDO JOAO SILVA" → "joao silva"
+  // "PIX RECEBIDO MARIA SOUZA" → "maria souza"
+  // Sem remetente identificável: usar descrição normalizada completa
+  function _extrairRemetente(desc) {
+    const d = normalizeDesc(desc||'');
+    // Remove prefixos comuns de Pix
+    const semPrefixo = d
+      .replace(/^pix\s+(recebido|enviado|transferencia|transf)\s*/i, '')
+      .replace(/^recebido\s+de\s+/i, '')
+      .trim();
+    // Pega os 3 primeiros tokens (nome da pessoa/empresa) como assinatura
+    return semPrefixo.split(/\s+/).slice(0,3).join(' ') || d.slice(0,20);
+  }
+
   const series = [];
   for (let i = 0; i < pixAltos.length - 1; i++) {
     const a = pixAltos[i], b = pixAltos[i + 1];
     if (!a.date || !b.date) continue;
     const diffDays = (b.date - a.date) / 86400000;
     const valueDiff = Math.abs(a.value - b.value);
-    if (diffDays <= ENGINE_CONFIG.SPLIT_PIX_WINDOW && valueDiff <= ENGINE_CONFIG.SPLIT_PIX_DELTA) {
-      series.push({ valores: [a.value, b.value], diffDays: Math.round(diffDays) });
+    // [fix-F6] Verificar mesmo remetente antes de detectar split
+    const remetA = _extrairRemetente(a.desc);
+    const remetB = _extrairRemetente(b.desc);
+    const mesmoRemetente = remetA.length >= 3 && remetA === remetB;
+    if (
+      diffDays <= ENGINE_CONFIG.SPLIT_PIX_WINDOW &&
+      valueDiff <= ENGINE_CONFIG.SPLIT_PIX_DELTA &&
+      mesmoRemetente
+    ) {
+      series.push({ valores: [a.value, b.value], diffDays: Math.round(diffDays), remetente: remetA });
     }
   }
   return series;
@@ -5784,12 +5869,41 @@ function scoreDeAlertas(alertas) {
 
 function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   rendaDeclarada = rendaDeclarada || 0;
-  if (!txns || txns.length === 0) return null;
+  // [fix-bug1b] Array vazio ou null → retornar objeto seguro com score=0 (não null/undefined)
+  if (!txns || txns.length === 0) return {
+    bank: bank||'', totalTxns: 0, creditCount: 0, totalCredits: 0, totalDebits: 0,
+    pixTotal: 0, especieTotal: 0, formalTotal: 0, comercialTotal: 0,
+    suspCount: 0, attCount: 0, monthsOverLimit: 0, months: 0,
+    score: 0, confidence: 0, numEvidencias: 0,
+    classified: [], fatores: [], recorrentes: [], comercialOculta: [],
+    anomalias: [], mediaHistorica: 0, pico: 0, circularidade: [], splitPix: [],
+    internos: [], quarterly: {}, perfil: {},
+    mesCritico: null, indiceEspecie: 0, indiceConsumo: 0,
+    extratoMuitoCurto: true, extratoCurto: false,
+    parserConfidence: 0, txnsValidas: 0, txnsDescartadas: 0,
+    tipoAnalise: 'indicador_compatibilidade_fiscal', versaoEngine: 'v7.0',
+    rendaDeclarada: rendaDeclarada || 0, mesesAnalisados: 0,
+  };
 
   // P6: Validar transacoes antes de processar
   const txnsValidas = txns.filter(isValidTxn);
   const parserConfidence = txns.length > 0 ? txnsValidas.length / txns.length : 0;
   const txnsDescartadas = txns.length - txnsValidas.length;
+  // [fix-bug1] Extrato vazio após filtragem → retornar score=0 seguro
+  if (txnsValidas.length === 0) return {
+    bank, totalTxns: txns.length, creditCount: 0, totalCredits: 0, totalDebits: 0,
+    pixTotal: 0, especieTotal: 0, formalTotal: 0, comercialTotal: 0,
+    suspCount: 0, attCount: 0, monthsOverLimit: 0, months: 0,
+    score: 0, confidence: 0, numEvidencias: 0,
+    classified: [], fatores: [], recorrentes: [], comercialOculta: [],
+    anomalias: [], mediaHistorica: 0, pico: 0, circularidade: [], splitPix: [],
+    internos: [], quarterly: {}, perfil: {},
+    mesCritico: null, indiceEspecie: 0, indiceConsumo: 0,
+    extratoMuitoCurto: true, extratoCurto: false,
+    parserConfidence: 0, txnsValidas: 0, txnsDescartadas,
+    tipoAnalise: 'indicador_compatibilidade_fiscal', versaoEngine: 'v7.0',
+    rendaDeclarada: rendaDeclarada || 0, mesesAnalisados: 0,
+  };
 
   // P1+P3: Agregacao mensal canonica usando aggregateMonthly()
   const monthly = aggregateMonthly(txnsValidas);
@@ -5809,6 +5923,8 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const perfil = calcProfile(monthly);
 
   // Analise trimestral — padrao de 3 meses consecutivos
+  // [fix-raiz] quarterly é calculado ANTES de classified estar disponível.
+  // Será recalculado abaixo após classified com pixConsolidadoLiquido.
   const quarterly = {};
   Object.entries(monthly).forEach(([k, m]) => {
     if (k === 'unk') return;
@@ -5825,6 +5941,32 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const classifiedRaw = txns.map(t => ({ ...t, ...eClassifyTxn(t), bank }));
   // Aplica detecção de movimento interno antes de calcular risco
   const classified  = applyInternalDetection(classifiedRaw);
+
+  // [fix-raiz] Reconstruir quarterly com pixConsolidadoLiquido
+  // Exclui do consolidado Pix os movimentos internos (cross-bank, conta própria)
+  // e os pares entrada+saída de mesmo valor no mesmo dia (transferências)
+  const _pixInternosMes = {};
+  classified.forEach(t => {
+    if (!t.date || !(t.date instanceof Date)) return;
+    const mesK = t.date.getFullYear()+'-'+String(t.date.getMonth()+1).padStart(2,'0');
+    const isInterno = t.internalMove==='confirmed' || t.internalMove==='probable'
+                   || t.natureza==='transf_propria' || t.cat==='interno';
+    const isPix = normalizeDesc(t.desc||'').includes('pix');
+    if (isInterno && isPix) {
+      _pixInternosMes[mesK] = (_pixInternosMes[mesK]||0) + Math.abs(t.value);
+    }
+  });
+  // Reconstituir quarterly com consolidado líquido
+  Object.keys(quarterly).forEach(q => quarterly[q].consolidadoLiquido = 0);
+  Object.entries(monthly).forEach(([k, m]) => {
+    if (k === 'unk') return;
+    const [y, mo] = k.split('-').map(Number);
+    const q = y + '-Q' + Math.ceil(mo / 3);
+    if (quarterly[q]) {
+      const _interno = _pixInternosMes[k] || 0;
+      quarterly[q].consolidadoLiquido += Math.max(0, m.pixConsolidado - _interno);
+    }
+  });
   const credits     = classified.filter(t => t.value > 0);
   const debits      = classified.filter(t => t.value < 0);
   // Naturezas que não constituem renda nova tributável — excluídas do cálculo de risco F1
@@ -5854,10 +5996,32 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const _volumesMensais = _mesesKeys.map(k => monthly[k].credits);
   const _medVol = _volumesMensais.length > 0
     ? _volumesMensais.reduce((a,b)=>a+b,0) / _volumesMensais.length : 0;
-  const _mesesAltos  = _volumesMensais.filter(v => _medVol > 0 && v > _medVol * 2.5).length;
-  const _mesesBaixos = _volumesMensais.filter(v => _medVol > 0 && v < _medVol * 0.4).length;
-  // Sazonal: ≥2 meses altos E ≥2 meses baixos, com extrato de ≥6 meses
-  const _padraoSazonal = _mesesKeys.length >= 6 && _mesesAltos >= 2 && _mesesBaixos >= 2;
+  const _mesesAltos  = _volumesMensais.filter(v => _medVol > 0 && v > _medVol * 1.8).length;
+  const _mesesBaixos = _volumesMensais.filter(v => _medVol > 0 && v < _medVol * 0.55).length;
+  // [fix-NAT] Coeficiente de variação — alta dispersão mensal indica sazonalidade
+  // CV = desviopadrao/media. CV > 0.5 com ≥6 meses = padrão sazonal provável
+  const _cvVolume = _medVol > 0 && _volumesMensais.length >= 6
+    ? Math.sqrt(_volumesMensais.reduce((a,v)=>a+Math.pow(v-_medVol,2),0)/_volumesMensais.length) / _medVol
+    : 0;
+  // [fix-NAT+linear] Sazonalidade: picos altos E meses baixos (não apenas crescimento)
+  // Crescimento linear (1x→12x) tem CV alto mas não é sazonal — não tem meses baixos
+  // Natal (10m normais + 2m pico) tem CV moderado + pico claro — É sazonal
+  const _medianaVol = (() => {
+    const sv = _volumesMensais.slice().sort((a,b)=>a-b);
+    const mid = Math.floor(sv.length/2);
+    return sv.length%2!==0 ? sv[mid] : (sv[mid-1]+sv[mid])/2;
+  })();
+  const _mesesPicoClaro = _volumesMensais.filter(v => v > _medianaVol * 1.8).length;
+  // Meses "normais" = entre 0.5x e 2x a mediana (nem pico nem baixo)
+  const _mesesNormais = _volumesMensais.filter(v => v >= _medianaVol*0.5 && v <= _medianaVol*2.0).length;
+  // Para ser sazonal via CV: precisa ter meses normais (base estável) + picos acima
+  // Crescimento linear não tem meses normais — todos meses são diferentes
+  const _temBaseEstavel = _mesesNormais >= Math.floor(_mesesKeys.length * 0.4);
+  const _padraoSazonal = _mesesKeys.length >= 6 && (
+    (_mesesAltos >= 2 && _mesesBaixos >= 2) ||
+    (_cvVolume > 0.5 && _mesesPicoClaro >= 2 && _temBaseEstavel) ||
+    (_cvVolume > 0.6 && _mesesAltos >= 1 && _mesesBaixos >= 1 && _temBaseEstavel)
+  );
   // Sazonal forte: assimetria extrema (verão/inverno) — meses baixos próximos de zero
   const _mesesQuaseZero = _volumesMensais.filter(v => _medVol > 0 && v < _medVol * 0.15).length;
   const _padraoSazonalForte = _padraoSazonal && _mesesQuaseZero >= 2;
@@ -5881,18 +6045,27 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   // [fix-NAT/SAZ] Para perfil sazonal: usar mediana do consolidado Pix
   // em vez de contar meses acima do limite — evita que picos de natal/verão
   // inflem monthsOverLimit artificialmente (ex: 6000 Pix/mês em todos os 12 meses)
+  // [fix-raiz] usar pixConsolidadoLiquido como base (cross-bank já excluído em aggregateMonthly)
   const _consolidadoAjustado = (k) => {
     const desconto = _crossBankDesconto[k] || 0;
-    return (monthly[k] ? (monthly[k].pixConsolidado||0) : 0) - desconto;
+    const base = monthly[k] ? (monthly[k].pixConsolidadoLiquido ?? monthly[k].pixConsolidado ?? 0) : 0;
+    return Math.max(0, base - desconto);
   };
+  // [fix-NAT] Para sazonal: usar pixIn (entradas) em vez de consolidado (entrada+saída)
+  // pixConsolidado = pixIn + pixOut infla quando o autônomo também paga via Pix
+  // O relevante para risco fiscal é o RECEBIMENTO via Pix, não o pagamento
   const monthsOverLimit = _padraoSazonal
     ? (() => {
-        // Sazonal: conta apenas meses em que consolidado excede 1.5x a mediana
-        const _consVals = _mesesKeys.map(k=>_consolidadoAjustado(k)).sort((a,b)=>a-b);
-        const _mid = Math.floor(_consVals.length/2);
-        const _medCons = _consVals.length%2!==0 ? _consVals[_mid] : (_consVals[_mid-1]+_consVals[_mid])/2;
-        // Só conta meses onde consolidado é 1.5x a mediana E acima de PIX_LIMIT_PF
-        return _mesesKeys.filter(k => _consolidadoAjustado(k) >= ENGINE_CONFIG.PIX_LIMIT_PF && _consolidadoAjustado(k) > _medCons*1.5).length;
+        // Sazonal: contar meses onde ENTRADA Pix excede o limite
+        // (não consolidado — saídas Pix de despesas não são renda)
+        const _pixInVals = _mesesKeys.map(k => monthly[k] ? (monthly[k].pixIn||0) : 0).sort((a,b)=>a-b);
+        const _mid = Math.floor(_pixInVals.length/2);
+        const _medPixIn = _pixInVals.length%2!==0 ? _pixInVals[_mid] : (_pixInVals[_mid-1]+_pixInVals[_mid])/2;
+        // Só meses onde entrada Pix é 1.5x a mediana E acima do limite (picos reais)
+        return _mesesKeys.filter(k => {
+          const pin = monthly[k] ? (monthly[k].pixIn||0) : 0;
+          return pin >= ENGINE_CONFIG.PIX_LIMIT_PF && pin > _medPixIn * 1.5;
+        }).length;
       })()
     : Object.entries(monthly).filter(([k,m]) => {
         const desconto = _crossBankDesconto[k] || 0;
@@ -5906,7 +6079,8 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   // Transferencia entre contas proprias no mesmo dia nao e conta-passagem
   // Tambem exclui cross-bank: saida Pix com entrada de mesmo valor no mesmo dia
   const _entradaPorValorDia = new Map();
-  classified.filter(t => t.value > 0 && t.date instanceof Date).forEach(t => {
+  // [fix-crash] instanceof Date não garante data válida — isNaN é obrigatório
+  classified.filter(t => t.value > 0 && t.date instanceof Date && !isNaN(t.date)).forEach(t => {
     const _chk = t.value.toFixed(2) + '|' + t.date.toISOString().slice(0,10);
     if (!_entradaPorValorDia.has(_chk)) _entradaPorValorDia.set(_chk, []);
     _entradaPorValorDia.get(_chk).push(t);
@@ -5917,7 +6091,7 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
     const _d = normalizeDesc(t.desc || '');
     if (/conta.{0,10}propria|propria.{0,10}conta|investimento|poupan|aplicac|resgate|aporte/.test(_d)) return false;
     // [fix-L4_02] Cross-bank: saida Pix com entrada de mesmo valor no mesmo dia = transf propria
-    if (t.value < 0 && t.date instanceof Date) {
+    if (t.value < 0 && t.date instanceof Date && !isNaN(t.date)) {
       const _chk = Math.abs(t.value).toFixed(2) + '|' + t.date.toISOString().slice(0,10);
       const _entradas = _entradaPorValorDia.get(_chk) || [];
       if (_entradas.length > 0 && _d.includes('pix')) return false;
@@ -6010,23 +6184,56 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   // F2 — Pix mensal acima do limite e-Financeira
   // Desconta peso quando renda declarada já explica o volume (autônomo/MEI legítimo)
   const _nMesesF2 = Math.max(1, Object.keys(monthly).filter(k=>k!=='unk').length);
-  const _pixMediaMensal = Object.values(monthly).reduce((a,m)=>a+m.pixConsolidado,0) / _nMesesF2;
-  // [fix-NAT/SAZ] Para perfil sazonal, calcular _rendaCobre sem os meses de pico
-  // Pix alto em dezembro/verão infla _pixMediaMensal artificialmente
-  const _pixMediaParaCobertura = _padraoSazonal && _mesesKeys.length >= 6
+  // [fix-XBK+NAT] usar pixIn (só entradas Pix) como base — pixConsolidado inclui saídas e infla
+  const _pixMediaMensal = Object.values(monthly).reduce((a,m)=>a+(m.pixIn||0),0) / _nMesesF2;
+  // [fix-NAT/SAZ/N04] _rendaCobre compara ENTRADAS Pix com renda (não consolidado entrada+saída)
+  // pixConsolidado = pixIn + pixOut inflaciona artificialmente quando autônomo também paga via Pix
+  // O relevante para cobertura é: renda cobre as ENTRADAS Pix (receita do autônomo)
+  // [fix-N07] Apostas: descontar do pixIn o volume "reciclado" de apostas
+  // (recebeu 8k da bet, enviou 2.5k → saldo real é 5.5k, não 8k de renda nova)
+  const _pixApostaDesconto = {};
+  classified.forEach(t => {
+    if (!t.date || !(t.date instanceof Date)) return;
+    const mesK = t.date.getFullYear()+'-'+String(t.date.getMonth()+1).padStart(2,'0');
+    if (t.natureza === 'aposta_jogo' && t.value > 0) {
+      // Entrada de aposta: calcular quanto saiu para aposta no mesmo mês
+      const saidaAposta = classified
+        .filter(s => s.natureza === 'aposta_jogo' && s.value < 0 && s.date instanceof Date &&
+                     s.date.getFullYear()+'-'+String(s.date.getMonth()+1).padStart(2,'0') === mesK)
+        .reduce((a,s) => a + Math.abs(s.value), 0);
+      // Desconta do pixIn apenas o volume que "voltou" (min entrada, saída)
+      const entradaAposta = classified
+        .filter(e => e.natureza === 'aposta_jogo' && e.value > 0 && e.date instanceof Date &&
+                     e.date.getFullYear()+'-'+String(e.date.getMonth()+1).padStart(2,'0') === mesK)
+        .reduce((a,e) => a + e.value, 0);
+      _pixApostaDesconto[mesK] = Math.min(entradaAposta, saidaAposta);
+    }
+  });
+  // Aplicar desconto de apostas ao pix do monthly (pixEntrada líquido)
+  Object.entries(_pixApostaDesconto).forEach(([mesK, desconto]) => {
+    if (monthly[mesK]) monthly[mesK].pixApostaDesconto = desconto;
+  });
+
+  const _pixEntradaMediaMensal = _mesesKeys.length > 0
+    ? _mesesKeys.reduce((a,k) => a + Math.max(0, (monthly[k] ? (monthly[k].pixIn||0) : 0) - (monthly[k]?.pixApostaDesconto||0)), 0) / _mesesKeys.length
+    : 0;
+  const _pixEntradaParaCobertura = _padraoSazonal && _mesesKeys.length >= 6
     ? (() => {
-        // Usar mediana em vez de média — mais robusta contra picos sazonais
-        const _pixVals = _mesesKeys.map(k => monthly[k] ? (monthly[k].pixConsolidado||0) : 0).sort((a,b)=>a-b);
-        const _mid = Math.floor(_pixVals.length/2);
-        return _pixVals.length%2!==0 ? _pixVals[_mid] : (_pixVals[_mid-1]+_pixVals[_mid])/2;
+        // Sazonal: usar mediana das ENTRADAS (não consolidado) — robusta contra picos
+        const _vals = _mesesKeys.map(k => monthly[k] ? (monthly[k].pixIn||0) : 0).sort((a,b)=>a-b);
+        const _mid = Math.floor(_vals.length/2);
+        return _vals.length%2!==0 ? _vals[_mid] : (_vals[_mid-1]+_vals[_mid])/2;
       })()
-    : _pixMediaMensal;
-  const _rendaCobre = rendaDeclarada > 0 && _pixMediaParaCobertura <= rendaDeclarada * 1.3;
+    : _pixEntradaMediaMensal;
+  // _rendaCobre: renda declarada cobre as ENTRADAS Pix do período (com margem 30%)
+  const _rendaCobre = rendaDeclarada > 0 && _pixEntradaParaCobertura <= rendaDeclarada * 1.3;
+  const _pixMediaParaCobertura = _pixEntradaParaCobertura; // alias para compatibilidade
   const _pesoF2base = Math.min(15, monthsOverLimit * 5);
   // Reduz 60% do peso se renda declarada cobre o volume de Pix
   // Quando renda declarada cobre o volume de Pix: gera alerta mas peso mínimo (2pts)
   // pois o risco fiscal real é baixo — o autônomo é declarável
-  const f2 = _rendaCobre ? Math.min(2, _pesoF2base) : _pesoF2base;
+  // [fix-NAT/SAZ] Sazonal + renda cobre → F2 não aciona (picos de temporada são esperados)
+  const f2 = (_padraoSazonal && _rendaCobre) ? 0 : _rendaCobre ? Math.min(2, _pesoF2base) : _pesoF2base;
   if (f2 > 0) {
     _fator(f2,
       `Foram encontrados sinais que merecem conferência: Pix consolidado acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)} em ${monthsOverLimit} mês(es)${_rendaCobre ? ' (parcialmente coberto pela renda declarada)' : ''}`,
@@ -6061,12 +6268,14 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
 
   // F2b — Padrão trimestral elevado
   // Anti-dupla-contagem: só ativa se F2 não cobriu todos os trimestres
-  const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && q.consolidado / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
+  // [fix-raiz] usar consolidadoLiquido (exclui internos/cross-bank)
+  const trimestresElevados = Object.values(quarterly).filter(q => q.meses >= 2 && (q.consolidadoLiquido ?? q.consolidado) / q.meses >= ENGINE_CONFIG.PIX_LIMIT_PF).length;
   // F2b trimestral: só aciona se renda NÃO cobre — evitar dupla penalização
   // de autônomo legítimo que já foi suavizado em F2
   // [fix-B1] Se renda cobre E padrão sazonal: F2b não aciona
-  // F2b: não aciona se renda cobre OU se padrão sazonal detectado
-  if (trimestresElevados > 0 && !_rendaCobre && !_padraoSazonal) {
+  // F2b: não aciona se renda cobre | sazonal | extrato curto (<3 trimestres)
+  const _trimTotal = Object.keys(quarterly).length;
+  if (trimestresElevados > 0 && !_rendaCobre && !_padraoSazonal && _trimTotal >= 3) {
     const f2b = Math.min(8, trimestresElevados * 4);
     const _jaF2 = _jaContado(['pix_limit_' + monthsOverLimit]);
     _fator(_jaF2 ? Math.round(f2b * 0.5) : f2b,
@@ -6106,7 +6315,9 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
   const _totalComercOculto = comercialOculta.reduce((a,r)=>a+r.total,0);
   const _nMesesF4 = Math.max(1, Object.keys(monthly).filter(k=>k!=='unk').length);
   const _comercMediaMensal = _totalComercOculto / _nMesesF4;
-  const _f4RendaCobre = rendaDeclarada > 0 && _comercMediaMensal <= rendaDeclarada * 1.5;
+  // [fix-bug4b] _f4RendaCobre: quando _rendaCobre (pixIn cobre renda), F4 não deve acionar
+  // Autônomo declarado com clientes Pix não é atividade oculta
+  const _f4RendaCobre = rendaDeclarada > 0 && (_comercMediaMensal <= rendaDeclarada * 1.5 || _rendaCobre);
   const _comercOcultoNovo = comercialOculta.filter(r => !_jaContado(['comrc_' + r.desc]));
   const _f4base = Math.min(15, _comercOcultoNovo.length * 5);
   // Reduz 70% quando renda declarada já cobre; 40% quando F7 já punirá a incompatibilidade
@@ -6366,6 +6577,29 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada) {
       0.65,
       ['consumo_baixo']
     );
+  }
+
+  // [fix-N10] Suavizar F7 quando renda cresce de forma consistente (declarável)
+  // Influencer/freelancer com publi crescente: cada mês acima do anterior não é risco
+  // Critério: ≥6 meses dos últimos 8 com crédito acima do mês anterior = tendência crescente
+  if (_mesesKeys.length >= 8 && fatores.length > 0) {
+    const _creditsPorMes = _mesesKeys.map(k => monthly[k]?.credits||0);
+    let _mesesCrescentes = 0;
+    for (let i = 1; i < _creditsPorMes.length; i++) {
+      if (_creditsPorMes[i] > _creditsPorMes[i-1] * 1.05) _mesesCrescentes++;
+    }
+    const _padraoRendaCrescente = _mesesCrescentes >= Math.floor(_creditsPorMes.length * 0.65);
+    if (_padraoRendaCrescente) {
+      const _f7idx = [...fatores].reverse().find(f => f.ids && f.ids.some(id=>id.startsWith('omissao')));
+      if (_f7idx && _f7idx.peso > 0) {
+        const _pesoF7orig = _f7idx.peso;
+        const _pesoF7pos = Math.round(_pesoF7orig * 0.5);
+        const _deltaF7 = _pesoF7orig - _pesoF7pos;
+        _f7idx.peso = _pesoF7pos;
+        score = Math.max(0, score - _deltaF7);
+        _f7idx.motivo = (_f7idx.motivo||'') + ' [renda crescente — pode ser declarável]';
+      }
+    }
   }
 
   // Escala logarítmica — denominador calibrado em 100pts brutos = 100% no display
