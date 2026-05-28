@@ -2952,7 +2952,7 @@ function switchSimTab(tab) {
 // ===== PREÇOS — fonte única de verdade =====
 // Para alterar qualquer preço, mude APENAS aqui.
 const PRICES = {
-  avulso: { value: 34.90, label: 'R$34,90' },
+  avulso: { value: 0, label: 'Gratuito' },
   pro:    { value: 29.90, label: 'R$29,90' },
 };
 
@@ -3039,6 +3039,30 @@ function openCheckout(plan) {
   if (_currentUser?._plano === 'pro' || (_currentUser?._plano === 'avulso' && plan === 'avulso')) {
     if (_eConsolidated) { eUnlockResult(); return; }
     showPage('extrato'); return;
+  }
+
+  // AVULSO GRATUITO — bypass se value for 0
+  if (plan === 'avulso' && PRICES.avulso.value === 0) {
+    if (!_currentUser) {
+      currentPlan = plan;
+      setCheckoutStep(1);
+      closeAllOverlays();
+      document.getElementById('checkoutOverlay').classList.add('show');
+      document.getElementById('checkoutModal').scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+    if (_eConsolidated) {
+      closeCheckoutDirect();
+      eUnlockResult();
+    } else {
+      showPage('extrato');
+      setTimeout(() => {
+        const step2 = document.getElementById('extStep2');
+        if (step2) step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+    return;
   }
 
   // MODO PRO GRATUITO — bypass só para o plano Pro, nunca para avulso
