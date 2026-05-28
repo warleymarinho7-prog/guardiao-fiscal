@@ -20,7 +20,7 @@ n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','2144854999641148');
-fbq('track','PageView');
+fbq('track','PageView',{},{ eventID: Date.now().toString(), testEventCode: 'TEST53997' });
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=2144854999641148&ev=PageView&noscript=1"/></noscript>
@@ -3032,7 +3032,7 @@ function initProFreeMode() {
 
 function openCheckout(plan) {
   // Pixel — checkout iniciado
-  if(typeof fbq==='function') fbq('trackCustom','CheckoutStarted',{plan});
+  if(typeof fbq==='function') fbq('trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString(), testEventCode: 'TEST53997' });
   // Clarity — checkout iniciado
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
   // Se usuário já tem plano ativo — vai direto para análise
@@ -7016,7 +7016,7 @@ async function eRunAll(){
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   // Pixel — análise iniciada
-  if(typeof fbq==='function') fbq('trackCustom','AnalysisStarted',{files:ready.length});
+  if(typeof fbq==='function') fbq('trackCustom','AnalysisStarted',{files:ready.length},{ eventID: Date.now().toString(), testEventCode: 'TEST53997' });
   // Clarity — análise iniciada
   if(typeof clarity==='function') clarity('event','AnalysisStarted');
   // Captura renda declarada do campo (opcional — ativa F7 compatibilidade)
@@ -7830,7 +7830,7 @@ function eResetAll(){
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
   document.getElementById('paywallBlock').style.display='block';
   // Tracking — usuário bateu no paywall
-  if(typeof fbq==='function') fbq('trackCustom','PaywallHit',{});
+  if(typeof fbq==='function') fbq('trackCustom','PaywallHit',{},{ eventID: Date.now().toString(), testEventCode: 'TEST53997' });
   if(typeof clarity==='function') clarity('event','PaywallHit');
   document.getElementById('realResultBlock').style.display='none';
   // Reset preview
@@ -8248,7 +8248,7 @@ window.gFeedbackAbrir = function() {
   const d = document.getElementById('gFbDetalhes');
   if (d) d.style.display = 'block';
   // tracking
-  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordo', { score: window._gFeedback.sessao?.score });
+  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordo', { score: window._gFeedback.sessao?.score }, { eventID: Date.now().toString(), testEventCode: 'TEST53997' });
   if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordo');
 };
 
@@ -8280,7 +8280,7 @@ window.gFeedbackSubmit = function(tipo) {
   console.log('[GuardiaoFiscal] Feedback:', payload);
 
   // tracking Meta
-  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackOk', { score: r?.score });
+  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackOk', { score: r?.score }, { eventID: Date.now().toString(), testEventCode: 'TEST53997' });
   if (typeof clarity === 'function') clarity('event', 'FeedbackOk');
 
   // Esconder card, mostrar agradecimento
@@ -8323,7 +8323,7 @@ window.gFeedbackEnviar = function() {
   window._gFeedback.historico.push(payload);
   console.log('[GuardiaoFiscal] Feedback (discordo):', payload);
 
-  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordoEnviado', { score: r?.score, motivos });
+  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordoEnviado', { score: r?.score, motivos }, { eventID: Date.now().toString(), testEventCode: 'TEST53997' });
   if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordoEnviado');
 
   const det = document.getElementById('gFbDetalhes');
