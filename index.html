@@ -2327,7 +2327,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="font-size:24px;margin-bottom:6px">🔒</div>
       <div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
       <div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:16px;line-height:1.5">Desbloqueie para ver cada transação de risco com valor exato, relatório PDF e orientação fiscal personalizada.</div>
-      <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro Grátis — Período de lançamento</span></button>
+      <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
       <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
     </div>
             </div>
@@ -2472,7 +2472,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos quando seu risco muda</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF exportável</div>
         </div>
-        <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Acessar Pro Grátis →</span></button>
+        <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Assinar Pro — R$29,90/mês →</span></button>
       </div>
 
     </div>
@@ -2998,7 +2998,20 @@ function showProFreeBanner() {
 }
 
 function initProFreeMode() {
-  if (!PRO_FREE_MODE) return;
+  if (!PRO_FREE_MODE) {
+    // Modo pago — garantir que todos os textos refletem o preço real
+    const btnPro = document.querySelector('.btn-plan-pro span');
+    if (btnPro) btnPro.textContent = 'Assinar Pro — R$29,90/mês →';
+    const btnProEl = document.getElementById('btnProText');
+    if (btnProEl) btnProEl.textContent = 'Assinar Pro — R$29,90/mês →';
+    const pwPro = document.getElementById('paywallProText');
+    if (pwPro) pwPro.textContent = 'Acessar Pro — R$29,90/mês';
+    const ucPro = document.getElementById('ucProText');
+    if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
+    const popular = document.querySelector('.plan-popular');
+    if (popular) popular.textContent = '⭐ MAIS POPULAR';
+    return;
+  }
   // Banner na página de planos
   const plansWrap = document.querySelector('#page-planos .plans-page');
   if (plansWrap && !document.getElementById('proFreeBanner')) {
@@ -3013,7 +3026,7 @@ function initProFreeMode() {
   if (badge) { badge.textContent = 'PRO GRÁTIS'; badge.className = 'tbadge tbadge-green'; }
   // Atualiza botão Pro na página de planos
   const btnPro = document.querySelector('.btn-plan-pro');
-  if (btnPro) btnPro.innerHTML = '🎉 Acessar Pro Grátis — Período de lançamento →';
+  if (btnPro) btnPro.innerHTML = '🎉 Acessar Pro — R$29,90/mês →';
   // Atualiza destaque popular
   const popular = document.querySelector('.plan-popular');
   if (popular) popular.textContent = '🎉 GRATUITO AGORA';
@@ -3024,10 +3037,10 @@ function initProFreeMode() {
   if (planPeriod) planPeriod.textContent = 'durante o lançamento';
   // Atualiza cards upgrade no resultado
   const ucPro = document.getElementById('ucProText');
-  if (ucPro) ucPro.textContent = 'Acessar Pro Grátis — Período de lançamento';
+  if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
   // Atualiza paywall
   const pwPro = document.getElementById('paywallProText');
-  if (pwPro) pwPro.textContent = 'Acessar Pro Grátis — Período de lançamento';
+  if (pwPro) pwPro.textContent = 'Acessar Pro — R$29,90/mês';
 }
 
 function openCheckout(plan) {
