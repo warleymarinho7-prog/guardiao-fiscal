@@ -4141,6 +4141,12 @@ function showResult() {
 
   const total = answers.reduce((a,b) => a + (b?.risk || 0), 0);
   const pct   = Math.min(100, Math.round((total / 19) * 100));
+  // Pixel — quiz concluido
+  if (typeof fbq === 'function') {
+    const nivel = pct <= 20 ? 'baixo' : pct <= 50 ? 'moderado' : pct <= 75 ? 'elevado' : 'critico';
+    fbq('trackCustom', 'QuizCompleted', { origem: 'site_principal', risco: nivel, score: pct }, { eventID: 'qc_' + Date.now() });
+    fbq('track', 'Lead', { content_name: 'quiz_site_principal', content_category: nivel }, { eventID: 'lead_site_' + Date.now() });
+  }
 
   const scanLines = [
     'Cruzando movimentações com critérios e-Financeira…',
@@ -4454,6 +4460,11 @@ function mNextQ() {
   if (mCur < questions.length-1) {
     mCur++;
     mSel = (mAnswers[mCur] && !questions[mCur].multi) ? mAnswers[mCur] : null;
+    // Pixel — sinal de risco alto no mobile
+    const prevAnswer = mAnswers[mCur - 1];
+    if (typeof fbq === 'function' && prevAnswer && (prevAnswer.risk >= 2)) {
+      fbq('track', 'Search', { search_string: 'risco_incompatibilidade', content_category: questions[mCur-1]?.id || 'quiz' }, { eventID: 'srch_mob_' + Date.now() });
+    }
     // Desabilita botões durante microfeedback — evita duplo clique/travamento
     const nx = document.getElementById('mBtnNext');
     const bk = document.getElementById('mBtnBack');
@@ -4496,6 +4507,12 @@ function mShowResult() {
 
   const total = mAnswers.reduce((a,b) => a + (b?.risk || 0), 0);
   const pct   = Math.min(100, Math.round((total / 19) * 100));
+  // Pixel — quiz mobile concluido
+  if (typeof fbq === 'function') {
+    const nivel = pct <= 20 ? 'baixo' : pct <= 50 ? 'moderado' : pct <= 75 ? 'elevado' : 'critico';
+    fbq('trackCustom', 'QuizCompleted', { origem: 'site_principal_mobile', risco: nivel, score: pct }, { eventID: 'qcm_' + Date.now() });
+    fbq('track', 'Lead', { content_name: 'quiz_site_principal', content_category: nivel }, { eventID: 'lead_mob_' + Date.now() });
+  }
 
   const scanLines = [
     'Cruzando movimentações com critérios e-Financeira…',
@@ -4745,6 +4762,8 @@ function openQuiz() {
   }
   // Garante tab perguntas ativa
   switchSimTab('perguntas');
+  // Pixel — quiz iniciado
+  if (typeof fbq === 'function') fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   // Sempre reseta estado — independente de onde o quiz estava
   cur = 0; answers = []; sel = null;
   const rp = document.getElementById('resultPanel');
@@ -4793,7 +4812,12 @@ function openQuiz() {
 // ── FIM FEED DETECÇÕES ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   const _isMobile = window.innerWidth < 1100;
-  if (_isMobile) mRenderQ(); else renderQ();
+  if (_isMobile) {
+    mRenderQ();
+    if (typeof fbq === 'function') fbq('trackCustom', 'QuizStarted', { origem: 'site_principal_mobile' }, { eventID: 'qs_mob_' + Date.now() });
+  } else {
+    renderQ();
+  }
   initProFreeMode();
   // Anima o dashboard mockup no hero desktop
   setTimeout(() => {
