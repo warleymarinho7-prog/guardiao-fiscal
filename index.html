@@ -643,7 +643,7 @@ nav {
 
 /* ===== PLANOS PAGE ===== */
 .plans-page {
-  max-width:1080px; margin:0 auto; padding:64px 32px 112px;
+  max-width:960px; margin:0 auto; padding:64px clamp(20px,4vw,48px) 112px;
   position:relative; z-index:1;
 }
 
@@ -1075,7 +1075,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .result-cta { padding: 20px 28px 28px; }
 
   /* Planos em grid lado a lado */
-  .plans-page { max-width: 1100px; padding: 56px 32px 80px; }
+  .plans-page { max-width: 960px; padding: 56px clamp(20px,4vw,48px) 80px; }
   .page-title { font-size: 36px; }
   .page-sub { font-size: 15px; margin-bottom: 40px; }
   .plans-grid { flex-direction: row; align-items: stretch; gap: 20px; }
@@ -1118,10 +1118,17 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .hero { padding: 88px 40px 56px; }
   .hero h1 { font-size: 52px; }
   .sim-wrap { max-width: 680px; }
-  .plans-page { max-width: 1000px; }
+  .plans-page { max-width: 900px; }
 }
 
 /* ===== SPLIT HERO LAYOUT — DESKTOP WIDE ===== */
+/* Tablet (768–1099px): mobile layout mas com mais respiro */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .hero { max-width: 600px; padding: 72px 32px 48px; }
+  .sim-wrap { max-width: 600px; padding: 0 32px 80px; }
+  .plans-page { max-width: 760px; padding: 48px 32px 80px; }
+}
+
 @media (min-width: 1100px) {
   /* Wrapper que contém hero + simulador lado a lado */
   #page-home > .hero,
@@ -1136,10 +1143,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 /* Split home — sempre renderizado, escondido no mobile */
 .split-home {
   display: none;
-  max-width: 1280px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 80px 48px 80px;
-  gap: 64px;
+  padding: clamp(60px,7vw,88px) clamp(24px,4vw,48px);
+  gap: clamp(32px,4vw,56px);
   align-items: flex-start;
   position: relative;
   z-index: 1;
