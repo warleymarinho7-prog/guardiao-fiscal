@@ -3288,6 +3288,81 @@ function showBrickFallback(container, msg) {
 }
 
 // ── Processa pagamento por cartão via Edge Function ───────────
+// ── UI de assinatura Pro (preapproval) ───────────────────────
+function _initProSubscriptionUI() {
+  const container = document.getElementById('mpBrickContainer');
+  if (!container) return;
+  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
+
+  container.innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+      <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
+        💳 <strong style="color:var(--text)">Cartão de crédito</strong> — cobrança automática mensal<br>
+        <span style="font-size:11px;color:var(--muted)">Você será redirecionado para autorizar a assinatura no Mercado Pago</span>
+      </div>
+      <div id="mpProErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+      <button class="btn-pay" id="btnProSubscribe" onclick="startProSubscription()" style="margin-bottom:0">
+        <span id="btnProSubTxt">Assinar Pro — R$29,90/mês →</span>
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px">⚠️ Você será redirecionado para autorizar a cobrança recorrente</div>
+    </div>`;
+}
+
+async function startProSubscription() {
+  const btn = document.getElementById('btnProSubTxt');
+  const errEl = document.getElementById('mpProErr');
+  if (errEl) errEl.style.display = 'none';
+  if (btn) btn.textContent = 'Gerando link da assinatura...';
+  document.getElementById('btnProSubscribe').disabled = true;
+
+  // Abre janela antes do await (desktop) — mobile usa location.href
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const newWin = !isMobile ? window.open('', '_blank') : null;
+
+  try {
+    if (!sb) throw new Error('Serviço indisponível. Recarregue a página.');
+    const { data: { session }, error: sessErr } = await sb.auth.getSession();
+    if (sessErr || !session) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-mp-preference`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ plan: 'pro' }),
+    });
+
+    if (!res.ok) {
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    const url = data.init_point;
+    if (!url) throw new Error('Link de assinatura inválido. Tente novamente.');
+
+    if (newWin) {
+      newWin.location.href = url;
+      if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
+      document.getElementById('btnProSubscribe').disabled = false;
+    } else {
+      // Mobile: substitui onclick com URL gerada
+      if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
+      const btnEl = document.getElementById('btnProSubscribe');
+      btnEl.disabled = false;
+      btnEl.onclick = function() { window.location.href = url; };
+      if (errEl) {
+        errEl.style.cssText = 'display:block;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px;font-size:12px;color:#93c5fd;margin-bottom:12px';
+        errEl.innerHTML = '✅ Link gerado! Clique em <strong>Prosseguir no Mercado Pago</strong> para continuar.';
+      }
+    }
+  } catch(e) {
+    if (newWin) newWin.close();
+    if (errEl) { errEl.textContent = e.message || 'Erro inesperado.'; errEl.style.display = 'block'; }
+    if (btn) btn.textContent = 'Assinar Pro — R$29,90/mês →';
+    document.getElementById('btnProSubscribe').disabled = false;
+  }
+}
+
 async function processCardPayment(cardData) {
   const errEl = document.getElementById('mpPayErr');
   if (errEl) errEl.style.display = 'none';
@@ -3386,8 +3461,12 @@ function setCheckoutStep(n) {
       if (currentPlan === 'pro') {
         if (tabOutros) tabOutros.style.display = 'none';
         if (payPaneOutros) payPaneOutros.style.display = 'none';
+        // Pro: mostra botão de assinatura em vez do Brick
+        _initProSubscriptionUI();
       } else {
         if (tabOutros) tabOutros.style.display = '';
+        // Avulso: inicializa Brick normalmente
+        if (!_mpBrick) initMpBrick();
       }
     }, 100);
   }
