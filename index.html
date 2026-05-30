@@ -2716,7 +2716,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
 
       <div class="divider">já tem conta?</div>
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:Inter,sans-serif;font-size:13px;font-weight:600" onclick="closeCheckoutDirect();openLogin()">
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:Inter,sans-serif;font-size:13px;font-weight:600" onclick="openLoginFromCheckout()">
         Entrar com e-mail e senha
       </button>
       <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
@@ -3667,18 +3667,8 @@ async function _initSession() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) setUser(session.user);
     sb.auth.onAuthStateChange((_event, session) => {
-      const hadPendingPlan = !_currentUser && session && currentPlan;
       setUser(session ? session.user : null);
-      if (session) {
-        closeAllOverlays();
-        // Se havia checkout pendente antes do login, avança direto para pagamento
-        if (hadPendingPlan) {
-          setTimeout(() => {
-            document.getElementById('checkoutOverlay').classList.add('show');
-            setCheckoutStep(2);
-          }, 300);
-        }
-      }
+      if (session) closeAllOverlays();
     });
     handleMpReturn();
   } catch(e) {
@@ -3822,6 +3812,14 @@ function switchAuthTab(tab) {
   document.getElementById('tabCadastroBtn').style.color      = isLogin ? 'var(--muted)' : 'var(--text)';
 }
 
+// Abre login preservando o plano pendente no checkout
+let _checkoutPendingPlan = null;
+function openLoginFromCheckout() {
+  _checkoutPendingPlan = currentPlan || 'pro';
+  closeCheckoutDirect();
+  openLogin();
+}
+
 async function doLogin() {
   const email = capAuthInput(document.getElementById('loginEmail').value.trim(), 'email');
   const senha  = capAuthInput(document.getElementById('loginSenha').value, 'senha');
@@ -3838,6 +3836,16 @@ async function doLogin() {
   if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
   authSuccess(email);
   closeLoginDirect();
+  // Retoma checkout se veio de openLoginFromCheckout
+  if (_checkoutPendingPlan) {
+    const plan = _checkoutPendingPlan;
+    _checkoutPendingPlan = null;
+    setTimeout(() => {
+      currentPlan = plan;
+      document.getElementById('checkoutOverlay').classList.add('show');
+      setCheckoutStep(2);
+    }, 400);
+  }
 }
 
 async function doCadastro() {
