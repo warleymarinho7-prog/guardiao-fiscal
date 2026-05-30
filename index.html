@@ -3050,17 +3050,23 @@ function initProFreeMode() {
   if (pwPro) pwPro.textContent = 'Acessar Pro — R$29,90/mês';
 }
 
-function openCheckout(plan) {
+async function openCheckout(plan) {
   // Pixel — checkout iniciado
   if(typeof fbq==='function') {
     fbq('trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() });
     fbq('track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() });
   }
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
-  // Se usuário já tem plano ativo — vai direto para análise
-  if (_currentUser?._plano === 'pro' || (_currentUser?._plano === 'avulso' && plan === 'avulso')) {
-    if (_eConsolidated) { eUnlockResult(); return; }
-    showPage('extrato'); return;
+  // Se usuário já tem plano ativo — verifica no banco e vai direto para análise
+  if (_currentUser) {
+    if (!sb) return;
+    const { data } = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single().catch(() => ({ data: null }));
+    const planoAtual = data?.plano;
+    if (planoAtual) _currentUser._plano = planoAtual;
+    if (planoAtual === 'pro' || (planoAtual === 'avulso' && plan === 'avulso')) {
+      if (_eConsolidated) { eUnlockResult(); return; }
+      showPage('extrato'); return;
+    }
   }
 
   // AVULSO GRATUITO — bypass se value for 0
@@ -3439,34 +3445,40 @@ async function handleMpReturn() {
   try { history.replaceState({}, '', window.location.pathname); } catch(e) {}
 
   if (mp === 'success') {
-    // Aguarda webhook processar (até ~3s) e busca plano atualizado
-    await new Promise(r => setTimeout(r, 2500));
     if (!sb) return;
     const { data: { session } } = await sb.auth.getSession();
-    if (session) {
+    if (!session) return;
+
+    // Retry até 5x com 1.2s de intervalo — webhook pode demorar alguns segundos
+    let planoAtualizado = null;
+    for (let i = 0; i < 5; i++) {
+      await new Promise(r => setTimeout(r, 1200));
       const { data: profile } = await sb
         .from('profiles')
         .select('plano')
         .eq('id', session.user.id)
         .single();
-
-      const planoAtualizado = profile?.plano;
-
-      // Mostra modal de sucesso
-      const planKey = planoAtualizado ?? 'pro';
-      currentPlan = planKey === 'avulso' ? 'avulso' : 'pro';
-      setCheckoutStep(3);
-      document.getElementById('successMsg').textContent =
-        plans[currentPlan]?.successMsg ?? 'Pagamento confirmado! Seu acesso está liberado.';
-      document.getElementById('checkoutOverlay').classList.add('show');
-      // Pixel — Purchase (Pix/Boleto confirmado)
-      if(typeof fbq==='function') {
-        const valor = currentPlan==='pro' ? 29.90 : 0;
-        fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_mp_'+Date.now().toString() });
+      if (profile?.plano && profile.plano !== 'free') {
+        planoAtualizado = profile.plano;
+        break;
       }
-      if (_eConsolidated) {
-        setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1500);
-      }
+    }
+
+    const planKey = planoAtualizado ?? 'pro';
+    currentPlan = planKey === 'avulso' ? 'avulso' : 'pro';
+    if (_currentUser) _currentUser._plano = planKey;
+
+    setCheckoutStep(3);
+    document.getElementById('successMsg').textContent =
+      plans[currentPlan]?.successMsg ?? 'Pagamento confirmado! Seu acesso está liberado.';
+    document.getElementById('checkoutOverlay').classList.add('show');
+
+    if(typeof fbq==='function') {
+      const valor = currentPlan==='pro' ? 29.90 : PRICES?.avulso?.value ?? 34.90;
+      fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_mp_'+Date.now().toString() });
+    }
+    if (_eConsolidated) {
+      setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1500);
     }
   } else if (mp === 'failure') {
     // Mostra modal de erro de pagamento
@@ -7331,7 +7343,34 @@ function eRenderPreview(c, sources) {
   }).join('');
 }
 
-function eUnlockResult(){
+async function _verifyPlanBeforeUnlock() {
+  // PRO_FREE_MODE ativo — libera sem verificar banco
+  if (PRO_FREE_MODE) return true;
+  // Avulso gratuito (price = 0) — libera direto
+  if (PRICES?.avulso?.value === 0) return true;
+  // Sem sessão — bloqueia
+  if (!sb || !_currentUser) return false;
+  try {
+    const { data } = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single();
+    const plano = data?.plano;
+    if (plano === 'pro' || plano === 'avulso') {
+      _currentUser._plano = plano; // sincroniza em memória
+      return true;
+    }
+    return false;
+  } catch(e) {
+    console.warn('[GuardiaoFiscal] Erro ao verificar plano:', e);
+    return false;
+  }
+}
+
+async function eUnlockResult(){
+  const allowed = await _verifyPlanBeforeUnlock();
+  if (!allowed) {
+    console.warn('[GuardiaoFiscal] Acesso bloqueado — plano não verificado');
+    document.getElementById('paywallBlock').style.display='block';
+    return;
+  }
   document.getElementById('paywallBlock').style.display='none';
   document.getElementById('realResultBlock').style.display='block';
   // Scroll suave até o resultado
