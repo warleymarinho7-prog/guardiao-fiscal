@@ -3390,8 +3390,10 @@ async function goToMercadoPago() {
   if (btn) btn.textContent = 'Gerando link de pagamento...';
   document.getElementById('btnMpPay').disabled = true;
 
+  // Abre janela ANTES do await — mantém o gesto do usuário válido no mobile
+  const newWin = window.open('', '_blank');
+
   try {
-    // Verifica sessão
     if (!sb) throw new Error('Serviço de autenticação indisponível. Recarregue a página.');
     const { data: { session }, error: sessErr } = await sb.auth.getSession();
     if (sessErr) throw new Error('Erro de autenticação. Faça login novamente.');
@@ -3411,7 +3413,6 @@ async function goToMercadoPago() {
         }
       );
     } catch (networkErr) {
-      // Erro de rede/CORS — mostra mensagem mais útil
       throw new Error('Não foi possível conectar ao servidor de pagamento. Verifique sua conexão e tente novamente.');
     }
 
@@ -3425,20 +3426,19 @@ async function goToMercadoPago() {
     const url = data.init_point || data.sandbox_url;
     if (!url) throw new Error('Link de pagamento inválido. Tente novamente.');
 
-    // Abre em nova aba para escapar da interceptação do SDK do MP
-    // (quando usuário tem conta MP vinculada no browser, window.location.href é interceptado)
-    const win = window.open(url, '_blank');
-    if (!win) {
-      // Popup bloqueado (mobile/Safari) — redireciona na mesma aba
+    if (newWin) {
+      newWin.location.href = url;
+    } else {
       window.location.href = url;
     }
+
     if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
     document.getElementById('btnMpPay').disabled = false;
 
   } catch (e) {
-    errEl.textContent = e.message || 'Erro inesperado. Tente novamente.';
-    errEl.style.display = 'block';
-    btn.textContent = 'Ir para o pagamento →';
+    if (newWin) newWin.close();
+    if (errEl) { errEl.textContent = e.message || 'Erro inesperado. Tente novamente.'; errEl.style.display = 'block'; }
+    if (btn) btn.textContent = 'Ir para o pagamento →';
     document.getElementById('btnMpPay').disabled = false;
   }
 }
