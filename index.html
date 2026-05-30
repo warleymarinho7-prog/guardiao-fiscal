@@ -3390,8 +3390,11 @@ async function goToMercadoPago() {
   if (btn) btn.textContent = 'Gerando link de pagamento...';
   document.getElementById('btnMpPay').disabled = true;
 
-  // Abre janela ANTES do await — mantém o gesto do usuário válido no mobile
-  const newWin = window.open('', '_blank');
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // Desktop com SDK MP ativo: abre aba em branco antes do await
+  // Mobile: não usa window.open (browsers bloqueiam/suspendem aba em branco)
+  const newWin = (!isMobile) ? window.open('', '_blank') : null;
 
   try {
     if (!sb) throw new Error('Serviço de autenticação indisponível. Recarregue a página.');
@@ -3426,14 +3429,16 @@ async function goToMercadoPago() {
     const url = data.init_point || data.sandbox_url;
     if (!url) throw new Error('Link de pagamento inválido. Tente novamente.');
 
-    if (newWin) {
-      newWin.location.href = url;
-    } else {
-      window.location.href = url;
-    }
-
+    // Desktop e mobile: substitui onclick com URL gerada — clique humano escapa do SDK do MP
+    if (newWin) newWin.close(); // fecha aba em branco se abriu
     if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
-    document.getElementById('btnMpPay').disabled = false;
+    const btnEl = document.getElementById('btnMpPay');
+    btnEl.disabled = false;
+    btnEl.onclick = function() { window.open(url, '_blank') || (window.location.href = url); };
+    if (errEl) {
+      errEl.style.cssText = 'display:block;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px;font-size:12px;color:#93c5fd;margin-bottom:12px';
+      errEl.innerHTML = '✅ Link gerado! Clique em <strong>Prosseguir no Mercado Pago</strong> para continuar.';
+    }
 
   } catch (e) {
     if (newWin) newWin.close();
