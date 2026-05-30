@@ -3425,7 +3425,15 @@ async function goToMercadoPago() {
     const url = data.init_point || data.sandbox_url;
     if (!url) throw new Error('Link de pagamento inválido. Tente novamente.');
 
-    window.location.href = url;
+    // Abre em nova aba para escapar da interceptação do SDK do MP
+    // (quando usuário tem conta MP vinculada no browser, window.location.href é interceptado)
+    const win = window.open(url, '_blank');
+    if (!win) {
+      // Popup bloqueado (mobile/Safari) — redireciona na mesma aba
+      window.location.href = url;
+    }
+    if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
+    document.getElementById('btnMpPay').disabled = false;
 
   } catch (e) {
     errEl.textContent = e.message || 'Erro inesperado. Tente novamente.';
