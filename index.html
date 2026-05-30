@@ -3058,8 +3058,7 @@ async function openCheckout(plan) {
   }
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
   // Se usuário já tem plano ativo — verifica no banco e vai direto para análise
-  if (_currentUser) {
-    if (!sb) return;
+  if (_currentUser && sb) {
     let data = null;
     try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { data = null; }
     const planoAtual = data?.plano;
@@ -3668,8 +3667,18 @@ async function _initSession() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) setUser(session.user);
     sb.auth.onAuthStateChange((_event, session) => {
+      const hadPendingPlan = !_currentUser && session && currentPlan;
       setUser(session ? session.user : null);
-      if (session) closeAllOverlays();
+      if (session) {
+        closeAllOverlays();
+        // Se havia checkout pendente antes do login, avança direto para pagamento
+        if (hadPendingPlan) {
+          setTimeout(() => {
+            document.getElementById('checkoutOverlay').classList.add('show');
+            setCheckoutStep(2);
+          }, 300);
+        }
+      }
     });
     handleMpReturn();
   } catch(e) {
