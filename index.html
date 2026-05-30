@@ -3378,7 +3378,18 @@ function setCheckoutStep(n) {
   });
   // Quando entra no step 2, inicializa a aba cartão
   if (n === 2) {
-    setTimeout(() => switchPayTab('cartao'), 100);
+    setTimeout(() => {
+      switchPayTab('cartao');
+      // Pro = apenas cartão (Pix não é recorrente)
+      const tabOutros = document.getElementById('tabOutros');
+      const payPaneOutros = document.getElementById('payPaneOutros');
+      if (currentPlan === 'pro') {
+        if (tabOutros) tabOutros.style.display = 'none';
+        if (payPaneOutros) payPaneOutros.style.display = 'none';
+      } else {
+        if (tabOutros) tabOutros.style.display = '';
+      }
+    }, 100);
   }
 }
 
