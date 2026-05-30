@@ -3060,7 +3060,8 @@ async function openCheckout(plan) {
   // Se usuário já tem plano ativo — verifica no banco e vai direto para análise
   if (_currentUser) {
     if (!sb) return;
-    const { data } = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single().catch(() => ({ data: null }));
+    let data = null;
+    try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { data = null; }
     const planoAtual = data?.plano;
     if (planoAtual) _currentUser._plano = planoAtual;
     if (planoAtual === 'pro' || (planoAtual === 'avulso' && plan === 'avulso')) {
