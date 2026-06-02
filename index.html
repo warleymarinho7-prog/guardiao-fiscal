@@ -2023,6 +2023,229 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
     </div>
 
+
+    <!-- GUIA: Como exportar seu extrato -->
+    <div id="guiaExtrato" style="margin-bottom:20px;">
+      <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">📥 Como baixar seu extrato</div>
+
+      <!-- Abas dos bancos -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="guiaTabs">
+        <button onclick="guiaTab('nubank')" id="gtab-nubank"
+          style="padding:6px 14px;border-radius:20px;border:1.5px solid rgba(130,80,255,0.5);background:rgba(130,80,255,0.1);color:#a78bfa;font-family:Inter,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+          Nubank
+        </button>
+        <button onclick="guiaTab('inter')" id="gtab-inter"
+          style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">
+          Inter
+        </button>
+        <button onclick="guiaTab('bb')" id="gtab-bb"
+          style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">
+          Banco do Brasil
+        </button>
+        <button onclick="guiaTab('itau')" id="gtab-itau"
+          style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">
+          Itaú
+        </button>
+        <button onclick="guiaTab('bradesco')" id="gtab-bradesco"
+          style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">
+          Bradesco
+        </button>
+      </div>
+
+      <!-- Conteúdo das abas -->
+      <div id="guia-nubank" class="guia-content" style="display:block;">
+        <div style="background:rgba(130,80,255,0.05);border:1px solid rgba(130,80,255,0.15);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:10px;letter-spacing:0.5px;">NUBANK · Exportar CSV</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(130,80,255,0.2);color:#a78bfa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Abra o <strong>app do Nubank</strong> no celular</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(130,80,255,0.2);color:#a78bfa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Toque no ícone do seu <strong>perfil</strong> (canto superior esquerdo)</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(130,80,255,0.2);color:#a78bfa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Vá em <strong>"Extratos e cobranças"</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(130,80,255,0.2);color:#a78bfa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Toque em <strong>"Exportar extrato"</strong> → selecione <strong>últimos 12 meses</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(130,80,255,0.2);color:#a78bfa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Escolha <strong>CSV</strong> e salve o arquivo</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,0.2);color:#10b981;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="font-size:13px;color:#10b981;line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="guia-inter" class="guia-content" style="display:none;">
+        <div style="background:rgba(255,100,0,0.05);border:1px solid rgba(255,100,0,0.15);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:700;color:#fb923c;margin-bottom:10px;letter-spacing:0.5px;">INTER · Exportar CSV</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(255,100,0,0.15);color:#fb923c;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Abra o <strong>app do Inter</strong> no celular</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(255,100,0,0.15);color:#fb923c;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Toque em <strong>"Extrato"</strong> no menu inferior</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(255,100,0,0.15);color:#fb923c;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Toque no ícone de <strong>filtro</strong> (canto superior direito) → selecione <strong>últimos 12 meses</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(255,100,0,0.15);color:#fb923c;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Toque em <strong>"Exportar"</strong> → escolha <strong>CSV</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(255,100,0,0.15);color:#fb923c;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Salve o arquivo e suba ele abaixo</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,0.2);color:#10b981;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="font-size:13px;color:#10b981;line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="guia-bb" class="guia-content" style="display:none;">
+        <div style="background:rgba(0,100,220,0.05);border:1px solid rgba(0,100,220,0.15);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:10px;letter-spacing:0.5px;">BANCO DO BRASIL · Exportar OFX</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(0,100,220,0.15);color:#60a5fa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Acesse o <strong>app ou site do BB</strong> (bb.com.br) no computador ou celular</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(0,100,220,0.15);color:#60a5fa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Vá em <strong>"Extrato"</strong> → <strong>"Conta corrente"</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(0,100,220,0.15);color:#60a5fa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Selecione o período: <strong>últimos 12 meses</strong> (ou data inicial e final manual)</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(0,100,220,0.15);color:#60a5fa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(0,100,220,0.15);color:#60a5fa;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">O arquivo vai para seus <strong>Downloads</strong> — suba ele abaixo</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,0.2);color:#10b981;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="font-size:13px;color:#10b981;line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="guia-itau" class="guia-content" style="display:none;">
+        <div style="background:rgba(230,150,0,0.05);border:1px solid rgba(230,150,0,0.15);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:700;color:#fbbf24;margin-bottom:10px;letter-spacing:0.5px;">ITAÚ · Exportar OFX</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(230,150,0,0.15);color:#fbbf24;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Acesse o <strong>app ou site do Itaú</strong> (itau.com.br)</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(230,150,0,0.15);color:#fbbf24;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Vá em <strong>"Conta corrente"</strong> → <strong>"Extrato"</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(230,150,0,0.15);color:#fbbf24;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Selecione o período: <strong>últimos 12 meses</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(230,150,0,0.15);color:#fbbf24;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(230,150,0,0.15);color:#fbbf24;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Salve o arquivo e suba ele abaixo</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,0.2);color:#10b981;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="font-size:13px;color:#10b981;line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="guia-bradesco" class="guia-content" style="display:none;">
+        <div style="background:rgba(220,30,30,0.05);border:1px solid rgba(220,30,30,0.15);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:10px;letter-spacing:0.5px;">BRADESCO · Exportar OFX</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(220,30,30,0.15);color:#f87171;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Acesse o <strong>site do Bradesco</strong> (bradesco.com.br) pelo computador</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(220,30,30,0.15);color:#f87171;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Vá em <strong>"Extrato"</strong> no menu principal</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(220,30,30,0.15);color:#f87171;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Selecione o período: <strong>últimos 12 meses</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(220,30,30,0.15);color:#f87171;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong></span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(220,30,30,0.15);color:#f87171;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</span>
+              <span style="font-size:13px;color:var(--text2);line-height:1.5;">Salve o arquivo e suba ele abaixo</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,0.2);color:#10b981;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="font-size:13px;color:#10b981;line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    function guiaTab(banco) {
+      // Esconde todos
+      document.querySelectorAll('.guia-content').forEach(el => el.style.display = 'none');
+      // Reseta todas as abas
+      ['nubank','inter','bb','itau','bradesco'].forEach(b => {
+        const btn = document.getElementById('gtab-' + b);
+        if (!btn) return;
+        btn.style.border = '1px solid var(--border)';
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--muted2)';
+        btn.style.fontWeight = '600';
+      });
+      // Ativa o selecionado
+      document.getElementById('guia-' + banco).style.display = 'block';
+      const cores = {
+        nubank:   { border: 'rgba(130,80,255,0.5)',  bg: 'rgba(130,80,255,0.1)',  color: '#a78bfa' },
+        inter:    { border: 'rgba(255,100,0,0.4)',   bg: 'rgba(255,100,0,0.08)',  color: '#fb923c' },
+        bb:       { border: 'rgba(0,100,220,0.4)',   bg: 'rgba(0,100,220,0.08)', color: '#60a5fa' },
+        itau:     { border: 'rgba(230,150,0,0.4)',   bg: 'rgba(230,150,0,0.08)', color: '#fbbf24' },
+        bradesco: { border: 'rgba(220,30,30,0.4)',   bg: 'rgba(220,30,30,0.08)', color: '#f87171' },
+      };
+      const c = cores[banco];
+      const btn = document.getElementById('gtab-' + banco);
+      btn.style.border = '1.5px solid ' + c.border;
+      btn.style.background = c.bg;
+      btn.style.color = c.color;
+      btn.style.fontWeight = '700';
+    }
+    </script>
+    <!-- FIM GUIA -->
+
     <!-- STEP 2: upload multi-extrato -->
     <div class="ext-card" id="extStep2">
       <div class="ext-card-header">
