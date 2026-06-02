@@ -12,6 +12,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
+<meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique.">
 <!-- Meta Pixel -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -29,7 +30,10 @@ src="https://www.facebook.com/tr?id=2144854999641148&ev=PageView&noscript=1"/></
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");</script>
 <!-- Fim Clarity -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet"></noscript>
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -64,6 +68,9 @@ body { overflow-x: hidden; }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+@font-face { font-family: 'Inter'; font-display: swap; }
+@font-face { font-family: 'DM Mono'; font-display: swap; }
 
 body {
   background: var(--bg);
@@ -2800,7 +2807,33 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase lazy — carrega só após primeira interação do usuário
+window._supabaseReady = false;
+window._supabaseQueue = [];
+function _loadSupabase() {
+  if (window._supabaseReady || window._supabaseLoading) return;
+  window._supabaseLoading = true;
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  s.onload = function() {
+    window._supabaseReady = true;
+    window._supabaseLoading = false;
+    window._supabaseQueue.forEach(fn => fn());
+    window._supabaseQueue = [];
+  };
+  document.head.appendChild(s);
+}
+// Dispara no primeiro toque/clique/scroll
+['touchstart','mousedown','scroll','keydown'].forEach(function(ev) {
+  window.addEventListener(ev, function h() {
+    _loadSupabase();
+    window.removeEventListener(ev, h);
+  }, { once: true, passive: true });
+});
+// Fallback: carrega após 4s mesmo sem interação
+setTimeout(_loadSupabase, 4000);
+</script>
 <script>
 // ── Lazy loaders para bibliotecas pesadas ──────────────────────────
 // pdf.js (~500KB): carrega só quando usuário faz upload de PDF
@@ -3756,7 +3789,9 @@ function _bootSupabase() {
 if (typeof supabase !== 'undefined') {
   _bootSupabase();
 } else {
-  window.addEventListener('load', _bootSupabase, { once: true });
+  // Supabase está em modo lazy — aguarda o loader sinalizarthrough a queue
+  window._supabaseQueue = window._supabaseQueue || [];
+  window._supabaseQueue.push(_bootSupabase);
 }
 
 function setUser(user) {
