@@ -13,22 +13,42 @@
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique.">
-<!-- Meta Pixel -->
+<!-- Meta Pixel + Clarity — carregam apenas com consentimento -->
 <script>
-!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init','2144854999641148');
-fbq('track','PageView',{},{ eventID: Date.now().toString() });
+// Fila de eventos fbq antes do consentimento
+window._fbqQueue = window._fbqQueue || [];
+window.fbq = window.fbq || function() { window._fbqQueue.push(arguments); };
+window.PIXEL_ATIVO = false; // desativado até consentimento confirmado
+
+function _loadPixels() {
+  if (window._pixelsLoaded) return;
+  const consent = localStorage.getItem('gf_cookie_consent');
+  if (consent !== 'accepted') return;
+  window._pixelsLoaded = true;
+  window.PIXEL_ATIVO = true;
+  // Meta Pixel
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','2144854999641148');
+  fbq('track','PageView',{},{ eventID: Date.now().toString() });
+  // Drena fila de eventos anteriores ao consentimento
+  (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
+  window._fbqQueue = [];
+  // Microsoft Clarity
+  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");
+}
+
+// Carrega pixels agora se já tiver consentimento anterior
+document.addEventListener('DOMContentLoaded', _loadPixels);
+// Também tenta no visibilitychange (Instagram pré-render)
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') _loadPixels(); });
 </script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=2144854999641148&ev=PageView&noscript=1"/></noscript>
-<!-- Fim Meta Pixel -->
-<!-- Microsoft Clarity -->
-<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");</script>
-<!-- Fim Clarity -->
+<!-- Fim Pixel/Clarity -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3600,7 +3620,7 @@ async function startProSubscription() {
 
     const data = await res.json();
     const url = data.init_point;
-    if (!url) throw new Error('Link de assinatura inválido. Tente novamente.');
+    if (!url || !url.startsWith('https://www.mercadopago.com') && !url.startsWith('https://mercadopago.com')) throw new Error('Link de assinatura inválido. Tente novamente.');
 
     if (newWin) {
       newWin.location.href = url;
@@ -3779,7 +3799,8 @@ async function goToMercadoPago() {
 
     const data = await res.json();
     const url = data.init_point || data.sandbox_url;
-    if (!url) throw new Error('Link de pagamento inválido. Tente novamente.');
+    const _urlOk = url && (url.startsWith('https://www.mercadopago.com') || url.startsWith('https://mercadopago.com') || url.startsWith('https://sandbox.mercadopago.com'));
+    if (!_urlOk) throw new Error('Link de pagamento inválido. Tente novamente.');
 
     // Desktop e mobile: substitui onclick com URL gerada — clique humano escapa do SDK do MP
     if (newWin) newWin.close(); // fecha aba em branco se abriu
@@ -4263,9 +4284,25 @@ function extSwitchTab(tab) {
   document.getElementById('extAuthBtnTxt').textContent  = isCad ? 'Criar conta e continuar →' : 'Entrar e continuar →';
 }
 
+// Rate limiter de auth — máx 5 tentativas por 2 minutos
+const _authRL = { count: 0, resetAt: 0 };
+function _authRateOk() {
+  const now = Date.now();
+  if (now > _authRL.resetAt) { _authRL.count = 0; _authRL.resetAt = now + 120000; }
+  if (_authRL.count >= 5) return false;
+  _authRL.count++;
+  return true;
+}
+
 async function extStep1Done() {
   // Se já logado, avança direto
   if (_currentUser) { autoSkipExtStep1(_currentUser.email); return; }
+  // Rate limit
+  if (!_authRateOk()) {
+    const err = document.getElementById('extAuthErr');
+    if (err) { err.textContent = 'Muitas tentativas. Aguarde 2 minutos.'; err.style.display = 'block'; }
+    return;
+  }
 
   const err = document.getElementById('extAuthErr');
   const btn = document.getElementById('extAuthBtnTxt');
@@ -9090,7 +9127,7 @@ async function eCarregarHistorico() {
     el.innerHTML += `<div style="text-align:center;padding:16px 0 4px;font-size:12px;color:var(--muted2)">${data.length} análise(s) registrada(s) · Motor v8.0</div>`;
 
   } catch(e) {
-    el.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Erro ao carregar histórico: ${e.message}</div>`;
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Erro ao carregar histórico. Tente novamente.</div>';
     console.warn('[GuardiaoFiscal] histórico erro:', e.message);
   }
 }
@@ -9163,10 +9200,12 @@ window.gFeedbackHistorico = function() {
 function ckAccept() {
   localStorage.setItem('gf_cookie_consent', 'accepted');
   document.getElementById('cookieBanner').style.display = 'none';
+  if (typeof _loadPixels === 'function') _loadPixels(); // carrega pixels agora
 }
 function ckReject() {
   localStorage.setItem('gf_cookie_consent', 'rejected');
   window.PIXEL_ATIVO = false;
+  window._pixelsLoaded = false;
   document.getElementById('cookieBanner').style.display = 'none';
 }
 </script>
