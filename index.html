@@ -2664,9 +2664,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
 
       <!-- Avulso -->
-      <div class="plan-card" style="position:relative">
-        <div class="plan-popular" style="background:var(--amber);color:#000">🎉 GRATUITO POR TEMPO LIMITADO</div>
-        <div class="plan-header" style="margin-top:8px">
+      <div class="plan-card">
+        <div class="plan-header">
           <div>
             <div class="plan-icon">📄</div>
             <div class="plan-name">Análise Avulsa</div>
@@ -2691,7 +2690,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
       <!-- Pro -->
       <div class="plan-card featured">
-        <div class="plan-popular">⭐ MELHOR CUSTO-BENEFÍCIO</div>
+        <div class="plan-popular" id="planProBadge">⭐ MELHOR CUSTO-BENEFÍCIO</div>
         <div class="plan-header">
           <div>
             <div class="plan-icon">🛡️</div>
@@ -3308,7 +3307,7 @@ function initProFreeMode() {
     if (pwPro) pwPro.textContent = 'Acessar Pro — R$29,90/mês';
     const ucPro = document.getElementById('ucProText');
     if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
-    const popular = document.querySelector('.plan-popular');
+    const popular = document.getElementById('planProBadge');
     if (popular) popular.textContent = '⭐ MELHOR CUSTO-BENEFÍCIO';
     return;
   }
@@ -3328,7 +3327,7 @@ function initProFreeMode() {
   const btnPro = document.querySelector('.btn-plan-pro');
   if (btnPro) btnPro.innerHTML = '🎉 Acessar Pro — R$29,90/mês →';
   // Atualiza destaque popular
-  const popular = document.querySelector('.plan-popular');
+  const popular = document.getElementById('planProBadge');
   if (popular) popular.textContent = '🎉 GRATUITO AGORA';
   // Atualiza preço
   const planVal = document.querySelector('.plan-card.featured .plan-value');
@@ -8721,5 +8720,189 @@ function ckReject() {
   document.getElementById('cookieBanner').style.display = 'none';
 }
 </script>
+<!-- ===== WHATSAPP + FEEDBACK ===== -->
+<style>
+/* Botão WhatsApp fixo */
+#btnWhatsapp {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #25d366; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+#btnWhatsapp:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
+#btnWhatsapp svg { width: 28px; height: 28px; fill: #fff; }
+
+/* Botão Feedback fixo */
+#btnFeedback {
+  position: fixed; bottom: 84px; right: 24px; z-index: 999;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 7px 14px;
+  color: var(--muted2); font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: all 0.2s; white-space: nowrap;
+}
+#btnFeedback:hover { border-color: var(--border); color: var(--text2); }
+
+/* Modal feedback */
+#feedbackOverlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+  padding: 16px;
+}
+#feedbackOverlay.open { display: flex; }
+#feedbackModal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 440px;
+}
+#feedbackModal h3 {
+  font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700;
+  color: var(--text); margin-bottom: 6px;
+}
+#feedbackModal p {
+  font-size: 13px; color: var(--muted2); margin-bottom: 16px; line-height: 1.5;
+}
+#feedbackType {
+  display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.fb-type-btn {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border2);
+  background: none; color: var(--muted2); font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.fb-type-btn.active { border-color: var(--blue); background: rgba(59,130,246,0.1); color: var(--text); }
+#feedbackText {
+  width: 100%; min-height: 100px; padding: 12px 14px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 12px; color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 13px; line-height: 1.6; resize: vertical; outline: none;
+  box-sizing: border-box;
+}
+#feedbackText:focus { border-color: var(--blue); }
+#feedbackText::placeholder { color: var(--muted); }
+#feedbackActions {
+  display: flex; gap: 10px; margin-top: 14px;
+}
+#btnFeedbackSend {
+  flex: 1; padding: 12px; background: var(--blue); border: none;
+  border-radius: 10px; color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+#btnFeedbackSend:hover { opacity: 0.9; }
+#btnFeedbackCancel {
+  padding: 12px 18px; background: none; border: 1px solid var(--border2);
+  border-radius: 10px; color: var(--muted2); font-family: 'Inter', sans-serif;
+  font-size: 14px; cursor: pointer; transition: all 0.15s;
+}
+#btnFeedbackCancel:hover { color: var(--text2); border-color: var(--border); }
+#feedbackMsg { font-size: 12px; margin-top: 10px; display: none; text-align: center; }
+</style>
+
+<!-- Botão WhatsApp -->
+<a id="btnWhatsapp" href="https://wa.me/5562992707284?text=Olá!%20Tenho%20uma%20dúvida%20sobre%20o%20Guardião%20Fiscal." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.118 1.528 5.845L.057 23.428a.75.75 0 0 0 .922.899l5.688-1.492A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.953-1.355l-.355-.212-3.683.966.983-3.595-.232-.371A9.718 9.718 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+  </svg>
+</a>
+
+<!-- Botão Feedback -->
+<button id="btnFeedback" onclick="openFeedback()">💬 Feedback</button>
+
+<!-- Modal Feedback -->
+<div id="feedbackOverlay" onclick="closeFeedbackOutside(event)">
+  <div id="feedbackModal">
+    <h3>Nos diga o que achou</h3>
+    <p>Sua opinião ajuda a melhorar o produto. Anônimo ou não — fica à vontade.</p>
+    <div id="feedbackType">
+      <button class="fb-type-btn active" onclick="setFbType(this,'sugestão')">💡 Sugestão</button>
+      <button class="fb-type-btn" onclick="setFbType(this,'bug')">🐛 Bug</button>
+      <button class="fb-type-btn" onclick="setFbType(this,'elogio')">⭐ Elogio</button>
+      <button class="fb-type-btn" onclick="setFbType(this,'dúvida')">❓ Dúvida</button>
+    </div>
+    <textarea id="feedbackText" placeholder="Descreva aqui..."></textarea>
+    <div id="feedbackActions">
+      <button id="btnFeedbackCancel" onclick="closeFeedback()">Cancelar</button>
+      <button id="btnFeedbackSend" onclick="sendFeedback()">Enviar →</button>
+    </div>
+    <div id="feedbackMsg"></div>
+  </div>
+</div>
+
+<script>
+// ── FEEDBACK ──────────────────────────────────────────
+let _fbType = 'sugestão';
+
+function openFeedback() {
+  document.getElementById('feedbackOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('feedbackText').focus(), 100);
+}
+
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('feedbackText').value = '';
+  document.getElementById('feedbackMsg').style.display = 'none';
+  // reset tipo
+  document.querySelectorAll('.fb-type-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  _fbType = 'sugestão';
+}
+
+function closeFeedbackOutside(e) {
+  if (e.target === document.getElementById('feedbackOverlay')) closeFeedback();
+}
+
+function setFbType(el, type) {
+  _fbType = type;
+  document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function sendFeedback() {
+  const texto = document.getElementById('feedbackText').value.trim();
+  const msg   = document.getElementById('feedbackMsg');
+  const btn   = document.getElementById('btnFeedbackSend');
+
+  if (!texto) {
+    msg.textContent = 'Escreva algo antes de enviar.';
+    msg.style.color = '#f87171';
+    msg.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  try {
+    const client = typeof sb !== 'undefined' ? sb : null;
+    if (client) {
+      await client.from('feedbacks').insert({
+        tipo: _fbType,
+        mensagem: texto,
+        user_id: _currentUser?.id || null,
+        email: _currentUser?.email || null,
+        pagina: window.location.href,
+        criado_em: new Date().toISOString(),
+      });
+    }
+    msg.textContent = '✓ Enviado! Obrigado pelo feedback.';
+    msg.style.color = '#34d399';
+    msg.style.display = 'block';
+    btn.textContent = 'Enviado ✓';
+    setTimeout(() => closeFeedback(), 1800);
+  } catch(e) {
+    msg.textContent = 'Erro ao enviar. Tente novamente.';
+    msg.style.color = '#f87171';
+    msg.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Enviar →';
+  }
+}
+</script>
+
 </body>
 </html>
