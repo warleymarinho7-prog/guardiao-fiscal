@@ -7610,6 +7610,39 @@ async function eRunAll(){
   _eConsolidated=consolidated;
   _eSources=results;
 
+  // ── [v5] Salvar análise no Supabase (fire-and-forget) ────────────────────
+  // Não bloqueia a UI — erro silencioso para o usuário
+  if (_currentUser && sb) {
+    (async () => {
+      try {
+        const _nivel = consolidated.score >= 71 ? 'critico'
+                     : consolidated.score >= 46 ? 'elevado'
+                     : consolidated.score >= 21 ? 'atencao'
+                     : 'baixo';
+        const _payload = {
+          user_id:           _currentUser.id,
+          score:             consolidated.score,
+          nivel_risco:       _nivel,
+          perfil_usuario:    window._perfilUsuario || null,
+          renda_declarada:   window._rendaDeclaradaMensal || null,
+          total_creditos:    Math.round(consolidated.totalCredits || 0),
+          total_debitos:     Math.round(consolidated.totalDebits || 0),
+          total_txns:        consolidated.totalTxns || 0,
+          pix_total:         Math.round(consolidated.pixTotal || 0),
+          especie_total:     Math.round(consolidated.especieTotal || 0),
+          num_alertas:       (consolidated.alerts || []).length,
+          num_fontes:        results.length,
+          versao_engine:     'v8.0',
+          created_at:        new Date().toISOString(),
+        };
+        await sb.from('analyses').insert(_payload);
+      } catch(e) {
+        console.warn('[GuardiaoFiscal] analyses insert falhou:', e.message);
+      }
+    })();
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   // Preenche preview com dados REAIS
   eRenderPreview(consolidated, results);
 
@@ -7852,6 +7885,14 @@ async function eUnlockResult(){
   eActiveBankTab='all';
   document.getElementById('pDbgPre').textContent=`Motor: v8.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
+  // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
+  setTimeout(() => {
+    if (!document.getElementById('gFeedbackCard') && typeof gRenderFeedbackCard === 'function') {
+      const target = document.getElementById('pAlertList')?.parentElement
+                  || document.getElementById('realResultBlock');
+      if (target) gRenderFeedbackCard(target, c);
+    }
+  }, 300);
 }
 
 function eSwitchBank(bank){
