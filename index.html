@@ -1761,9 +1761,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- ESQUERDA: copy + CTA -->
     <div class="split-left">
-      <div class="hero-tag">🛡️ Motor de análise fiscal · e-Financeira · LGPD</div>
-      <h1>Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em></h1>
-      <p>A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.</p>
+      <div class="hero-tag" id="heroTagDesktop"></div>
+      <h1 id="heroH1Desktop"></h1>
+      <p id="heroSubDesktop"></p>
       <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
         <span class="badge">🔒 Processamento 100% local</span>
         <span class="badge">📊 40+ verificações fiscais</span>
@@ -1953,16 +1953,16 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 
   <div class="hero">
-    <div class="hero-tag">🛡️ Motor de análise fiscal · e-Financeira · LGPD</div>
-    <h1>Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em></h1>
-    <p>A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.</p>
+    <div class="hero-tag" id="heroTagMobile"></div>
+    <h1 id="heroH1Mobile"></h1>
+    <p id="heroSubMobile"></p>
     <div class="hero-badges">
       <span class="badge">🔒 Processamento 100% local</span>
       <span class="badge">📊 40+ verificações fiscais</span>
       <span class="badge">✅ Grátis para começar</span>
     </div>
     <div style="margin-top:24px">
-      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">🔍 Verificar meu perfil fiscal →</button>
+      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
     </div>
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
@@ -2644,7 +2644,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <div class="page" id="page-planos">
   <div class="plans-page">
     <div class="page-title">Veja o que a Receita vê — antes dela.</div>
-    <div class="page-sub">Se existe uma inconsistência no seu extrato, o Guardião Fiscal encontra antes que vire problema.</div>
+    <div class="page-sub">Escolha como quer verificar sua situação — antes que a Receita identifique.</div>
 
     <div class="plans-grid">
 
@@ -2694,14 +2694,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div class="plan-feat"><span class="feat-icon">—</span> Monitoramento contínuo</div>
         </div>
         <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — <span id="planAvulsoCta"></span> →</button>
-        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
-          💡 Pelo mesmo valor você assina o Pro por 1 mês e faz análises ilimitadas
-        </div>
       </div>
 
       <!-- Pro -->
       <div class="plan-card featured">
-        <div class="plan-popular">⭐ MAIS POPULAR</div>
+        <div class="plan-popular">⭐ MELHOR CUSTO-BENEFÍCIO</div>
         <div class="plan-header">
           <div>
             <div class="plan-icon">🛡️</div>
@@ -3150,6 +3147,27 @@ function _loadJsPDF() {
 }
 </script>
 <script>
+// ═══════════════════════════════
+// HERO CONFIG — edite aqui para mudar o hero em desktop e mobile
+// Não altere o HTML diretamente.
+// ═══════════════════════════════
+const HERO_CONFIG = {
+  tag: '🛡️ Análise fiscal preventiva · e-Financeira · LGPD',
+  h1:  'Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em>',
+  sub: 'A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.',
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+  ['Desktop', 'Mobile'].forEach(function (s) {
+    const tag = document.getElementById('heroTag' + s);
+    const h1  = document.getElementById('heroH1' + s);
+    const sub = document.getElementById('heroSub' + s);
+    if (tag) tag.textContent  = HERO_CONFIG.tag;
+    if (h1)  h1.innerHTML     = HERO_CONFIG.h1;
+    if (sub) sub.textContent  = HERO_CONFIG.sub;
+  });
+});
+
 // ===== NAVIGATION =====
 function _applyPage(id) {
   const target = document.getElementById('page-' + id);
@@ -3298,7 +3316,7 @@ function initProFreeMode() {
     const ucPro = document.getElementById('ucProText');
     if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
     const popular = document.querySelector('.plan-popular');
-    if (popular) popular.textContent = '⭐ MAIS POPULAR';
+    if (popular) popular.textContent = '⭐ MELHOR CUSTO-BENEFÍCIO';
     return;
   }
   // Banner na página de planos
