@@ -2016,6 +2016,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
         </div>
         <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
+        <label id="termosCheck" style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:10px;padding:10px 12px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:8px">
+          <input type="checkbox" id="termosAceite" style="margin-top:3px;accent-color:#10b981;cursor:pointer;flex-shrink:0">
+          <span style="font-size:11px;color:var(--muted2);line-height:1.6">Li e concordo com os <a href="/termos-de-uso.html" target="_blank" style="color:#3b82f6">Termos de Uso</a> e a <a href="/politica-privacidade.html" target="_blank" style="color:#3b82f6">Política de Privacidade</a>, incluindo o processamento dos meus dados conforme descrito.</span>
+        </label>
         <button class="btn-next on" style="width:100%;margin-top:4px" onclick="extStep1Done()">
           <span id="extAuthBtnTxt">Criar conta e continuar →</span>
         </button>
@@ -4270,6 +4274,9 @@ async function extStep1Done() {
   if (_extTab === 'cad') {
     const email = capAuthInput(document.getElementById('extEmail').value.trim(), 'email');
     const senha = capAuthInput(document.getElementById('extSenha').value, 'senha');
+    // Validação do aceite de termos
+    const _termosEl = document.getElementById('termosAceite');
+    if (_termosEl && !_termosEl.checked) { err.textContent='Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.'; err.style.display='block'; return; }
     if (!email.includes('@') || senha.length < 8) { err.textContent='E-mail inválido ou senha com menos de 8 caracteres.'; err.style.display='block'; return; }
     const pwCheck = checkPasswordStrength(senha);
     if (!pwCheck.strong) { err.style.color='var(--red)'; err.textContent=`Senha fraca — adicione: ${pwCheck.failed.map(r=>r.msg).join(', ')}.`; err.style.display='block'; return; }
@@ -9110,6 +9117,58 @@ window.gFeedbackHistorico = function() {
 // extrato step 1 — handled by Supabase auth above
 
 
+</script>
+
+<!-- ── Banner de cookies ── -->
+<style>
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#111827;border-top:1px solid #1e2d40;padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:'Inter',sans-serif}
+#cookieBanner p{font-size:12px;color:#94a3b8;margin:0;flex:1;min-width:180px;line-height:1.5}
+#cookieBanner a{color:#3b82f6}
+.ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
+.ck-accept{background:#10b981;color:#000}
+.ck-reject{background:transparent;border:1px solid #263548!important;color:#64748b}
+#legalFooter{text-align:center;padding:20px 16px 32px;font-size:11px;color:#64748b;font-family:'Inter',sans-serif;border-top:1px solid #1e2d40;margin-top:40px}
+#legalFooter a{color:#64748b;text-decoration:none;margin:0 8px}
+#legalFooter a:hover{color:#94a3b8}
+</style>
+
+<div id="cookieBanner" style="display:none">
+  <p>Usamos cookies essenciais para autenticação e, com seu consentimento, cookies de analytics (Clarity) e marketing (Meta Pixel).
+  <a href="/politica-cookies.html" target="_blank">Saiba mais</a></p>
+  <button class="ck-btn ck-reject" onclick="ckReject()">Só essenciais</button>
+  <button class="ck-btn ck-accept" onclick="ckAccept()">Aceitar todos</button>
+</div>
+
+<div id="legalFooter">
+  © 2025 Guardião Fiscal · Ferramenta educacional — não substitui consultoria tributária
+  <br style="margin-bottom:6px">
+  <a href="/politica-privacidade.html" target="_blank">Política de Privacidade</a>
+  <a href="/termos-de-uso.html" target="_blank">Termos de Uso</a>
+  <a href="/politica-cookies.html" target="_blank">Cookies</a>
+  <a href="mailto:contato@oguardiaofiscal.com.br">Contato</a>
+</div>
+
+<script>
+(function(){
+  const consent = localStorage.getItem('gf_cookie_consent');
+  if (!consent) {
+    setTimeout(() => {
+      const b = document.getElementById('cookieBanner');
+      if (b) b.style.display = 'flex';
+    }, 1500);
+  } else if (consent === 'rejected') {
+    window.PIXEL_ATIVO = false;
+  }
+})();
+function ckAccept() {
+  localStorage.setItem('gf_cookie_consent', 'accepted');
+  document.getElementById('cookieBanner').style.display = 'none';
+}
+function ckReject() {
+  localStorage.setItem('gf_cookie_consent', 'rejected');
+  window.PIXEL_ATIVO = false;
+  document.getElementById('cookieBanner').style.display = 'none';
+}
 </script>
 </body>
 </html>
