@@ -2035,7 +2035,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <span id="extAuthBtnTxt">Criar conta e continuar →</span>
         </button>
         <div class="security-note" style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
-          🔒 Gratuito — sem cobrança neste passo
+          🔒 Seus dados ficam 100% no seu dispositivo
         </div>
       </div>
     </div>
@@ -2672,8 +2672,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <div class="plan-tagline">Análise completa quando precisar</div>
           </div>
           <div class="plan-price">
-            <div style="font-size:13px;text-decoration:line-through;opacity:0.5;font-family:Inter,sans-serif;font-weight:400;color:var(--muted2)">R$19,90</div>
-            <div class="plan-value" style="color:var(--green)" id="planAvulsoPrice">Gratuito</div>
+            <div class="plan-value" id="planAvulsoPrice">R$19,90</div>
             <div class="plan-period">uso único</div>
           </div>
         </div>
@@ -3251,7 +3250,7 @@ function switchSimTab(tab) {
 // ===== PREÇOS — fonte única de verdade =====
 // Para alterar qualquer preço, mude APENAS aqui.
 const PRICES = {
-  avulso: { value: 0, label: 'R$19,90', labelPromo: 'Gratuito' }, // value:0 = não cobra; label = preço real ancorado
+  avulso: { value: 19.90, label: 'R$19,90', labelPromo: 'R$19,90' }, // value:19.90 = cobra; cobrança ativa
   pro:    { value: 29.90, label: 'R$29,90' },
 };
 
@@ -3276,7 +3275,7 @@ let currentPlan = 'pro';
 function _initPrices() {
   const pr = PRICES.pro.label;
   // Avulso: preço riscado + "Gratuito" em destaque
-  const avHtml = `<span style="text-decoration:line-through;opacity:0.5;font-size:13px;font-weight:400">${PRICES.avulso.label}</span> <span style="color:var(--green)">Gratuito</span>`;
+  const avHtml = PRICES.avulso.label;
   ['splitAvulsoPrice1','splitAvulsoPrice2','paywallAvulsoPrice','planAvulsoCta']
     .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = avHtml; });
   ['splitProPrice1','splitProPrice2','planProPrice']
@@ -3359,30 +3358,6 @@ async function openCheckout(plan) {
       if (_eConsolidated) { eUnlockResult(); return; }
       showPage('extrato'); return;
     }
-  }
-
-  // AVULSO GRATUITO — bypass se value for 0
-  if (plan === 'avulso' && PRICES.avulso.value === 0) {
-    if (!_currentUser) {
-      currentPlan = plan;
-      setCheckoutStep(1);
-      closeAllOverlays();
-      document.getElementById('checkoutOverlay').classList.add('show');
-      document.getElementById('checkoutModal').scrollTop = 0;
-      document.body.style.overflow = 'hidden';
-      return;
-    }
-    if (_eConsolidated) {
-      closeCheckoutDirect();
-      eUnlockResult();
-    } else {
-      showPage('extrato');
-      setTimeout(() => {
-        const step2 = document.getElementById('extStep2');
-        if (step2) step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 150);
-    }
-    return;
   }
 
   // MODO PRO GRATUITO — bypass só para o plano Pro, nunca para avulso
@@ -7058,17 +7033,6 @@ function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=p
 async function eRunAll(){
   const ready=eFiles.filter(f=>f.status==='ok');
   if(ready.length===0)return;
-  // Se não está logado, mostra Step 1 inline antes de continuar
-  if(!_currentUser){
-    const s1=document.getElementById('extStep1');
-    if(s1){
-      s1.style.display='block';
-      s1.scrollIntoView({behavior:'smooth',block:'start'});
-      // Configura callback para retomar análise após login
-      window._pendingAnalysis=true;
-    }
-    return;
-  }
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   // Pixel — análise iniciada
@@ -7352,8 +7316,6 @@ function eRenderPreview(c, sources) {
 async function _verifyPlanBeforeUnlock() {
   // PRO_FREE_MODE ativo — libera sem verificar banco
   if (PRO_FREE_MODE) return true;
-  // Avulso gratuito (price = 0) — libera direto
-  if (PRICES?.avulso?.value === 0) return true;
   // Sem sessão — bloqueia
   if (!sb || !_currentUser) return false;
   try {
