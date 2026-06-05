@@ -211,17 +211,7 @@ nav {
   margin-bottom: 28px;
 }
 
-.hero-tag::before {
-  content: '';
-  width: 6px; height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-}
 
-@keyframes pulse {
-  0%,100% { opacity:1; transform:scale(1); }
-  50% { opacity:0.5; transform:scale(0.8); }
-}
 
 .hero h1 {
   font-family: 'Inter', sans-serif;
@@ -419,11 +409,7 @@ nav {
   padding:32px 24px; text-align:center;
   border-bottom:1px solid var(--border); position:relative;
 }
-.result-glow {
-  position:absolute; top:-80px; left:50%; transform:translateX(-50%);
-  width:280px; height:280px; border-radius:50%;
-  filter:blur(80px); opacity:0.1; pointer-events:none;
-}
+
 .result-sublabel { font-family:Inter,sans-serif; font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
 .result-level { font-family:Inter,sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
@@ -584,25 +570,6 @@ nav {
 .file-remove { font-size:12px; color:var(--muted); cursor:pointer; }
 .file-remove:hover { color:var(--red); }
 
-/* analyzing */
-.analyzing-block {
-  display:none; text-align:center; padding:8px 0 4px;
-}
-.analyzing-block.show { display:block; }
-.analyzing-bar {
-  height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:10px;
-}
-.analyzing-fill {
-  height:100%; background:var(--green); border-radius:2px;
-  animation:analyzeProgress 2.5s ease forwards;
-}
-@keyframes analyzeProgress {
-  0% { width:0%; }
-  60% { width:75%; }
-  90% { width:92%; }
-  100% { width:100%; }
-}
-.analyzing-label { font-size:12px; color:var(--muted2); font-family:Inter,sans-serif; }
 
 /* PAYWALL result */
 .paywall-result {
@@ -920,23 +887,15 @@ nav {
 /* ===== ANIMATIONS ===== */
 /* ===== PARSER V3 — MULTI-EXTRATO ===== */
 .drop-zone{border:2px dashed var(--border2);border-radius:12px;
-  padding:14px 16px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;
-  display:flex;align-items:center;justify-content:center;gap:10px}
+  padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
 .drop-zone:hover,.drop-zone.drag{border-color:rgba(0,217,110,0.5);background:rgba(0,217,110,0.03)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.dz-ico{font-size:24px;margin-bottom:0;display:block;flex-shrink:0}
-.dz-ttl{font-family:Inter,sans-serif;font-size:13px;font-weight:700;margin-bottom:2px}
-.dz-sub{font-size:11px;color:var(--muted2);margin-bottom:0;line-height:1.4}
+.dz-ico{font-size:36px;margin-bottom:10px;display:block}
+.dz-ttl{font-family:Inter,sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.dz-sub{font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.6}
 .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
 .chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
 .chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
-.limit-bar{display:flex;align-items:center;gap:10px;margin-top:16px;
-  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
-.limit-dots{display:flex;gap:5px}
-.ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
-  display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
-.ldot.used{background:rgba(0,217,110,0.15);border:1px solid rgba(0,217,110,0.3)}
-.ldot.full{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
 .limit-txt{font-size:12px;color:var(--muted2)}
 .limit-txt strong{color:var(--text);font-weight:600}
 .file-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
@@ -1307,7 +1266,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   gap: 8px;
   background: rgba(0,0,0,0.15);
 }
-.dash-dot { width: 10px; height: 10px; border-radius: 50%; }
 .dash-title {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -1441,10 +1399,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 3px 8px;
   border-radius: 5px;
   font-family: 'Inter', sans-serif;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.85); }
 }
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
@@ -2042,15 +1996,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
 
 
-    <!-- GUIA: Como baixar seu extrato — colapsado por padrão -->
-    <details id="guiaExtrato" style="margin-bottom:12px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-      <summary style="padding:12px 16px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:var(--text2);">
-        <span style="font-size:14px">📥</span>
-        <span>Como baixar meu extrato?</span>
-        <span style="margin-left:auto;font-size:11px;color:var(--muted2);font-weight:400">Nubank · Inter · BB · Itaú · Bradesco</span>
-        <span style="font-size:12px;color:var(--muted2)">▾</span>
-      </summary>
-      <div style="padding:0 16px 16px;">
+    <!-- GUIA: Como exportar seu extrato -->
+    <div id="guiaExtrato" style="margin-bottom:20px;">
+      <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">📥 Como baixar seu extrato</div>
 
       <!-- Abas dos bancos -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="guiaTabs">
@@ -2237,8 +2185,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
     </div>
-    </div>
-    </details>
 
     <script>
     function guiaTab(banco) {
@@ -2320,96 +2266,127 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             </button>
           </div>
 
-          <!-- Zona de arrastar -->
+          <!-- Zona de arrastar (mantida funcional) -->
           <div class="drop-zone" id="dz"
                ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)"
-               onclick="document.getElementById('efi').click()">
+               onclick="document.getElementById('efi').click()"
+               style="padding:18px;cursor:pointer">
             <span class="dz-ico" id="dzIco">📂</span>
-            <div style="text-align:left">
-              <div class="dz-ttl" id="dzTtl">Adicione mais ou clique em Analisar</div>
-              <div class="dz-sub">Até 5 extratos · bancos diferentes · análise consolidada</div>
+            <div class="dz-ttl" id="dzTtl">Ou arraste os arquivos aqui</div>
+            <div class="dz-sub">Até 5 extratos · bancos diferentes · análise consolidada</div>
+          </div>
+
+          <!-- Como exportar de cada banco -->
+          <details style="margin-top:12px">
+            <summary style="font-size:12px;color:var(--muted2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px">
+              <span style="font-size:14px">ℹ️</span>
+              <span>Como exportar o extrato do meu banco?</span>
+            </summary>
+            <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Nubank</strong><br>
+                App → Extrato → Exportar → CSV
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Inter</strong><br>
+                App → Extrato → Exportar planilha → CSV
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Itaú</strong><br>
+                Internet Banking → Extrato → Exportar OFX
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Bradesco</strong><br>
+                Internet Banking → Extrato → Arquivo OFX
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Banco do Brasil</strong><br>
+                Internet Banking → Extrato → Exportar CSV
+              </div>
+              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+                <strong style="color:var(--text);font-weight:600">Caixa / Santander</strong><br>
+                Internet Banking → Extrato → Salvar OFX
+              </div>
             </div>
+            <div style="margin-top:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
+              <strong style="color:var(--text);font-weight:600">Qualquer banco</strong> — Se o seu banco não estiver listado, exporte o extrato em PDF pelo internet banking ou aplicativo. Nossa engine extrai as transações automaticamente.
+            </div>
+          </details>
+        </div>
+        <!-- O que o motor detecta — reforço antes do upload -->
+        <div style="margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">// 40+ verificações automáticas</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
+            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
           </div>
         </div>
 
-        <!-- Contador de arquivos -->
-        <div class="limit-bar" id="limitBar" style="display:none">
-          <div class="limit-dots" id="ldots"></div>
-          <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos</div>
-          <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
+        <div id="limitBar" style="display:none">
+          <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos &nbsp;<span id="limitNote" style="font-size:11px;color:var(--muted2)"></span></div>
         </div>
         <div class="file-list" id="fileList"></div>
         <div class="err-ext" id="errExt"></div>
 
-        <!-- Analisar + renda + perfil — aparece após upload -->
-        <div class="act-bar" id="actBar" style="display:none;margin-top:12px;border-top:none;padding-left:0;padding-right:0">
-          <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
-          <span class="act-msg" id="actMsg">Pronto para analisar</span>
-          <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
-          <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;width:100%">
-            <label for="rendaDeclaradaInput" style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda declarada (opcional)</label>
-            <div style="position:relative;flex:1">
-              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
-              <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
-                style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box"
-                title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
+        <!-- Segurança e LGPD -->
+        <div style="margin-top:16px;padding:14px 16px;background:rgba(0,217,110,0.04);border:1px solid rgba(0,217,110,0.15);border-radius:10px">
+          <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Seus dados estão protegidos</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">100% local</strong> — o arquivo é lido diretamente no seu navegador</div>
             </div>
-          </div>
-          <div style="margin:4px 0 2px;width:100%">
-            <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:5px">Fonte de renda (opcional)</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="perfilBtns">
-              <button onclick="selecionarPerfil('clt',this)"
-                style="padding:7px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
-                🏢<br>CLT / Servidor
-              </button>
-              <button onclick="selecionarPerfil('mei',this)"
-                style="padding:7px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
-                🧾<br>MEI / Autônomo
-              </button>
-              <button onclick="selecionarPerfil('investidor',this)"
-                style="padding:7px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
-                📈<br>Investidor / Aposent.
-              </button>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">Sem upload</strong> — nenhum dado bancário é enviado a servidores</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">LGPD art. 13.709/2018</strong> — processamento conforme a lei</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
+              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">Não substitui contador</strong> — ferramenta educacional e preventiva</div>
             </div>
           </div>
         </div>
 
-        <!-- 40+ verificações — contexto, abaixo da ação -->
-        <div style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:8px">// 40+ verificações automáticas</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-            <div style="font-size:11px;color:var(--muted2);display:flex;gap:5px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
-            <div style="font-size:11px;color:var(--muted2);display:flex;gap:5px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
-            <div style="font-size:11px;color:var(--muted2);display:flex;gap:5px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
-            <div style="font-size:11px;color:var(--muted2);display:flex;gap:5px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
-            <div style="font-size:11px;color:var(--muted2);display:flex;gap:5px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
-            <div style="font-size:11px;color:var(--muted2);display:flex;gap:5px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
+      </div>
+      <div class="act-bar" id="actBar" style="display:none">
+        <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
+        <span class="act-msg" id="actMsg">Pronto para analisar</span>
+        <!-- Seletor de perfil — reduz falsos positivos no motor -->
+        <div style="margin:8px 0 6px;width:100%">
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px">Qual é a sua principal fonte de renda?</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="perfilBtns">
+            <button onclick="selecionarPerfil('clt',this)"
+              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
+              🏢<br>CLT / Servidor
+            </button>
+            <button onclick="selecionarPerfil('mei',this)"
+              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
+              🧾<br>MEI / Autônomo
+            </button>
+            <button onclick="selecionarPerfil('investidor',this)"
+              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
+              📈<br>Investidor / Aposent.
+            </button>
           </div>
         </div>
-
-        <!-- LGPD — rodapé informativo -->
-        <div style="margin-top:10px;padding:10px 14px;background:rgba(0,217,110,0.04);border:1px solid rgba(0,217,110,0.12);border-radius:10px">
-          <div style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px">Seus dados estão protegidos</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px">
-            <div style="display:flex;gap:5px;align-items:flex-start">
-              <span style="color:var(--green);font-size:12px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.4"><strong style="color:var(--text);font-weight:600">100% local</strong> — lido no navegador</div>
-            </div>
-            <div style="display:flex;gap:5px;align-items:flex-start">
-              <span style="color:var(--green);font-size:12px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.4"><strong style="color:var(--text);font-weight:600">Sem upload</strong> — nenhum dado enviado</div>
-            </div>
-            <div style="display:flex;gap:5px;align-items:flex-start">
-              <span style="color:var(--green);font-size:12px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.4"><strong style="color:var(--text);font-weight:600">LGPD</strong> art. 13.709/2018</div>
-            </div>
-            <div style="display:flex;gap:5px;align-items:flex-start">
-              <span style="color:var(--green);font-size:12px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.4"><strong style="color:var(--text);font-weight:600">Educacional</strong> — não substitui contador</div>
-            </div>
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;width:100%">
+          <label for="rendaDeclaradaInput" style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda mensal declarada (opcional)</label>
+          <div style="position:relative;flex:1">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
+            <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
+              style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box"
+              title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
           </div>
         </div>
-
+        <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
       </div>
     </div>
 
@@ -2538,6 +2515,73 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
   </div>
 
+  <!-- ── Seção de credibilidade (abaixo do fold) ── -->
+  <div style="max-width:min(600px,100%);margin:0 auto;padding:32px 16px 48px;box-sizing:border-box">
+    <div style="border-top:1px solid var(--border);padding-top:32px">
+
+      <!-- Scanner fiscal — título + descrição -->
+      <div style="margin-bottom:28px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-family:Inter,sans-serif">Scanner fiscal</div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita Federal. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
+      </div>
+
+      <!-- Grid 4 benefícios -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">🔍</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">⚠️</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">📊</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">📄</div>
+          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
+        </div>
+      </div>
+
+      <!-- O que a engine detecta -->
+      <div style="margin-bottom:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;font-family:Inter,sans-serif">// 40+ verificações automáticas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">A Receita Federal usa mais de 160 filtros automatizados para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira — antes da sua declaração ser entregue.</div>
+      </div>
+
+      <!-- LGPD detalhado + Metodologia -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:Inter,sans-serif">📋 Metodologia</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:Inter,sans-serif">🔒 Privacidade e LGPD</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>.</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
+          oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
+          Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
+          <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
+        </div>
+      </div>
+
+    </div>
+  </div>
 
 </div>
 
@@ -2656,72 +2700,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;color:#f87171;margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
         <div style="font-size:13px;color:var(--muted2);line-height:1.65">Após notificação da Receita Federal, multas e juros se aplicam automaticamente — e a retificação não elimina a penalidade. A análise preventiva custa menos de R$35.</div>
       </div>
-    </div>
-
-    <!-- Seção de credibilidade -->
-    <div style="border-top:1px solid var(--border);padding-top:32px;margin-top:40px">
-
-      <!-- Scanner fiscal -->
-      <div style="margin-bottom:28px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-family:Inter,sans-serif">Scanner fiscal</div>
-        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita Federal. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
-      </div>
-
-      <!-- Grid 4 benefícios -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">🔍</div>
-          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">⚠️</div>
-          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">📊</div>
-          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">📄</div>
-          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
-        </div>
-      </div>
-
-      <!-- 40+ verificações -->
-      <div style="margin-bottom:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;font-family:Inter,sans-serif">// 40+ verificações automáticas</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
-          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
-          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
-          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
-          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
-          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
-        </div>
-        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">A Receita Federal usa mais de 160 filtros automatizados para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira — antes da sua declaração ser entregue.</div>
-      </div>
-
-      <!-- Metodologia + LGPD -->
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:Inter,sans-serif">📋 Metodologia</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:Inter,sans-serif">🔒 Privacidade e LGPD</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>.</div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
-          oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
-          Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
-          <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
-        </div>
-      </div>
-
     </div>
 
   </div>
@@ -3263,13 +3241,6 @@ document.addEventListener('DOMContentLoaded', _initPrices);
 // ===== PRO FREE MODE FUNCTIONS =====
 const PRO_FREE_MODE = false; // avulso é gratuito, pro cobra R$29,90
 
-function showProFreeBanner() {
-  showPage('planos');
-  setTimeout(() => {
-    const banner = document.getElementById('proFreeBanner');
-    if (banner) { banner.style.display = 'block'; banner.scrollIntoView({behavior:'smooth',block:'start'}); }
-  }, 150);
-}
 
 function initProFreeMode() {
   if (!PRO_FREE_MODE) {
@@ -3287,15 +3258,6 @@ function initProFreeMode() {
     return;
   }
   // Banner na página de planos
-  const plansWrap = document.querySelector('#page-planos .plans-page');
-  if (plansWrap && !document.getElementById('proFreeBanner')) {
-    const banner = document.createElement('div');
-    banner.id = 'proFreeBanner';
-    banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
-    banner.innerHTML = '<div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
-    plansWrap.insertBefore(banner, plansWrap.firstChild);
-  }
-  // Atualiza badge aba extrato
   const badge = document.getElementById('extratoTabBadge');
   if (badge) { badge.textContent = 'PRO GRÁTIS'; badge.className = 'tbadge tbadge-green'; }
   // Atualiza botão Pro na página de planos
@@ -4574,7 +4536,7 @@ function revealResult(p, heroId, alertsId, isDesktop) {
 
   const rh = document.getElementById(heroId);
   if (rh) rh.innerHTML = `
-    <div class="result-glow" style="background:${color}"></div>
+
     <div style="padding:${isDesktop ? '28px 28px 16px' : '28px 20px 16px'}">
       <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center;font-family:Inter,sans-serif">// score de coerência fiscal</div>
       <div style="display:flex;${isDesktop ? 'align-items:center;gap:24px' : 'flex-direction:column;align-items:center;gap:12px'}">
@@ -4758,11 +4720,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // inicialização dos quiz cards já feita no listener DOMContentLoaded do engine
   if (typeof fbq === 'function') fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
-  // Anima o dashboard mockup no hero desktop
-  setTimeout(() => {
-    const bar = document.getElementById('mockBar');
-    if (bar) bar.style.width = '38%';
-  }, 600);
   // Restaura página via hash na URL (ex: após voltar/avançar do browser)
   const hashPage = window.location.hash.replace('#', '');
   const validPages = ['home', 'extrato', 'planos', 'institucional'];
@@ -4806,47 +4763,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Injeta banner personalizado após renderização da página
       setTimeout(() => {
-        const wrap = document.querySelector('#page-extrato .sim-wrap');
-        if (!wrap) return;
-
-        // Evita duplicar o banner em navegações repetidas
-        if (document.getElementById('quiz-welcome-banner')) return;
-
-        const banner = document.createElement('div');
-        banner.id = 'quiz-welcome-banner';
-        banner.style.cssText = [
-          'display:flex', 'align-items:flex-start', 'gap:12px',
-          'padding:14px 16px', 'margin-bottom:20px',
-          'background:rgba(59,130,246,0.07)',
-          'border:1px solid rgba(59,130,246,0.18)',
-          'border-radius:10px',
-          'font-size:13.5px', 'color:#e2e8f0',
-          'line-height:1.55', 'position:relative'
-        ].join(';');
-
-        banner.innerHTML = `
-          <span style="font-size:18px;flex-shrink:0;margin-top:1px">🔍</span>
-          <div style="flex:1">
-            <div style="font-weight:600;color:#f8fafc;margin-bottom:3px">Pré-análise concluída</div>
-            <div>Perfil: <strong style="color:#f8fafc">${perfilLabel}</strong> &nbsp;·&nbsp;
-            Nível: <strong style="color:${riscoColor}">${riscoLabel}</strong></div>
-            <div style="margin-top:6px;font-size:12.5px;color:#94a3b8">
-              Envie seu extrato bancário abaixo para ver a análise completa com seus dados reais.
-            </div>
-          </div>
-          <button
-            onclick="this.closest('#quiz-welcome-banner').remove()"
-            style="background:none;border:none;color:#64748b;cursor:pointer;font-size:18px;padding:0;flex-shrink:0;line-height:1"
-            aria-label="Fechar">×</button>
-        `;
-
-        wrap.insertBefore(banner, wrap.firstChild);
-
-        // Scroll suave até o banner
-        setTimeout(() => {
-          banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 150);
-
         // Pré-preenche email do cadastro se veio da landing com ?email=
         try {
           const emailParam = p.get('email');
@@ -7018,7 +6934,6 @@ function eRenderFileList(){
     document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'✅':'📂';
     document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
     document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
-    document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'✓':''}</div>`).join('');
   }else{lb.style.display='none';document.getElementById('dzIco').textContent='📂';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
 
