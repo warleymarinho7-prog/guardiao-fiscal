@@ -211,7 +211,17 @@ nav {
   margin-bottom: 28px;
 }
 
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
 
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.8); }
+}
 
 .hero h1 {
   font-family: 'Inter', sans-serif;
@@ -409,7 +419,11 @@ nav {
   padding:32px 24px; text-align:center;
   border-bottom:1px solid var(--border); position:relative;
 }
-
+.result-glow {
+  position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+  width:280px; height:280px; border-radius:50%;
+  filter:blur(80px); opacity:0.1; pointer-events:none;
+}
 .result-sublabel { font-family:Inter,sans-serif; font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
 .result-level { font-family:Inter,sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
@@ -570,6 +584,25 @@ nav {
 .file-remove { font-size:12px; color:var(--muted); cursor:pointer; }
 .file-remove:hover { color:var(--red); }
 
+/* analyzing */
+.analyzing-block {
+  display:none; text-align:center; padding:8px 0 4px;
+}
+.analyzing-block.show { display:block; }
+.analyzing-bar {
+  height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:10px;
+}
+.analyzing-fill {
+  height:100%; background:var(--green); border-radius:2px;
+  animation:analyzeProgress 2.5s ease forwards;
+}
+@keyframes analyzeProgress {
+  0% { width:0%; }
+  60% { width:75%; }
+  90% { width:92%; }
+  100% { width:100%; }
+}
+.analyzing-label { font-size:12px; color:var(--muted2); font-family:Inter,sans-serif; }
 
 /* PAYWALL result */
 .paywall-result {
@@ -896,6 +929,13 @@ nav {
 .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
 .chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
 .chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
+.limit-bar{display:flex;align-items:center;gap:10px;margin-top:16px;
+  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
+.limit-dots{display:flex;gap:5px}
+.ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
+.ldot.used{background:rgba(0,217,110,0.15);border:1px solid rgba(0,217,110,0.3)}
+.ldot.full{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
 .limit-txt{font-size:12px;color:var(--muted2)}
 .limit-txt strong{color:var(--text);font-weight:600}
 .file-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
@@ -1266,6 +1306,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   gap: 8px;
   background: rgba(0,0,0,0.15);
 }
+.dash-dot { width: 10px; height: 10px; border-radius: 50%; }
 .dash-title {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -1399,6 +1440,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 3px 8px;
   border-radius: 5px;
   font-family: 'Inter', sans-serif;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
 }
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
@@ -2326,8 +2371,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
         </div>
 
-        <div id="limitBar" style="display:none">
-          <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos &nbsp;<span id="limitNote" style="font-size:11px;color:var(--muted2)"></span></div>
+        <div class="limit-bar" id="limitBar" style="display:none">
+          <div class="limit-dots" id="ldots"></div>
+          <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos</div>
+          <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
         </div>
         <div class="file-list" id="fileList"></div>
         <div class="err-ext" id="errExt"></div>
@@ -3241,6 +3288,13 @@ document.addEventListener('DOMContentLoaded', _initPrices);
 // ===== PRO FREE MODE FUNCTIONS =====
 const PRO_FREE_MODE = false; // avulso é gratuito, pro cobra R$29,90
 
+function showProFreeBanner() {
+  showPage('planos');
+  setTimeout(() => {
+    const banner = document.getElementById('proFreeBanner');
+    if (banner) { banner.style.display = 'block'; banner.scrollIntoView({behavior:'smooth',block:'start'}); }
+  }, 150);
+}
 
 function initProFreeMode() {
   if (!PRO_FREE_MODE) {
@@ -3258,6 +3312,15 @@ function initProFreeMode() {
     return;
   }
   // Banner na página de planos
+  const plansWrap = document.querySelector('#page-planos .plans-page');
+  if (plansWrap && !document.getElementById('proFreeBanner')) {
+    const banner = document.createElement('div');
+    banner.id = 'proFreeBanner';
+    banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
+    banner.innerHTML = '<div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;color:#00d96e;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:#8fa8c8;line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
+    plansWrap.insertBefore(banner, plansWrap.firstChild);
+  }
+  // Atualiza badge aba extrato
   const badge = document.getElementById('extratoTabBadge');
   if (badge) { badge.textContent = 'PRO GRÁTIS'; badge.className = 'tbadge tbadge-green'; }
   // Atualiza botão Pro na página de planos
@@ -4510,8 +4573,8 @@ function revealResult(p, heroId, alertsId, isDesktop) {
   const DESCS = {
     baixo:   'Seu perfil não apresenta sinais evidentes de incompatibilidade com o declarado. Confirmar com o extrato real é a forma mais segura de garantir.',
     moderado:'Identificamos possíveis incompatibilidades para o seu perfil. Esses padrões são os mesmos que o e-Financeira usa para cruzar com sua declaração.',
-    elevado: 'Seu perfil ativou múltiplos critérios de atenção. Esses são os mesmos sinais que a Receita Federal cruza automaticamente com extratos bancários.',
-    critico: 'Seu perfil reúne as principais características que ativam cruzamento automático. A análise com extrato real precisa acontecer antes de uma notificação.',
+    elevado: 'As combinações do seu perfil são exatamente as que o sistema da Receita prioriza no cruzamento entre extrato e declaração. Sem verificar os dados reais, você não sabe o que o sistema já viu.',
+    critico: 'Seu perfil reúne as principais características que ativam cruzamento automático no e-Financeira. A análise com o extrato real precisa acontecer antes que uma notificação chegue.',
   };
 
   const color = CORES[p.nivel];
@@ -4536,7 +4599,7 @@ function revealResult(p, heroId, alertsId, isDesktop) {
 
   const rh = document.getElementById(heroId);
   if (rh) rh.innerHTML = `
-
+    <div class="result-glow" style="background:${color}"></div>
     <div style="padding:${isDesktop ? '28px 28px 16px' : '28px 20px 16px'}">
       <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;text-align:center;font-family:Inter,sans-serif">// score de coerência fiscal</div>
       <div style="display:flex;${isDesktop ? 'align-items:center;gap:24px' : 'flex-direction:column;align-items:center;gap:12px'}">
@@ -4619,9 +4682,8 @@ function revealResult(p, heroId, alertsId, isDesktop) {
       const ctaBlock = document.createElement('div');
       ctaBlock.style.cssText = 'margin-top:16px;opacity:0;transform:translateY(10px);transition:all 0.4s ease;box-sizing:border-box;width:100%';
       ctaBlock.innerHTML = `
-        <div style="font-size:12px;color:var(--muted2);line-height:1.6;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;box-sizing:border-box;word-break:break-word">
-          <strong style="color:var(--text2);display:block;margin-bottom:4px">// próximo passo</strong>
-          Faça o upload do seu extrato bancário. O motor verifica se esses fatores aparecem nos seus dados reais e gera um score preciso com os valores exatos.
+        <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px;box-sizing:border-box;word-break:break-word">
+          A análise real usa seu extrato para confirmar se esses padrões realmente aparecem — com os valores exatos que a Receita enxerga.
         </div>
         <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color};border:none;border-radius:12px;color:${p.nivel === 'baixo' || p.nivel === 'moderado' ? '#000' : '#fff'};font-family:Inter,sans-serif;font-size:clamp(13px,3.5vw,15px);font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em;box-sizing:border-box;word-break:break-word">${p.ctaCopy}</button>
         <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Seus arquivos são processados localmente · Nenhum dado enviado</div>`;
@@ -4720,6 +4782,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // inicialização dos quiz cards já feita no listener DOMContentLoaded do engine
   if (typeof fbq === 'function') fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
+  // Anima o dashboard mockup no hero desktop
+  setTimeout(() => {
+    const bar = document.getElementById('mockBar');
+    if (bar) bar.style.width = '38%';
+  }, 600);
   // Restaura página via hash na URL (ex: após voltar/avançar do browser)
   const hashPage = window.location.hash.replace('#', '');
   const validPages = ['home', 'extrato', 'planos', 'institucional'];
@@ -4763,6 +4830,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Injeta banner personalizado após renderização da página
       setTimeout(() => {
+        const wrap = document.querySelector('#page-extrato .sim-wrap');
+        if (!wrap) return;
+
+        // Evita duplicar o banner em navegações repetidas
+        if (document.getElementById('quiz-welcome-banner')) return;
+
+        const banner = document.createElement('div');
+        banner.id = 'quiz-welcome-banner';
+        banner.style.cssText = [
+          'display:flex', 'align-items:flex-start', 'gap:12px',
+          'padding:14px 16px', 'margin-bottom:20px',
+          'background:rgba(59,130,246,0.07)',
+          'border:1px solid rgba(59,130,246,0.18)',
+          'border-radius:10px',
+          'font-size:13.5px', 'color:#e2e8f0',
+          'line-height:1.55', 'position:relative'
+        ].join(';');
+
+        banner.innerHTML = `
+          <span style="font-size:18px;flex-shrink:0;margin-top:1px">🔍</span>
+          <div style="flex:1">
+            <div style="font-weight:600;color:#f8fafc;margin-bottom:3px">Pré-análise concluída</div>
+            <div>Perfil: <strong style="color:#f8fafc">${perfilLabel}</strong> &nbsp;·&nbsp;
+            Nível: <strong style="color:${riscoColor}">${riscoLabel}</strong></div>
+            <div style="margin-top:6px;font-size:12.5px;color:#94a3b8">
+              Envie seu extrato bancário abaixo para ver a análise completa com seus dados reais.
+            </div>
+          </div>
+          <button
+            onclick="this.closest('#quiz-welcome-banner').remove()"
+            style="background:none;border:none;color:#64748b;cursor:pointer;font-size:18px;padding:0;flex-shrink:0;line-height:1"
+            aria-label="Fechar">×</button>
+        `;
+
+        wrap.insertBefore(banner, wrap.firstChild);
+
+        // Scroll suave até o banner
+        setTimeout(() => {
+          banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+
         // Pré-preenche email do cadastro se veio da landing com ?email=
         try {
           const emailParam = p.get('email');
@@ -6934,6 +7042,7 @@ function eRenderFileList(){
     document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'✅':'📂';
     document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
     document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
+    document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'✓':''}</div>`).join('');
   }else{lb.style.display='none';document.getElementById('dzIco').textContent='📂';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
 
