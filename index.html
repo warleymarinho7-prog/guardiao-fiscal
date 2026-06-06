@@ -11,8 +11,113 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<title>Guardião Fiscal — Seu termômetro de risco fiscal</title>
-<meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique.">
+<title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
+<meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oguardiaofiscal.com.br/">
+
+<!-- Open Graph (WhatsApp, LinkedIn, Facebook) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oguardiaofiscal.com.br/">
+<meta property="og:site_name" content="Guardião Fiscal">
+<meta property="og:title" content="Guardião Fiscal — Descubra seu risco de cair na malha fina">
+<meta property="og:description" content="Seu extrato bancário contradiz sua declaração de IR? Descubra antes da Receita Federal. Análise preventiva de risco fiscal para pessoa física — gratuito e 100% privado.">
+<meta property="og:image" content="https://oguardiaofiscal.com.br/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Guardião Fiscal — Descubra seu risco de cair na malha fina">
+<meta name="twitter:description" content="Seu extrato bancário contradiz sua declaração de IR? Descubra antes da Receita Federal. Análise preventiva gratuita.">
+<meta name="twitter:image" content="https://oguardiaofiscal.com.br/og-image.png">
+
+<!-- Schema.org: SoftwareApplication -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Guardião Fiscal",
+  "url": "https://oguardiaofiscal.com.br",
+  "description": "Ferramenta de análise preventiva de risco fiscal para pessoa física. Identifica incompatibilidades entre movimentação bancária e declaração de Imposto de Renda antes que a Receita Federal atue.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "pt-BR",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Análise Gratuita",
+      "price": "0",
+      "priceCurrency": "BRL"
+    },
+    {
+      "@type": "Offer",
+      "name": "Análise Avulsa",
+      "price": "19.90",
+      "priceCurrency": "BRL"
+    },
+    {
+      "@type": "Offer",
+      "name": "Plano Pro",
+      "price": "29.90",
+      "priceCurrency": "BRL",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "billingDuration": 1,
+        "billingIncrement": "P1M"
+      }
+    }
+  ],
+  "provider": {
+    "@type": "Organization",
+    "name": "Guardião Fiscal",
+    "url": "https://oguardiaofiscal.com.br"
+  }
+}
+</script>
+
+<!-- Schema.org: FAQPage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "O que é malha fina?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Malha fina é o processo de retenção da declaração de Imposto de Renda pela Receita Federal quando há inconsistências entre o que foi declarado pelo contribuinte e as informações recebidas de outras fontes, como bancos, empregadores e operadoras de saúde."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Como saber se vou cair na malha fina?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A principal forma de identificar o risco antes da Receita Federal é analisar se sua movimentação bancária é compatível com a renda declarada. O Guardião Fiscal faz essa análise automaticamente a partir do seu extrato bancário, sem enviar seus dados para nenhum servidor."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O Guardião Fiscal é seguro?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. Todo o processamento do extrato bancário acontece diretamente no seu navegador, sem que os dados sejam enviados para nenhum servidor. O Guardião Fiscal não armazena nem tem acesso às suas informações financeiras."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quais bancos são compatíveis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O Guardião Fiscal aceita extratos em CSV dos principais bancos brasileiros (Nubank, Banco Inter, Banco do Brasil) e arquivos OFX compatíveis com qualquer instituição financeira."
+      }
+    }
+  ]
+}
+</script>
 <!-- Meta Pixel + Clarity — carregam apenas com consentimento -->
 <script>
 // Fila de eventos fbq antes do consentimento
