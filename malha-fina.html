@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Como Saber se Você Vai Cair na Malha Fina — Guardião Fiscal</title>
+<meta name="description" content="Entenda o que é malha fina, como a Receita Federal cruza dados bancários com sua declaração de IR, e como identificar seu risco antes de ser notificado.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oguardiaofiscal.com.br/malha-fina">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://oguardiaofiscal.com.br/malha-fina">
+<meta property="og:title" content="Como Saber se Você Vai Cair na Malha Fina">
+<meta property="og:description" content="Entenda o que é malha fina, como a Receita Federal cruza dados bancários com sua declaração de IR, e como identificar seu risco antes de ser notificado.">
+<meta property="og:image" content="https://oguardiaofiscal.com.br/og-image.png">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Guardião Fiscal">
+<meta property="article:published_time" content="2025-06-06">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Como Saber se Você Vai Cair na Malha Fina",
+  "description": "Entenda o que é malha fina, como a Receita Federal cruza dados bancários com sua declaração de IR, e como identificar seu risco antes de ser notificado.",
+  "url": "https://oguardiaofiscal.com.br/malha-fina",
+  "datePublished": "2025-06-06",
+  "dateModified": "2025-06-06",
+  "author": {
+    "@type": "Organization",
+    "name": "Guardião Fiscal",
+    "url": "https://oguardiaofiscal.com.br"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Guardião Fiscal",
+    "url": "https://oguardiaofiscal.com.br"
+  },
+  "inLanguage": "pt-BR",
+  "about": {
+    "@type": "Thing",
+    "name": "Malha Fina - Receita Federal"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Início", "item": "https://oguardiaofiscal.com.br/" },
+    { "@type": "ListItem", "position": 2, "name": "Malha Fina", "item": "https://oguardiaofiscal.com.br/malha-fina" }
+  ]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --azul: #0a1628;
+    --azul-medio: #0f2040;
+    --verde: #00d96e;
+    --verde-suave: rgba(0,217,110,0.12);
+    --laranja: #f5a623;
+    --vermelho: #ef4444;
+    --texto: #e8edf4;
+    --muted: #8899b4;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--azul);
+    color: var(--texto);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,22,40,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--verde);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-logo span { color: var(--texto); }
+  .nav-cta {
+    background: var(--verde); color: var(--azul);
+    padding: 8px 18px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    text-decoration: none;
+    transition: opacity .2s;
+  }
+  .nav-cta:hover { opacity: .85; }
+
+  /* ── HERO DO ARTIGO ── */
+  .article-hero {
+    padding: 64px 24px 48px;
+    max-width: 760px; margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .breadcrumb {
+    font-size: 13px; color: var(--muted);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a { color: var(--verde); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+
+  .article-tag {
+    display: inline-block;
+    background: var(--verde-suave);
+    color: var(--verde);
+    border: 1px solid rgba(0,217,110,0.25);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700; line-height: 1.18;
+    color: #fff; margin-bottom: 20px;
+  }
+
+  .article-lead {
+    font-size: 19px; color: var(--muted);
+    line-height: 1.65; margin-bottom: 28px;
+    border-left: 3px solid var(--verde);
+    padding-left: 20px;
+  }
+
+  .article-meta {
+    font-size: 13px; color: var(--muted);
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .article-meta strong { color: var(--texto); }
+
+  /* ── CONTEÚDO ── */
+  .article-body {
+    max-width: 760px; margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 600; color: #fff;
+    margin: 52px 0 16px;
+    padding-top: 8px;
+  }
+
+  h3 {
+    font-size: 18px; font-weight: 600;
+    color: var(--texto); margin: 32px 0 12px;
+  }
+
+  p { margin-bottom: 20px; color: #c8d4e4; }
+
+  strong { color: var(--texto); }
+
+  a { color: var(--verde); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 12px; padding: 20px 24px;
+    margin: 32px 0;
+    display: flex; gap: 16px;
+  }
+  .callout-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .callout-body { flex: 1; }
+  .callout-body strong { display: block; margin-bottom: 6px; font-size: 15px; }
+  .callout-body p { margin: 0; font-size: 15px; }
+
+  .callout.info {
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.25);
+  }
+  .callout.warning {
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.3);
+  }
+  .callout.danger {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+  }
+  .callout.success {
+    background: var(--verde-suave);
+    border: 1px solid rgba(0,217,110,0.25);
+  }
+
+  /* ── LISTA DE SINAIS ── */
+  .sinais-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px; margin: 28px 0;
+  }
+  .sinal-card {
+    background: var(--azul-medio);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .sinal-card .sinal-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .sinal-card h3 { font-size: 15px; margin: 0 0 8px; color: #fff; }
+  .sinal-card p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
+  .sinal-card.alto { border-top: 2px solid var(--vermelho); }
+  .sinal-card.medio { border-top: 2px solid var(--laranja); }
+  .sinal-card.baixo { border-top: 2px solid var(--verde); }
+
+  /* ── TABELA ── */
+  .tabela-wrapper { overflow-x: auto; margin: 28px 0; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead { background: rgba(255,255,255,0.04); }
+  th { padding: 12px 16px; text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  td { padding: 12px 16px; border-top: 1px solid var(--border); color: #c8d4e4; vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+  }
+  .badge.alto { background: rgba(239,68,68,.15); color: #f87171; }
+  .badge.medio { background: rgba(245,166,35,.15); color: var(--laranja); }
+  .badge.baixo { background: var(--verde-suave); color: var(--verde); }
+
+  /* ── CTA INLINE ── */
+  .cta-box {
+    background: linear-gradient(135deg, rgba(0,217,110,0.12) 0%, rgba(0,217,110,0.04) 100%);
+    border: 1px solid rgba(0,217,110,0.3);
+    border-radius: 16px; padding: 32px;
+    text-align: center; margin: 48px 0;
+  }
+  .cta-box h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px; color: #fff; margin-bottom: 12px;
+  }
+  .cta-box p { color: var(--muted); margin-bottom: 24px; font-size: 16px; }
+  .cta-btn {
+    display: inline-block;
+    background: var(--verde); color: var(--azul);
+    padding: 14px 32px; border-radius: 10px;
+    font-weight: 700; font-size: 16px;
+    text-decoration: none; transition: opacity .2s;
+  }
+  .cta-btn:hover { opacity: .85; text-decoration: none; }
+  .cta-note { font-size: 13px; color: var(--muted); margin-top: 12px; margin-bottom: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px; text-align: center;
+    font-size: 13px; color: var(--muted);
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--verde); }
+
+  @media (max-width: 600px) {
+    .article-hero { padding: 40px 20px 36px; }
+    .article-body { padding: 36px 20px 60px; }
+    .sinais-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="https://oguardiaofiscal.com.br/">
+    🛡 <span>Guardião Fiscal</span>
+  </a>
+  <a class="nav-cta" href="https://oguardiaofiscal.com.br/">Analisar meu extrato</a>
+</nav>
+
+<article>
+  <header class="article-hero">
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a href="https://oguardiaofiscal.com.br/">Início</a>
+      <span>›</span>
+      <span>Malha Fina</span>
+    </nav>
+
+    <span class="article-tag">Guia Fiscal</span>
+
+    <h1>Como Saber se Você Vai Cair na Malha Fina</h1>
+
+    <p class="article-lead">
+      A Receita Federal cruza automaticamente sua declaração de IR com dados de bancos, cartórios e empregadores. Entenda como funciona esse cruzamento e o que fazer para se antecipar.
+    </p>
+
+    <div class="article-meta">
+      <span>Por <strong>Guardião Fiscal</strong></span>
+      <span>·</span>
+      <span>Atualizado em <strong>junho de 2025</strong></span>
+      <span>·</span>
+      <span>Leitura: <strong>8 min</strong></span>
+    </div>
+  </header>
+
+  <div class="article-body">
+
+    <h2>O que é malha fina?</h2>
+
+    <p>Malha fina — tecnicamente chamada de <strong>malha fiscal</strong> — é o processo pelo qual a Receita Federal retém e audita declarações de Imposto de Renda que apresentam inconsistências. Não é uma punição automática: é uma sinalização de que algo não fechou no cruzamento de dados.</p>
+
+    <p>Cerca de <strong>1,5 milhão de declarações</strong> caem na malha fina a cada ano. A maioria por erros não intencionais: omissão de rendimento de segundo emprego, divergência com informe do plano de saúde, ou simplesmente rendimentos Pix que não foram declarados.</p>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">
+        <strong>Malha fina não é sinônimo de fraude</strong>
+        <p>Mais de 60% dos contribuintes em malha fina caem por erros não intencionais. O problema é que o processo de regularização pode levar meses e bloquear a restituição do IR.</p>
+      </div>
+    </div>
+
+    <h2>Como a Receita Federal cruza os dados</h2>
+
+    <p>Desde 2013, bancos, corretoras e instituições de pagamento são obrigados a reportar à Receita toda movimentação acima de <strong>R$ 5.000 por mês</strong> para pessoas físicas (Instrução Normativa RFB nº 1.571/2015). Isso inclui Pix, TED, DOC, depósitos em espécie e saques.</p>
+
+    <p>O sistema chama-se <strong>e-Financeira</strong>. Ele processa automaticamente os dados recebidos e compara com o que você declarou no IRPF. Se houver incompatibilidade relevante, sua declaração é sinalizada.</p>
+
+    <div class="tabela-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Fonte de dados</th>
+            <th>O que é reportado</th>
+            <th>Frequência</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bancos e fintechs</td>
+            <td>Movimentações mensais acima de R$ 5.000 (PF)</td>
+            <td>Semestral</td>
+          </tr>
+          <tr>
+            <td>Empregadores</td>
+            <td>Salários, 13º, férias, rescisões</td>
+            <td>Anual (DIRF)</td>
+          </tr>
+          <tr>
+            <td>Planos de saúde</td>
+            <td>Prêmios pagos e beneficiários</td>
+            <td>Anual</td>
+          </tr>
+          <tr>
+            <td>Cartórios</td>
+            <td>Escrituras de imóveis, transferências</td>
+            <td>Por operação</td>
+          </tr>
+          <tr>
+            <td>DETRAN</td>
+            <td>Transferências de veículos acima de R$ 30.000</td>
+            <td>Por operação</td>
+          </tr>
+          <tr>
+            <td>Corretoras</td>
+            <td>Rendimentos de renda fixa, dividendos, ganho de capital</td>
+            <td>Anual (Informe)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Principais motivos para cair na malha fina</h2>
+
+    <p>Com base nos relatórios anuais da Receita Federal, estes são os motivos mais frequentes de retenção em malha fiscal:</p>
+
+    <div class="sinais-grid">
+      <div class="sinal-card alto">
+        <div class="sinal-label">Risco alto</div>
+        <h3>Omissão de rendimentos</h3>
+        <p>Não declarar salário de emprego anterior, freelas recebidos via Pix ou rendimentos de segunda fonte pagadora.</p>
+      </div>
+      <div class="sinal-card alto">
+        <div class="sinal-label">Risco alto</div>
+        <h3>Movimentação incompatível com renda</h3>
+        <p>Receber R$ 30.000/mês via Pix e declarar renda de R$ 5.000. O e-Financeira detecta automaticamente essa divergência.</p>
+      </div>
+      <div class="sinal-card alto">
+        <div class="sinal-label">Risco alto</div>
+        <h3>Depósitos em espécie não declarados</h3>
+        <p>Depósitos em dinheiro físico sem origem declarada são um dos itens mais monitorados pelo COAF e pela Receita.</p>
+      </div>
+      <div class="sinal-card medio">
+        <div class="sinal-label">Risco médio</div>
+        <h3>Divergência com informe de plano de saúde</h3>
+        <p>Deduzir plano de saúde com valor diferente do informado pela operadora à Receita.</p>
+      </div>
+      <div class="sinal-card medio">
+        <div class="sinal-label">Risco médio</div>
+        <h3>Rendimentos de aluguel não declarados</h3>
+        <p>Contratos de locação registrados em cartório são cruzados automaticamente com a declaração.</p>
+      </div>
+      <div class="sinal-card baixo">
+        <div class="sinal-label">Risco baixo</div>
+        <h3>Erro de digitação nos informes</h3>
+        <p>Pequenas diferenças de centavos entre o informe recebido e o valor digitado na declaração.</p>
+      </div>
+    </div>
+
+    <h2>O que acontece quando você cai na malha fina</h2>
+
+    <p>Cair na malha fina <strong>não significa auto de infração imediato</strong>. O processo tem etapas:</p>
+
+    <p><strong>1. Retenção da declaração</strong> — sua declaração é retida para análise. A restituição (se houver) fica bloqueada.</p>
+
+    <p><strong>2. Notificação</strong> — a Receita envia uma notificação pelo e-CAC explicando o que foi identificado. Você tem prazo para responder.</p>
+
+    <p><strong>3. Regularização voluntária</strong> — você pode entregar documentação comprobatória ou enviar uma declaração retificadora. Se feita voluntariamente, a multa é menor (0,33% ao dia, limitada a 20%).</p>
+
+    <p><strong>4. Auto de infração</strong> — se não houver regularização, a Receita lança o auto de infração com multa de 75% a 150% do imposto devido, mais juros Selic.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Retificação espontânea reduz drasticamente a multa</strong>
+        <p>Quem se antecipa e retifica antes de ser notificado paga apenas a diferença do imposto mais juros Selic. Após a notificação, a multa mínima é de 75%.</p>
+      </div>
+    </div>
+
+    <h2>Como verificar se você está na malha fina agora</h2>
+
+    <p>Acesse o <strong>portal e-CAC</strong> da Receita Federal (eCAC.receita.fazenda.gov.br) com seu login Gov.br e consulte a situação da sua declaração em <em>Declarações e Demonstrativos → Extrato do IRPF</em>.</p>
+
+    <p>Se aparecer "Em Processamento" após 60 dias do envio, ou "Em Análise", sua declaração pode estar em malha.</p>
+
+    <h2>Como se antecipar: análise preventiva de risco</h2>
+
+    <p>A melhor defesa é entender <strong>o que a Receita enxerga no seu extrato bancário antes de você declarar</strong>. O cruzamento do e-Financeira é automático e acontece independente do que você declara — o que importa é que os números fechem.</p>
+
+    <p>O <strong>Guardião Fiscal</strong> reaplica a lógica do e-Financeira diretamente no seu extrato bancário, sem enviar nenhum dado para servidores. A análise acontece inteiramente no seu navegador e identifica os principais pontos de incompatibilidade antes que a Receita Federal os identifique por você.</p>
+
+    <div class="callout success">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <strong>Processamento 100% local</strong>
+        <p>Seu extrato nunca sai do seu dispositivo. O Guardião Fiscal processa tudo no navegador, sem armazenar ou transmitir nenhuma informação financeira.</p>
+      </div>
+    </div>
+
+    <div class="cta-box">
+      <h3>Descubra seu risco fiscal agora</h3>
+      <p>Importe seu extrato bancário e veja em minutos se sua movimentação é compatível com sua declaração de IR.</p>
+      <a class="cta-btn" href="https://oguardiaofiscal.com.br/">Analisar meu extrato — grátis</a>
+      <p class="cta-note">Sem cadastro. Sem envio de dados. Resultado em menos de 1 minuto.</p>
+    </div>
+
+    <h2>Perguntas frequentes</h2>
+
+    <h3>Recebimentos via Pix de amigos e familiares contam?</h3>
+    <p>Depende do contexto. Pix recebidos de mesma pessoa com frequência e valor regular são interpretados pelo sistema como possível prestação de serviço. Transferências entre familiares próximos, especialmente bidirecionais (você também envia para a mesma pessoa), têm peso menor na análise.</p>
+
+    <h3>Qual o valor mínimo que o banco reporta para a Receita?</h3>
+    <p>Bancos são obrigados a reportar movimentações mensais acima de <strong>R$ 5.000</strong> para pessoas físicas. Esse limite é sobre o total mensal — não por transação individual. Se você recebe 10 Pix de R$ 600, o total de R$ 6.000 é reportado.</p>
+
+    <h3>Quem não precisa declarar IR precisa se preocupar?</h3>
+    <p>Sim. A obrigação de reportar ao e-Financeira é dos bancos, independente de você ser ou não declarante do IR. Se você não declara mas tem movimentação relevante, pode ser notificado sobre a obrigatoriedade de declarar.</p>
+
+    <h3>Autônomo que recebe via Pix tem mais risco?</h3>
+    <p>Autônomos que recebem de múltiplos pagadores via Pix têm naturalmente um padrão de extrato mais complexo. O risco não é o Pix em si, mas a compatibilidade entre o volume recebido e o que é declarado como rendimento de trabalho autônomo (Carnê-Leão ou PGBL).</p>
+
+  </div>
+</article>
+
+<footer>
+  <p>
+    <a href="https://oguardiaofiscal.com.br/">Guardião Fiscal</a> ·
+    <a href="https://oguardiaofiscal.com.br/politica-de-privacidade">Política de Privacidade</a> ·
+    <a href="https://oguardiaofiscal.com.br/termos-de-uso">Termos de Uso</a>
+  </p>
+  <p style="margin-top:12px">© 2025 Guardião Fiscal. Ferramenta de análise preventiva — não substitui assessoria contábil ou jurídica.</p>
+</footer>
+
+</body>
+</html>
