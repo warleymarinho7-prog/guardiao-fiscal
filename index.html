@@ -49,40 +49,41 @@ document.addEventListener('DOMContentLoaded', _loadPixels);
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') _loadPixels(); });
 
 // ── PURCHASE EVENT (retorno Mercado Pago) ──────────────────────
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('mp') !== 'success') return;
 
-  const plan  = params.get('plan') ?? 'avulso';
+  const plan  = params.get('plan') || 'avulso';
   const value = plan === 'pro' ? 29.90 : 19.90;
 
-  // Garante que o Pixel esteja carregado antes de disparar
+  // Guarda pendência globalmente para ckAccept() usar se necessário
+  window._purchasePending = { plan: plan, value: value };
+
   function _firePurchase() {
+    if (!window._purchasePending) return; // já disparou
     if (typeof fbq === 'function') {
       fbq('track', 'Purchase', {
-        value:        value,
+        value:        window._purchasePending.value,
         currency:     'BRL',
-        content_name: 'Guardião Fiscal — ' + (plan === 'pro' ? 'Pro Mensal' : 'Avulso'),
+        content_name: 'Guardião Fiscal — ' + (window._purchasePending.plan === 'pro' ? 'Pro Mensal' : 'Avulso'),
         content_type: 'product',
       });
     }
+    window._purchasePending = null; // marca como disparado
   }
 
-  // Se pixel já carregou (consentimento prévio), dispara agora
-  if (window.PIXEL_ATIVO) {
-    _firePurchase();
-  } else {
-    // Aguarda até 3s pelo pixel (caso consentimento seja dado na mesma sessão)
-    let attempts = 0;
-    const interval = setInterval(function() {
-      if (window.PIXEL_ATIVO) { _firePurchase(); clearInterval(interval); }
-      if (++attempts >= 30) clearInterval(interval); // desiste após 3s
-    }, 100);
-  }
+  // Expõe para ckAccept() chamar após consentimento
+  window._firePurchase = _firePurchase;
 
-  // Limpa URL para não redisparar em reload
+  // Limpa URL imediatamente para não redisparar em reload
   window.history.replaceState({}, '', '/');
-});
+
+  // Se pixel já ativo (consentimento prévio), dispara direto
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.PIXEL_ATIVO) _firePurchase();
+    // Senão, aguarda consentimento via ckAccept() — sem timeout
+  });
+})();
 </script>
 <!-- Fim Pixel/Clarity -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%230ea5e9' opacity='0.15' stroke='%2338bdf8' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2338bdf8' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2338bdf8' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2338bdf8'/></svg>">
@@ -8709,6 +8710,8 @@ function ckAccept() {
   localStorage.setItem('gf_cookie_consent', 'accepted');
   document.getElementById('cookieBanner').style.display = 'none';
   if (typeof _loadPixels === 'function') _loadPixels(); // carrega pixels agora
+  // Dispara Purchase pendente (usuário voltou do MP sem consentimento prévio)
+  if (typeof window._firePurchase === 'function') window._firePurchase();
 }
 function ckReject() {
   localStorage.setItem('gf_cookie_consent', 'rejected');
