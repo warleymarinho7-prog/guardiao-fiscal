@@ -931,7 +931,7 @@ nav {
 .chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
 .limit-bar{display:flex;align-items:center;gap:10px;margin-top:16px;
   padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
-.limit-dots{display:flex;gap:5px}
+.limit-dots{display:none}
 .ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
   display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
 .ldot.used{background:rgba(0,217,110,0.15);border:1px solid rgba(0,217,110,0.3)}
@@ -2522,6 +2522,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="ov-sub" id="ovSub">—</div>
             </div>
           </div>
+          <!-- Causas principais — visíveis ANTES do score numérico (ponto 6 do roadmap) -->
+          <div id="pCausasTop" style="padding:0 16px 12px;box-sizing:border-box;width:100%;overflow:hidden"></div>
           <div class="p-score-wrap">
             <div class="p-score-row">
     <span class="p-score-lbl">Índice de risco fiscal consolidado</span>
@@ -5334,7 +5336,13 @@ function eParseInter(lines){
     const desc=iDesc>=0?c[iDesc]:c[1]||'';
     const label=[hist,desc].filter(Boolean).join(' — ').trim();
     const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-2]||c[c.length-1]);
-    return date&&label?{date,desc:label,value}:null;
+    if(!date||!label)return null;
+    // Extrai nome do remetente do formato Inter: "Cp :CNPJ-Nome Remetente"
+    // Permite que o motor identifique transferências do mesmo titular
+    let senderName = null;
+    const mInter = desc.match(/Cp\s*:\d+-(.+)/i);
+    if(mInter) senderName = mInter[1].trim().toUpperCase();
+    return {date, desc:label, value, senderName};
   }).filter(Boolean);
 }
 function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'',cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
@@ -5402,7 +5410,11 @@ const CAT = {
   invest:    ['btc','bitcoin','cripto','crypto','ethereum','xrp','usdt','binance','foxbit','mercado bitcoin','novadax','tesouro direto','tesouro selic','tesouro ipca','dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca','resgate rdb','resgate fundo','rendimento aplicacao','rendimento poupanca'],
   aluguel:   ['aluguel','locação','locacao','imóvel','imovel','alugar','locatário','locatario'],
   comercial: ['ifood','rappi','uber eats','99food','shopee','mercado livre','mercadolivre','ame digital','pagseguro','mercado pago','stone','cielo','getnet','rede ','sumup','ton ','pagar.me','venda','vend.','nota fiscal','nf-e','recebimento vendas','vendas online'],
+  // P04: equipamentos de criador de conteúdo — despesa profissional, não consumo pessoal
+  equip_creator: ['ring light','anel de luz','microfone','tripé','tripe','softbox','lente camera','lente câmera','estabilizador','drone dji','memoria sd','cartao sd','cabo hdmi','placa de video','placa de captura','mixer audio','interface audio'],
   especie:   ['saque','caixa eletronico','atm','deposito especie','dep especie','deposito em especie','dinheiro','cdas','cofre'],
+  // marcador interno: depósito espécie precedido de saque de valor similar no mesmo dia/dia anterior
+  // sera resolvido em applyInternalDetection via pares saque→especie
   interno:   ['entre contas','conta própria','conta propria','transferência interna','transf interna','tid própria','tid propria','portabilidade'],
   pix:       ['pix recebido','pix credit','recebido pix','pix enviado','pix debitado','chave pix'],
   transf:    ['transferência recebida','transferencia recebida','ted recebida','doc recebido','depósito recebido','deposito recebido','transf. recebida','transf recebida'],
@@ -5453,9 +5465,17 @@ const NATUREZA_KW = {
     'gratificacao','gratificação','adicional','bonificacao','bonificação',
   ],
   renda_capital: [
-    'dividendo','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca',
+    'dividendo','dividendos','jscp','jcp','rendimento fundo','resgate cdb','resgate lci','resgate lca',
     'resgate rdb','resgate fundo','rendimento aplicacao','rendimento poupanca',
     'tesouro direto','tesouro selic','tesouro ipca','btc','bitcoin','cripto','ethereum',
+    // P05: FII e ações — rendimentos de capital, isentos ou com tributação específica
+    'rendimento fii','fii rendimento','rendimento fiagro','rendimento cri','rendimento cra',
+    'proventos ações','proventos acoes','proventos fii','rendimento reit',
+    'venda acoes','venda ações','liquido venda','liq venda','liquido operacao',
+    'ganho capital','ganho de capital',
+    // Corretoras: créditos de operações — não são renda do trabalho
+    'xp investimentos','rico corretora','clear corretora','modal mais','btg pactual invest',
+    'avenue securities','nuinvest','inter invest',
   ],
   transf_propria: [
     'entre contas','conta própria','conta propria','transferência interna','transf interna',
@@ -5463,11 +5483,30 @@ const NATUREZA_KW = {
     'minha conta','meu banco','conta salario propria','conta digital propria',
     'nubank propria','inter propria','c6 propria','bradesco propria','itau propria',
     'santander propria','caixa propria','bb propria','sicoob propria','sicredi propria',
+    // P05: movimentações de conta investimento → não são renda nova
+    'ted corretora','ted retorno corretora','retorno corretora','aporte corretora',
+    'transferencia corretora','ted xp ','ted rico ','ted clear ','ted modal ','ted btg ',
+    'ted avenue','ted inter invest','ted nubank invest','ted itau invest',
+    'resgate corretora','aporte investimento','transferencia investimento',
+  ],
+  retirada_empresa: [
+    // P06: retiradas societárias com labels ambíguos — renda tributável não declarada
+    'antecipacao lucro','antecipação lucro','distribuicao lucro','distribuição lucro',
+    'retirada socio','retirada sócio','pro labore','pró labore','prolabore',
+    'sangria empresa','retirada empresa','distribuicao isenta','distribuição isenta',
+    'antecipacao de resultado','antecipação resultado',
   ],
   emprestimo: [
     'empréstimo','emprestimo','crédito pessoal','credito pessoal','financiamento recebido',
     'cdc ','fgts emprestimo','adiantamento salario','antecipação','antecipacao',
     'cheque especial','limite','liberação crédito','liberacao credito',
+    // empréstimo formalizado — não é renda nova
+    'ccb ','cédula de crédito','cedula de credito','cédula bancária','cedula bancaria',
+    'emprestimo bancario','empréstimo bancário','emprestimo consignado','empréstimo consignado',
+    'crédito consignado','credito consignado','refinanciamento','portabilidade credito',
+    'portabilidade crédito','emprestimo entre amigos','emprestimo familiar',
+    'contrato emprestimo','mutuo ','mútuo ','liberacao emprestimo','liberação empréstimo',
+    'credito liberado emprestimo','parcela emprestimo',
   ],
   devolucao_reembolso: [
     'reembolso','ressarcimento','devolução','devolucao','estorno','cancelamento',
@@ -5576,6 +5615,10 @@ function eClassifyTxn(t) {
     if (v >= 5000)  return { risk: 'suspicious', flag: 'Pix ≥ R$5k',  cat: 'pix', channel, natureza };
     if (v >= 2000)  return { risk: 'attention',  flag: 'Pix relevante', cat: 'pix', channel, natureza };
     if (v >= 500)   return { risk: 'attention',  flag: 'Pix', cat: 'pix', channel, natureza };
+    // PIX pequenos (< R$50): padrão de vaquinha/racha/grupo — baixo risco individual
+    // A recorrência desses valores entre MUITOS remetentes distintos
+    // é tratada em detectarRecorrencia com threshold mais alto
+    if (v < 50)     return { risk: 'normal', flag: null, cat: 'pix_pequeno', channel, natureza };
     return { risk: 'normal', flag: null, cat: 'pix', channel, natureza };
   }
 
@@ -5625,8 +5668,41 @@ function detectarRecorrencia(txns) {
   const _propKw = ['conta propria','conta própria','propria conta','nubank propria','inter propria',
                    'transferencia propria','transf propria','mesma titularidade','portabilidade'];
   const _isPropria = d => _propKw.some(k => (d||'').toLowerCase().includes(k));
+  // Remetentes bidirecionais: pessoas que aparecem como EMISSORES e RECEPTORES
+  // de PIX frequentemente = troca familiar/parceiro, não renda comercial
+  // Deduz pelo senderName se disponível, senão pela descrição normalizada
+  const _saldoLiqPorRemetente = {};
+  txns.forEach(t => {
+    const nome = t.senderName || normalizeDesc(t.desc).replace(/^pix\s+(recebido|enviado)\s*/i,'').slice(0,30);
+    if(!_saldoLiqPorRemetente[nome]) _saldoLiqPorRemetente[nome] = {cred:0, deb:0, count:0};
+    if(t.value > 0) { _saldoLiqPorRemetente[nome].cred += t.value; _saldoLiqPorRemetente[nome].count++; }
+    else            { _saldoLiqPorRemetente[nome].deb  += Math.abs(t.value); }
+  });
+  // Bidirecional: envia >= 30% do que recebe E recebe pelo menos R$500
+  const _isBidirecional = nome => {
+    const s = _saldoLiqPorRemetente[nome];
+    if(!s || s.cred < 500) return false;
+    return (s.deb / s.cred) >= 0.30;
+  };
+
   const grupos = {};
-  txns.filter((t, idx) => t.value > 0 && !_isFormal(t.desc) && !_crossBankIdx.has(idx) && !_isPropria(t.desc)).forEach(t => {
+  txns.filter((t, idx) => {
+    if(t.value <= 0) return false;
+    if(_isFormal(t.desc)) return false;
+    if(_crossBankIdx.has(idx)) return false;
+    if(_isPropria(t.desc)) return false;
+    // [fix-P05] Excluir créditos de investimento — dividendos/TED corretora/resgates não são atividade comercial
+    const _d = (t.desc||'').toLowerCase();
+    const _investKw = ['dividend','dividendo','fii','cri','cra','lci','lca','cdb','ltn','ntn','tesouro','ação','acao',
+      'ted recebida xp','ted recebida btg','ted recebida rico','ted recebida clear','ted recebida nu invest',
+      'resgate cdb','resgate lci','resgate lca','resgate renda fixa','rendimento investimento',
+      'investimentos cctvm','corretora','bolsa de valores','b3 '];
+    if(_investKw.some(k => _d.includes(k))) return false;
+    // Excluir remetentes bidirecionais — padrão familiar, não comercial
+    const nome = t.senderName || normalizeDesc(t.desc).replace(/^pix\s+(recebido|enviado)\s*/i,'').slice(0,30);
+    if(_isBidirecional(nome)) return false;
+    return true;
+  }).forEach(t => {
     const chave = t.desc.toLowerCase()
       .replace(/\d{2}\/\d{2}\/\d{4}/g, '')
       .replace(/\d{2}\/\d{2}/g, '')
@@ -5769,10 +5845,17 @@ function detectarSplitPix(txns) {
     const remetA = _extrairRemetente(a.desc);
     const remetB = _extrairRemetente(b.desc);
     const mesmoRemetente = remetA.length >= 3 && remetA === remetB;
+    // P01: exige similaridade de valor para ser split — valores muito distintos
+    // (ex: R$850 + R$120) são pagamentos separados, não split de R$970
+    const _menorVal = Math.min(a.value, b.value);
+    const _maiorVal = Math.max(a.value, b.value);
+    const _similaridade = _menorVal / _maiorVal; // 1.0 = idênticos, 0 = completamente distintos
+    const _eSplit = _similaridade >= 0.70; // exige pelo menos 70% de similaridade
     if (
       diffDays <= ENGINE_CONFIG.SPLIT_PIX_WINDOW &&
       valueDiff <= ENGINE_CONFIG.SPLIT_PIX_DELTA &&
-      mesmoRemetente
+      mesmoRemetente &&
+      _eSplit  // P01: não penaliza pagamentos distintos do mesmo cliente
     ) {
       series.push({ valores: [a.value, b.value], diffDays: Math.round(diffDays), remetente: remetA });
     }
@@ -5827,6 +5910,14 @@ function sameOwnerHeuristic(a, b) {
     const x = normalizeDesc(a.ownerName);
     const y = normalizeDesc(b.ownerName);
     if (x && y && x === y && x.length > 3) return true;
+  }
+
+  // 3b. senderName do Inter — nome extraído do campo "Cp :CNPJ-Nome"
+  // Se o remetente do crédito tem o mesmo nome que aparece nos débitos, é transferência própria
+  if (a.senderName && b.senderName) {
+    const sx = normalizeDesc(a.senderName);
+    const sy = normalizeDesc(b.senderName);
+    if (sx && sy && sx === sy && sx.length > 5) return true;
   }
 
   // 4. Descrições simétricas (TED enviada / TED recebida, mesmo valor)
@@ -5901,13 +5992,47 @@ function isInternalTransfer(txn, allTxns, _byValue) {
 // Aplica detecção interna no array de transações classificadas
 // Retorna array com campo internalMove e riskWeight ajustado
 function applyInternalDetection(classified) {
+  // P02: Detectar saque PJ → depósito espécie PF (janela 2 dias, valor ±5%)
+  // Marca depósitos em espécie que têm um saque de valor similar na janela como prováveis internos
+  const _saques = classified.filter(t =>
+    t.value < 0 &&
+    (normalizeDesc(t.desc).includes('saque') || normalizeDesc(t.desc).includes('caixa eletronico') || normalizeDesc(t.desc).includes('atm'))
+  );
+  const _depositos_especie = classified.filter(t =>
+    t.value > 0 && t.cat === 'especie'
+  );
+  const _especie_de_saque = new Set();
+  _depositos_especie.forEach((dep, di) => {
+    const depVal = dep.value;
+    const depTs  = dep.date instanceof Date ? dep.date.getTime() : 0;
+    for (const saq of _saques) {
+      const saqVal = Math.abs(saq.value);
+      const saqTs  = saq.date instanceof Date ? saq.date.getTime() : 0;
+      const diffDays = Math.abs(depTs - saqTs) / 86400000;
+      const diffPct  = Math.abs(depVal - saqVal) / saqVal;
+      if (diffDays <= 2 && diffPct <= 0.05) {
+        _especie_de_saque.add(di);
+        break;
+      }
+    }
+  });
   const _byValue = new Map();
   for (const t of classified) {
     const k = Math.abs(t.value).toFixed(2);
     if (!_byValue.has(k)) _byValue.set(k, []);
     _byValue.get(k).push(t);
   }
-  return classified.map(txn => {
+  return classified.map((txn, txnIdx) => {
+    // P02: depósito espécie originado de saque próprio — reduz peso de espécie
+    const _especieOrigem = _depositos_especie.indexOf(txn);
+    if (_especieOrigem >= 0 && _especie_de_saque.has(_especieOrigem)) {
+      return {
+        ...txn,
+        internalMove: 'probable',
+        riskWeight: 0.1,
+        flag: 'Depósito em espécie com saque de valor similar nos últimos 2 dias — provável movimentação própria',
+      };
+    }
     const result = isInternalTransfer(txn, classified, _byValue);
     if (!result) return txn;
 
@@ -6245,13 +6370,25 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada, perfilUsuario) {
   const _rendaCobreTotal   = _cobertura >= 0.8; // renda cobre 80%+ → F1 irrelevante
   const f1raw = Math.round(Math.min(30, infRatio * 30));
   const _circularidadeAlta = circularidade.length >= 3;
-  const f1 = _rendaCobreTotal
-    ? 0                                                // renda cobre 80%+: sem F1
-    : _rendaExplicaMovim
-      ? Math.min(8, Math.round(f1raw * 0.5))          // renda cobre 60%+: F1 reduzido
-      : _circularidadeAlta
-        ? Math.round(f1raw * 0.7)                     // circularidade captura parte
-        : f1raw;
+  // P03: CLT com renda extra — salário cobre o total mas há créditos extras de PF/PJ
+  // sem DARF. Não zerar F1 completamente se houver créditos de natureza "indefinida"
+  // de origens distintas do empregador (padrão de freelancer paralelo sem declaração)
+  const _temRendaExtra = (() => {
+    if (formalTotal <= 0) return false;
+    const _credExtras = creditsRisco.filter(t =>
+      t.cat !== 'formal' && t.natureza === 'indefinida' && t.value >= 300
+    );
+    return _credExtras.length >= 3; // 3+ créditos extras de natureza indefinida
+  })();
+  const f1 = _rendaCobreTotal && !_temRendaExtra
+    ? 0                                                // renda cobre 80%+ e sem extras: sem F1
+    : _rendaCobreTotal && _temRendaExtra
+      ? Math.min(12, Math.round(f1raw * 0.4))         // P03: CLT cobre mas há extras — F1 leve
+      : _rendaExplicaMovim
+        ? Math.min(8, Math.round(f1raw * 0.5))        // renda cobre 60%+: F1 reduzido
+        : _circularidadeAlta
+          ? Math.round(f1raw * 0.7)                   // circularidade captura parte
+          : f1raw;
   if (f1 > 0) {
     _fator(f1,
       `Foram identificados sinais compatíveis com possível omissão de rendimentos — ${Math.round(infRatio * 100)}% das entradas sem origem fiscal identificável`,
@@ -6379,6 +6516,17 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada, perfilUsuario) {
   }
 
   // F3 — Depósito em espécie
+  // P04: índice de consumo — excluir compras de equipamento profissional do cálculo
+  // iPhone, câmera, microfone etc. são ferramentas de trabalho de criadores de conteúdo
+  // Um mês de compra de equipamento não deve disparar anomalia temporal
+  const _debEquipCreator = classified.filter(t =>
+    t.value < 0 &&
+    (['ring light','anel de luz','microfone','tripé','tripe','softbox',
+      'lente camera','estabilizador','drone','placa de captura','interface audio',
+      'iphone','smartphone profissional'].some(k => normalizeDesc(t.desc).includes(k)))
+  ).reduce((a,t) => a + Math.abs(t.value), 0);
+  // Nota: _debEquipCreator é informativo — usado para contexto nos alertas
+
   const especieRatio = totalCredits > 0 ? especieTotal / totalCredits : 0;
   const _especieAlta = especieRatio > 0.3;
   const f3 = Math.round(Math.min(15, especieRatio * 60));
@@ -6580,11 +6728,14 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada, perfilUsuario) {
 
   // F6 — Investimentos e aluguel
   if (classified.some(t => t.flag === 'Investimento') && !_jaContado(['invest'])) {
-    _fator(8,
+    // [fix-P05] Investidor/aposentado: investimentos são renda esperada do perfil — peso zero, só aviso
+    const _f6InvestPeso = (perfilUsuario === 'investidor' || perfilUsuario === 'investidor_aposentado') ? 0 : 8;
+    const _f6InvestConf = (perfilUsuario === 'investidor' || perfilUsuario === 'investidor_aposentado') ? 0.4 : 0.75;
+    _fator(_f6InvestPeso,
       'Rendimentos de investimentos identificados no extrato',
       'Rendimentos de renda fixa, dividendos e ganhos de capital devem ser declarados separadamente no IR. A instituição financeira já reporta esses dados à Receita.',
       'Não é risco se os rendimentos já estiverem incluídos na declaração de IR.',
-      0.75,
+      _f6InvestConf,
       ['invest']
     );
   }
@@ -7376,6 +7527,39 @@ async function eUnlockResult(){
     <span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
     <span class="src-val">${fmtBRL(r.totalCredits)}</span>
     <span style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
+
+  // Causas principais — aparecem ANTES do score numérico para aumentar explicabilidade
+  const _causasEl = document.getElementById('pCausasTop');
+  if (_causasEl) {
+    const _todosF = (sources||[]).flatMap(r => r.fatores||[]).filter(f => f.peso > 0);
+    const _topF   = _todosF.sort((a,b) => b.peso - a.peso).slice(0, 3);
+    // Mapa de fundamento legal por fator — ponto 9 (o que a Receita já recebe)
+    const _fundamento = {
+      'F1_omissao_renda':    'A Receita já recebe informações bancárias via e-Financeira (IN RFB 1.571/2015). Créditos sem origem declarada são cruzados automaticamente.',
+      'F2_pix_limite':       'Bancos reportam à Receita toda movimentação Pix acima de R$5.000/mês (e-Financeira). Esse cruzamento é automático e independe de denúncia.',
+      'F3_especie':          'Depósitos em espécie são registrados pelos bancos e reportados ao Fisco. Valores acima de R$2.000/mês entram no radar automaticamente.',
+      'F4_comercial_oculta': 'Atividade econômica recorrente sem CNPJ ou nota fiscal é um dos principais gatilhos de fiscalização da Receita Federal (art. 7º Lei 7.713/88).',
+      'F5_anomalia_temporal':'Variação brusca de créditos entre meses é detectada pelo sistema de malha fina da Receita no cruzamento anual da DIRPF.',
+      'F7_compatibilidade':  'A Receita cruza sua renda declarada com a movimentação reportada pelos bancos. Incompatibilidade acima de 20% é gatilho automático de análise.',
+      'F8_conta_auxiliar':   'Movimentação expressiva em contas secundárias é consolidada pela e-Financeira junto com a conta principal do CPF.',
+    };
+    if (_topF.length > 0) {
+      _causasEl.innerHTML = `
+        <div style="background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 16px;margin-bottom:4px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:10px">// por que esse score</div>
+          ${_topF.map(f => {
+            const _fund = _fundamento[f.fatorKey] || '';
+            return `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;padding-bottom:8px;border-bottom:0.5px solid rgba(255,255,255,0.06);">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#f97316">+${f.peso}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:3px">${sanitize((f.motivo||'').split('.')[0])}</div>
+                ${_fund ? `<div style="font-size:11px;color:var(--muted2);line-height:1.5">${sanitize(_fund)}</div>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
+  }
 
   document.getElementById('pAlertList').innerHTML=c.alerts.map(a=>`
     <div class="pal ${a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu'}">
