@@ -2662,26 +2662,36 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
         <!-- resultado real (visível após pagamento) -->
         <div id="realResultBlock" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
-          <div class="ov-top">
+
+          <!-- BLOCO 1: Contexto pessoal -->
+          <div id="pContextoBlock" style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 16px;margin:0 0 10px;"></div>
+
+          <!-- BLOCO 2: Nível em linguagem humana -->
+          <div class="ov-top" style="margin-bottom:10px">
             <div class="ov-emoji" id="ovEmoji">🟡</div>
-            <div>
-    <div class="ov-level" id="ovLevel">—</div>
-    <div class="ov-sub" id="ovSub">—</div>
+            <div style="flex:1;min-width:0">
+              <div class="ov-level" id="ovLevel">—</div>
+              <div class="ov-sub" id="ovSub">—</div>
             </div>
           </div>
-          <!-- Causas principais — visíveis ANTES do score numérico (ponto 6 do roadmap) -->
-          <div id="pCausasTop" style="padding:0 16px 12px;box-sizing:border-box;width:100%;overflow:hidden"></div>
-          <div class="p-score-wrap">
+
+          <!-- BLOCO 3: Fatores com evidências e quandoNaoERisco em destaque -->
+          <div id="pFatoresList" style="padding:0 0 4px;box-sizing:border-box;width:100%;overflow:hidden"></div>
+
+          <!-- BLOCO 4: Score numérico — âncora final -->
+          <div class="p-score-wrap" style="margin-bottom:10px">
             <div class="p-score-row">
-    <span class="p-score-lbl">Índice de risco fiscal consolidado</span>
-    <span class="p-score-val" id="pScoreVal">0%</span>
+              <span class="p-score-lbl">Índice de risco fiscal consolidado</span>
+              <span class="p-score-val" id="pScoreVal">0%</span>
             </div>
             <div class="p-bar-bg"><div class="p-bar-fill" id="pBarFill" style="width:0%"></div></div>
           </div>
+
+          <!-- BLOCO 5: Stats detalhados (para quem quer se aprofundar) -->
           <div class="p-stats" id="pStatsGrid"></div>
           <div class="sources"><div class="src-ttl">// Extratos analisados</div><div class="src-list" id="srcList"></div></div>
           <div class="p-alerts" id="pAlertList" style="overflow:hidden;word-break:break-word"></div>
-          <div id="pFatoresList" style="padding:0 16px 16px;box-sizing:border-box;width:100%;overflow:hidden"></div>
+          <div id="pCausasTop" style="display:none"></div>
           <div class="bank-tabs" id="bankTabs"></div>
           <div class="p-txn-wrap">
             <div class="p-txn-hd">
@@ -7639,19 +7649,39 @@ async function eUnlockResult(){
   }
   document.getElementById('paywallBlock').style.display='none';
   document.getElementById('realResultBlock').style.display='block';
-  // Scroll suave até o resultado
   setTimeout(() => document.getElementById('realResultBlock').scrollIntoView({behavior:'smooth',block:'start'}), 100);
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
-  let emoji,level,color;
-  if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#00d96e';}
-  else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';}
-  else if(c.score<=70){emoji='🟠';level='NÍVEL DE ATENÇÃO';color='#f97316';}
-  else{emoji='🔴';level='REQUER ANÁLISE';color='#f04f60';}
+  let emoji,level,color,levelHumano;
+  if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#00d96e';levelHumano='Sua movimentação está dentro do padrão esperado.';}
+  else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';levelHumano='Encontramos pontos que merecem uma revisão.';}
+  else if(c.score<=70){emoji='🟠';level='RISCO ELEVADO';color='#f97316';levelHumano='Sua movimentação apresenta padrões que chamam atenção.';}
+  else{emoji='🔴';level='RISCO CRÍTICO';color='#f04f60';levelHumano='Sua movimentação tem inconsistências relevantes que precisam de atenção.';}
+
+  // ── BLOCO 1: Contexto pessoal ──
+  const totalMeses = sources.reduce((acc,r) => acc + (r.months||0), 0);
+  const mediaCreditos = totalMeses > 0 ? c.totalCredits / totalMeses : c.totalCredits;
+  const todosFatoresCtx = (sources||[]).flatMap(r => r.fatores||[]).filter(f => f.peso > 0);
+  const nPontos = todosFatoresCtx.length;
+  const ctxEl = document.getElementById('pContextoBlock');
+  if (ctxEl) {
+    ctxEl.innerHTML = `
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;font-family:Inter,sans-serif;margin-bottom:8px">// análise concluída</div>
+      <div style="font-size:14px;color:var(--text);line-height:1.6;">
+        Analisamos <strong>${sources.length} extrato(s)</strong>, <strong>${c.totalTxns} transações</strong> e <strong>${totalMeses} mês(es)</strong> de movimentação. Sua média de créditos foi <strong>${fmtBRL(mediaCreditos)}/mês</strong>.
+        ${nPontos > 0
+          ? `<span style="color:${color}"> Encontramos <strong>${nPontos} ponto(s)</strong> que podem chamar atenção.</span>`
+          : `<span style="color:var(--green)"> Nenhum padrão de risco identificado.</span>`}
+      </div>`;
+  }
+
+  // ── BLOCO 2: Nível em linguagem humana ──
   document.getElementById('ovEmoji').textContent=emoji;
   document.getElementById('ovLevel').textContent=level;
   document.getElementById('ovLevel').style.color=color;
-  document.getElementById('ovSub').textContent=`${sources.length} extrato(s) · ${c.totalTxns} transações · Motor fiscal v8`;
+  document.getElementById('ovSub').textContent=levelHumano;
+
+  // ── BLOCO 4: Score numérico ──
   document.getElementById('pScoreVal').textContent=c.score+'%';
   document.getElementById('pScoreVal').style.color=color;
   document.getElementById('pBarFill').style.background=color;
@@ -7675,38 +7705,16 @@ async function eUnlockResult(){
     <span class="src-val">${fmtBRL(r.totalCredits)}</span>
     <span style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
 
-  // Causas principais — aparecem ANTES do score numérico para aumentar explicabilidade
-  const _causasEl = document.getElementById('pCausasTop');
-  if (_causasEl) {
-    const _todosF = (sources||[]).flatMap(r => r.fatores||[]).filter(f => f.peso > 0);
-    const _topF   = _todosF.sort((a,b) => b.peso - a.peso).slice(0, 3);
-    // Mapa de fundamento legal por fator — ponto 9 (o que a Receita já recebe)
-    const _fundamento = {
-      'F1_omissao_renda':    'A Receita já recebe informações bancárias via e-Financeira (IN RFB 1.571/2015). Créditos sem origem declarada são cruzados automaticamente.',
-      'F2_pix_limite':       'Bancos reportam à Receita toda movimentação Pix acima de R$5.000/mês (e-Financeira). Esse cruzamento é automático e independe de denúncia.',
-      'F3_especie':          'Depósitos em espécie são registrados pelos bancos e reportados ao Fisco. Valores acima de R$2.000/mês entram no radar automaticamente.',
-      'F4_comercial_oculta': 'Atividade econômica recorrente sem CNPJ ou nota fiscal é um dos principais gatilhos de fiscalização da Receita Federal (art. 7º Lei 7.713/88).',
-      'F5_anomalia_temporal':'Variação brusca de créditos entre meses é detectada pelo sistema de malha fina da Receita no cruzamento anual da DIRPF.',
-      'F7_compatibilidade':  'A Receita cruza sua renda declarada com a movimentação reportada pelos bancos. Incompatibilidade acima de 20% é gatilho automático de análise.',
-      'F8_conta_auxiliar':   'Movimentação expressiva em contas secundárias é consolidada pela e-Financeira junto com a conta principal do CPF.',
-    };
-    if (_topF.length > 0) {
-      _causasEl.innerHTML = `
-        <div style="background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 16px;margin-bottom:4px;">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:10px">// por que esse score</div>
-          ${_topF.map(f => {
-            const _fund = _fundamento[f.fatorKey] || '';
-            return `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;padding-bottom:8px;border-bottom:0.5px solid rgba(255,255,255,0.06);">
-              <div style="width:28px;height:28px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#f97316">+${f.peso}</div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:3px">${sanitize((f.motivo||'').split('.')[0])}</div>
-                ${_fund ? `<div style="font-size:11px;color:var(--muted2);line-height:1.5">${sanitize(_fund)}</div>` : ''}
-              </div>
-            </div>`;
-          }).join('')}
-        </div>`;
-    }
-  }
+  // ── BLOCO 3: Fatores com evidências + quandoNaoERisco em destaque ──
+  const _fundamento = {
+    'F1_omissao_renda':    'A Receita já recebe informações bancárias via e-Financeira (IN RFB 1.571/2015). Créditos sem origem declarada são cruzados automaticamente.',
+    'F2_pix_limite':       'Bancos reportam à Receita toda movimentação Pix acima de R$5.000/mês (e-Financeira). Esse cruzamento é automático e independe de denúncia.',
+    'F3_especie':          'Depósitos em espécie são registrados pelos bancos e reportados ao Fisco. Valores acima de R$2.000/mês entram no radar automaticamente.',
+    'F4_comercial_oculta': 'Atividade econômica recorrente sem CNPJ ou nota fiscal é um dos principais gatilhos de fiscalização da Receita Federal (art. 7º Lei 7.713/88).',
+    'F5_anomalia_temporal':'Variação brusca de créditos entre meses é detectada pelo sistema de malha fina da Receita no cruzamento anual da DIRPF.',
+    'F7_compatibilidade':  'A Receita cruza sua renda declarada com a movimentação reportada pelos bancos. Incompatibilidade acima de 20% é gatilho automático de análise.',
+    'F8_conta_auxiliar':   'Movimentação expressiva em contas secundárias é consolidada pela e-Financeira junto com a conta principal do CPF.',
+  };
 
   document.getElementById('pAlertList').innerHTML=c.alerts.map(a=>`
     <div class="pal ${a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu'}">
@@ -7721,7 +7729,7 @@ async function eUnlockResult(){
     if (alertList) alertList.parentNode.insertBefore(avisoEl, alertList);
   }
 
-  // [v4-NEW] Fatores com evidências e confiança separada
+  // ── BLOCO 3: Fatores com evidências + quandoNaoERisco em destaque ──
   const todosFatores = (sources||[]).flatMap(r => r.fatores||[]).filter(f => f.peso > 0 || f.tipo === 'aviso');
   const fatoresOrdenados = todosFatores.sort((a,b) => b.peso - a.peso).slice(0, 6);
   const fatoresEl = document.getElementById('pFatoresList');
@@ -7729,19 +7737,21 @@ async function eUnlockResult(){
     fatoresEl.innerHTML = fatoresOrdenados.map(f => {
       const confPct = Math.round((f.confianca || 0) * 100);
       const confColor = confPct >= 80 ? 'var(--red)' : confPct >= 60 ? 'var(--yellow)' : 'var(--muted)';
+      const fund = _fundamento[f.fatorKey] || '';
       const evidHtml = (f.evidencias || []).map(e =>
-        `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:4px;">
-          <span style="color:${e.ok ? 'var(--red)' : 'var(--green)'};font-weight:700">${e.ok ? '✓' : '✗'}</span>
+        `<div style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">
+          <span style="color:${e.ok ? 'var(--red)' : 'var(--green)'};font-weight:700;flex-shrink:0">${e.ok ? '✓' : '✗'}</span>
           <span>${sanitize(e.texto)}</span>
         </div>`
       ).join('');
-      return `<div style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      return `<div style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:10px;">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
-          <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.4;flex:1">${sanitize(f.motivo)}</div>
-          ${confPct > 0 ? `<div style="font-size:10px;font-weight:700;color:${confColor};white-space:nowrap;padding:2px 7px;background:rgba(255,255,255,0.05);border-radius:4px;">Confiança ${confPct}%</div>` : ''}
+          <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;flex:1">${sanitize(f.motivo)}</div>
+          ${confPct > 0 ? `<div style="font-size:10px;font-weight:700;color:${confColor};white-space:nowrap;padding:2px 7px;background:rgba(255,255,255,0.05);border-radius:4px;flex-shrink:0">Confiança ${confPct}%</div>` : ''}
         </div>
+        ${fund ? `<div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:6px;">${sanitize(fund)}</div>` : ''}
         ${evidHtml}
-        ${f.quandoNaoERisco ? `<div style="font-size:11px;color:var(--muted2);margin-top:6px;padding-top:6px;border-top:0.5px solid rgba(255,255,255,0.06);line-height:1.4;">${sanitize(f.quandoNaoERisco)}</div>` : ''}
+        ${f.quandoNaoERisco ? `<div style="font-size:12px;color:var(--green);margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(0,217,110,0.07);border:0.5px solid rgba(0,217,110,0.2);line-height:1.5;"><strong style="font-weight:600">Pode não ser risco</strong> — ${sanitize(f.quandoNaoERisco)}</div>` : ''}
       </div>`;
     }).join('');
   }
