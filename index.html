@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v12.2.8 | 2026-06-07 -->
+<!-- Guardião Fiscal v12.2.9 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -2734,7 +2734,7 @@ function guiaTab(banco) {
           <div>
             <div class="plan-icon">📄</div>
             <div class="plan-name">Análise Avulsa</div>
-            <div class="plan-tagline">Análise completa quando precisar</div>
+            <div class="plan-tagline">Resultado disponível por 30 min · resumo salvo no histórico</div>
           </div>
           <div class="plan-price">
             <div class="plan-value" id="planAvulsoPrice">R$19,90</div>
@@ -2745,6 +2745,7 @@ function guiaTab(banco) {
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Gratuito</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análise completa do extrato bancário real</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score de risco com explicação causal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Resultado acessível por 30 minutos após a análise</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV, OFX e PDF (25 bancos)</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
         </div>
@@ -3321,7 +3322,7 @@ const PRICES = {
 const plans = {
   avulso: {
     icon: '📄', name: 'Análise Avulsa', desc: '1 análise completa por extrato + relatório PDF',
-    price: PRICES.avulso.label, period: 'uso único',
+    price: PRICES.avulso.label, period: 'uso único · 30 min de acesso',
     successMsg: 'Sua análise avulsa está ativa! Acesse "Extrato" no menu para fazer o upload e ver os resultados.'
   },
   pro: {
@@ -7685,7 +7686,7 @@ async function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.2.8\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.2.9\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
   // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
   setTimeout(() => {
