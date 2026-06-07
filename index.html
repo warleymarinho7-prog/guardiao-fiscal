@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v12.1.0 | 2026-06-07 -->
+<!-- Guardião Fiscal v12.1.4 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -2100,9 +2100,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <span class="badge">📊 40+ verificações fiscais</span>
       <span class="badge">✅ Grátis para começar</span>
     </div>
-    <div style="margin-top:24px">
-      <button onclick="document.getElementById('quizWrap').scrollIntoView({behavior:'smooth',block:'start'})" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:Inter,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
-    </div>
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
       <div style="text-align:center">
@@ -2449,93 +2446,38 @@ function guiaTab(banco) {
                  onchange="eOnSel(event)"
                  style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
 
-          <!-- Três botões de tipo -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-            <button onclick="document.getElementById('efi').click()"
-                    style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;color:var(--text)"
-                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
-                    onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
-              <span style="font-size:24px">📄</span>
-              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:700">PDF</span>
-              <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Extrato em PDF<br>de qualquer banco</span>
-            </button>
-            <button onclick="document.getElementById('efi').click()"
-                    style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;color:var(--text)"
-                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
-                    onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
-              <span style="font-size:24px">📊</span>
-              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:700">CSV</span>
-              <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Nubank, Inter<br>e outros bancos</span>
-            </button>
-            <button onclick="document.getElementById('efi').click()"
-                    style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;color:var(--text)"
-                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)';this.style.background='rgba(0,217,110,0.04)'"
-                    onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
-              <span style="font-size:24px">🏦</span>
-              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:700">OFX</span>
-              <span style="font-size:10px;color:var(--muted2);text-align:center;line-height:1.4">Itaú, Bradesco<br>BB, Caixa, Santander</span>
-            </button>
-          </div>
-
-          <!-- Zona de arrastar (mantida funcional) -->
+          <!-- Três botões de tipo + drop zone unificados e compactos -->
           <div class="drop-zone" id="dz"
                ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)"
                onclick="document.getElementById('efi').click()"
-               style="padding:18px;cursor:pointer">
-            <span class="dz-ico" id="dzIco">📂</span>
-            <div class="dz-ttl" id="dzTtl">Ou arraste os arquivos aqui</div>
-            <div class="dz-sub">Até 5 extratos · bancos diferentes · análise consolidada</div>
+               style="padding:14px 12px;cursor:pointer;margin-bottom:8px">
+            <span class="dz-ico" id="dzIco" style="font-size:22px">📂</span>
+            <div class="dz-ttl" id="dzTtl" style="font-size:13px;margin:4px 0 2px">Clique ou arraste seu extrato aqui</div>
+            <div class="dz-sub" style="font-size:11px">PDF · CSV · OFX · até 5 arquivos</div>
           </div>
-
-          <!-- Como exportar de cada banco -->
-          <details style="margin-top:12px">
-            <summary style="font-size:12px;color:var(--muted2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px">
-              <span style="font-size:14px">ℹ️</span>
-              <span>Como exportar o extrato do meu banco?</span>
-            </summary>
-            <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
-              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-                <strong style="color:var(--text);font-weight:600">Nubank</strong><br>
-                App → Extrato → Exportar → CSV
-              </div>
-              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-                <strong style="color:var(--text);font-weight:600">Inter</strong><br>
-                App → Extrato → Exportar planilha → CSV
-              </div>
-              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-                <strong style="color:var(--text);font-weight:600">Itaú</strong><br>
-                Internet Banking → Extrato → Exportar OFX
-              </div>
-              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-                <strong style="color:var(--text);font-weight:600">Bradesco</strong><br>
-                Internet Banking → Extrato → Arquivo OFX
-              </div>
-              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-                <strong style="color:var(--text);font-weight:600">Banco do Brasil</strong><br>
-                Internet Banking → Extrato → Exportar CSV
-              </div>
-              <div style="padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-                <strong style="color:var(--text);font-weight:600">Caixa / Santander</strong><br>
-                Internet Banking → Extrato → Salvar OFX
-              </div>
-            </div>
-            <div style="margin-top:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted2);line-height:1.6">
-              <strong style="color:var(--text);font-weight:600">Qualquer banco</strong> — Se o seu banco não estiver listado, exporte o extrato em PDF pelo internet banking ou aplicativo. Nossa engine extrai as transações automaticamente.
-            </div>
-          </details>
-        </div>
-        <!-- O que o motor detecta — reforço antes do upload -->
-        <div style="margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">// 40+ verificações automáticas</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
-            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
-            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
-            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
-            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
-            <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:4px">
+            <button onclick="document.getElementById('efi').click()"
+                    style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:15px">📄</span>
+              <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700">PDF</span>
+              <span style="font-size:10px;color:var(--muted2)">qualquer banco</span>
+            </button>
+            <button onclick="document.getElementById('efi').click()"
+                    style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:15px">📊</span>
+              <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700">CSV</span>
+              <span style="font-size:10px;color:var(--muted2)">Nubank, Inter</span>
+            </button>
+            <button onclick="document.getElementById('efi').click()"
+                    style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span style="font-size:15px">🏦</span>
+              <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700">OFX</span>
+              <span style="font-size:10px;color:var(--muted2)">Itaú, Bradesco</span>
+            </button>
           </div>
-        </div>
 
         <div class="limit-bar" id="limitBar" style="display:none">
           <div class="limit-dots" id="ldots"></div>
@@ -2544,31 +2486,6 @@ function guiaTab(banco) {
         </div>
         <div class="file-list" id="fileList"></div>
         <div class="err-ext" id="errExt"></div>
-
-        <!-- Segurança e LGPD -->
-        <div style="margin-top:16px;padding:14px 16px;background:rgba(0,217,110,0.04);border:1px solid rgba(0,217,110,0.15);border-radius:10px">
-          <div style="font-size:11px;font-family:Inter,sans-serif;font-weight:700;color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px">Seus dados estão protegidos</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px">
-            <div style="display:flex;gap:6px;align-items:flex-start">
-              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">100% local</strong> — o arquivo é lido diretamente no seu navegador</div>
-            </div>
-            <div style="display:flex;gap:6px;align-items:flex-start">
-              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">Sem upload</strong> — nenhum dado bancário é enviado a servidores</div>
-            </div>
-            <div style="display:flex;gap:6px;align-items:flex-start">
-              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">LGPD art. 13.709/2018</strong> — processamento conforme a lei</div>
-            </div>
-            <div style="display:flex;gap:6px;align-items:flex-start">
-              <span style="color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px">✓</span>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5"><strong style="color:var(--text);font-weight:600">Não substitui contador</strong> — ferramenta educacional e preventiva</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
       <div class="act-bar" id="actBar" style="display:none">
         <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
         <span class="act-msg" id="actMsg">Pronto para analisar</span>
@@ -2590,17 +2507,27 @@ function guiaTab(banco) {
             </button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px;width:100%">
-          <label for="rendaDeclaradaInput" style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap;cursor:pointer">Renda mensal declarada (opcional)</label>
-          <div style="position:relative;flex:1">
+        <div style="width:100%;margin:10px 0 4px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.25);border-radius:10px;padding:10px 12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:13px">🎯</span>
+            <label for="rendaDeclaradaInput" style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--green);cursor:pointer">Renda mensal declarada no IR</label>
+          </div>
+          <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;line-height:1.5">Preencher ativa a verificação de compatibilidade — o ponto mais sensível para a Receita.</div>
+          <div style="position:relative;">
             <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
             <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
-              style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box"
+              style="width:100%;padding:9px 10px 9px 28px;border:1px solid rgba(0,217,110,0.3);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box"
               title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
           </div>
         </div>
         <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
       </div>
+
+
+        </div>
+
+      </div>
+
     </div>
 
     <!-- STEP 3: resultado com paywall -->
@@ -4255,8 +4182,10 @@ function setUser(user) {
         const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
         const isExpired = expiresAt && expiresAt < new Date();
         // Se tem plano ativo e não expirou — libera acesso direto
-        if ((plano === 'pro' || plano === 'avulso') && !isExpired) {
-          _currentUser._plano = plano;
+        const _CREATOR = ['warleymarinho7@gmail.com'];
+        const isCreator = _currentUser && _CREATOR.includes(_currentUser.email);
+        if (isCreator || ((plano === 'pro' || plano === 'avulso') && !isExpired)) {
+          if (!isCreator) _currentUser._plano = plano;
           // Se já tem análise feita e está no extrato — desbloqueia resultado
           if (_eConsolidated) eUnlockResult();
         }
@@ -7788,7 +7717,7 @@ async function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.1.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.1.4\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
   // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
   setTimeout(() => {
