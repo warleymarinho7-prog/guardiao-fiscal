@@ -3841,7 +3841,7 @@ function showCheckoutSuccess() {
     `Seu acesso ao ${plan.name} foi ativado. Pode fechar este painel e usar a análise.`;
   // Pixel — Purchase (cartão aprovado)
   if(typeof fbq==='function') {
-    const valor = currentPlan==='pro' ? 29.90 : 0;
+    const valor = currentPlan==='pro' ? 29.90 : (PRICES?.avulso?.value ?? 19.90);
     fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_'+Date.now().toString() });
   }
   if (_eConsolidated) setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 2000);
@@ -9187,13 +9187,15 @@ async function sendFeedback() {
   try {
     const client = typeof sb !== 'undefined' ? sb : null;
     if (client) {
-      await client.from('feedbacks').insert({
-        tipo: _fbType,
-        mensagem: texto,
+      await client.from('guardiao_feedback').insert({
         user_id: _currentUser?.id || null,
-        email: _currentUser?.email || null,
-        pagina: window.location.href,
-        criado_em: new Date().toISOString(),
+        motivo: _fbType,
+        comentario: texto,
+        perfil_usuario: null,
+        score: null,
+        nivel: null,
+        meses_analisados: null,
+        fatores: { pagina: window.location.href, email: _currentUser?.email || null },
       });
     }
     msg.textContent = '✓ Enviado! Obrigado pelo feedback.';
