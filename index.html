@@ -163,25 +163,35 @@ document.addEventListener('visibilitychange', function(){ if(document.visibility
 
   window._purchasePending = { plan: plan, value: value };
 
+  // Limpa URL imediatamente
+  window.history.replaceState({}, '', '/');
+
   function _firePurchase() {
     if (!window._purchasePending) return;
-    if (typeof fbq === 'function') {
-      fbq('track', 'Purchase', {
-        value:        window._purchasePending.value,
-        currency:     'BRL',
-        content_name: 'Guardião Fiscal — ' + (window._purchasePending.plan === 'pro' ? 'Pro Mensal' : 'Avulso'),
-        content_type: 'product',
-      });
-    }
+    var p = window._purchasePending;
     window._purchasePending = null;
+    // Usa _fbqQueue: funciona mesmo antes do fbevents.js carregar.
+    // _loadPixels() drena a fila automaticamente ao inicializar o Pixel.
+    window._fbqQueue = window._fbqQueue || [];
+    window._fbqQueue.push(['track', 'Purchase', {
+      value:        p.value,
+      currency:     'BRL',
+      content_name: 'Guardiao Fiscal - ' + (p.plan === 'pro' ? 'Pro Mensal' : 'Avulso'),
+      content_type: 'product',
+    }]);
+    // Se Pixel ja ativo, drena agora
+    if (window.PIXEL_ATIVO && typeof fbq === 'function') {
+      var ev = window._fbqQueue.pop();
+      if (ev) fbq.apply(null, ev);
+    }
   }
 
   window._firePurchase = _firePurchase;
-  window.history.replaceState({}, '', '/');
 
+  // Caso 1: consentimento ja dado — dispara no DOMContentLoaded
   document.addEventListener('DOMContentLoaded', function() {
     if (window.PIXEL_ATIVO) _firePurchase();
-    // Senao dispara via ckAccept() quando usuario aceitar cookies
+    // Caso 2: sem consentimento — dispara via ckAccept()
   });
 })();
 </script>
@@ -8994,8 +9004,21 @@ function ckAccept() {
   localStorage.setItem('gf_cookie_consent', 'accepted');
   document.getElementById('cookieBanner').style.display = 'none';
   if (typeof _loadPixels === 'function') _loadPixels(); // carrega pixels agora
-  // Dispara Purchase pendente (usuario voltou do MP sem consentimento previo)
-  if (typeof window._firePurchase === 'function') window._firePurchase();
+  // Dispara Purchase pendente — aguarda o fbevents.js carregar (async)
+  if (typeof window._firePurchase === 'function') {
+    var _att = 0;
+    var _wait = setInterval(function() {
+      _att++;
+      // fbevents.js carregado E Pixel inicializado
+      if (window.PIXEL_ATIVO) {
+        clearInterval(_wait);
+        window._firePurchase();
+      } else if (_att >= 50) { // 5s maximo
+        clearInterval(_wait);
+        window._firePurchase(); // dispara mesmo assim (usa a fila _fbqQueue)
+      }
+    }, 100);
+  }
 }
 function ckReject() {
   localStorage.setItem('gf_cookie_consent', 'rejected');
