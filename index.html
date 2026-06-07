@@ -235,6 +235,16 @@ body { overflow-x: hidden; }
   /* Vermelho — risco crítico */
   --red: #FF4D4F;
 
+  /* Escala semafórica do motor de risco */
+  --risk-critico:  #FF4D4F;
+  --risk-elevado:  #f04f60;
+  --risk-moderado: #f97316;
+  --risk-atencao:  #F5A623;
+  --risk-baixo:    #7CFF4F;
+  --risk-text-red:    #f87171;
+  --risk-text-yellow: #fbbf24;
+  --risk-text-green:  #34d399;
+
   /* Hierarquia de texto */
   --text:   #FFFFFF;
   --text2:  #B8C0CC;
@@ -1309,7 +1319,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  background: #f97316;
+  background: var(--risk-moderado);
   border-radius: 3px 0 0 3px;
 }
 .res-fator-card--aviso::before { background: var(--yellow); }
@@ -1327,7 +1337,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   background: rgba(249,115,22,0.1);
   border: 1px solid rgba(249,115,22,0.25);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #f97316;
+  font-size: 11px; font-weight: 700; color: var(--risk-moderado);
   flex-shrink: 0;
 }
 .res-fator-titulo {
@@ -1438,8 +1448,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   white-space: nowrap;
   flex-shrink: 0;
 }
-.res-badge--critico  { background: rgba(240,79,96,0.12);  color: #f04f60;  border: 1px solid rgba(240,79,96,0.25); }
-.res-badge--moderado { background: rgba(249,115,22,0.12); color: #f97316;  border: 1px solid rgba(249,115,22,0.25); }
+.res-badge--critico  { background: rgba(255,77,79,0.12);   color: var(--risk-critico);  border: 1px solid rgba(255,77,79,0.25); }
+.res-badge--moderado { background: rgba(249,115,22,0.12); color: var(--risk-moderado); border: 1px solid rgba(249,115,22,0.25); }
 .res-badge--atencao  { background: rgba(245,166,35,0.12); color: #f5a623;  border: 1px solid rgba(245,166,35,0.25); }
 .res-badge--ok       { background: rgba(124,255,79,0.1);  color: var(--accent);  border: 1px solid rgba(124,255,79,0.2); }
 
@@ -1503,7 +1513,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .res-cat-btn.on-red {
   background: rgba(240,79,96,0.1);
   border-color: rgba(240,79,96,0.25);
-  color: #f04f60;
+  color: var(--risk-elevado);
 }
 
 /* ── Contadores nos filtros ── */
@@ -2465,11 +2475,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <span style="font-size:18px;flex-shrink:0">⚠️</span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Entradas sem origem identificada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Depósitos ou créditos sem descrição clara podem ser interpretados como renda não declarada.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,158,11,0.2);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:12px;padding:14px 16px">
         <span style="font-size:18px;flex-shrink:0">⚠️</span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Possível atividade comercial não declarada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Padrões recorrentes de recebimento de múltiplos pagadores sugerem prestação de serviços sem nota.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,158,11,0.2);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:12px;padding:14px 16px">
         <span style="font-size:18px;flex-shrink:0">⚠️</span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Volume financeiro acima do perfil declarado</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Movimentação total anual muito superior à renda do IR é um dos principais gatilhos de malha fina.</div></div>
       </div>
@@ -2477,7 +2487,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <span style="font-size:18px;flex-shrink:0">⚠️</span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Movimentação incompatível com rendimentos</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Picos atípicos em determinados meses — como uma rescisão não declarada — aparecem no cruzamento automático da Receita.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,158,11,0.2);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:12px;padding:14px 16px">
         <span style="font-size:18px;flex-shrink:0">⚠️</span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Receitas sem documentação aparente</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Créditos repetidos sem CNPJ remetente identificável são sinalizados como possível renda informal.</div></div>
       </div>
@@ -2503,14 +2513,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div>
             <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:4px">Score de Risco Fiscal</div>
-            <div style="font-size:36px;font-weight:800;color:#f97316;letter-spacing:-2px;font-family:var(--ff)">68%</div>
-            <div style="font-size:13px;font-weight:600;color:#f97316;margin-top:2px">⚠️ Risco Elevado</div>
+            <div style="font-size:36px;font-weight:800;color:var(--risk-elevado);letter-spacing:-2px;font-family:var(--ff)">68%</div>
+            <div style="font-size:13px;font-weight:600;color:var(--risk-elevado);margin-top:2px">⚠️ Risco Elevado</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Composição do risco</div>
             <div style="font-size:11px;color:var(--muted2);line-height:1.8">
               <span style="color:var(--red)">40%</span> entradas sem origem<br>
-              <span style="color:#f59e0b">15%</span> padrão comercial<br>
+              <span style="color:var(--risk-atencao)">15%</span> padrão comercial<br>
               <span style="color:#60a5fa">8%</span> volume Pix<br>
               <span style="color:var(--muted2)">5%</span> circularidade
             </div>
@@ -2538,7 +2548,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:16px">🚨</span>
               <div><div style="font-size:13px;font-weight:600;color:var(--text)">Pix recorrentes de múltiplos remetentes</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">23 recebimentos mensais compatíveis com prestação de serviços</div></div>
             </div>
-            <div style="display:flex;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px">
+            <div style="display:flex;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:12px">
               <span style="font-size:16px">⚠️</span>
               <div><div style="font-size:13px;font-weight:600;color:var(--text)">Volume acima do perfil declarado</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">Movimentação 3,2× superior à renda declarada no período</div></div>
             </div>
@@ -3005,12 +3015,16 @@ function guiaTab(banco) {
             <div id="pvAlerts" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
 
             <!-- Restante bloqueado — compacto, valor claro -->
-            <div style="background:var(--surface2);border:1px solid rgba(0,217,110,0.2);border-radius:12px;padding:14px;margin-top:6px">
-              <div style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:10px;text-align:center;font-weight:600">
-                Acesse a análise completa para ver cada transação e o motivo do risco.
+            <div style="background:var(--surface2);border:1px solid rgba(124,255,79,0.2);border-radius:12px;padding:14px;margin-top:6px">
+              <div id="paywallDynamicBadge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px">
+                🔒 Análise completa bloqueada
               </div>
-              <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:6px;white-space:normal;line-height:1.4;padding:12px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
+              <div id="paywallDynamicSub" style="font-size:12px;color:var(--muted2);line-height:1.5;margin-bottom:10px;text-align:center">
+                Veja cada fator de risco com os valores exatos do seu extrato.
+              </div>
+              <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:6px;white-space:normal;line-height:1.4;padding:14px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:var(--ff);font-size:13px;font-weight:800;cursor:pointer;box-shadow:var(--glow-green)">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
               <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--muted2);font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
+              <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">🔒 Nenhum dado enviado · Processamento local · Cancele quando quiser</div>
             </div>
 
           </div>
@@ -3282,7 +3296,7 @@ function guiaTab(banco) {
 
       <!-- Bloco de urgência -->
       <div style="margin-top:28px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:18px 20px;text-align:center">
-        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:#f87171;margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
+        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--risk-text-red);margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
         <div style="font-size:13px;color:var(--muted2);line-height:1.65">Após notificação da Receita Federal, multas e juros se aplicam automaticamente — e a retificação não elimina a penalidade. A análise preventiva custa menos de R$35.</div>
       </div>
     </div>
@@ -3356,14 +3370,14 @@ function guiaTab(banco) {
         <div style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
           <span style="font-size:16px">🚨</span>
           <div>
-            <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:#f87171">Incompatibilidade de renda detectada</div>
+            <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--risk-text-red)">Incompatibilidade de renda detectada</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Critério e-Financeira — peso alto no score</div>
           </div>
         </div>
         <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <span style="font-size:13px;color:var(--muted2)">Movimentação no período</span>
-            <span style="font-family:var(--ff);font-size:15px;font-weight:800;color:#f87171">R$ 84.000</span>
+            <span style="font-family:var(--ff);font-size:15px;font-weight:800;color:var(--risk-text-red)">R$ 84.000</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--border)">
             <span style="font-size:13px;color:var(--muted2)">Renda declarada (estimada)</span>
@@ -3371,11 +3385,11 @@ function guiaTab(banco) {
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:13px;color:var(--muted2)">Divergência detectada</span>
-            <span style="font-family:var(--ff);font-size:15px;font-weight:800;color:#f87171">+162%</span>
+            <span style="font-family:var(--ff);font-size:15px;font-weight:800;color:var(--risk-text-red)">+162%</span>
           </div>
         </div>
         <div style="background:rgba(239,68,68,0.04);border-top:1px solid rgba(239,68,68,0.1);padding:12px 18px">
-          <div style="font-size:12px;color:var(--muted2);line-height:1.6"><strong style="color:#f87171;font-weight:600">Recomendação:</strong> Verificar origem das entradas e reunir documentação comprobatória antes da declaração.</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.6"><strong style="color:var(--risk-text-red);font-weight:600">Recomendação:</strong> Verificar origem das entradas e reunir documentação comprobatória antes da declaração.</div>
         </div>
       </div>
 
@@ -3383,7 +3397,7 @@ function guiaTab(banco) {
         <div style="background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
           <span style="font-size:16px">⚠️</span>
           <div>
-            <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:#fbbf24">Padrão comercial recorrente detectado</div>
+            <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--risk-text-yellow)">Padrão comercial recorrente detectado</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Possível atividade sem nota fiscal</div>
           </div>
         </div>
@@ -4154,7 +4168,7 @@ async function startProSubscription() {
       btnEl.disabled = false;
       btnEl.onclick = function() { window.location.href = url; };
       if (errEl) {
-        errEl.style.cssText = 'display:block;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px;font-size:12px;color:#93c5fd;margin-bottom:12px';
+        errEl.style.cssText = 'display:block;background:rgba(255,77,79,0.08);border:1px solid rgba(255,77,79,0.2);border-radius:8px;padding:10px;font-size:12px;color:var(--muted2);margin-bottom:12px';
         errEl.innerHTML = '✅ Link gerado! Clique em <strong>Prosseguir no Mercado Pago</strong> para continuar.';
       }
     }
@@ -4330,7 +4344,7 @@ async function goToMercadoPago() {
     btnEl.disabled = false;
     btnEl.onclick = function() { window.open(url, '_blank') || (window.location.href = url); };
     if (errEl) {
-      errEl.style.cssText = 'display:block;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:10px;font-size:12px;color:#93c5fd;margin-bottom:12px';
+      errEl.style.cssText = 'display:block;background:rgba(255,77,79,0.08);border:1px solid rgba(255,77,79,0.2);border-radius:8px;padding:10px;font-size:12px;color:var(--muted2);margin-bottom:12px';
       errEl.innerHTML = '✅ Link gerado! Clique em <strong>Prosseguir no Mercado Pago</strong> para continuar.';
     }
 
@@ -4630,7 +4644,7 @@ function setUser(user) {
     nameEl.textContent = firstName;
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'nav-btn-login';
-    logoutBtn.style.cssText = 'background:rgba(255,100,100,0.08);border-color:rgba(255,100,100,0.2);color:#f87171;font-size:12px;padding:7px 14px';
+    logoutBtn.style.cssText = 'background:rgba(255,77,79,0.08);border-color:rgba(255,77,79,0.2);color:var(--red);font-size:12px;padding:7px 14px';
     logoutBtn.textContent = 'Sair';
     logoutBtn.onclick = doLogout;
     const wrap = document.createElement('div');
@@ -4895,7 +4909,7 @@ function renderPasswordMeter(containerId, senha) {
   if (!senha) { container.innerHTML = ''; return; }
   const { passed, total, rules } = checkPasswordStrength(senha);
   const pct = Math.round((passed / total) * 100);
-  const color = passed <= 2 ? '#f87171' : passed <= 3 ? '#f59e0b' : '#7CFF4F';
+  const color = passed <= 2 ? '#f87171' : passed <= 3 ? '#F5A623' : '#7CFF4F';
   const label = passed <= 2 ? 'Fraca' : passed <= 3 ? 'Razoável' : passed === 5 ? 'Excelente' : 'Boa';
   container.innerHTML = `
     <div style="margin-top:8px">
@@ -5074,7 +5088,13 @@ function selectProfile(id, bodyId) {
 }
 
 function revealResult(p, heroId, alertsId, isDesktop) {
-  const CORES = { baixo:'#7CFF4F', moderado:'#f5a623', elevado:'#f04f60', critico:'#FF4D4F' };
+  // Paleta de risco — espelha :root CSS vars
+const C_BAIXO    = '#7CFF4F';
+const C_ATENCAO  = '#F5A623';
+const C_MODERADO = '#f97316';
+const C_ELEVADO  = '#f04f60';
+const C_CRITICO  = '#FF4D4F';
+const CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critico: C_CRITICO };
   const LABELS = {
     baixo:   'Perfil compatível',
     moderado:'Sinais que merecem atenção',
@@ -5188,16 +5208,29 @@ function revealResult(p, heroId, alertsId, isDesktop) {
       </div>`;
     ra.appendChild(blurBlock);
 
-    // Próximo passo + CTA
+    // Próximo passo + CTA — dinâmico por nível de risco
     setTimeout(() => {
+      const URGENCIA = {
+        critico:  { badge: '🚨 Risco crítico detectado', sub: 'Seu perfil ativa cruzamento automático no e-Financeira. Confirme os valores reais antes que a Receita notifique.', btnColor: '#FF4D4F', btnText: '#fff', btnLabel: 'Ver os valores exatos no meu extrato →', trust: '⚡ Análise em menos de 2 min · sem envio de dados' },
+        elevado:  { badge: '⚠️ Atenção — risco elevado', sub: 'Identificamos padrões que a Receita prioriza no cruzamento. Veja quais transações específicas estão em risco.', btnColor: '#FF4D4F', btnText: '#fff', btnLabel: 'Ver quais transações estão em risco →', trust: '🔒 Extrato processado localmente · Nenhum dado sai do seu dispositivo' },
+        moderado: { badge: '🟡 Sinais que merecem atenção', sub: 'Esses padrões podem gerar inconsistência com sua declaração. Vale confirmar antes da Receita fazer o cruzamento.', btnColor: '#7CFF4F', btnText: '#000', btnLabel: 'Confirmar se minha movimentação está compatível →', trust: '🔒 Análise 100% local · Gratuito para começar' },
+        baixo:    { badge: '✅ Perfil com baixo risco', sub: 'Seu perfil não apresenta sinais críticos. Confirme com o extrato real para ter certeza antes da declaração.', btnColor: '#7CFF4F', btnText: '#000', btnLabel: 'Confirmar que está tudo certo no extrato →', trust: '🔒 Análise 100% local · Gratuito para começar' },
+      };
+      const u = URGENCIA[p.nivel] || URGENCIA.moderado;
+
       const ctaBlock = document.createElement('div');
       ctaBlock.style.cssText = 'margin-top:16px;opacity:0;transform:translateY(10px);transition:all 0.4s ease;box-sizing:border-box;width:100%';
       ctaBlock.innerHTML = `
-        <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px;box-sizing:border-box;word-break:break-word">
-          A análise real usa seu extrato para confirmar se esses padrões realmente aparecem — com os valores exatos que a Receita enxerga.
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;white-space:nowrap">
+          ${u.badge}
         </div>
-        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${color};border:none;border-radius:12px;color:${p.nivel === 'baixo' || p.nivel === 'moderado' ? '#000' : '#fff'};font-family:var(--ff);font-size:clamp(13px,3.5vw,15px);font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.01em;box-sizing:border-box;word-break:break-word">${p.ctaCopy}</button>
-        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Seus arquivos são processados localmente · Nenhum dado enviado</div>`;
+        <div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:14px;box-sizing:border-box;word-break:break-word">
+          ${u.sub}
+        </div>
+        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${u.btnColor};border:none;border-radius:12px;color:${u.btnText};font-family:var(--ff);font-size:clamp(13px,3.5vw,15px);font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:-0.01em;box-sizing:border-box;word-break:break-word;${(p.nivel==='critico'||p.nivel==='elevado') ? 'box-shadow:0 0 20px rgba(255,77,79,0.4)' : 'box-shadow:var(--glow-green)'}">
+          ${u.btnLabel}
+        </button>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">${u.trust}</div>`;
       ra.appendChild(ctaBlock);
       setTimeout(() => { ctaBlock.style.opacity='1'; ctaBlock.style.transform='translateY(0)'; }, 30);
     }, 300);
@@ -5271,9 +5304,9 @@ function openQuiz() {
     { type: 'green',  icon: '✅', label: 'Score de coerência fiscal',         val: '23/100 — perfil compatível' },
   ];
   const colors = {
-    red:    { bg: 'rgba(239,68,68,0.07)',   border: 'rgba(239,68,68,0.18)',   text: '#f87171' },
-    yellow: { bg: 'rgba(245,158,11,0.07)',  border: 'rgba(245,158,11,0.18)',  text: '#fbbf24' },
-    green:  { bg: 'rgba(16,185,129,0.07)',  border: 'rgba(16,185,129,0.18)', text: '#34d399' },
+    red:    { bg: 'rgba(255,77,79,0.07)',    border: 'rgba(255,77,79,0.18)',    text: '#f87171' },
+    yellow: { bg: 'rgba(245,166,35,0.07)',   border: 'rgba(245,166,35,0.18)',   text: '#fbbf24' },
+    green:  { bg: 'rgba(124,255,79,0.07)',   border: 'rgba(124,255,79,0.18)',   text: '#34d399' },
   };
   feed.innerHTML = items.map(d => {
     const c = colors[d.type];
@@ -5329,8 +5362,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const riscoColor = {
         baixo:    '#7CFF4F',
-        moderado: '#f59e0b',
-        elevado:  '#f97316',
+        moderado: C_ATENCAO,
+        elevado:  C_ELEVADO,
         critico:  'var(--red)'
       }[risco] || '#7CFF4F';
 
@@ -7913,14 +7946,44 @@ function eRenderPreview(c, sources) {
   let emoji, level, color;
   if (c.score <= 20)      { emoji='🟢'; level='BAIXO RISCO';   color='#7CFF4F'; }
   else if (c.score <= 45) { emoji='🟡'; level='ATENÇÃO';       color='#f5a623'; }
-  else if (c.score <= 70) { emoji='🟠'; level='RISCO ELEVADO'; color='#f97316'; }
-  else                    { emoji='🔴'; level='RISCO CRÍTICO'; color='#f04f60'; }
+  else if (c.score <= 70) { emoji='🟠'; level='RISCO ELEVADO'; color=C_ELEVADO; }
+  else                    { emoji='🔴'; level='RISCO CRÍTICO'; color=C_CRITICO; }
 
   document.getElementById('pvEmoji').textContent = emoji;
   document.getElementById('pvLevel').textContent = level;
   document.getElementById('pvLevel').style.color = color;
   document.getElementById('pvScore').textContent = c.score + '%';
   document.getElementById('pvScore').style.color = color;
+
+  // Atualiza copy do paywall dinamicamente pelo score real
+  (function _updatePaywallCopy(score) {
+    const badge = document.getElementById('paywallDynamicBadge');
+    const sub   = document.getElementById('paywallDynamicSub');
+    const proBtn = document.getElementById('paywallProText');
+    if (!badge || !sub) return;
+    if (score > 70) {
+      badge.innerHTML = '🚨 Risco crítico — ação necessária';
+      badge.style.color = '#FF4D4F';
+      badge.style.borderColor = 'rgba(255,77,79,0.3)';
+      sub.textContent = 'Seu extrato apresenta ' + score + '% de score de risco. Veja cada transação que ativou o alerta antes que a Receita notifique.';
+      if (proBtn) proBtn.textContent = 'Ver análise completa — R$29,90/mês';
+    } else if (score > 45) {
+      badge.innerHTML = '⚠️ Risco elevado — ' + score + '% de score';
+      badge.style.color = C_ELEVADO;
+      badge.style.borderColor = 'rgba(240,79,96,0.3)';
+      sub.textContent = 'Identificamos padrões no seu extrato que coincidem com os critérios de cruzamento do e-Financeira. Veja os detalhes.';
+    } else if (score > 20) {
+      badge.innerHTML = '🟡 Atenção — ' + score + '% de score';
+      badge.style.color = '#f5a623';
+      badge.style.borderColor = 'rgba(245,166,35,0.3)';
+      sub.textContent = 'Alguns fatores merecem atenção. Confirme se estão todos compatíveis com sua declaração de IR.';
+    } else {
+      badge.innerHTML = '✅ Baixo risco — ' + score + '% de score';
+      badge.style.color = '#7CFF4F';
+      badge.style.borderColor = 'rgba(124,255,79,0.3)';
+      sub.textContent = 'Perfil com baixo risco aparente. Acesse a análise completa para confirmar cada transação.';
+    }
+  })(c.score);
   const evidStr = c.numEvidencias !== undefined ? ' · ' + c.numEvidencias + ' indicador(es)' : '';
   const confStr = c.confidence !== undefined ? ' · confiança ' + Math.round(c.confidence * 100) + '%' : '';
   const parseStr = c.parserConfidence !== undefined ? ' · leitura ' + Math.round(c.parserConfidence * 100) + '%' : '';
@@ -8067,8 +8130,8 @@ async function eUnlockResult(){
   let emoji,level,color,levelHumano;
   if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#7CFF4F';levelHumano='Sua movimentação está dentro do padrão esperado.';}
   else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';levelHumano='Encontramos pontos que merecem uma revisão.';}
-  else if(c.score<=70){emoji='🟠';level='RISCO ELEVADO';color='#f97316';levelHumano='Sua movimentação apresenta padrões que chamam atenção.';}
-  else{emoji='🔴';level='RISCO CRÍTICO';color='#f04f60';levelHumano='Sua movimentação tem inconsistências relevantes que precisam de atenção.';}
+  else if(c.score<=70){emoji='🟠';level='RISCO ELEVADO';color=C_MODERADO;levelHumano='Sua movimentação apresenta padrões que chamam atenção.';}
+  else{emoji='🔴';level='RISCO CRÍTICO';color=C_CRITICO;levelHumano='Sua movimentação tem inconsistências relevantes que precisam de atenção.';}
 
   // Métricas
   const totalMeses = sources.reduce((acc,r)=>acc+(r.months||0),0);
@@ -8104,7 +8167,7 @@ async function eUnlockResult(){
         <span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${c.totalTxns} transações</span>
         <span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${totalMeses} mês(es)</span>
         ${nPontos>0
-          ? `<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-card);padding:4px 10px;color:#f97316;font-weight:600">${nPontos} ponto(s) de atenção</span>`
+          ? `<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-card);padding:4px 10px;color:var(--risk-moderado);font-weight:600">${nPontos} ponto(s) de atenção</span>`
           : `<span style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-card);padding:4px 10px;color:var(--accent);font-weight:600">✓ nenhum padrão de risco</span>`
         }
       </div>`;
@@ -8145,7 +8208,7 @@ async function eUnlockResult(){
       <span class="src-bank">${sanitize(r.bank)}</span>
       <span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
       <span class="src-val">${fmtBRL(r.totalCredits)}</span>
-      <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span>
+      <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?C_MODERADO:'var(--red)'}">${sanitize(String(r.score))}%</span>
     </div>`).join('');
 
   // ── BLOCO 4: Fatores de risco (redesenhados) ──
@@ -9510,7 +9573,7 @@ async function eCarregarHistorico() {
       return;
     }
 
-    const nivelCor = { baixo: '#7CFF4F', atencao: '#f5a623', elevado: '#f97316', critico: '#FF4D4F' };
+    const nivelCor = { baixo: C_BAIXO, atencao: C_ATENCAO, elevado: C_MODERADO, critico: C_CRITICO };
     const nivelLabel = { baixo: 'Baixo risco', atencao: 'Atenção', elevado: 'Elevado', critico: 'Crítico' };
     const perfilLabel = { clt: 'CLT / Servidor', mei: 'MEI / Autônomo', investidor: 'Investidor / Aposent.' };
 
@@ -9527,7 +9590,7 @@ async function eCarregarHistorico() {
       let fatoresHtml = '';
       fatores.forEach(function(f) {
         fatoresHtml += '<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06)">'
-          + '<div style="width:26px;height:26px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#f97316;flex-shrink:0">+'+f.peso+'</div>'
+          + '<div style="width:26px;height:26px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--risk-moderado);flex-shrink:0">+'+f.peso+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:2px">'+sanitize(f.motivo||'')+'</div>'
           + (f.quandoNaoERisco ? '<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;background:rgba(0,217,110,0.06);border-radius:6px;line-height:1.4"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>' : '')
