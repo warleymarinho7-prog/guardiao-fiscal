@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v12.1.7 | 2026-06-07 -->
+<!-- Guardião Fiscal v12.2.4 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -1142,7 +1142,7 @@ nav {
 .src-val{font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:var(--green)}
 .src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .p-alerts{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
-.pal{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;word-break:break-word;overflow:hidden}
+.pal{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.4;word-break:break-word;overflow:hidden}
 .pal-ico{font-size:15px;flex-shrink:0;margin-top:1px}
 .pal strong{font-weight:600;display:block;margin-bottom:1px}
 .p-red{background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.2)}
@@ -2523,7 +2523,7 @@ function guiaTab(banco) {
           <div id="previewReal" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
             <!-- Score e nível — VISÍVEL -->
-            <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:12px">
+            <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-bottom:8px">
     <div style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <div id="pvEmoji" style="font-size:32px;flex-shrink:0"></div>
@@ -2542,33 +2542,18 @@ function guiaTab(banco) {
             </div>
 
             <!-- Métricas rápidas — VISÍVEL -->
-            <div id="pvMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-bottom:12px;overflow:hidden"></div>
+            <div id="pvMetrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:5px;margin-bottom:8px;overflow:hidden"></div>
 
             <!-- 2 primeiros alertas — VISÍVEL -->
-            <div id="pvAlerts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+            <div id="pvAlerts" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
 
-            <!-- Restante bloqueado -->
-            <div style="position:relative;border-radius:14px;overflow:hidden">
-    <!-- preview borrada do que vem depois -->
-    <div style="filter:blur(5px);pointer-events:none;user-select:none;padding:16px;background:var(--surface2);border:1px solid var(--border);border-radius:14px">
-      <div style="height:12px;background:rgba(255,255,255,0.08);border-radius:6px;margin-bottom:8px;width:80%"></div>
-      <div style="height:12px;background:rgba(255,255,255,0.05);border-radius:6px;margin-bottom:8px;width:60%"></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <div style="height:40px;flex:1;background:rgba(248,113,113,0.12);border-radius:8px"></div>
-        <div style="height:40px;flex:1;background:rgba(245,158,11,0.1);border-radius:8px"></div>
-        <div style="height:40px;flex:1;background:rgba(59,130,246,0.08);border-radius:8px"></div>
-      </div>
-      <div style="height:12px;background:rgba(255,255,255,0.06);border-radius:6px;margin-top:12px;width:90%"></div>
-      <div style="height:12px;background:rgba(255,255,255,0.04);border-radius:6px;margin-top:6px;width:70%"></div>
-    </div>
-    <!-- overlay de lock -->
-    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(11,17,32,0.1) 0%,rgba(11,17,32,0.95) 50%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px;border-radius:14px">
-      <div style="font-size:24px;margin-bottom:6px">🔒</div>
-      <div style="font-family:Inter,sans-serif;font-size:14px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)">+<span id="pvLockedCount">3</span> alertas detalhados e lista completa de transações</div>
-      <div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:16px;line-height:1.5">Desbloqueie para ver cada transação de risco com valor exato, relatório PDF e orientação fiscal personalizada.</div>
-      <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:8px;white-space:normal;line-height:1.4;padding:13px 12px">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
-      <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:13px 12px">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
-    </div>
+            <!-- Restante bloqueado — compacto, valor claro -->
+            <div style="background:var(--surface2);border:1px solid rgba(0,217,110,0.2);border-radius:12px;padding:14px;margin-top:6px">
+              <div style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:10px;text-align:center;font-weight:600">
+                Acesse a análise completa para ver cada transação e o motivo do risco.
+              </div>
+              <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:6px;white-space:normal;line-height:1.4;padding:12px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
+              <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--muted2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
             </div>
 
           </div>
@@ -2725,7 +2710,7 @@ function guiaTab(banco) {
           <div>
             <div class="plan-icon">✦</div>
             <div class="plan-name">Gratuito</div>
-            <div class="plan-tagline">Diagnóstico inicial sem compromisso</div>
+            <div class="plan-tagline">Simulação inicial sem compromisso</div>
           </div>
           <div class="plan-price">
             <div class="plan-free">R$0</div>
@@ -2762,7 +2747,6 @@ function guiaTab(banco) {
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score de risco com explicação causal</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV, OFX e PDF (25 bancos)</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
-          <div class="plan-feat"><span class="feat-icon">—</span> Monitoramento contínuo</div>
         </div>
         <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — <span id="planAvulsoCta"></span> →</button>
       </div>
@@ -2783,10 +2767,10 @@ function guiaTab(banco) {
         </div>
         <div class="plan-features">
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Avulso</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas — monitore o ano todo</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas — até 5 extratos por análise</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Múltiplos extratos por análise (até 5 arquivos)</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico de risco — veja sua evolução fiscal</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Alertas proativos quando seu risco muda</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score atualizado a cada nova análise</div>
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF exportável</div>
         </div>
         <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Assinar Pro — R$29,90/mês →</span></button>
@@ -2816,7 +2800,6 @@ function guiaTab(banco) {
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Relatório PDF completo</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
             <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análises ilimitadas</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
             <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Múltiplos extratos por análise</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Monitoramento contínuo (ano todo)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
           </tbody>
         </table>
       </div>
@@ -5206,7 +5189,7 @@ function deduplicateCrossSource(allTxns) {
     return true;
   });
 }
-const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
+const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2}).format(isNaN(v)?0:v);
 const fmtDate=d=>d?d.toLocaleDateString('pt-BR'):'—';
 
 function eParseBRL(s){
@@ -6156,9 +6139,15 @@ function eAnalyzeSingle(txns, bank, rendaDeclarada, perfilUsuario) {
   // CLT: renda formal previsível → tolerância menor para anomalias
   // MEI/Autônomo: recebimentos variáveis são normais → tolerância maior para Pix recorrente e volume
   // Investidor/Aposentado: créditos de investimentos/benefícios → neutraliza F1 e F3
+  // Normaliza perfis do quiz para os 3 perfis do motor
+  const _perfilNorm = perfilUsuario === 'freelancer' ? 'mei'
+    : perfilUsuario === 'socio' ? 'mei'
+    : perfilUsuario === 'clt_extra' ? 'clt'
+    : perfilUsuario;
+
   const _perfilMult = {
-    pix:      perfilUsuario === 'mei' ? 1.5 : perfilUsuario === 'investidor' ? 1.4 : 1.0,
-    comercial: perfilUsuario === 'mei' ? 0.4 : perfilUsuario === 'investidor' ? 0.6 : 1.0,
+    pix:      _perfilNorm === 'mei' ? 1.5 : _perfilNorm === 'investidor' ? 1.4 : 1.0,
+    comercial: _perfilNorm === 'mei' ? 0.4 : _perfilNorm === 'investidor' ? 0.6 : 1.0,
     especie:  1.0, // espécie é suspeita em todos os perfis
     f7compat: perfilUsuario === 'investidor' ? 0.5 : 1.0, // aposentado/investidor tem créditos que não são renda trabalho
   };
@@ -7435,7 +7424,7 @@ function eRenderPreview(c, sources) {
   if (c.score <= 20)      { emoji='🟢'; level='BAIXO RISCO';   color='#00d96e'; }
   else if (c.score <= 45) { emoji='🟡'; level='ATENÇÃO';       color='#f5a623'; }
   else if (c.score <= 70) { emoji='🟠'; level='RISCO ELEVADO'; color='#f97316'; }
-  else                    { emoji='🔴'; level='ATENÇÃO ELEVADA'; color='#f04f60'; }
+  else                    { emoji='🔴'; level='RISCO CRÍTICO'; color='#f04f60'; }
 
   document.getElementById('pvEmoji').textContent = emoji;
   document.getElementById('pvLevel').textContent = level;
@@ -7455,6 +7444,12 @@ function eRenderPreview(c, sources) {
   // Métricas rápidas (4 cards)
   const pixPct = c.totalCredits > 0 ? Math.round(c.pixTotal / c.totalCredits * 100) : 0;
   const icConsumo = Math.round((c.indiceConsumo || 0) * 100);
+  // Threshold de Pix ajustado por perfil — MEI/freelancer/autônomo têm tolerância maior
+  const _perfil = window._perfilUsuario || c._usuario || null;
+  const _isMei = _perfil === 'mei' || _perfil === 'freelancer' || _perfil === 'socio';
+  const _isInv = _perfil === 'investidor';
+  const _pixRedLim  = _isMei ? 80 : _isInv ? 70 : 50;
+  const _pixYelLim  = _isMei ? 60 : _isInv ? 50 : 30;
   // BUG-6: aviso de extrato curto quando meses analisados < 3
   const _mesesMin = sources.reduce((min, r) => Math.min(min, r.mesesAnalisados || 12), 12);
   if (_mesesMin < 3 && c.rendaDeclarada > 0) {
@@ -7469,19 +7464,19 @@ function eRenderPreview(c, sources) {
     }
   }
   document.getElementById('pvMetrics').innerHTML = `
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
-      <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Total créditos</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Total créditos</div>
       <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:var(--green)">${fmtBRL(c.totalCredits)}</div>
       <div style="font-size:10px;color:var(--muted);margin-top:2px">${c.creditCount} entradas</div>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Suspeitos</div>
       <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div>
-      <div style="font-size:10px;color:var(--muted);margin-top:2px">transações de risco</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">de ${c.creditCount} entradas</div>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
       <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Pix recebidos</div>
-      <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${pixPct}%</div>
+      <div style="font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:${pixPct>=_pixRedLim?'var(--red)':pixPct>=_pixYelLim?'var(--yellow)':'var(--text)'}">${pixPct}%</div>
       <div style="font-size:10px;color:var(--muted);margin-top:2px">das entradas</div>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
@@ -7536,10 +7531,11 @@ function eRenderPreview(c, sources) {
 
   document.getElementById('pvAlerts').innerHTML = alertsVisiveis.map(a => {
     const cls = a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu';
+    const showText = a.type !== 'green'; // alertas verdes: só título, sem subtexto desnecessário
     return `<div class="pal ${cls}">
       <span class="pal-ico">${a.icon}</span>
-      <div><strong>${sanitize(a.title||'')}</strong><br>
-      <span style="font-size:12px;opacity:0.85">${sanitize(a.text||'')}</span></div>
+      <div><strong>${sanitize(a.title||'')}</strong>${showText ? `<br><span style="font-size:12px;opacity:0.85">${sanitize(a.text||'')}</span>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -7692,7 +7688,7 @@ async function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.1.7\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.2.4\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
   // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
   setTimeout(() => {
