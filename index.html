@@ -11,6 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<!-- Guardião Fiscal v12.1.0 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -2190,7 +2191,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- GUIA: Como exportar seu extrato -->
     <div id="guiaExtrato" style="margin-bottom:20px;">
-      <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">📥 Como baixar seu extrato</div>
+      <!-- Header clicável — accordion -->
+      <button onclick="toggleGuia()" id="guiaToggleBtn" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.10);border-radius:10px;padding:10px 14px;cursor:pointer;margin-bottom:0;font-family:Inter,sans-serif;">
+        <span style="font-size:12px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;">📥 Como baixar seu extrato</span>
+        <span id="guiaChevron" style="font-size:14px;color:var(--muted);transition:transform 0.2s;">▼</span>
+      </button>
+
+      <!-- Conteúdo colapsável -->
+      <div id="guiaConteudo" style="display:none;margin-top:10px;">
 
       <!-- Abas dos bancos -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="guiaTabs">
@@ -2379,7 +2387,17 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
 
     <script>
-    function guiaTab(banco) {
+    function toggleGuia() {
+  const conteudo = document.getElementById('guiaConteudo');
+  const chevron = document.getElementById('guiaChevron');
+  const btn = document.getElementById('guiaToggleBtn');
+  const aberto = conteudo.style.display !== 'none';
+  conteudo.style.display = aberto ? 'none' : 'block';
+  chevron.style.transform = aberto ? '' : 'rotate(180deg)';
+  btn.style.borderRadius = aberto ? '10px' : '10px 10px 0 0';
+  btn.style.borderBottom = aberto ? '' : '0.5px solid transparent';
+}
+function guiaTab(banco) {
       // Esconde todos
       document.querySelectorAll('.guia-content').forEach(el => el.style.display = 'none');
       // Reseta todas as abas
@@ -2408,6 +2426,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       btn.style.fontWeight = '700';
     }
     </script>
+      </div><!-- /guiaConteudo -->
     <!-- FIM GUIA -->
 
     <!-- STEP 2: upload multi-extrato -->
@@ -7624,6 +7643,9 @@ function eRenderPreview(c, sources) {
 async function _verifyPlanBeforeUnlock() {
   // PRO_FREE_MODE ativo — libera sem verificar banco
   if (PRO_FREE_MODE) return true;
+  // Acesso de criador — whitelist de email
+  const _CREATOR_EMAILS = ['warleymarinho7@gmail.com'];
+  if (_currentUser && _CREATOR_EMAILS.includes(_currentUser.email)) return true;
   // Sem sessão — bloqueia
   if (!sb || !_currentUser) return false;
   try {
@@ -7766,7 +7788,7 @@ async function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v8.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.1.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
   // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
   setTimeout(() => {
