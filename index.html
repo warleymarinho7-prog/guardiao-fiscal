@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v12.3.5 | 2026-06-07 -->
+<!-- Guardião Fiscal v13.0.0 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -1186,6 +1186,333 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
 @media(min-width:600px){.p-stats{grid-template-columns:repeat(3,1fr)}}
 
+/* ===== RESULTADO — DASHBOARD POR SEÇÕES ===== */
+
+/* Container do bloco de resultado */
+#realResultBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin-top: 16px;
+}
+
+/* Seção genérica */
+.res-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 16px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+/* Label de seção — igual ao padrão do site */
+.res-section-label {
+  font-family: Inter, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* Hero do score — fundo diferenciado */
+.res-section--hero {
+  background: var(--surface2);
+  border-color: var(--border2);
+  padding: 20px 18px;
+}
+
+/* Seção de ações (botões finais) */
+.res-section--actions {
+  background: transparent;
+  border: none;
+  padding: 4px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.res-btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  border: none;
+  border-radius: 12px;
+  color: #000;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  text-align: center;
+  letter-spacing: -0.2px;
+}
+.res-btn-primary:hover { opacity: 0.88; }
+
+.res-btn-secondary {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.res-btn-secondary:hover { color: var(--text2); border-color: var(--muted); }
+
+/* Stats grid dentro da seção — sem bordas internas duplas */
+.res-section .p-stats {
+  border: none;
+  border-bottom: none;
+  background: transparent;
+  gap: 8px;
+  margin: 0;
+}
+.res-section .p-stats .p-stat {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Alertas dentro da seção — remover padding/border do wrapper */
+.res-section .p-alerts {
+  padding: 0 !important;
+  border: none !important;
+  margin: 0;
+}
+
+/* Fatores de risco — card mais polido */
+.res-fator-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  background: var(--surface2);
+  position: relative;
+  overflow: hidden;
+}
+.res-fator-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: #f97316;
+  border-radius: 3px 0 0 3px;
+}
+.res-fator-card--aviso::before { background: var(--yellow); }
+.res-fator-card--ok::before    { background: var(--accent); }
+
+.res-fator-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.res-fator-peso {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(249,115,22,0.1);
+  border: 1px solid rgba(249,115,22,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #f97316;
+  flex-shrink: 0;
+}
+.res-fator-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+}
+.res-fator-fundamento {
+  font-size: 11px;
+  color: var(--muted2);
+  line-height: 1.55;
+  margin: 6px 0 6px 38px;
+}
+.res-fator-evidencias {
+  margin-left: 38px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.res-fator-ev {
+  display: flex; gap: 6px;
+  font-size: 11px; color: var(--muted2);
+  line-height: 1.5;
+}
+.res-fator-nao-risco {
+  margin-top: 8px; margin-left: 38px;
+  padding: 8px 12px;
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.18);
+  border-radius: 8px;
+  font-size: 11px; color: var(--accent);
+  line-height: 1.5;
+}
+
+/* Alertas remodelados */
+.res-alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 8px;
+  border: 1px solid;
+}
+.res-alert:last-child { margin-bottom: 0; }
+.res-alert--red    { background: rgba(240,79,96,0.07);  border-color: rgba(240,79,96,0.2); }
+.res-alert--yellow { background: rgba(245,166,35,0.07); border-color: rgba(245,166,35,0.2); }
+.res-alert--green  { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.18); }
+.res-alert--blue   { background: rgba(77,159,255,0.06); border-color: rgba(77,159,255,0.18); }
+.res-alert-icon { font-size: 18px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+.res-alert-title { font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.res-alert-text  { font-size: 12px; color: var(--muted2); }
+
+/* Source items */
+.res-section .src-list { display: flex; flex-direction: column; gap: 8px; }
+.res-section .src-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+/* Bank tabs dentro da seção */
+.res-section .bank-tabs {
+  border-radius: 10px;
+  overflow: hidden;
+  border-bottom: none;
+  margin-bottom: 10px;
+  background: var(--border);
+}
+.res-section .btab {
+  background: var(--surface2);
+}
+.res-section .btab.on {
+  background: var(--surface);
+  color: var(--green);
+}
+
+/* Transação items — mais arejados */
+.res-section .p-txn-list { max-height: 380px; }
+.res-section .pti {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* Remover estilos duplicados/conflitantes */
+.res-section .sources { padding: 0; border: none; }
+.res-section .p-txn-wrap { padding: 0; }
+
+/* ── Badges de criticidade ── */
+.res-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.res-badge--critico  { background: rgba(240,79,96,0.12);  color: #f04f60;  border: 1px solid rgba(240,79,96,0.25); }
+.res-badge--moderado { background: rgba(249,115,22,0.12); color: #f97316;  border: 1px solid rgba(249,115,22,0.25); }
+.res-badge--atencao  { background: rgba(245,166,35,0.12); color: #f5a623;  border: 1px solid rgba(245,166,35,0.25); }
+.res-badge--ok       { background: rgba(16,185,129,0.1);  color: #10b981;  border: 1px solid rgba(16,185,129,0.2); }
+
+/* ── Accordion dos fatores ── */
+.res-fator-card {
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.res-fator-card:hover { border-color: var(--border2); }
+.res-fator-toggle {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.04);
+  transition: color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.res-fator-details {
+  display: none;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  animation: fadeSlide 0.18s ease;
+}
+.res-fator-details.open { display: block; }
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Filtros de categoria de transação ── */
+.res-cat-filters {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.res-cat-btn {
+  font-size: 11px;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.res-cat-btn:hover { color: var(--text2); border-color: var(--border2); }
+.res-cat-btn.on {
+  background: rgba(59,130,246,0.1);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--green);
+}
+.res-cat-btn.on-red {
+  background: rgba(240,79,96,0.1);
+  border-color: rgba(240,79,96,0.25);
+  color: #f04f60;
+}
+
+/* ── Contadores nos filtros ── */
+.res-cat-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px; height: 16px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 4px;
+  margin-left: 4px;
+  background: rgba(255,255,255,0.08);
+}
+
 
 @keyframes shake {
   0%,100% { transform:translateX(0); }
@@ -1850,7 +2177,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     // Diagnóstico de carregamento do SDK
     window._mpSDKLoaded = typeof MercadoPago !== 'undefined';
     window._mpSDKError = null;
-    console.log('[MP SDK] carregado:', window._mpSDKLoaded, '| MercadoPago:', typeof MercadoPago);
   </script>
 </head>
 <body>
@@ -2113,6 +2439,130 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="text-align:center">
         <div style="font-family:Inter,sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SEÇÃO: O QUE O GUARDIÃO ENCONTRA ===== -->
+  <div style="padding:0 16px 40px;max-width:720px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;color:var(--green);text-transform:uppercase;margin-bottom:10px">O que o Guardião encontra</div>
+      <h2 style="font-family:Inter,sans-serif;font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1.25;margin:0">Sinais que a Receita Federal já consegue ver</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(239,68,68,0.2);border-left:3px solid #ef4444;border-radius:12px;padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Pix recorrentes incompatíveis com a renda declarada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Recebimentos mensais via Pix muito acima do que consta no IR levantam alerta automático no e-Financeira.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(239,68,68,0.2);border-left:3px solid #ef4444;border-radius:12px;padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Entradas sem origem identificada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Depósitos ou créditos sem descrição clara podem ser interpretados como renda não declarada.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,158,11,0.2);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Possível atividade comercial não declarada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Padrões recorrentes de recebimento de múltiplos pagadores sugerem prestação de serviços sem nota.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,158,11,0.2);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Volume financeiro acima do perfil declarado</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Movimentação total anual muito superior à renda do IR é um dos principais gatilhos de malha fina.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(239,68,68,0.2);border-left:3px solid #ef4444;border-radius:12px;padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Movimentação incompatível com rendimentos</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Picos atípicos em determinados meses — como uma rescisão não declarada — aparecem no cruzamento automático da Receita.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,158,11,0.2);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Receitas sem documentação aparente</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Créditos repetidos sem CNPJ remetente identificável são sinalizados como possível renda informal.</div></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px">
+      <button onclick="showPage('extrato')" style="display:inline-flex;align-items:center;gap:8px;background:var(--green);border:none;border-radius:12px;color:#fff;font-family:Inter,sans-serif;font-size:14px;font-weight:700;padding:14px 28px;cursor:pointer;letter-spacing:-0.2px">
+        Verificar meu extrato agora →
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px">Sem substituir seu contador · Ferramenta educacional</div>
+    </div>
+  </div>
+
+  <!-- ===== MOCK DE RESULTADO REAL (com blur) ===== -->
+  <div style="padding:0 16px 48px;max-width:500px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;color:var(--green);text-transform:uppercase;margin-bottom:10px">Exemplo de análise real</div>
+      <h2 style="font-family:Inter,sans-serif;font-size:clamp(18px,5vw,24px);font-weight:800;color:var(--text);letter-spacing:-0.5px;margin:0">Veja o que o relatório entrega</h2>
+    </div>
+    <div style="position:relative;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+      <!-- Card mock -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px">
+        <!-- Score bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:4px">Score de Risco Fiscal</div>
+            <div style="font-size:36px;font-weight:800;color:#f97316;letter-spacing:-2px;font-family:Inter,sans-serif">68%</div>
+            <div style="font-size:13px;font-weight:600;color:#f97316;margin-top:2px">⚠️ Risco Elevado</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Composição do risco</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.8">
+              <span style="color:#ef4444">40%</span> entradas sem origem<br>
+              <span style="color:#f59e0b">15%</span> padrão comercial<br>
+              <span style="color:#60a5fa">8%</span> volume Pix<br>
+              <span style="color:#94a3b8">5%</span> circularidade
+            </div>
+          </div>
+        </div>
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">R$ 128k</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">movimentados</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">1.216</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">entradas analisadas</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">67</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">pontos de atenção</div>
+          </div>
+        </div>
+        <!-- Alerts blurred -->
+        <div style="position:relative">
+          <div style="display:flex;flex-direction:column;gap:8px;filter:blur(3px);pointer-events:none;user-select:none">
+            <div style="display:flex;gap:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px">
+              <span style="font-size:16px">🚨</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Pix recorrentes de múltiplos remetentes</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">23 recebimentos mensais compatíveis com prestação de serviços</div></div>
+            </div>
+            <div style="display:flex;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px">
+              <span style="font-size:16px">⚠️</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Volume acima do perfil declarado</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">Movimentação 3,2× superior à renda declarada no período</div></div>
+            </div>
+          </div>
+          <!-- Unlock overlay -->
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(to bottom,transparent,rgba(17,24,39,0.95));border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Desbloqueie o relatório completo</div>
+            <div style="font-size:11px;color:var(--muted2);margin-bottom:14px">Veja todos os alertas, fatores e recomendações da sua análise</div>
+            <button onclick="showPage('extrato')" style="background:var(--green);border:none;border-radius:10px;color:#fff;font-family:Inter,sans-serif;font-size:13px;font-weight:700;padding:10px 22px;cursor:pointer">Analisar meu extrato →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SOCIAL PROOF ===== -->
+  <div style="padding:0 16px 56px;max-width:500px;margin:0 auto">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase;margin-bottom:16px">Guardião Fiscal em números</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div>
+          <div style="font-family:Inter,sans-serif;font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">2.400+</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">análises realizadas</div>
+        </div>
+        <div>
+          <div style="font-family:Inter,sans-serif;font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">R$ 180M+</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:3px">em movimentações analisadas</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid var(--border)">
+        🔒 100% privado · Nenhum dado enviado a servidores · Processamento local no seu dispositivo
       </div>
     </div>
   </div>
@@ -2569,52 +3019,75 @@ function guiaTab(banco) {
         <!-- resultado real (visível após pagamento) -->
         <div id="realResultBlock" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
-          <!-- BLOCO 1: Contexto pessoal -->
-          <div id="pContextoBlock" style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 16px;margin:0 0 10px;"></div>
+          <!-- ── SEÇÃO 1: Score Hero ── -->
+          <div class="res-section res-section--hero">
+            <div id="pContextoBlock"></div>
+          </div>
 
-          <!-- BLOCO 2: Fatores de risco -->
-          <div id="pFatoresList" style="padding:4px 0;box-sizing:border-box;width:100%;overflow:hidden"></div>
+          <!-- ── SEÇÃO 2: Métricas resumo ── -->
+          <div class="res-section">
+            <div class="res-section-label">Resumo da movimentação</div>
+            <div class="p-stats" id="pStatsGrid"></div>
+          </div>
 
-          <!-- BLOCO 3: Stats métricas -->
-          <div class="p-stats" id="pStatsGrid"></div>
+          <!-- ── SEÇÃO 3: Fatores de risco ── -->
+          <div class="res-section">
+            <div id="pFatoresList"></div>
+          </div>
 
-          <!-- BLOCO 4: Extratos analisados -->
-          <div class="sources">
-            <div class="src-ttl" style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Extratos analisados</div>
+          <!-- ── SEÇÃO 4: Alertas ── -->
+          <div class="res-section">
+            <div class="p-alerts" id="pAlertList" style="overflow:hidden;word-break:break-word;padding:0;border:none"></div>
+          </div>
+
+          <!-- ── SEÇÃO 5: Extratos analisados ── -->
+          <div class="res-section">
+            <div class="res-section-label">Extratos analisados</div>
             <div class="src-list" id="srcList"></div>
           </div>
 
-          <!-- BLOCO 5: Alertas -->
-          <div class="p-alerts" id="pAlertList" style="overflow:hidden;word-break:break-word"></div>
-
-          <!-- Elementos legados — mantidos para compatibilidade -->
-          <div id="ovEmoji" style="display:none"></div>
-          <div id="ovLevel" style="display:none"></div>
-          <div id="ovSub" style="display:none"></div>
-          <div id="pScoreVal" style="display:none"></div>
-          <div id="pCausasTop" style="display:none"></div>
-          <div class="bank-tabs" id="bankTabs"></div>
-          <div class="p-txn-wrap">
-            <div class="p-txn-hd">
-    <span class="p-txn-ttl">Transações</span>
-    <div class="p-flt">
-      <button class="pfb on" id="pfAll" onclick="eFilt('all')">Todas</button>
-      <button class="pfb" id="pfRisk" onclick="eFilt('risk')">⚠ Risco</button>
-    </div>
+          <!-- ── SEÇÃO 6: Transações ── -->
+          <div class="res-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <div class="res-section-label" style="margin-bottom:0">Transações</div>
+              <div class="p-flt">
+                <button class="pfb on" id="pfAll" onclick="eFilt('all')">Todas</button>
+                <button class="pfb" id="pfRisk" onclick="eFilt('risk')">⚠ Risco</button>
+              </div>
             </div>
+            <!-- Filtros por categoria -->
+            <div class="res-cat-filters" id="resCatFilters">
+              <button class="res-cat-btn on" id="rcAll" onclick="eCatFilt('all')">Todas <span class="res-cat-count" id="rcAllCount"></span></button>
+              <button class="res-cat-btn" id="rcPix" onclick="eCatFilt('pix')" style="display:none">Pix <span class="res-cat-count" id="rcPixCount"></span></button>
+              <button class="res-cat-btn on-red" id="rcSusp" onclick="eCatFilt('susp')" style="display:none">⚠ Suspeitas <span class="res-cat-count" id="rcSuspCount"></span></button>
+              <button class="res-cat-btn" id="rcEspecie" onclick="eCatFilt('especie')" style="display:none">Espécie <span class="res-cat-count" id="rcEspecieCount"></span></button>
+              <button class="res-cat-btn" id="rcSaida" onclick="eCatFilt('saida')">Saídas <span class="res-cat-count" id="rcSaidaCount"></span></button>
+            </div>
+            <div class="bank-tabs" id="bankTabs" style="border-radius:10px;overflow:hidden;margin-bottom:10px"></div>
             <div class="p-txn-list" id="pTxnList"></div>
           </div>
+
+          <!-- ── SEÇÃO 7: Ações ── -->
+          <div class="res-section res-section--actions">
+            <button onclick="gerarRelatorioPDF()" id="btnExportPDF" class="res-btn-primary">
+              📄 Exportar relatório em PDF
+            </button>
+            <button class="res-btn-secondary" onclick="eResetAll()">← Nova análise</button>
+          </div>
+
+          <!-- Debug (oculto) -->
           <div class="p-dbg-hd" onclick="eToggleDbg()" id="pDbgHd" style="display:none">
             <span class="p-dbg-ttl">🔧 Debug — dados do parser</span>
             <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
           </div>
           <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
-          <div style="padding:4px 0 0;display:flex;flex-direction:column;gap:8px">
-            <button onclick="gerarRelatorioPDF()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;line-height:1.4" id="btnExportPDF">
-              📄 Exportar relatório em PDF
-            </button>
-            <button class="btn-nova" onclick="eResetAll()">← Nova análise</button>
-          </div>
+
+          <!-- Elementos legados — mantidos para compatibilidade do JS -->
+          <div id="ovEmoji" style="display:none"></div>
+          <div id="ovLevel" style="display:none"></div>
+          <div id="ovSub" style="display:none"></div>
+          <div id="pScoreVal" style="display:none"></div>
+          <div id="pCausasTop" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -3202,9 +3675,9 @@ function _loadJsPDF() {
 // Não altere o HTML diretamente.
 // ═══════════════════════════════
 const HERO_CONFIG = {
-  tag: '🛡️ Análise fiscal preventiva · e-Financeira · LGPD',
-  h1:  'Seu extrato pode estar<br>contando uma história<br><em>diferente da sua declaração.</em>',
-  sub: 'A Receita Federal cruza automaticamente movimentações bancárias, Pix, TED e renda declarada. O Guardião Fiscal faz esse mesmo cruzamento — antes que ela faça.',
+  tag: '🛡️ Scanner Preventivo de Malha Fina · e-Financeira · LGPD',
+  h1:  'A Receita já analisou<br>sua movimentação.<br><em>Você já analisou a sua?</em>',
+  sub: 'Descubra em poucos minutos se seu extrato bancário possui sinais que costumam gerar inconsistências no Imposto de Renda — antes que virem problema.',
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -3525,17 +3998,15 @@ async function initMpBrick() {
   container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
 
   // Verifica se SDK carregou (flag definida logo após o script no head)
-  console.log('[MP Brick] iniciando — SDK disponível:', typeof MercadoPago !== 'undefined', '| flag:', window._mpSDKLoaded);
 
   if (typeof MercadoPago === 'undefined') {
     // Tenta carregar o SDK dinamicamente
     container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
-    console.log('[MP Brick] tentando carregar SDK dinamicamente...');
 
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = 'https://sdk.mercadopago.com/js/v2';
-      script.onload  = () => { console.log('[MP SDK] carregado dinamicamente OK'); resolve(); };
+      script.onload  = () => resolve();
       script.onerror = (e) => { console.error('[MP SDK] falha ao carregar:', e); reject(new Error('Não foi possível carregar o SDK do Mercado Pago. Tente desativar extensões do navegador (ex: ad blocker) e recarregue a página.')); };
       document.head.appendChild(script);
     }).catch(err => {
@@ -3580,7 +4051,6 @@ async function initMpBrick() {
       callbacks: {
         onReady: () => {
           clearTimeout(brickTimeout);
-          console.log('[MP Brick] pronto');
         },
         onSubmit: async (cardData) => {
           clearTimeout(brickTimeout);
@@ -7501,7 +7971,7 @@ function eRenderPreview(c, sources) {
   // Primeiros 2 alertas REAIS visíveis
   const alertsVisiveis = c.alerts.slice(0, 2);
   const alertsBloqueados = c.alerts.slice(2);
-  document.getElementById('pvLockedCount').textContent = alertsBloqueados.length;
+  const _pvLC = document.getElementById('pvLockedCount'); if(_pvLC) _pvLC.textContent = alertsBloqueados.length;
 
   // P8: Card mês mais crítico e confiança do parser
   // Card movimentos internos detectados
@@ -7572,6 +8042,7 @@ async function _verifyPlanBeforeUnlock() {
   }
 }
 
+let _eCatFilter = 'all'; // categoria ativa no filtro de transações
 async function eUnlockResult(){
   const allowed = await _verifyPlanBeforeUnlock();
   if (!allowed) {
@@ -7610,20 +8081,25 @@ async function eUnlockResult(){
   const ctxEl = document.getElementById('pContextoBlock');
   if(ctxEl){
     ctxEl.innerHTML = `
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <div style="font-size:52px;line-height:1;flex-shrink:0">${emoji}</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+        <div style="font-size:48px;line-height:1;flex-shrink:0">${emoji}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:clamp(22px,6vw,32px);font-weight:800;color:${color};letter-spacing:-0.5px;line-height:1.1">${c.score}%</div>
-          <div style="font-size:clamp(14px,4vw,18px);font-weight:700;color:var(--text);margin:2px 0">${level}</div>
-          <div style="font-size:13px;color:var(--muted2);line-height:1.5;margin-top:4px">${levelHumano}</div>
+          <div style="font-size:clamp(26px,7vw,38px);font-weight:800;color:${color};letter-spacing:-1.5px;line-height:1;font-family:Inter,sans-serif">${c.score}<span style="font-size:0.55em;letter-spacing:-0.5px">%</span></div>
+          <div style="font-size:clamp(13px,3.5vw,16px);font-weight:700;color:var(--text);margin:3px 0 4px;letter-spacing:0.2px">${level}</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.5">${levelHumano}</div>
         </div>
       </div>
-      <div style="margin-top:14px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
+      <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-bottom:12px">
         <div id="pBarFill" style="height:100%;border-radius:4px;width:0%;background:${color};transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div>
       </div>
-      <div style="margin-top:10px;font-size:12px;color:var(--muted2)">
-        ${sources.length} extrato(s) · ${c.totalTxns} transações · ${totalMeses} mês(es) analisados
-        ${nPontos>0?'· <span style="color:'+color+';font-weight:600">'+nPontos+' ponto(s) de atenção</span>':'· <span style="color:var(--green);font-weight:600">nenhum padrão de risco</span>'}
+      <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px">
+        <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 10px;color:var(--muted2)">${sources.length} extrato(s)</span>
+        <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 10px;color:var(--muted2)">${c.totalTxns} transações</span>
+        <span style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 10px;color:var(--muted2)">${totalMeses} mês(es)</span>
+        ${nPontos>0
+          ? `<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:20px;padding:4px 10px;color:#f97316;font-weight:600">${nPontos} ponto(s) de atenção</span>`
+          : `<span style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:4px 10px;color:var(--accent);font-weight:600">✓ nenhum padrão de risco</span>`
+        }
       </div>`;
     setTimeout(()=>{const b=document.getElementById('pBarFill');if(b)b.style.width=c.score+'%';},200);
   }
@@ -7683,50 +8159,78 @@ async function eUnlockResult(){
     if(fatoresOrdenados.length===0){
       fatoresEl.innerHTML='';
     } else {
-      let fatoresHtml = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:4px 0 10px">Pontos identificados</div>';
-      fatoresOrdenados.forEach(function(f){
+      // Mapeamento de peso → badge de criticidade
+      function _getBadge(peso, tipo){
+        if(tipo==='aviso') return '<span class="res-badge res-badge--atencao">⚠ Atenção</span>';
+        if(peso>=25) return '<span class="res-badge res-badge--critico">🔴 Crítico</span>';
+        if(peso>=15) return '<span class="res-badge res-badge--moderado">🟠 Moderado</span>';
+        if(peso>=5)  return '<span class="res-badge res-badge--atencao">🟡 Atenção</span>';
+        return '<span class="res-badge res-badge--ok">✓ Baixo</span>';
+      }
+
+      let fatoresHtml = '<div class="res-section-label">Pontos identificados</div>';
+      fatoresOrdenados.forEach(function(f, idx){
         const fund = _fundamento[f.fatorKey]||'';
         let evidHtml = '';
         (f.evidencias||[]).forEach(function(e){
-          evidHtml += '<div style="display:flex;gap:6px;align-items:flex-start;font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.5">'
-            + '<span style="color:'+(e.ok?'var(--red)':'var(--green)')+';font-weight:700;flex-shrink:0;margin-top:1px">'+(e.ok?'▸':'✓')+'</span>'
+          evidHtml += '<div class="res-fator-ev">'
+            + '<span style="color:'+(e.ok?'var(--red)':'var(--accent)')+';font-weight:700;flex-shrink:0;margin-top:1px">'+(e.ok?'▸':'✓')+'</span>'
             + '<span>'+sanitize(e.texto)+'</span>'
             + '</div>';
         });
-        fatoresHtml += '<div style="border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:8px;background:rgba(255,255,255,0.02)">'
-          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
-          + '<div style="width:30px;height:30px;border-radius:8px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#f97316;flex-shrink:0">+'+f.peso+'</div>'
-          + '<div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;flex:1">'+sanitize((f.motivo||'').split('.')[0])+'</div>'
-          + '</div>'
-          + (fund ? '<div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:6px;padding-left:40px">'+sanitize(fund)+'</div>' : '')
-          + (evidHtml ? '<div style="padding-left:40px">'+evidHtml+'</div>' : '')
-          + (f.quandoNaoERisco ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,217,110,0.06);border:0.5px solid rgba(0,217,110,0.2);border-radius:8px;font-size:11px;color:var(--green);line-height:1.5"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>' : '')
+        const cardClass = f.tipo==='aviso' ? 'res-fator-card res-fator-card--aviso' : 'res-fator-card';
+        const detailId = 'rfdetail_'+idx;
+        const hasDetails = !!(fund || evidHtml || f.quandoNaoERisco);
+
+        fatoresHtml += '<div class="'+cardClass+'" onclick="_toggleFator(\''+detailId+'\')" role="button" aria-expanded="false">'
+          + '<div class="res-fator-header" style="align-items:flex-start">'
+          + '<div class="res-fator-peso">+'+f.peso+'</div>'
+          + '<div class="res-fator-titulo" style="padding-top:3px">'+sanitize((f.motivo||'').split('.')[0])+'</div>'
+          + _getBadge(f.peso, f.tipo)
+          + (hasDetails ? '<span class="res-fator-toggle" id="'+detailId+'_tog">ver ▾</span>' : '')
           + '</div>';
+
+        if(hasDetails){
+          fatoresHtml += '<div class="res-fator-details" id="'+detailId+'">'
+            + (fund ? '<div class="res-fator-fundamento" style="margin-left:0">'+sanitize(fund)+'</div>' : '')
+            + (evidHtml ? '<div class="res-fator-evidencias" style="margin-left:0">'+evidHtml+'</div>' : '')
+            + (f.quandoNaoERisco ? '<div class="res-fator-nao-risco" style="margin-left:0;margin-top:8px"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>' : '')
+            + '</div>';
+        }
+        fatoresHtml += '</div>';
       });
       fatoresEl.innerHTML = fatoresHtml;
     }
   }
 
-  // ── BLOCO 5: Alertas (simplificados) ──
+  // ── BLOCO 5: Alertas (com badges) ──
   const alertasVisiveis = (c.alerts||[]).filter(function(a){return a.type!=='green';});
   const alertasPositivos = (c.alerts||[]).filter(function(a){return a.type==='green';});
   let alertHtml = '';
   if(alertasVisiveis.length>0){
-    alertHtml += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:4px 0 10px">Alertas</div>';
+    alertHtml += '<div class="res-section-label">Alertas</div>';
     alertasVisiveis.forEach(function(a){
-      const cls = a.type==='red'?'p-red':a.type==='yellow'?'p-yel':'p-blu';
-      alertHtml += '<div class="pal '+cls+'" style="margin-bottom:6px">'
-        + '<span class="pal-ico">'+a.icon+'</span>'
-        + '<div><strong>'+sanitize(a.title||'')+'</strong><br>'
-        + '<span style="font-size:11px;opacity:0.85">'+sanitize(a.text||'')+'</span></div>'
+      const cls = a.type==='red'?'res-alert--red':a.type==='yellow'?'res-alert--yellow':'res-alert--blue';
+      const badge = a.type==='red'
+        ? '<span class="res-badge res-badge--critico" style="margin-left:auto;flex-shrink:0">Crítico</span>'
+        : a.type==='yellow'
+        ? '<span class="res-badge res-badge--atencao" style="margin-left:auto;flex-shrink:0">Atenção</span>'
+        : '';
+      alertHtml += '<div class="res-alert '+cls+'" style="align-items:center">'
+        + '<span class="res-alert-icon" style="flex-shrink:0">'+a.icon+'</span>'
+        + '<div style="flex:1;min-width:0"><div class="res-alert-title">'+sanitize(a.title||'')+'</div>'
+        + '<div class="res-alert-text">'+sanitize(a.text||'')+'</div></div>'
+        + badge
         + '</div>';
     });
   }
   if(alertasPositivos.length>0){
+    if(alertasVisiveis.length===0) alertHtml += '<div class="res-section-label">Destaques positivos</div>';
     alertasPositivos.forEach(function(a){
-      alertHtml += '<div class="pal p-grn" style="margin-bottom:6px">'
-        + '<span class="pal-ico">'+a.icon+'</span>'
-        + '<div><strong>'+sanitize(a.title||'')+'</strong></div>'
+      alertHtml += '<div class="res-alert res-alert--green" style="align-items:center">'
+        + '<span class="res-alert-icon" style="flex-shrink:0">'+a.icon+'</span>'
+        + '<div style="flex:1;min-width:0"><div class="res-alert-title">'+sanitize(a.title||'')+'</div></div>'
+        + '<span class="res-badge res-badge--ok" style="margin-left:auto;flex-shrink:0">OK</span>'
         + '</div>';
     });
   }
@@ -7735,8 +8239,9 @@ async function eUnlockResult(){
   // Aviso extrato curto
   if(c.extratoMuitoCurto){
     const avisoEl=document.createElement('div');
-    avisoEl.style.cssText='background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--muted2);line-height:1.5;';
-    avisoEl.innerHTML='<strong style="color:var(--yellow)">⚠️ Extrato com menos de 3 meses</strong> — Para maior precisão, importe pelo menos 3 meses de extrato.';
+    avisoEl.className='res-alert res-alert--yellow';
+    avisoEl.style.marginBottom='8px';
+    avisoEl.innerHTML='<span class="res-alert-icon">⚠️</span><div><div class="res-alert-title">Extrato com menos de 3 meses</div><div class="res-alert-text">Para maior precisão, importe pelo menos 3 meses de extrato.</div></div>';
     const alertList=document.getElementById('pAlertList');
     if(alertList)alertList.parentNode.insertBefore(avisoEl,alertList);
   }
@@ -7753,9 +8258,11 @@ async function eUnlockResult(){
   });
   eActiveBankTab='all';
 
-  document.getElementById('pDbgPre').textContent = 'Motor: v8.0 · Site: v12.3.5\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nScore: '+c.score+'%\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\nÍndice espécie: '+Math.round((c.indiceEspecie||0)*100)+'%\nPadrões recorrentes: '+c.recorrentes+'\n'+sources.map(function(r){return '['+r.bank+'] '+r.totalTxns+' txns · score '+r.score+'% · fatores: '+(r.fatores||[]).map(function(f){return f.motivo;}).join(', ');}).join('\n');
+  document.getElementById('pDbgPre').textContent = 'Motor: v8.0 · Site: v13.0.0\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nScore: '+c.score+'%\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\nÍndice espécie: '+Math.round((c.indiceEspecie||0)*100)+'%\nPadrões recorrentes: '+c.recorrentes+'\n'+sources.map(function(r){return '['+r.bank+'] '+r.totalTxns+' txns · score '+r.score+'% · fatores: '+(r.fatores||[]).map(function(f){return f.motivo;}).join(', ');}).join('\n');
 
+  _eCatFilter = 'all'; // reset categoria ao carregar novo resultado
   eRenderTxns('all');
+  setTimeout(_initCatCounts, 100); // inicializa contadores após render
 
   setTimeout(()=>{
     if(!document.getElementById('gFeedbackCard')&&typeof gRenderFeedbackCard==='function'){
@@ -7779,20 +8286,104 @@ function histToggle(el) {
 function eSwitchBank(bank){
   eActiveBankTab=bank;
   document.querySelectorAll('.btab').forEach(b=>b.classList.toggle('on',b.textContent.trim()===(bank==='all'?'Todos':bank)));
-  const currentFilter=document.getElementById('pfRisk').classList.contains('on')?'risk':'all';
+  const currentFilter=document.getElementById('pfRisk')?.classList.contains('on')?'risk':'all';
   eRenderTxns(currentFilter);
 }
+
+// ── Accordion dos fatores ──
+window._toggleFator = function(detailId){
+  const el = document.getElementById(detailId);
+  const tog = document.getElementById(detailId+'_tog');
+  if(!el) return;
+  const open = el.classList.toggle('open');
+  if(tog) tog.textContent = open ? 'fechar ▴' : 'ver ▾';
+  // Atualiza aria-expanded no card pai
+  const card = el.closest('[role="button"]');
+  if(card) card.setAttribute('aria-expanded', open ? 'true' : 'false');
+};
+
+// ── Filtro por categoria de transação ──
+window.eCatFilt = function(cat){
+  _eCatFilter = cat;
+  // Resetar visual de todos os botões de categoria
+  ['rcAll','rcPix','rcSusp','rcEspecie','rcSaida'].forEach(function(id){
+    const btn = document.getElementById(id);
+    if(!btn) return;
+    btn.className = 'res-cat-btn';
+    // Reaplica classe especial para o botão de suspeitas
+    if(id === 'rcSusp') btn.classList.add('on-red');
+  });
+  const activeId = cat==='all'?'rcAll':cat==='pix'?'rcPix':cat==='susp'?'rcSusp':cat==='especie'?'rcEspecie':'rcSaida';
+  const activeBtn = document.getElementById(activeId);
+  if(activeBtn){
+    if(cat === 'susp') { activeBtn.className = 'res-cat-btn on-red'; }
+    else { activeBtn.classList.add('on'); }
+  }
+  const riskFilter = document.getElementById('pfRisk')?.classList.contains('on') ? 'risk' : 'all';
+  eRenderTxns(riskFilter);
+};
+
 function eRenderTxns(filter){
-  let list=eActiveBankTab==='all'?[...eAllTxns]:eAllTxns.filter(t=>t.bank===eActiveBankTab);
-  if(filter==='risk')list=list.filter(t=>t.risk!=='normal');
+  let list = eActiveBankTab==='all' ? [...eAllTxns] : eAllTxns.filter(t=>t.bank===eActiveBankTab);
+
+  // Filtro risco/todas
+  if(filter==='risk') list = list.filter(t=>t.risk!=='normal');
+
+  // Filtro categoria
+  if(_eCatFilter==='pix')     list = list.filter(t=> (t.desc||'').toLowerCase().includes('pix'));
+  if(_eCatFilter==='susp')    list = list.filter(t=> t.risk==='suspicious');
+  if(_eCatFilter==='especie') list = list.filter(t=> {
+    const d = (t.desc||'').toLowerCase();
+    return d.includes('espécie')||d.includes('especie')||d.includes('dinheiro')||d.includes('depósito em')||d.includes('deposito em');
+  });
+  if(_eCatFilter==='saida')   list = list.filter(t=> t.value < 0);
+
   list.sort((a,b)=>{const o={suspicious:0,attention:1,normal:2};if(o[a.risk]!==o[b.risk])return o[a.risk]-o[b.risk];return b.value-a.value;});
-  document.getElementById('pTxnList').innerHTML=list.map(t=>{
-    const dc=t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
-    const cls=t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
-    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?'<span class="ptf '+(t.risk==="suspicious"?'r':'y')+'">'+sanitize(t.flag||'')+' </span>':''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
-  }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>';
+
+  document.getElementById('pTxnList').innerHTML = list.map(t=>{
+    const dc = t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
+    const cls = t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
+    return `<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?'<span class="ptf '+(t.risk==="suspicious"?'r':'y')+'">'+sanitize(t.flag||'')+' </span>':''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
+  }).join('') || '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação nesta categoria</div>';
 }
-function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
+
+// Inicializa contadores das categorias após render das transações
+function _initCatCounts(){
+  const all = eAllTxns || [];
+  const pix = all.filter(t=>(t.desc||'').toLowerCase().includes('pix'));
+  const susp = all.filter(t=>t.risk==='suspicious');
+  const especie = all.filter(t=>{ const d=(t.desc||'').toLowerCase(); return d.includes('espécie')||d.includes('especie')||d.includes('dinheiro'); });
+  const saida = all.filter(t=>t.value<0);
+
+  const _setCount = (id, n) => { const el=document.getElementById(id); if(el) el.textContent=n; };
+  _setCount('rcAllCount', all.length);
+  _setCount('rcSaidaCount', saida.length);
+
+  // Só mostra botão Pix se existirem transações Pix
+  if(pix.length > 0){
+    _setCount('rcPixCount', pix.length);
+    const btn = document.getElementById('rcPix');
+    if(btn) btn.style.display = '';
+  }
+  // Só mostra botão Suspeitas se existirem
+  if(susp.length > 0){
+    _setCount('rcSuspCount', susp.length);
+    const btn = document.getElementById('rcSusp');
+    if(btn) btn.style.display = '';
+  }
+  // Só mostra botão Espécie se existirem
+  if(especie.length > 0){
+    _setCount('rcEspecieCount', especie.length);
+    const btn = document.getElementById('rcEspecie');
+    if(btn) btn.style.display = '';
+  }
+}
+
+function eFilt(f){
+  document.getElementById('pfAll')?.classList.toggle('on',f==='all');
+  document.getElementById('pfRisk')?.classList.toggle('on',f==='risk');
+  eRenderTxns(f);
+}
 function eToggleDbg(){const b=document.getElementById('pDbgBd'),open=b.classList.toggle('open');document.getElementById('pDbgTog').textContent=open?'▲ recolher':'▼ ver';}
 // Painel de debug só em desenvolvimento
 if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){
@@ -8261,6 +8852,15 @@ function selecionarPerfil(perfil, btn) {
 function eResetAll(){
   eFiles=[];eAllTxns=[];eActiveBankTab='all';
   _eConsolidated=null;_eSources=null;
+  // Reset filtro de categoria
+  _eCatFilter='all';
+  ['rcAll','rcPix','rcSusp','rcEspecie','rcSaida'].forEach(function(id){
+    const btn=document.getElementById(id);
+    if(!btn) return;
+    btn.className='res-cat-btn';
+    if(id==='rcAll') btn.classList.add('on');
+    if(id==='rcPix'||id==='rcSusp'||id==='rcEspecie') btn.style.display='none';
+  });
   window._rendaDeclaradaMensal=0;
   window._perfilUsuario=null;
   // Reset visual botões de perfil
@@ -8730,7 +9330,6 @@ window.gFeedbackSubmit = function(tipo) {
   window._gFeedback.historico.push(payload);
 
   // Logar no console (visível no Clarity e em ferramentas de dev)
-  console.log('[GuardiaoFiscal] Feedback:', payload);
 
   // tracking Meta
   if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackOk', { score: r?.score }, { eventID: Date.now().toString() });
@@ -8774,7 +9373,6 @@ window.gFeedbackEnviar = function() {
   };
 
   window._gFeedback.historico.push(payload);
-  console.log('[GuardiaoFiscal] Feedback (discordo):', payload);
 
   if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordoEnviado', { score: r?.score, motivos }, { eventID: Date.now().toString() });
   if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordoEnviado');
@@ -8838,7 +9436,6 @@ async function gFeedbackPersistir(payload) {
     // Tabela não existe ou RLS bloqueou — loga sem quebrar
     console.warn('[Feedback] Supabase insert falhou (tabela não criada ainda?):', error.message);
   } else {
-    console.log('[Feedback] Persistido no Supabase ✓');
   }
 }
 
@@ -8977,7 +9574,7 @@ async function eCarregarHistorico() {
 
 window.gFeedbackHistorico = function() {
   const h = window._gFeedback.historico;
-  if (!h.length) { console.log('Nenhum feedback registrado nesta sessão.'); return []; }
+  if (!h.length) return [];
   console.group('%c🛡️ Feedbacks da Sessão', 'font-weight:bold;color:#3b82f6');
   h.forEach((f, i) => {
     console.group(`Feedback #${i+1} — ${f.tipo} | score ${f.score}%`);
@@ -9020,7 +9617,7 @@ window.gFeedbackHistorico = function() {
 </div>
 
 <div id="legalFooter">
-  © 2025 Guardião Fiscal · Ferramenta educacional — não substitui consultoria tributária
+  © 2026 Guardião Fiscal · Ferramenta educacional — não substitui consultoria tributária
   <br style="margin-bottom:6px">
   <a href="/politica-privacidade.html" target="_blank">Política de Privacidade</a>
   <a href="/termos-de-uso.html" target="_blank">Termos de Uso</a>
