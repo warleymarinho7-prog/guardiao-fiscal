@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v12.3.0 | 2026-06-07 -->
+<!-- Guardião Fiscal v12.3.5 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -1128,7 +1128,7 @@ nav {
 .p-score-val{font-family:Inter,sans-serif;font-size:clamp(24px,7vw,36px);font-weight:800;letter-spacing:-2px;line-height:1;flex-shrink:0}
 .p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
 .p-bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
-.p-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.p-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
 .p-stat{padding:12px 14px;background:var(--surface)}
 .p-sl{font-size:10px;font-family:Inter,sans-serif;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
 .p-sv{font-family:Inter,sans-serif;font-size:clamp(15px,4.5vw,20px);font-weight:800;letter-spacing:-0.5px}
@@ -1184,7 +1184,7 @@ nav {
 pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
 .btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:Inter,sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
-@media(min-width:600px){.p-stats{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:600px){.p-stats{grid-template-columns:repeat(3,1fr)}}
 
 
 @keyframes shake {
@@ -2572,31 +2572,26 @@ function guiaTab(banco) {
           <!-- BLOCO 1: Contexto pessoal -->
           <div id="pContextoBlock" style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 16px;margin:0 0 10px;"></div>
 
-          <!-- BLOCO 2: Nível em linguagem humana -->
-          <div class="ov-top" style="margin-bottom:10px">
-            <div class="ov-emoji" id="ovEmoji">🟡</div>
-            <div style="flex:1;min-width:0">
-              <div class="ov-level" id="ovLevel">—</div>
-              <div class="ov-sub" id="ovSub">—</div>
-            </div>
-          </div>
+          <!-- BLOCO 2: Fatores de risco -->
+          <div id="pFatoresList" style="padding:4px 0;box-sizing:border-box;width:100%;overflow:hidden"></div>
 
-          <!-- BLOCO 3: Fatores com evidências e quandoNaoERisco em destaque -->
-          <div id="pFatoresList" style="padding:0 0 4px;box-sizing:border-box;width:100%;overflow:hidden"></div>
-
-          <!-- BLOCO 4: Score numérico — âncora final -->
-          <div class="p-score-wrap" style="margin-bottom:10px">
-            <div class="p-score-row">
-              <span class="p-score-lbl">Índice de risco fiscal consolidado</span>
-              <span class="p-score-val" id="pScoreVal">0%</span>
-            </div>
-            <div class="p-bar-bg"><div class="p-bar-fill" id="pBarFill" style="width:0%"></div></div>
-          </div>
-
-          <!-- BLOCO 5: Stats detalhados (para quem quer se aprofundar) -->
+          <!-- BLOCO 3: Stats métricas -->
           <div class="p-stats" id="pStatsGrid"></div>
-          <div class="sources"><div class="src-ttl">// Extratos analisados</div><div class="src-list" id="srcList"></div></div>
+
+          <!-- BLOCO 4: Extratos analisados -->
+          <div class="sources">
+            <div class="src-ttl" style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Extratos analisados</div>
+            <div class="src-list" id="srcList"></div>
+          </div>
+
+          <!-- BLOCO 5: Alertas -->
           <div class="p-alerts" id="pAlertList" style="overflow:hidden;word-break:break-word"></div>
+
+          <!-- Elementos legados — mantidos para compatibilidade -->
+          <div id="ovEmoji" style="display:none"></div>
+          <div id="ovLevel" style="display:none"></div>
+          <div id="ovSub" style="display:none"></div>
+          <div id="pScoreVal" style="display:none"></div>
           <div id="pCausasTop" style="display:none"></div>
           <div class="bank-tabs" id="bankTabs"></div>
           <div class="p-txn-wrap">
@@ -7552,7 +7547,7 @@ function eRenderPreview(c, sources) {
     const showText = a.type !== 'green'; // alertas verdes: só título, sem subtexto desnecessário
     return `<div class="pal ${cls}">
       <span class="pal-ico">${a.icon}</span>
-      <div><strong>${sanitize(a.title||'')}</strong>${showText ? `<br><span style="font-size:12px;opacity:0.85">${sanitize(a.text||'')}</span>` : ''}
+      <div><strong>${sanitize(a.title||'')}</strong>${showText ? '<br><span style="font-size:12px;opacity:0.85">'+sanitize(a.text||'')+'</span>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -7589,130 +7584,196 @@ async function eUnlockResult(){
   setTimeout(() => document.getElementById('realResultBlock').scrollIntoView({behavior:'smooth',block:'start'}), 100);
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
+
+  // Cores e níveis
   let emoji,level,color,levelHumano;
   if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#00d96e';levelHumano='Sua movimentação está dentro do padrão esperado.';}
   else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';levelHumano='Encontramos pontos que merecem uma revisão.';}
   else if(c.score<=70){emoji='🟠';level='RISCO ELEVADO';color='#f97316';levelHumano='Sua movimentação apresenta padrões que chamam atenção.';}
   else{emoji='🔴';level='RISCO CRÍTICO';color='#f04f60';levelHumano='Sua movimentação tem inconsistências relevantes que precisam de atenção.';}
 
-  // ── BLOCO 1: Contexto pessoal ──
-  const totalMeses = sources.reduce((acc,r) => acc + (r.months||0), 0);
-  const mediaCreditos = totalMeses > 0 ? c.totalCredits / totalMeses : c.totalCredits;
-  const todosFatoresCtx = (sources||[]).flatMap(r => r.fatores||[]).filter(f => f.peso > 0);
+  // Métricas
+  const totalMeses = sources.reduce((acc,r)=>acc+(r.months||0),0);
+  const mediaCreditos = totalMeses>0 ? c.totalCredits/totalMeses : c.totalCredits;
+  const todosFatoresCtx = (sources||[]).flatMap(r=>r.fatores||[]).filter(f=>f.peso>0);
   const nPontos = todosFatoresCtx.length;
+  const _perfil = window._perfilUsuario || c._usuario || null;
+  const _isMei = _perfil==='mei'||_perfil==='freelancer'||_perfil==='socio';
+  const _isInv = _perfil==='investidor';
+  const _pixRedLim = _isMei?80:_isInv?70:50;
+  const _pixYelLim = _isMei?60:_isInv?50:30;
+  const icConsumo = Math.round((c.indiceConsumo||0)*100);
+  const icEspecie = Math.round((c.indiceEspecie||0)*100);
+  const pixPct = c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
+
+  // ── BLOCO 1: Score + Nível (hero do resultado) ──
   const ctxEl = document.getElementById('pContextoBlock');
-  if (ctxEl) {
+  if(ctxEl){
     ctxEl.innerHTML = `
-      <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;font-family:Inter,sans-serif;margin-bottom:8px">// análise concluída</div>
-      <div style="font-size:14px;color:var(--text);line-height:1.6;">
-        Analisamos <strong>${sources.length} extrato(s)</strong>, <strong>${c.totalTxns} transações</strong> e <strong>${totalMeses} mês(es)</strong> de movimentação. Sua média de créditos foi <strong>${fmtBRL(mediaCreditos)}/mês</strong>.
-        ${nPontos > 0
-          ? `<span style="color:${color}"> Encontramos <strong>${nPontos} ponto(s)</strong> que podem chamar atenção.</span>`
-          : `<span style="color:var(--green)"> Nenhum padrão de risco identificado.</span>`}
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="font-size:52px;line-height:1;flex-shrink:0">${emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:clamp(22px,6vw,32px);font-weight:800;color:${color};letter-spacing:-0.5px;line-height:1.1">${c.score}%</div>
+          <div style="font-size:clamp(14px,4vw,18px);font-weight:700;color:var(--text);margin:2px 0">${level}</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.5;margin-top:4px">${levelHumano}</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
+        <div id="pBarFill" style="height:100%;border-radius:4px;width:0%;background:${color};transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted2)">
+        ${sources.length} extrato(s) · ${c.totalTxns} transações · ${totalMeses} mês(es) analisados
+        ${nPontos>0?'· <span style="color:'+color+';font-weight:600">'+nPontos+' ponto(s) de atenção</span>':'· <span style="color:var(--green);font-weight:600">nenhum padrão de risco</span>'}
       </div>`;
+    setTimeout(()=>{const b=document.getElementById('pBarFill');if(b)b.style.width=c.score+'%';},200);
   }
 
-  // ── BLOCO 2: Nível em linguagem humana ──
-  document.getElementById('ovEmoji').textContent=emoji;
-  document.getElementById('ovLevel').textContent=level;
-  document.getElementById('ovLevel').style.color=color;
-  document.getElementById('ovSub').textContent=levelHumano;
+  // Limpar elementos legados
+  document.getElementById('ovEmoji').textContent='';
+  document.getElementById('ovLevel').textContent='';
+  document.getElementById('ovSub').textContent='';
+  document.getElementById('pScoreVal').textContent='';
+  document.getElementById('pBarFill2') && (document.getElementById('pBarFill2').style.width='0%');
 
-  // ── BLOCO 4: Score numérico ──
-  document.getElementById('pScoreVal').textContent=c.score+'%';
-  document.getElementById('pScoreVal').style.color=color;
-  document.getElementById('pBarFill').style.background=color;
-  setTimeout(()=>{document.getElementById('pBarFill').style.width=c.score+'%';},200);
-
-  // Índices do motor v2
-  const icConsumo=Math.round((c.indiceConsumo||0)*100);
-  const icEspecie=Math.round((c.indiceEspecie||0)*100);
-  const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
+  // ── BLOCO 2: 3 métricas principais ──
   document.getElementById('pStatsGrid').innerHTML=`
-    <div class="p-stat"><div class="p-sl">Total créditos</div><div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div><div class="p-sn">${c.creditCount} entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Pix (% das entradas)</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${fmtBRL(c.pixTotal)}</div><div class="p-sn">${pixPct}% das entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Índice de consumo</div><div class="p-sv" style="color:${icConsumo>=120?'var(--red)':icConsumo>=90?'var(--yellow)':'var(--green)'}">${icConsumo}%</div><div class="p-sn">saídas/entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Espécie</div><div class="p-sv" style="color:${icEspecie>=20?'var(--red)':icEspecie>=10?'var(--yellow)':'var(--green)'}">${icEspecie}%</div><div class="p-sn">das entradas</div></div>
-    <div class="p-stat"><div class="p-sl">Para revisão</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount}</div><div class="p-sn">alto risco</div></div>
-    <div class="p-stat"><div class="p-sl">Padrões recorrentes</div><div class="p-sv" style="color:${c.recorrentes>3?'var(--yellow)':'var(--text)'}">${c.recorrentes}</div><div class="p-sn">detectados</div></div>`;
+    <div class="p-stat">
+      <div class="p-sl">Movimentação total</div>
+      <div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div>
+      <div class="p-sn">${c.creditCount} entradas · ${totalMeses} mês(es)</div>
+    </div>
+    <div class="p-stat">
+      <div class="p-sl">Transações de atenção</div>
+      <div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">
+        ${c.suspCount} <span style="font-size:12px;font-weight:400">de ${c.creditCount}</span>
+      </div>
+      <div class="p-sn">${c.suspCount>0?'requerem verificação':'perfil dentro do esperado'}</div>
+    </div>
+    <div class="p-stat">
+      <div class="p-sl">Recebimentos via Pix</div>
+      <div class="p-sv" style="color:${pixPct>=_pixRedLim?'var(--red)':pixPct>=_pixYelLim?'var(--yellow)':'var(--text)'}">${pixPct}%</div>
+      <div class="p-sn">das entradas · ${fmtBRL(c.pixTotal)}</div>
+    </div>`;
 
+  // ── BLOCO 3: Extratos analisados (compacto) ──
   document.getElementById('srcList').innerHTML=sources.map((r,i)=>`
-    <div class="src-item"><div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div>
-    <span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
-    <span class="src-val">${fmtBRL(r.totalCredits)}</span>
-    <span style="font-size:10px;font-family:Inter,sans-serif;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span></div>`).join('');
+    <div class="src-item">
+      <div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div>
+      <span class="src-bank">${sanitize(r.bank)}</span>
+      <span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span>
+      <span class="src-val">${fmtBRL(r.totalCredits)}</span>
+      <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?'#f97316':'var(--red)'}">${sanitize(String(r.score))}%</span>
+    </div>`).join('');
 
-  // ── BLOCO 3: Fatores com evidências + quandoNaoERisco em destaque ──
+  // ── BLOCO 4: Fatores de risco (redesenhados) ──
   const _fundamento = {
-    'F1_omissao_renda':    'A Receita já recebe informações bancárias via e-Financeira (IN RFB 1.571/2015). Créditos sem origem declarada são cruzados automaticamente.',
-    'F2_pix_limite':       'Bancos reportam à Receita toda movimentação Pix acima de R$5.000/mês (e-Financeira). Esse cruzamento é automático e independe de denúncia.',
-    'F3_especie':          'Depósitos em espécie são registrados pelos bancos e reportados ao Fisco. Valores acima de R$2.000/mês entram no radar automaticamente.',
-    'F4_comercial_oculta': 'Atividade econômica recorrente sem CNPJ ou nota fiscal é um dos principais gatilhos de fiscalização da Receita Federal (art. 7º Lei 7.713/88).',
-    'F5_anomalia_temporal':'Variação brusca de créditos entre meses é detectada pelo sistema de malha fina da Receita no cruzamento anual da DIRPF.',
-    'F7_compatibilidade':  'A Receita cruza sua renda declarada com a movimentação reportada pelos bancos. Incompatibilidade acima de 20% é gatilho automático de análise.',
-    'F8_conta_auxiliar':   'Movimentação expressiva em contas secundárias é consolidada pela e-Financeira junto com a conta principal do CPF.',
+    'F1_omissao_renda':    'A Receita cruza créditos bancários com a renda declarada via e-Financeira.',
+    'F2_pix_limite':       'Bancos reportam à Receita movimentações Pix acima de R$5.000/mês automaticamente.',
+    'F3_especie':          'Depósitos em espécie acima de R$2.000/mês são reportados ao Fisco pelos bancos.',
+    'F4_comercial_oculta': 'Recebimentos recorrentes sem nota fiscal ou CNPJ são gatilho de fiscalização.',
+    'F5_anomalia_temporal':'Variação brusca entre meses é detectada no cruzamento anual da declaração.',
+    'F7_compatibilidade':  'Incompatibilidade entre movimentação e renda declarada acima de 20% é gatilho automático.',
+    'F8_conta_auxiliar':   'Contas secundárias são consolidadas pela e-Financeira com a conta principal do CPF.',
   };
 
-  document.getElementById('pAlertList').innerHTML=c.alerts.map(a=>`
-    <div class="pal ${a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu'}">
-    <span class="pal-ico">${a.icon}</span><div><strong>${sanitize(a.title||'')}</strong><br><span style="font-size:12px;opacity:0.85">${sanitize(a.text||'')}</span></div></div>`).join('');
-
-  // [v4-NEW] Aviso de extrato curto
-  if (c.extratoMuitoCurto) {
-    const avisoEl = document.createElement('div');
-    avisoEl.style.cssText = 'background:rgba(99,153,34,0.08);border:1px solid rgba(99,153,34,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.5;';
-    avisoEl.innerHTML = '<strong style="color:var(--yellow)">⚠️ Análise baseada em 1 mês de extrato</strong><br>Com apenas um mês não é possível calcular média histórica nem detectar anomalias temporais. Para um resultado mais preciso, importe pelo menos 3 meses de extrato.';
-    const alertList = document.getElementById('pAlertList');
-    if (alertList) alertList.parentNode.insertBefore(avisoEl, alertList);
-  }
-
-  // ── BLOCO 3: Fatores com evidências + quandoNaoERisco em destaque ──
-  const todosFatores = (sources||[]).flatMap(r => r.fatores||[]).filter(f => f.peso > 0 || f.tipo === 'aviso');
-  const fatoresOrdenados = todosFatores.sort((a,b) => b.peso - a.peso).slice(0, 6);
+  const todosFatores = (sources||[]).flatMap(r=>r.fatores||[]).filter(f=>f.peso>0||f.tipo==='aviso');
+  const fatoresOrdenados = todosFatores.sort((a,b)=>b.peso-a.peso).slice(0,6);
   const fatoresEl = document.getElementById('pFatoresList');
-  if (fatoresEl && fatoresOrdenados.length > 0) {
-    fatoresEl.innerHTML = fatoresOrdenados.map(f => {
-      const confPct = Math.round((f.confianca || 0) * 100);
-      const confColor = confPct >= 80 ? 'var(--red)' : confPct >= 60 ? 'var(--yellow)' : 'var(--muted)';
-      const fund = _fundamento[f.fatorKey] || '';
-      const evidHtml = (f.evidencias || []).map(e =>
-        `<div style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">
-          <span style="color:${e.ok ? 'var(--red)' : 'var(--green)'};font-weight:700;flex-shrink:0">${e.ok ? '✓' : '✗'}</span>
-          <span>${sanitize(e.texto)}</span>
-        </div>`
-      ).join('');
-      return `<div style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:10px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
-          <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;flex:1">${sanitize(f.motivo)}</div>
-          ${confPct > 0 ? `<div style="font-size:10px;font-weight:700;color:${confColor};white-space:nowrap;padding:2px 7px;background:rgba(255,255,255,0.05);border-radius:4px;flex-shrink:0">Confiança ${confPct}%</div>` : ''}
-        </div>
-        ${fund ? `<div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:6px;">${sanitize(fund)}</div>` : ''}
-        ${evidHtml}
-        ${f.quandoNaoERisco ? `<div style="font-size:12px;color:var(--green);margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(0,217,110,0.07);border:0.5px solid rgba(0,217,110,0.2);line-height:1.5;"><strong style="font-weight:600">Pode não ser risco</strong> — ${sanitize(f.quandoNaoERisco)}</div>` : ''}
-      </div>`;
-    }).join('');
+  if(fatoresEl){
+    if(fatoresOrdenados.length===0){
+      fatoresEl.innerHTML='';
+    } else {
+      let fatoresHtml = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:4px 0 10px">Pontos identificados</div>';
+      fatoresOrdenados.forEach(function(f){
+        const fund = _fundamento[f.fatorKey]||'';
+        let evidHtml = '';
+        (f.evidencias||[]).forEach(function(e){
+          evidHtml += '<div style="display:flex;gap:6px;align-items:flex-start;font-size:11px;color:var(--muted2);margin-top:3px;line-height:1.5">'
+            + '<span style="color:'+(e.ok?'var(--red)':'var(--green)')+';font-weight:700;flex-shrink:0;margin-top:1px">'+(e.ok?'▸':'✓')+'</span>'
+            + '<span>'+sanitize(e.texto)+'</span>'
+            + '</div>';
+        });
+        fatoresHtml += '<div style="border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:8px;background:rgba(255,255,255,0.02)">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+          + '<div style="width:30px;height:30px;border-radius:8px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#f97316;flex-shrink:0">+'+f.peso+'</div>'
+          + '<div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;flex:1">'+sanitize((f.motivo||'').split('.')[0])+'</div>'
+          + '</div>'
+          + (fund ? '<div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:6px;padding-left:40px">'+sanitize(fund)+'</div>' : '')
+          + (evidHtml ? '<div style="padding-left:40px">'+evidHtml+'</div>' : '')
+          + (f.quandoNaoERisco ? '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,217,110,0.06);border:0.5px solid rgba(0,217,110,0.2);border-radius:8px;font-size:11px;color:var(--green);line-height:1.5"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>' : '')
+          + '</div>';
+      });
+      fatoresEl.innerHTML = fatoresHtml;
+    }
   }
 
-  const bankTabsEl = document.getElementById('bankTabs');
-  bankTabsEl.innerHTML = '';
-  ['all', ...sources.map(r => r.bank)].forEach((b, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'btab' + (b === 'all' ? ' on' : '');
-    btn.textContent = b === 'all' ? 'Todos' : b;
-    btn.onclick = () => eSwitchBank(b);
+  // ── BLOCO 5: Alertas (simplificados) ──
+  const alertasVisiveis = (c.alerts||[]).filter(function(a){return a.type!=='green';});
+  const alertasPositivos = (c.alerts||[]).filter(function(a){return a.type==='green';});
+  let alertHtml = '';
+  if(alertasVisiveis.length>0){
+    alertHtml += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:4px 0 10px">Alertas</div>';
+    alertasVisiveis.forEach(function(a){
+      const cls = a.type==='red'?'p-red':a.type==='yellow'?'p-yel':'p-blu';
+      alertHtml += '<div class="pal '+cls+'" style="margin-bottom:6px">'
+        + '<span class="pal-ico">'+a.icon+'</span>'
+        + '<div><strong>'+sanitize(a.title||'')+'</strong><br>'
+        + '<span style="font-size:11px;opacity:0.85">'+sanitize(a.text||'')+'</span></div>'
+        + '</div>';
+    });
+  }
+  if(alertasPositivos.length>0){
+    alertasPositivos.forEach(function(a){
+      alertHtml += '<div class="pal p-grn" style="margin-bottom:6px">'
+        + '<span class="pal-ico">'+a.icon+'</span>'
+        + '<div><strong>'+sanitize(a.title||'')+'</strong></div>'
+        + '</div>';
+    });
+  }
+  document.getElementById('pAlertList').innerHTML = alertHtml;
+
+  // Aviso extrato curto
+  if(c.extratoMuitoCurto){
+    const avisoEl=document.createElement('div');
+    avisoEl.style.cssText='background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--muted2);line-height:1.5;';
+    avisoEl.innerHTML='<strong style="color:var(--yellow)">⚠️ Extrato com menos de 3 meses</strong> — Para maior precisão, importe pelo menos 3 meses de extrato.';
+    const alertList=document.getElementById('pAlertList');
+    if(alertList)alertList.parentNode.insertBefore(avisoEl,alertList);
+  }
+
+  // Bank tabs e transações
+  const bankTabsEl=document.getElementById('bankTabs');
+  bankTabsEl.innerHTML='';
+  ['all',...sources.map(r=>r.bank)].forEach((b,i)=>{
+    const btn=document.createElement('button');
+    btn.className='btab'+(b==='all'?' on':'');
+    btn.textContent=b==='all'?'Todos':b;
+    btn.onclick=()=>eSwitchBank(b);
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.3.0\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+
+  document.getElementById('pDbgPre').textContent = 'Motor: v8.0 · Site: v12.3.5\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nScore: '+c.score+'%\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\nÍndice espécie: '+Math.round((c.indiceEspecie||0)*100)+'%\nPadrões recorrentes: '+c.recorrentes+'\n'+sources.map(function(r){return '['+r.bank+'] '+r.totalTxns+' txns · score '+r.score+'% · fatores: '+(r.fatores||[]).map(function(f){return f.motivo;}).join(', ');}).join('\n');
+
   eRenderTxns('all');
-  // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
-  setTimeout(() => {
-    if (!document.getElementById('gFeedbackCard') && typeof gRenderFeedbackCard === 'function') {
-      const target = document.getElementById('pAlertList')?.parentElement
-                  || document.getElementById('realResultBlock');
-      if (target) gRenderFeedbackCard(target, c);
+
+  setTimeout(()=>{
+    if(!document.getElementById('gFeedbackCard')&&typeof gRenderFeedbackCard==='function'){
+      const target=document.getElementById('pAlertList')?.parentElement||document.getElementById('realResultBlock');
+      if(target)gRenderFeedbackCard(target,c);
     }
-  }, 300);
+  },300);
+}
+
+
+function histToggle(el) {
+  var id = el.getAttribute('data-histid');
+  var d = document.getElementById(id);
+  if (!d) return;
+  var open = d.style.display !== 'none';
+  d.style.display = open ? 'none' : 'block';
+  var chev = el.querySelector('.hist-chevron');
+  if (chev) chev.textContent = open ? '▼' : '▲';
 }
 
 function eSwitchBank(bank){
@@ -7728,7 +7789,7 @@ function eRenderTxns(filter){
   document.getElementById('pTxnList').innerHTML=list.map(t=>{
     const dc=t.risk==='suspicious'?'pdr':t.risk==='attention'?'pdy':t.value>0?'pdg':'pdm';
     const cls=t.risk==='suspicious'?' s':t.risk==='attention'?' a':'';
-    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?`<span class="ptf ${t.risk==='suspicious'?'r':'y'}">${sanitize(t.flag||"")}</span>`:''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
+    return`<div class="pti${cls}"><div class="pdot ${dc}"></div><div class="ptinfo"><div class="ptd">${sanitize(t.desc||'—')}</div><div class="ptt">${fmtDate(t.date)}</div></div><div class="ptv ${t.value>=0?'p':'n'}">${fmtBRL(t.value)}</div>${t.flag?'<span class="ptf '+(t.risk==="suspicious"?'r':'y')+'">'+sanitize(t.flag||'')+' </span>':''}<span class="ptbank">${sanitize(t.bank||'')} </span></div>`;
   }).join('')||'<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Nenhuma transação</div>';
 }
 function eFilt(f){document.getElementById('pfAll').classList.toggle('on',f==='all');document.getElementById('pfRisk').classList.toggle('on',f==='risk');eRenderTxns(f);}
@@ -8849,74 +8910,64 @@ async function eCarregarHistorico() {
     const nivelLabel = { baixo: 'Baixo risco', atencao: 'Atenção', elevado: 'Elevado', critico: 'Crítico' };
     const perfilLabel = { clt: 'CLT / Servidor', mei: 'MEI / Autônomo', investidor: 'Investidor / Aposent.' };
 
-    el.innerHTML = data.map((a, i) => {
+    el.innerHTML = data.map(function(a, i) {
       const cor = nivelCor[a.nivel_risco] || '#888';
       const data_fmt = new Date(a.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
       const hora_fmt = new Date(a.created_at).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-      const creditos_fmt = a.total_creditos ? 'R$ ' + (a.total_creditos/100).toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-
-      // Fatores e alertas salvos
-      const fatores = (() => { try { return JSON.parse(a.fatores || '[]'); } catch(e) { return []; } })();
-      const alertas = (() => { try { return JSON.parse(a.alertas || '[]'); } catch(e) { return []; } })();
+      const creditos_fmt = a.total_creditos ? 'R$ ' + (a.total_creditos).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '—';
       const cardId = 'hist-card-' + i;
 
-      const fatoresHtml = fatores.length > 0 ? fatores.map(f => `
-        <div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);">
-          <div style="width:26px;height:26px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#f97316;flex-shrink:0">+${f.peso}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:2px">${sanitize(f.motivo)}</div>
-            ${f.quandoNaoERisco ? `<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;background:rgba(0,217,110,0.06);border-radius:6px;line-height:1.4"><strong>Pode não ser risco</strong> — ${sanitize(f.quandoNaoERisco)}</div>` : ''}
-          </div>
-        </div>`).join('') : '<div style="font-size:12px;color:var(--muted2);padding:8px 0">Nenhum fator de risco identificado.</div>';
+      const fatores = (function(){ try { return JSON.parse(a.fatores || '[]'); } catch(e) { return []; } })();
+      const alertas = (function(){ try { return JSON.parse(a.alertas || '[]'); } catch(e) { return []; } })();
 
-      const alertasHtml = alertas.length > 0 ? alertas.map(a => {
-        const cls = a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu';
-        return `<div class="pal ${cls}" style="margin-bottom:6px">
-          <span class="pal-ico">${a.icon}</span>
-          <div><strong>${sanitize(a.title)}</strong><br><span style="font-size:11px;opacity:0.85">${sanitize(a.text)}</span></div>
-        </div>`;
-      }).join('') : '';
+      let fatoresHtml = '';
+      fatores.forEach(function(f) {
+        fatoresHtml += '<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06)">'
+          + '<div style="width:26px;height:26px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#f97316;flex-shrink:0">+'+f.peso+'</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:2px">'+sanitize(f.motivo||'')+'</div>'
+          + (f.quandoNaoERisco ? '<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;background:rgba(0,217,110,0.06);border-radius:6px;line-height:1.4"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>' : '')
+          + '</div></div>';
+      });
 
-      return `
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;position:relative;overflow:hidden">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${cor};border-radius:3px 0 0 3px"></div>
+      let alertasHtml = '';
+      alertas.forEach(function(al) {
+        const cls = al.type==='red'?'p-red':al.type==='yellow'?'p-yel':al.type==='green'?'p-grn':'p-blu';
+        alertasHtml += '<div class="pal '+cls+'" style="margin-bottom:6px">'
+          + '<span class="pal-ico">'+al.icon+'</span>'
+          + '<div><strong>'+sanitize(al.title)+'</strong><br>'
+          + '<span style="font-size:11px;opacity:0.85">'+sanitize(al.text)+'</span></div>'
+          + '</div>';
+      });
 
-          <!-- Header do card — sempre visível -->
-          <div style="padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap" onclick="document.getElementById('${cardId}').style.display=document.getElementById('${cardId}').style.display==='none'?'block':'none';this.querySelector('.hist-chevron').textContent=document.getElementById('${cardId}').style.display==='none'?'▼':'▲'">
-            <div>
-              <div style="font-size:11px;color:var(--muted2);margin-bottom:4px">${data_fmt} · ${hora_fmt}</div>
-              <div style="font-size:18px;font-weight:700;color:${cor};margin-bottom:4px">${a.score}% <span style="font-size:13px;font-weight:600">${a.nivel_label || nivelLabel[a.nivel_risco] || a.nivel_risco}</span></div>
-              <div style="display:flex;flex-wrap:wrap;gap:6px">
-                ${a.perfil_usuario ? `<span style="font-size:11px;padding:2px 7px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:20px;color:#60a5fa">${perfilLabel[a.perfil_usuario] || a.perfil_usuario}</span>` : ''}
-                ${a.total_txns ? `<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--muted2)">${a.total_txns} transações</span>` : ''}
-                ${a.num_alertas ? `<span style="font-size:11px;padding:2px 7px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);border-radius:20px;color:#f87171">${a.num_alertas} alerta(s)</span>` : ''}
-                ${a.renda_declarada ? `<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--muted2)">Renda: R$ ${Number(a.renda_declarada).toLocaleString('pt-BR')}/mês</span>` : ''}
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
-              <div style="text-align:right">
-                <div style="font-size:11px;color:var(--muted2);margin-bottom:2px">Movimentação</div>
-                <div style="font-size:15px;font-weight:600;color:var(--text)">${creditos_fmt}</div>
-              </div>
-              <span class="hist-chevron" style="font-size:12px;color:var(--muted)">▼</span>
-            </div>
-          </div>
+      const header = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;position:relative;overflow:hidden">'
+        + '<div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:'+cor+';border-radius:3px 0 0 3px"></div>'
+        + '<div style="padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap" data-histid="'+cardId+'" onclick="histToggle(this)">'
+        + '<div>'
+        + '<div style="font-size:11px;color:var(--muted2);margin-bottom:4px">'+data_fmt+' · '+hora_fmt+'</div>'
+        + '<div style="font-size:18px;font-weight:700;color:'+cor+';margin-bottom:4px">'+a.score+'% <span style="font-size:13px;font-weight:600">'+(a.nivel_label||nivelLabel[a.nivel_risco]||a.nivel_risco||'')+'</span></div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:6px">'
+        + (a.perfil_usuario ? '<span style="font-size:11px;padding:2px 7px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:20px;color:#60a5fa">'+(perfilLabel[a.perfil_usuario]||a.perfil_usuario)+'</span>' : '')
+        + (a.total_txns ? '<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--muted2)">'+a.total_txns+' transações</span>' : '')
+        + (a.num_alertas ? '<span style="font-size:11px;padding:2px 7px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);border-radius:20px;color:#f87171">'+a.num_alertas+' alerta(s)</span>' : '')
+        + (a.renda_declarada ? '<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--muted2)">Renda: R$ '+Number(a.renda_declarada).toLocaleString('pt-BR')+'/mês</span>' : '')
+        + '</div></div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">'
+        + '<div style="text-align:right">'
+        + '<div style="font-size:11px;color:var(--muted2);margin-bottom:2px">Movimentação</div>'
+        + '<div style="font-size:15px;font-weight:600;color:var(--text)">'+creditos_fmt+'</div>'
+        + '</div>'
+        + '<span class="hist-chevron" style="font-size:12px;color:var(--muted)">▼</span>'
+        + '</div></div>';
 
-          <!-- Detalhe expandível -->
-          <div id="${cardId}" style="display:none;padding:0 16px 14px;border-top:0.5px solid rgba(255,255,255,0.06)">
-            ${fatores.length > 0 ? `
-            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">// fatores de risco</div>
-            ${fatoresHtml}` : ''}
-            ${alertas.length > 0 ? `
-            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">// alertas</div>
-            ${alertasHtml}` : ''}
-            ${a.indice_consumo ? `<div style="font-size:11px;color:var(--muted2);margin-top:8px">Índice consumo: ${a.indice_consumo}% · Pix: ${a.pix_pct || 0}% das entradas</div>` : ''}
-          </div>
-        </div>`;
-    }).join('');
+      const detalhe = '<div id="'+cardId+'" style="display:none;padding:0 16px 14px;border-top:0.5px solid rgba(255,255,255,0.06)">'
+        + (fatores.length > 0 ? '<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Fatores de risco</div>' + fatoresHtml : '')
+        + (alertas.length > 0 ? '<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Alertas</div>' + alertasHtml : '')
+        + (a.indice_consumo ? '<div style="font-size:11px;color:var(--muted2);margin-top:8px">Índice consumo: '+a.indice_consumo+'% · Pix: '+(a.pix_pct||0)+'% das entradas</div>' : '')
+        + '</div>';
 
-    // Rodapé com total
-    el.innerHTML += `<div style="text-align:center;padding:16px 0 4px;font-size:12px;color:var(--muted2)">${data.length} análise(s) registrada(s) · Motor v8.0</div>`;
+      return header + detalhe + '</div>';
+    }).join('')
 
   } catch(e) {
     el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Erro ao carregar histórico. Tente novamente.</div>';
