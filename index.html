@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v12.1.4 | 2026-06-07 -->
+<!-- Guardião Fiscal v12.1.7 | 2026-06-07 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -1077,7 +1077,7 @@ nav {
 .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
 .chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
 .chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
-.limit-bar{display:flex;align-items:center;gap:10px;margin-top:16px;
+.limit-bar{display:flex;align-items:center;gap:8px;margin-top:8px;
   padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
 .limit-dots{display:none}
 .ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
@@ -1086,8 +1086,8 @@ nav {
 .ldot.full{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
 .limit-txt{font-size:12px;color:var(--muted2)}
 .limit-txt strong{color:var(--text);font-weight:600}
-.file-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.file-item{display:flex;align-items:center;gap:10px;padding:11px 14px;
+.file-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.file-item{display:flex;align-items:center;gap:8px;padding:8px 12px;
   background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px}
 .file-item.ok{border-color:rgba(0,217,110,0.25)}
 .file-item.err{border-color:rgba(240,79,96,0.3);background:rgba(240,79,96,0.05)}
@@ -1102,17 +1102,17 @@ nav {
 .fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
 .fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
 .fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
-.act-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.act-bar{padding:10px 16px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .prog-ext{flex:1;min-width:80px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
 .act-msg{font-size:12px;color:var(--muted2);flex:1;min-width:80px}
 .btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:9px;
   color:#000;font-family:Inter,sans-serif;font-size:13px;font-weight:700;
   cursor:pointer;transition:all 0.2s;white-space:nowrap;opacity:0.35;pointer-events:none;
-  width:100%}
+  width:auto}
 .btn-go.on{opacity:1;pointer-events:all}
 .btn-go.on:hover{background:#2563eb}
-@media(min-width:480px){.btn-go{width:auto}}
+
 .err-ext{display:none;padding:12px 16px;margin:0 0 12px;
   background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.25);
   border-radius:9px;font-size:13px;color:var(--red)}
@@ -2446,37 +2446,14 @@ function guiaTab(banco) {
                  onchange="eOnSel(event)"
                  style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
 
-          <!-- Três botões de tipo + drop zone unificados e compactos -->
+          <!-- Drop zone compacta — aparece abaixo dos botões -->
           <div class="drop-zone" id="dz"
                ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)"
                onclick="document.getElementById('efi').click()"
-               style="padding:14px 12px;cursor:pointer;margin-bottom:8px">
-            <span class="dz-ico" id="dzIco" style="font-size:22px">📂</span>
-            <div class="dz-ttl" id="dzTtl" style="font-size:13px;margin:4px 0 2px">Clique ou arraste seu extrato aqui</div>
-            <div class="dz-sub" style="font-size:11px">PDF · CSV · OFX · até 5 arquivos</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:4px">
-            <button onclick="document.getElementById('efi').click()"
-                    style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;color:var(--text)"
-                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
-              <span style="font-size:15px">📄</span>
-              <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700">PDF</span>
-              <span style="font-size:10px;color:var(--muted2)">qualquer banco</span>
-            </button>
-            <button onclick="document.getElementById('efi').click()"
-                    style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;color:var(--text)"
-                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
-              <span style="font-size:15px">📊</span>
-              <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700">CSV</span>
-              <span style="font-size:10px;color:var(--muted2)">Nubank, Inter</span>
-            </button>
-            <button onclick="document.getElementById('efi').click()"
-                    style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;color:var(--text)"
-                    onmouseover="this.style.borderColor='rgba(0,217,110,0.5)'" onmouseout="this.style.borderColor='var(--border)'">
-              <span style="font-size:15px">🏦</span>
-              <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700">OFX</span>
-              <span style="font-size:10px;color:var(--muted2)">Itaú, Bradesco</span>
-            </button>
+               style="padding:12px;cursor:pointer;margin-bottom:6px">
+            <span class="dz-ico" id="dzIco" style="font-size:20px">📂</span>
+            <div class="dz-ttl" id="dzTtl" style="font-size:12px;margin:3px 0 1px">Ou arraste os arquivos aqui</div>
+            <div class="dz-sub" style="font-size:11px">até 5 extratos · bancos diferentes</div>
           </div>
 
         <div class="limit-bar" id="limitBar" style="display:none">
@@ -2489,10 +2466,11 @@ function guiaTab(banco) {
       <div class="act-bar" id="actBar" style="display:none">
         <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
         <span class="act-msg" id="actMsg">Pronto para analisar</span>
-        <!-- Seletor de perfil — reduz falsos positivos no motor -->
-        <div style="margin:8px 0 6px;width:100%">
-          <div style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px">Qual é a sua principal fonte de renda?</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="perfilBtns">
+
+        <!-- Perfil + renda em layout compacto -->
+        <div style="width:100%;margin:6px 0 4px">
+          <div style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:5px">Qual é a sua principal fonte de renda?</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px" id="perfilBtns">
             <button onclick="selecionarPerfil('clt',this)"
               style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
               🏢<br>CLT / Servidor
@@ -2506,21 +2484,18 @@ function guiaTab(banco) {
               📈<br>Investidor / Aposent.
             </button>
           </div>
-        </div>
-        <div style="width:100%;margin:10px 0 4px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.25);border-radius:10px;padding:10px 12px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-            <span style="font-size:13px">🎯</span>
-            <label for="rendaDeclaradaInput" style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:var(--green);cursor:pointer">Renda mensal declarada no IR</label>
-          </div>
-          <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;line-height:1.5">Preencher ativa a verificação de compatibilidade — o ponto mais sensível para a Receita.</div>
-          <div style="position:relative;">
-            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted2);pointer-events:none">R$</span>
-            <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 5000"
-              style="width:100%;padding:9px 10px 9px 28px;border:1px solid rgba(0,217,110,0.3);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;font-family:Inter,sans-serif;box-sizing:border-box"
-              title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
+
+          <!-- Renda + botão em linha única -->
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="position:relative;flex:1;min-width:0">
+              <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">🎯 R$</span>
+              <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Renda declarada (opcional)"
+                style="width:100%;padding:8px 8px 8px 40px;border:1px solid rgba(0,217,110,0.3);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;font-family:Inter,sans-serif;box-sizing:border-box"
+                title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
+            </div>
+            <button class="btn-go" id="btnGo" onclick="eRunAll()" style="flex-shrink:0;white-space:nowrap">Analisar →</button>
           </div>
         </div>
-        <button class="btn-go" id="btnGo" onclick="eRunAll()">Analisar →</button>
       </div>
 
 
@@ -7717,7 +7692,7 @@ async function eUnlockResult(){
     bankTabsEl.appendChild(btn);
   });
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.1.4\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
+  document.getElementById('pDbgPre').textContent=`Motor: v8.0 · Site: v12.1.7\nExtratos: ${sources.length}\nTotal txns: ${c.totalTxns}\nScore: ${c.score}%\nÍndice consumo: ${Math.round((c.indiceConsumo||0)*100)}%\nÍndice espécie: ${Math.round((c.indiceEspecie||0)*100)}%\nPadrões recorrentes: ${c.recorrentes}\nAtividade comercial oculta: ${c.comercialOculta}\n`+sources.map(r=>`[${r.bank}] ${r.totalTxns} txns · score ${r.score}% · fatores: ${(r.fatores||[]).map(f=>f.motivo).join(', ')}`).join('\n');
   eRenderTxns('all');
   // [v5] Injetar card de feedback diretamente — sem depender do MutationObserver
   setTimeout(() => {
