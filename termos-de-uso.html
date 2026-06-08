@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Uso — Guardião Fiscal</title>
+<meta name="description" content="Termos de Uso do Guardião Fiscal. Leia as condições de uso do serviço antes de criar sua conta.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oguardiaofiscal.com.br/termos-de-uso">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ff: 'Inter', sans-serif;
+  --bg:      #050816;
+  --surface: #080D1A;
+  --surface2:#0C1220;
+  --border:  #1B2636;
+  --border2: #1F2E42;
+  --green:   #7CFF4F;
+  --yellow:  #F5A623;
+  --red:     #FF4D4F;
+  --text:    #FFFFFF;
+  --text2:   #B8C0CC;
+  --muted:   #7B8493;
+  --muted2:  #B8C0CC;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text2);
+  font-family: var(--ff);
+  font-size: 15px;
+  line-height: 1.8;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse 800px 400px at 50% -100px, rgba(59,130,246,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  background: rgba(5,8,22,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.nav-logo {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo span { color: var(--green); }
+
+.nav-back {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nav-back:hover { color: var(--text2); }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124,255,79,0.08);
+  border: 1px solid rgba(124,255,79,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 40px;
+}
+
+.toc-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.toc ol {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toc a {
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s;
+}
+
+.toc a:hover { color: var(--green); }
+
+section { margin-bottom: 44px; }
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+h2 .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(124,255,79,0.1);
+  border: 1px solid rgba(124,255,79,0.25);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+p { margin-bottom: 12px; color: var(--text2); }
+p:last-child { margin-bottom: 0; }
+
+.highlight-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--green);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--text2);
+}
+
+.warning-box {
+  background: rgba(245,166,35,0.06);
+  border: 1px solid rgba(245,166,35,0.2);
+  border-left: 3px solid var(--yellow);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--text2);
+}
+
+.danger-box {
+  background: rgba(255,77,79,0.05);
+  border: 1px solid rgba(255,77,79,0.2);
+  border-left: 3px solid var(--red);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--text2);
+}
+
+ul {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+li { color: var(--text2); font-size: 14px; }
+
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+.plan-table th {
+  background: var(--surface2);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+
+.plan-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+
+.plan-table tr:last-child td { border-bottom: none; }
+
+.cancel-flow {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+
+.cancel-flow h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.cancel-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.cancel-step:last-child { border-bottom: none; padding-bottom: 0; }
+
+.cancel-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(124,255,79,0.1);
+  border: 1px solid rgba(124,255,79,0.2);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--green);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+}
+
+footer a { color: var(--muted2); }
+
+@media (max-width: 600px) {
+  .container { padding: 32px 16px 60px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">🛡️ Guardião <span>Fiscal</span></a>
+  <a href="/" class="nav-back">← Voltar ao site</a>
+</nav>
+
+<div class="container">
+
+  <div class="badge">📄 Termos de Uso</div>
+
+  <h1>Termos de Uso</h1>
+
+  <p class="subtitle">
+    Última atualização: junho de 2026 · Ao criar uma conta ou utilizar o Guardião Fiscal, você concorda com estes termos. Leia com atenção.
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">Índice</div>
+    <ol>
+      <li><a href="#servico">O serviço</a></li>
+      <li><a href="#conta">Conta de usuário</a></li>
+      <li><a href="#planos">Planos e pagamento</a></li>
+      <li><a href="#cancelamento">Cancelamento e reembolso</a></li>
+      <li><a href="#conteudo">Conteúdo enviado pelo usuário</a></li>
+      <li><a href="#proibicoes">Uso proibido</a></li>
+      <li><a href="#dados">Dados e privacidade</a></li>
+      <li><a href="#limitacao">Limitação de responsabilidade</a></li>
+      <li><a href="#propriedade">Propriedade intelectual</a></li>
+      <li><a href="#alteracoes">Alterações nos termos</a></li>
+      <li><a href="#foro">Foro e legislação</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <section id="servico">
+    <h2><span class="num">1</span> O serviço</h2>
+    <p>
+      O <strong style="color:var(--text)">Guardião Fiscal</strong> é uma ferramenta de análise preventiva de risco fiscal para pessoa física, disponível em <a href="https://oguardiaofiscal.com.br">oguardiaofiscal.com.br</a>.
+    </p>
+    <div class="highlight-box">
+      <strong>O Guardião Fiscal não é um serviço de contabilidade, assessoria jurídica ou consultoria fiscal.</strong> Os resultados gerados são indicativos de risco e têm caráter exclusivamente informativo e preventivo. Não substituem a análise de um contador ou advogado tributarista habilitado.
+    </div>
+    <p>
+      O serviço analisa extratos bancários fornecidos pelo próprio usuário e gera um score de risco com base em padrões estatísticos. O resultado não constitui diagnóstico fiscal definitivo e não deve ser usado como base exclusiva para decisões tributárias.
+    </p>
+  </section>
+
+  <!-- 2 -->
+  <section id="conta">
+    <h2><span class="num">2</span> Conta de usuário</h2>
+    <p>Para acessar os recursos pagos do Guardião Fiscal, o usuário deve criar uma conta informando um endereço de e-mail válido.</p>
+    <ul>
+      <li>Você é responsável pela confidencialidade da sua senha e por todas as atividades realizadas na sua conta.</li>
+      <li>Não é permitido compartilhar credenciais de acesso com terceiros.</li>
+      <li>Em caso de acesso não autorizado, notifique imediatamente pelo e-mail <a href="mailto:contato@oguardiaofiscal.com.br">contato@oguardiaofiscal.com.br</a>.</li>
+      <li>O Guardião Fiscal reserva-se o direito de suspender contas que violem estes termos.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="planos">
+    <h2><span class="num">3</span> Planos e pagamento</h2>
+
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <th>Plano</th>
+          <th>Valor</th>
+          <th>Acesso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--text)">Gratuito</strong></td>
+          <td>R$ 0,00</td>
+          <td>Análise preliminar (score e nível de risco)</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--text)">Avulso</strong></td>
+          <td>R$ 19,90</td>
+          <td>Resultado completo de uma análise</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--text)">Pro</strong></td>
+          <td>R$ 29,90/mês</td>
+          <td>Análises ilimitadas com acesso completo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ul>
+      <li>Os pagamentos são processados com segurança pelo Mercado Pago.</li>
+      <li>A cobrança do plano Pro é recorrente, renovada mensalmente na data de contratação.</li>
+      <li>Os preços podem ser ajustados com aviso prévio de 30 dias por e-mail.</li>
+      <li>O acesso ao plano é ativado imediatamente após a confirmação do pagamento.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section id="cancelamento">
+    <h2><span class="num">4</span> Cancelamento e reembolso</h2>
+
+    <div class="highlight-box">
+      <strong>Cancelamento simples, sem burocracia.</strong> Se você assinou em poucos cliques, cancelar deve ser igual. Não exigimos ligação, WhatsApp ou abertura de chamado.
+    </div>
+
+    <div class="cancel-flow">
+      <h3>Como cancelar o plano Pro</h3>
+      <div class="cancel-step">
+        <span class="cancel-step-num">1</span>
+        <span>Acesse sua conta em <a href="https://oguardiaofiscal.com.br">oguardiaofiscal.com.br</a></span>
+      </div>
+      <div class="cancel-step">
+        <span class="cancel-step-num">2</span>
+        <span>Clique em <strong style="color:var(--text)">Configurações → Assinatura → Cancelar assinatura</strong></span>
+      </div>
+      <div class="cancel-step">
+        <span class="cancel-step-num">3</span>
+        <span>Confirme o cancelamento. Seu acesso permanece ativo até o fim do período pago.</span>
+      </div>
+    </div>
+
+    <p>Alternativamente, você pode solicitar o cancelamento por e-mail em <a href="mailto:contato@oguardiaofiscal.com.br">contato@oguardiaofiscal.com.br</a>. Atendemos em até 2 dias úteis.</p>
+
+    <p style="margin-top:16px;font-weight:600;color:var(--text)">Política de reembolso:</p>
+    <ul>
+      <li><strong style="color:var(--text)">Plano Pro:</strong> reembolso integral se solicitado em até 7 dias corridos após a primeira contratação, sem uso do resultado completo.</li>
+      <li><strong style="color:var(--text)">Análise Avulsa:</strong> reembolso disponível em até 7 dias se o resultado completo não tiver sido acessado.</li>
+      <li>Após o prazo ou após o acesso ao resultado, não há reembolso, pois o serviço digital foi integralmente entregue (Art. 49, §1° do CDC).</li>
+    </ul>
+
+    <div class="warning-box">
+      O cancelamento da assinatura encerra a renovação automática, mas não exclui sua conta. Para exclusão completa da conta e dos dados, consulte a <a href="/privacidade#seus-direitos">Política de Privacidade</a>.
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="conteudo">
+    <h2><span class="num">5</span> Conteúdo enviado pelo usuário</h2>
+    <p>
+      O usuário é exclusivamente responsável pelo conteúdo dos arquivos que envia para análise (extratos bancários, arquivos CSV, OFX, PDF e similares).
+    </p>
+    <div class="highlight-box">
+      Ao enviar um arquivo, o usuário declara que: <strong>(a)</strong> possui plena autorização para utilizá-lo; <strong>(b)</strong> as informações são verdadeiras e legítimas; <strong>(c)</strong> não está infringindo direitos de terceiros.
+    </div>
+    <p>
+      O Guardião Fiscal não verifica a autenticidade dos documentos enviados e não se responsabiliza por análises baseadas em dados falsos, adulterados ou ilegalmente obtidos. A responsabilidade civil e penal por tais atos é integralmente do usuário.
+    </p>
+    <p>
+      Os arquivos enviados são processados localmente no navegador do usuário e <strong style="color:var(--text)">não são transmitidos ou armazenados em nossos servidores</strong>. O Guardião Fiscal não tem acesso ao conteúdo dos extratos.
+    </p>
+  </section>
+
+  <!-- 6 -->
+  <section id="proibicoes">
+    <h2><span class="num">6</span> Uso proibido</h2>
+    <p>É expressamente proibido utilizar o Guardião Fiscal para:</p>
+    <ul>
+      <li>Simular ou testar cenários de evasão fiscal ou lavagem de dinheiro</li>
+      <li>Enviar extratos ou documentos de terceiros sem autorização expressa</li>
+      <li>Tentar acessar dados de outros usuários ou comprometer a segurança da plataforma</li>
+      <li>Realizar engenharia reversa, scraping ou uso automatizado da plataforma</li>
+      <li>Utilizar o serviço para fins ilegais ou que violem a legislação brasileira</li>
+      <li>Criar múltiplas contas para contornar limitações do plano gratuito</li>
+    </ul>
+    <div class="danger-box">
+      Violações podem resultar em suspensão imediata da conta, sem direito a reembolso, e comunicação às autoridades competentes quando exigido por lei.
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="dados">
+    <h2><span class="num">7</span> Dados e privacidade</h2>
+    <p>
+      O tratamento de dados pessoais é regido pela nossa <a href="/privacidade">Política de Privacidade</a>, em conformidade com a LGPD — Lei 13.709/2018.
+    </p>
+    <div class="highlight-box">
+      <strong>O Guardião Fiscal não vende, aluga, comercializa nem compartilha dados pessoais, extratos bancários ou informações financeiras dos usuários com terceiros</strong>, exceto quando estritamente necessário para: processamento de pagamentos, hospedagem do serviço, autenticação, cumprimento de obrigação legal ou ordem judicial.
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="limitacao">
+    <h2><span class="num">8</span> Limitação de responsabilidade</h2>
+    <p>O Guardião Fiscal:</p>
+    <ul>
+      <li>Não garante que os resultados da análise reflitam com exatidão a situação fiscal do usuário perante a Receita Federal.</li>
+      <li>Não se responsabiliza por decisões tomadas pelo usuário com base exclusivamente nos resultados da plataforma.</li>
+      <li>Não substitui orientação profissional de contador, advogado tributarista ou consultor fiscal habilitado.</li>
+      <li>Não se responsabiliza por interrupções temporárias do serviço por manutenção ou falhas técnicas.</li>
+    </ul>
+    <p style="margin-top:12px">
+      Em nenhuma hipótese a responsabilidade total do Guardião Fiscal por danos diretos excederá o valor pago pelo usuário nos últimos 3 meses de serviço.
+    </p>
+    <div class="warning-box">
+      O serviço é fornecido "no estado em que se encontra". Recomendamos sempre consultar um profissional habilitado para decisões fiscais relevantes.
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section id="propriedade">
+    <h2><span class="num">9</span> Propriedade intelectual</h2>
+    <p>
+      Todo o conteúdo do Guardião Fiscal — incluindo o motor de análise, algoritmos, interface, textos, marca e logotipo — é propriedade exclusiva do operador do serviço e protegido pela legislação brasileira de propriedade intelectual.
+    </p>
+    <p>
+      É vedada a reprodução, cópia, distribuição ou uso comercial de qualquer elemento da plataforma sem autorização prévia e expressa por escrito.
+    </p>
+  </section>
+
+  <!-- 10 -->
+  <section id="alteracoes">
+    <h2><span class="num">10</span> Alterações nos termos</h2>
+    <p>
+      O Guardião Fiscal pode atualizar estes Termos de Uso a qualquer momento. Alterações relevantes serão comunicadas por e-mail com antecedência mínima de 15 dias.
+    </p>
+    <p>
+      O uso continuado do serviço após a vigência das alterações implica aceitação dos novos termos. Caso não concorde, o usuário pode cancelar sua conta antes da data de vigência.
+    </p>
+    <p>
+      O histórico de versões dos termos está disponível mediante solicitação pelo canal de contato.
+    </p>
+  </section>
+
+  <!-- 11 -->
+  <section id="foro">
+    <h2><span class="num">11</span> Foro e legislação</h2>
+    <p>
+      Estes Termos de Uso são regidos pela legislação brasileira, em especial pelo Código de Defesa do Consumidor (Lei 8.078/1990), pelo Marco Civil da Internet (Lei 12.965/2014) e pela LGPD (Lei 13.709/2018).
+    </p>
+    <p>
+      Fica eleito o foro da comarca de <strong style="color:var(--text)">Goiânia — GO</strong> para dirimir quaisquer controvérsias oriundas destes termos, com renúncia a qualquer outro, por mais privilegiado que seja.
+    </p>
+  </section>
+
+  <!-- 12 -->
+  <section id="contato">
+    <h2><span class="num">12</span> Contato</h2>
+    <p>Para dúvidas, solicitações ou comunicações relacionadas a estes termos:</p>
+    <ul>
+      <li>E-mail geral: <a href="mailto:contato@oguardiaofiscal.com.br">contato@oguardiaofiscal.com.br</a></li>
+      <li>Privacidade e LGPD: <a href="mailto:privacidade@oguardiaofiscal.com.br">privacidade@oguardiaofiscal.com.br</a></li>
+      <li>Site: <a href="https://oguardiaofiscal.com.br">oguardiaofiscal.com.br</a></li>
+    </ul>
+    <p style="margin-top:16px;font-size:13px;color:var(--muted)">
+      Prazo de resposta: até 5 dias úteis para questões gerais, até 15 dias úteis para solicitações LGPD.
+    </p>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2026 Guardião Fiscal · <a href="/">Voltar ao site</a> · <a href="/privacidade">Política de Privacidade</a> · <a href="/termos-de-uso">Termos de Uso</a></p>
+  <p style="margin-top:6px">Regido pela legislação brasileira — CDC · Marco Civil da Internet · LGPD</p>
+</footer>
+
+</body>
+</html>

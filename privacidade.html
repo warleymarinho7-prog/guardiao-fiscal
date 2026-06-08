@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — Guardião Fiscal</title>
+<meta name="description" content="Política de Privacidade do Guardião Fiscal. Saiba como tratamos seus dados em conformidade com a LGPD — Lei 13.709/2018.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oguardiaofiscal.com.br/privacidade">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ff: 'Inter', sans-serif;
+  --bg:      #050816;
+  --surface: #080D1A;
+  --surface2:#0C1220;
+  --border:  #1B2636;
+  --border2: #1F2E42;
+  --green:   #7CFF4F;
+  --yellow:  #F5A623;
+  --red:     #FF4D4F;
+  --text:    #FFFFFF;
+  --text2:   #B8C0CC;
+  --muted:   #7B8493;
+  --muted2:  #B8C0CC;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text2);
+  font-family: var(--ff);
+  font-size: 15px;
+  line-height: 1.8;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse 800px 400px at 50% -100px, rgba(59,130,246,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  background: rgba(5,8,22,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.nav-logo {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo span { color: var(--green); }
+
+.nav-back {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s;
+}
+
+.nav-back:hover { color: var(--text2); }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124,255,79,0.08);
+  border: 1px solid rgba(124,255,79,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toc {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 40px;
+}
+
+.toc-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.toc ol {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toc a {
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s;
+}
+
+.toc a:hover { color: var(--green); }
+
+section {
+  margin-bottom: 44px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+h2 .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(124,255,79,0.1);
+  border: 1px solid rgba(124,255,79,0.25);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+p { margin-bottom: 12px; color: var(--text2); }
+p:last-child { margin-bottom: 0; }
+
+.highlight-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--green);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--text2);
+}
+
+.highlight-box strong { color: var(--text); }
+
+.warning-box {
+  background: rgba(245,166,35,0.06);
+  border: 1px solid rgba(245,166,35,0.2);
+  border-left: 3px solid var(--yellow);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--text2);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+th {
+  background: var(--surface2);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: none; }
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tag-green { background: rgba(124,255,79,0.1); color: var(--green); }
+.tag-yellow { background: rgba(245,166,35,0.1); color: var(--yellow); }
+.tag-blue { background: rgba(59,130,246,0.1); color: #60a5fa; }
+
+ul {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+li { color: var(--text2); font-size: 14px; }
+
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.contact-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 16px;
+}
+
+.contact-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.contact-item:last-child { border-bottom: none; padding-bottom: 0; }
+.contact-label { color: var(--muted); min-width: 100px; }
+.contact-value { color: var(--text2); }
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+}
+
+footer a { color: var(--muted2); }
+
+@media (max-width: 600px) {
+  .container { padding: 32px 16px 60px; }
+  table { font-size: 12px; }
+  th, td { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">🛡️ Guardião <span>Fiscal</span></a>
+  <a href="/" class="nav-back">← Voltar ao site</a>
+</nav>
+
+<div class="container">
+
+  <div class="badge">🔒 LGPD — Lei 13.709/2018</div>
+
+  <h1>Política de Privacidade</h1>
+
+  <p class="subtitle">
+    Última atualização: junho de 2026 · Esta política descreve como o Guardião Fiscal coleta, usa e protege seus dados pessoais.
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">Índice</div>
+    <ol>
+      <li><a href="#quem-somos">Quem somos</a></li>
+      <li><a href="#dados-coletados">Dados que coletamos</a></li>
+      <li><a href="#como-usamos">Como usamos seus dados</a></li>
+      <li><a href="#terceiros">Serviços terceiros</a></li>
+      <li><a href="#retencao">Retenção e exclusão</a></li>
+      <li><a href="#seus-direitos">Seus direitos (LGPD)</a></li>
+      <li><a href="#seguranca">Segurança</a></li>
+      <li><a href="#cookies">Cookies e rastreamento</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <section id="quem-somos">
+    <h2><span class="num">1</span> Quem somos</h2>
+    <p>
+      O <strong style="color:var(--text)">Guardião Fiscal</strong> é uma ferramenta de análise preventiva de risco fiscal para pessoa física, disponível em <a href="https://oguardiaofiscal.com.br">oguardiaofiscal.com.br</a>.
+    </p>
+    <p>
+      O responsável pelo tratamento dos dados é o operador do serviço, com sede no Brasil, que pode ser contactado pelo e-mail indicado na seção <a href="#contato">Contato</a>.
+    </p>
+  </section>
+
+  <!-- 2 -->
+  <section id="dados-coletados">
+    <h2><span class="num">2</span> Dados que coletamos</h2>
+
+    <div class="highlight-box">
+      <strong>Seu extrato bancário nunca sai do seu dispositivo.</strong> O processamento do arquivo ocorre 100% localmente no seu navegador. Nenhum conteúdo bancário é transmitido ou armazenado em nossos servidores.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Dado</th>
+          <th>Origem</th>
+          <th>Finalidade</th>
+          <th>Base legal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>E-mail</td>
+          <td>Cadastro / login</td>
+          <td>Autenticação e controle de acesso</td>
+          <td><span class="tag tag-blue">Contrato</span></td>
+        </tr>
+        <tr>
+          <td>Score de risco e nível</td>
+          <td>Resultado da análise</td>
+          <td>Exibir histórico ao usuário</td>
+          <td><span class="tag tag-blue">Contrato</span></td>
+        </tr>
+        <tr>
+          <td>Totais financeiros agregados</td>
+          <td>Processamento local</td>
+          <td>Histórico e melhoria do motor</td>
+          <td><span class="tag tag-blue">Contrato</span></td>
+        </tr>
+        <tr>
+          <td>Perfil declarado (CLT, MEI etc.)</td>
+          <td>Seleção do usuário</td>
+          <td>Calibrar análise</td>
+          <td><span class="tag tag-blue">Contrato</span></td>
+        </tr>
+        <tr>
+          <td>Renda declarada (opcional)</td>
+          <td>Campo manual</td>
+          <td>Ativar índice de compatibilidade</td>
+          <td><span class="tag tag-green">Consentimento</span></td>
+        </tr>
+        <tr>
+          <td>Fatores de risco (sem dados brutos)</td>
+          <td>Motor de análise</td>
+          <td>Histórico e contestação</td>
+          <td><span class="tag tag-blue">Contrato</span></td>
+        </tr>
+        <tr>
+          <td>Feedback textual (opcional)</td>
+          <td>Formulário voluntário</td>
+          <td>Melhoria do produto</td>
+          <td><span class="tag tag-green">Consentimento</span></td>
+        </tr>
+        <tr>
+          <td>Dados de pagamento</td>
+          <td>Checkout Mercado Pago</td>
+          <td>Processar cobrança</td>
+          <td><span class="tag tag-blue">Contrato</span></td>
+        </tr>
+        <tr>
+          <td>Eventos de navegação</td>
+          <td>Cookies / pixels</td>
+          <td>Analytics e campanhas</td>
+          <td><span class="tag tag-yellow">Legítimo interesse</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:13px;color:var(--muted)">
+      Não coletamos dados sensíveis conforme definição da LGPD (dados de saúde, origem racial, convicção religiosa etc.). Os totais financeiros armazenados são valores arredondados — não contêm descrições de transações individuais nem saldos exatos.
+    </p>
+  </section>
+
+  <!-- 3 -->
+  <section id="como-usamos">
+    <h2><span class="num">3</span> Como usamos seus dados</h2>
+    <ul>
+      <li>Autenticar seu acesso e manter sua conta ativa</li>
+      <li>Exibir seu histórico de análises anteriores</li>
+      <li>Processar pagamentos e liberar acesso ao resultado completo</li>
+      <li>Melhorar o motor de análise com base em métricas agregadas anônimas</li>
+      <li>Enviar comunicações relacionadas ao serviço (não fazemos spam)</li>
+      <li>Cumprir obrigações legais quando exigido</li>
+    </ul>
+    <p style="margin-top:12px">
+      Não vendemos, alugamos nem compartilhamos seus dados com terceiros para fins de marketing ou publicidade.
+    </p>
+  </section>
+
+  <!-- 4 -->
+  <section id="terceiros">
+    <h2><span class="num">4</span> Serviços terceiros</h2>
+    <p>O Guardião Fiscal utiliza os seguintes serviços de terceiros, cada um com sua própria política de privacidade:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th>Finalidade</th>
+          <th>Dados compartilhados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--text)">Supabase</strong></td>
+          <td>Banco de dados e autenticação</td>
+          <td>E-mail, score, métricas agregadas</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--text)">Mercado Pago</strong></td>
+          <td>Processamento de pagamentos</td>
+          <td>Dados de pagamento (cartão/Pix)</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--text)">Vercel</strong></td>
+          <td>Hospedagem do site</td>
+          <td>IP, logs de acesso</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--text)">Microsoft Clarity</strong></td>
+          <td>Análise de comportamento (heatmap/replay)</td>
+          <td>Interações de navegação anonimizadas</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--text)">Meta (Facebook)</strong></td>
+          <td>Pixel de marketing e campanhas</td>
+          <td>Eventos de navegação (PageView, conversões)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box">
+      O carregamento do Microsoft Clarity e do Meta Pixel está condicionado ao seu consentimento via banner de cookies. Você pode recusar a qualquer momento.
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="retencao">
+    <h2><span class="num">5</span> Retenção e exclusão</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Dado</th>
+          <th>Prazo de retenção</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Conta e e-mail</td>
+          <td>Enquanto a conta estiver ativa ou até solicitação de exclusão</td>
+        </tr>
+        <tr>
+          <td>Histórico de análises</td>
+          <td>12 meses após a criação, ou até exclusão da conta</td>
+        </tr>
+        <tr>
+          <td>Feedbacks</td>
+          <td>12 meses, podendo ser excluídos sob solicitação</td>
+        </tr>
+        <tr>
+          <td>Dados de pagamento</td>
+          <td>Conforme exigências legais e fiscais (mínimo 5 anos)</td>
+        </tr>
+        <tr>
+          <td>Extrato bancário</td>
+          <td>Não armazenado — processado e descartado localmente</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Para solicitar a exclusão da sua conta e de todos os dados associados, entre em contato pelo e-mail indicado na seção <a href="#contato">Contato</a>.
+    </p>
+  </section>
+
+  <!-- 6 -->
+  <section id="seus-direitos">
+    <h2><span class="num">6</span> Seus direitos (LGPD)</h2>
+    <p>Conforme a Lei 13.709/2018, você tem direito a:</p>
+    <ul>
+      <li><strong style="color:var(--text)">Acesso</strong> — saber quais dados temos sobre você</li>
+      <li><strong style="color:var(--text)">Correção</strong> — corrigir dados incompletos ou incorretos</li>
+      <li><strong style="color:var(--text)">Exclusão</strong> — solicitar a remoção dos seus dados</li>
+      <li><strong style="color:var(--text)">Portabilidade</strong> — receber seus dados em formato estruturado</li>
+      <li><strong style="color:var(--text)">Revogação do consentimento</strong> — retirar consentimentos dados anteriormente</li>
+      <li><strong style="color:var(--text)">Oposição</strong> — se opor a tratamentos baseados em legítimo interesse</li>
+      <li><strong style="color:var(--text)">Informação</strong> — ser informado sobre uso de seus dados por terceiros</li>
+    </ul>
+    <p style="margin-top:12px">
+      Para exercer qualquer direito, envie um e-mail para <a href="mailto:privacidade@oguardiaofiscal.com.br">privacidade@oguardiaofiscal.com.br</a> com o assunto <strong style="color:var(--text)">"Direitos LGPD"</strong>. Responderemos em até 15 dias úteis.
+    </p>
+  </section>
+
+  <!-- 7 -->
+  <section id="seguranca">
+    <h2><span class="num">7</span> Segurança</h2>
+    <ul>
+      <li>Comunicação criptografada via HTTPS (TLS)</li>
+      <li>Extrato bancário processado localmente — nunca transmitido</li>
+      <li>Banco de dados com Row Level Security (RLS) — cada usuário acessa apenas seus próprios dados</li>
+      <li>Chaves de acesso privilegiado isoladas em funções de servidor (Edge Functions)</li>
+      <li>Content Security Policy (CSP) implementada no frontend</li>
+      <li>Validação e sanitização de todos os arquivos enviados</li>
+    </ul>
+    <p style="margin-top:12px">
+      Em caso de incidente de segurança que possa afetar seus dados, notificaremos os usuários afetados e a ANPD conforme exigido pela LGPD.
+    </p>
+  </section>
+
+  <!-- 8 -->
+  <section id="cookies">
+    <h2><span class="num">8</span> Cookies e rastreamento</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Cookie / Script</th>
+          <th>Tipo</th>
+          <th>Pode recusar?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Autenticação (Supabase)</td>
+          <td>Essencial</td>
+          <td>Não — necessário para login</td>
+        </tr>
+        <tr>
+          <td>Consentimento de cookies</td>
+          <td>Essencial</td>
+          <td>Não — registra sua preferência</td>
+        </tr>
+        <tr>
+          <td>Microsoft Clarity</td>
+          <td>Analytics</td>
+          <td><strong style="color:var(--green)">Sim</strong> — via banner de cookies</td>
+        </tr>
+        <tr>
+          <td>Meta Pixel</td>
+          <td>Marketing</td>
+          <td><strong style="color:var(--green)">Sim</strong> — via banner de cookies</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Você pode alterar suas preferências de cookies a qualquer momento clicando em <strong style="color:var(--text)">"Configurar cookies"</strong> no rodapé do site.
+    </p>
+  </section>
+
+  <!-- 9 -->
+  <section id="contato">
+    <h2><span class="num">9</span> Contato</h2>
+    <p>Para exercer seus direitos, tirar dúvidas ou reportar qualquer questão relacionada à privacidade:</p>
+
+    <div class="contact-card">
+      <h3>Canal de Privacidade</h3>
+      <div class="contact-item">
+        <span class="contact-label">E-mail</span>
+        <span class="contact-value"><a href="mailto:privacidade@oguardiaofiscal.com.br">privacidade@oguardiaofiscal.com.br</a></span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label">Assunto</span>
+        <span class="contact-value">"Direitos LGPD" ou "Privacidade"</span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label">Prazo</span>
+        <span class="contact-value">Resposta em até 15 dias úteis</span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label">Site</span>
+        <span class="contact-value"><a href="https://oguardiaofiscal.com.br">oguardiaofiscal.com.br</a></span>
+      </div>
+    </div>
+
+    <p style="margin-top:20px;font-size:13px;color:var(--muted)">
+      Esta política pode ser atualizada periodicamente. Alterações relevantes serão comunicadas por e-mail aos usuários cadastrados. A versão mais recente estará sempre disponível nesta página.
+    </p>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2026 Guardião Fiscal · <a href="/">Voltar ao site</a> · <a href="/privacidade">Política de Privacidade</a></p>
+  <p style="margin-top:6px">Em conformidade com a LGPD — Lei Federal nº 13.709/2018</p>
+</footer>
+
+</body>
+</html>
