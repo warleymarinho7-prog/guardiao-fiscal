@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050816">
+<title>Blog — Guardião Fiscal · Educação fiscal para pessoa física</title>
+<meta name="description" content="Artigos sobre malha fina, cruzamento de dados da Receita Federal, declaração de IR e como evitar inconsistências fiscais. Conteúdo educacional gratuito.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oguardiaofiscal.com.br/blog">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oguardiaofiscal.com.br/blog">
+<meta property="og:site_name" content="Guardião Fiscal">
+<meta property="og:title" content="Blog — Guardião Fiscal · Educação fiscal para pessoa física">
+<meta property="og:description" content="Artigos sobre malha fina, cruzamento de dados da Receita Federal e como proteger sua declaração de IR.">
+<meta property="og:image" content="https://oguardiaofiscal.com.br/og-image.png">
+<meta property="og:locale" content="pt_BR">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "Blog Guardião Fiscal",
+  "url": "https://oguardiaofiscal.com.br/blog",
+  "description": "Educação fiscal para pessoa física: malha fina, cruzamento de dados, declaração de IR.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Guardião Fiscal",
+    "url": "https://oguardiaofiscal.com.br"
+  },
+  "inLanguage": "pt-BR"
+}
+</script>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 79 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=swap" rel="stylesheet"></noscript>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+:root {
+  --ff: 'Inter', sans-serif;
+  --bg:      #050816;
+  --surface: #080D1A;
+  --surface2:#0C1220;
+  --border:  #1B2636;
+  --border2: #1F2E42;
+  --green:  #7CFF4F;
+  --green2: #69E837;
+  --yellow: #F5A623;
+  --red:    #FF4D4F;
+  --text:   #FFFFFF;
+  --text2:  #B8C0CC;
+  --muted:  #7B8493;
+  --muted2: #B8C0CC;
+  --glow-green: 0 0 10px rgba(124,255,79,.4), 0 0 30px rgba(124,255,79,.25);
+  --radius-card: 24px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text2);
+  font-family: var(--ff);
+  font-size: 15px;
+  line-height: 1.72;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse 800px 400px at 50% -100px, rgba(59,130,246,0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(11,17,32,0.98);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+.logo-svg { width: 26px; height: 30px; flex-shrink: 0; }
+.logo-wordmark { display: flex; flex-direction: column; line-height: 1.1; }
+.logo-top { font-size: 14px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.logo-bottom { font-size: 10px; font-weight: 600; color: var(--green); letter-spacing: 0.5px; text-transform: uppercase; }
+
+.nav-cta {
+  background: var(--green);
+  border: none; color: #000;
+  font-family: var(--ff); font-size: 13px; font-weight: 700;
+  padding: 9px 18px; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s;
+  text-decoration: none; display: inline-block;
+}
+.nav-cta:hover { background: var(--green2); box-shadow: var(--glow-green); }
+
+/* ── HERO DO BLOG ── */
+.blog-hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 108px 24px 56px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(59,130,246,0.07);
+  border: 1px solid rgba(59,130,246,0.18);
+  padding: 6px 16px;
+  border-radius: var(--radius-card);
+  margin-bottom: 24px;
+}
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+.blog-hero h1 {
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -2px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.blog-hero h1 em { font-style: normal; color: var(--green); }
+
+.blog-hero p {
+  font-size: 16px;
+  color: var(--muted2);
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 0 auto 40px;
+}
+
+/* ── FILTROS ── */
+.filter-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 32px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.filter-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--ff);
+}
+.filter-btn:hover { border-color: rgba(124,255,79,0.3); color: var(--text2); }
+.filter-btn.active {
+  background: rgba(124,255,79,0.1);
+  border-color: rgba(124,255,79,0.35);
+  color: var(--green);
+}
+
+/* ── GRID DE ARTIGOS ── */
+.blog-grid-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Artigo em destaque */
+.article-featured {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: all 0.25s;
+  text-decoration: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  position: relative;
+}
+.article-featured:hover {
+  border-color: rgba(124,255,79,0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+
+.featured-badge {
+  position: absolute;
+  top: 20px; left: 20px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  background: var(--green); color: #000;
+  padding: 3px 10px; border-radius: 6px;
+}
+
+.featured-body {
+  padding: 52px 28px 28px;
+}
+
+.article-tags-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.atag {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.6px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 20px;
+}
+.atag-green { border: 1px solid rgba(124,255,79,0.25); color: var(--green); background: rgba(124,255,79,0.06); }
+.atag-gray  { border: 1px solid var(--border2); color: var(--muted2); background: var(--surface2); }
+
+.featured-title {
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.featured-title em { font-style: normal; color: var(--green); }
+
+.featured-desc {
+  font-size: 15px;
+  color: var(--muted2);
+  line-height: 1.75;
+  margin-bottom: 20px;
+  max-width: 560px;
+}
+
+.article-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.meta-i { display: flex; align-items: center; gap: 5px; }
+.meta-sep { width: 3px; height: 3px; background: var(--border2); border-radius: 50%; }
+
+.read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  text-decoration: none;
+  margin-top: 20px;
+  transition: gap 0.2s;
+}
+.read-link:hover { gap: 10px; }
+
+/* Grid 2 colunas */
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.article-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.article-card:hover {
+  border-color: rgba(124,255,79,0.22);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+}
+
+.card-top { display: flex; align-items: center; justify-content: space-between; }
+.card-read-time {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.65;
+  flex: 1;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.card-date { font-size: 11px; color: var(--muted); }
+.card-arrow {
+  width: 28px; height: 28px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted2);
+  transition: all 0.2s;
+}
+.article-card:hover .card-arrow {
+  background: rgba(124,255,79,0.1);
+  border-color: rgba(124,255,79,0.3);
+  color: var(--green);
+}
+
+/* Cards em breve */
+.article-card.coming-soon {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+}
+.coming-badge {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 6px;
+  background: rgba(123,132,147,0.12);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* ── SEÇÃO CTA ── */
+.blog-cta {
+  max-width: 720px;
+  margin: 0 auto 80px;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+.cta-block {
+  background: linear-gradient(135deg, rgba(124,255,79,0.06), rgba(59,130,246,0.04));
+  border: 1px solid rgba(124,255,79,0.2);
+  border-radius: var(--radius-card);
+  padding: 36px 28px;
+  text-align: center;
+}
+.cta-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--green); margin-bottom: 14px;
+}
+.cta-title {
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800; color: var(--text);
+  letter-spacing: -0.8px; margin-bottom: 12px;
+  line-height: 1.25;
+}
+.cta-sub {
+  font-size: 15px; color: var(--muted2);
+  line-height: 1.75; margin-bottom: 26px;
+  max-width: 480px; margin-left: auto; margin-right: auto;
+}
+.cta-btn {
+  display: inline-block;
+  background: var(--green); color: #000;
+  font-family: var(--ff); font-size: 15px; font-weight: 700;
+  padding: 15px 36px; border-radius: 14px;
+  text-decoration: none; transition: all 0.2s;
+  box-shadow: var(--glow-green); margin-bottom: 10px;
+}
+.cta-btn:hover { background: var(--green2); transform: translateY(-2px); }
+.cta-note { font-size: 12px; color: var(--muted); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 40px 24px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.footer-logo { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; text-decoration: none; }
+.footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
+.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--text2); }
+.footer-copy { font-size: 12px; color: var(--muted); }
+
+/* ── COUNTER DE ARTIGOS ── */
+.articles-counter {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.articles-counter span { color: var(--text2); font-weight: 600; }
+
+/* Seção "em breve" */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 32px 0 24px;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--border); }
+.section-divider-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .blog-hero { padding-top: 92px; }
+  .blog-hero h1 { letter-spacing: -1.2px; }
+  .featured-body { padding: 48px 20px 20px; }
+  .cta-block { padding: 26px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="https://oguardiaofiscal.com.br">
+    <svg class="logo-svg" viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg">
+      <rect width="80" height="90" fill="#0f1720"/>
+      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="#39B54A" opacity="0.15" stroke="#39B54A" stroke-width="1.5"/>
+      <path d="M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z" fill="#0f1720"/>
+      <rect x="23" y="43" width="9" height="21" rx="2.5" fill="#39B54A" opacity="0.38"/>
+      <rect x="36" y="33" width="9" height="31" rx="2.5" fill="#39B54A" opacity="0.7"/>
+      <rect x="49" y="23" width="9" height="41" rx="2.5" fill="#39B54A"/>
+    </svg>
+    <div class="logo-wordmark">
+      <span class="logo-top">Guardião</span>
+      <span class="logo-bottom">Fiscal</span>
+    </div>
+  </a>
+  <a class="nav-cta" href="https://oguardiaofiscal.com.br/#extrato">Analisar meu extrato →</a>
+</nav>
+
+<!-- HERO -->
+<section class="blog-hero">
+  <div class="hero-tag">Educação fiscal</div>
+  <h1>Tudo que você precisa saber<br>para <em>não cair na malha fina</em></h1>
+  <p>Artigos gratuitos sobre cruzamento de dados da Receita Federal, declaração de IR e como verificar seu risco fiscal antes que a Receita aja.</p>
+</section>
+
+<!-- FILTROS -->
+<div class="filter-wrap">
+  <span class="filter-label">Filtrar:</span>
+  <button class="filter-btn active" onclick="filterArticles('todos', this)">Todos</button>
+  <button class="filter-btn" onclick="filterArticles('malha-fina', this)">Malha fina</button>
+  <button class="filter-btn" onclick="filterArticles('extrato', this)">Extrato bancário</button>
+  <button class="filter-btn" onclick="filterArticles('perfis', this)">Perfis de risco</button>
+  <button class="filter-btn" onclick="filterArticles('ir', this)">Declaração IR</button>
+</div>
+
+<!-- GRID -->
+<div class="blog-grid-wrap">
+
+  <div class="articles-counter" id="counter">Mostrando <span id="count">8</span> artigos</div>
+
+  <!-- DESTAQUE -->
+  <a class="article-featured" href="https://oguardiaofiscal.com.br/blog/pix-cai-na-malha-fina"
+     data-cats="malha-fina extrato">
+    <div class="featured-badge">Em destaque</div>
+    <div class="featured-body">
+      <div class="article-tags-row">
+        <span class="atag atag-green">Malha fina</span>
+        <span class="atag atag-gray">Extrato bancário</span>
+        <span class="atag atag-gray">6.2k buscas/mês</span>
+      </div>
+      <h2 class="featured-title"><em>Pix</em> cai na malha fina? Quando a Receita monitora suas transferências em 2026</h2>
+      <p class="featured-desc">Com 60 bilhões de transações em 2025, o Pix virou o meio de pagamento favorito — e a maior dúvida fiscal do brasileiro. Entenda o que a Receita realmente monitora e como verificar se seu extrato levanta alertas.</p>
+      <div class="article-meta-row">
+        <span class="meta-i">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          8 min de leitura
+        </span>
+        <span class="meta-sep"></span>
+        <span>8 jun 2026</span>
+      </div>
+      <span class="read-link">
+        Ler artigo
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </div>
+  </a>
+
+  <!-- GRID DE CARDS -->
+  <div class="articles-grid" id="articlesGrid">
+
+    <!-- Artigo 2: publicado -->
+    <a class="article-card" href="https://oguardiaofiscal.com.br/blog/o-que-a-receita-federal-ve-no-extrato"
+       data-cats="extrato malha-fina">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-green">Extrato bancário</span>
+        </div>
+        <span class="card-read-time">7 min</span>
+      </div>
+      <div class="card-title">O que a Receita Federal enxerga no seu extrato bancário em 2026</div>
+      <div class="card-desc">DIMOF, cruzamento de dados, e os padrões de movimentação que acionam o sistema automático da Receita.</div>
+      <div class="card-footer">
+        <span class="card-date">8 jun 2026</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <!-- Artigo 3: publicado (malha-fina.html já existe) -->
+    <a class="article-card" href="https://oguardiaofiscal.com.br/malha-fina.html"
+       data-cats="malha-fina ir">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-green">Malha fina</span>
+        </div>
+        <span class="card-read-time">10 min</span>
+      </div>
+      <div class="card-title">Malha fina: o que é, como funciona e como evitar em 2026</div>
+      <div class="card-desc">Guia completo sobre o processo de retenção da Receita Federal, principais causas e o que fazer se você cair.</div>
+      <div class="card-footer">
+        <span class="card-date">Guia completo</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <!-- Artigo 4: em breve -->
+    <div class="article-card coming-soon" data-cats="perfis malha-fina">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-gray">Perfis de risco</span>
+        </div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Depósito em espécie cai na malha fina? Limite e regras em 2026</div>
+      <div class="card-desc">Quando depósitos em dinheiro físico acionam o fisco e quais valores chamam atenção da Receita.</div>
+      <div class="card-footer">
+        <span class="card-date">Semana 3</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- Artigo 5: em breve -->
+    <div class="article-card coming-soon" data-cats="perfis malha-fina">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-gray">Perfis de risco</span>
+        </div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Autônomo e malha fina: os 5 erros mais comuns e como evitar</div>
+      <div class="card-desc">Por que profissionais autônomos concentram o maior risco fiscal e como declarar corretamente.</div>
+      <div class="card-footer">
+        <span class="card-date">Semana 4</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- Artigo 6: em breve -->
+    <div class="article-card coming-soon" data-cats="perfis ir">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-gray">Investidores</span>
+        </div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Investidor e malha fina: quando FII, ações e rendimentos levantam alertas</div>
+      <div class="card-desc">Como declarar rendimentos de investimentos corretamente e evitar inconsistências com a Receita.</div>
+      <div class="card-footer">
+        <span class="card-date">Semana 5</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- Artigo 7: em breve -->
+    <div class="article-card coming-soon" data-cats="ir malha-fina">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-gray">Declaração IR</span>
+        </div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Como retificar declaração de IR sem pagar multa</div>
+      <div class="card-desc">Passo a passo para corrigir inconsistências antes que a Receita Federal instale o procedimento fiscal.</div>
+      <div class="card-footer">
+        <span class="card-date">Semana 7</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- Artigo 8: em breve -->
+    <div class="article-card coming-soon" data-cats="perfis extrato">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0">
+          <span class="atag atag-gray">Perfis de risco</span>
+        </div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Aluguel informal e malha fina: quando o risco é alto</div>
+      <div class="card-desc">Receber aluguel via Pix sem declarar é uma das formas mais comuns de cair na malha fina.</div>
+      <div class="card-footer">
+        <span class="card-date">Semana 8</span>
+        <span class="card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    </div>
+
+  </div><!-- /articles-grid -->
+
+  <!-- SEÇÃO EM BREVE - mês 3 -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <span class="section-divider-label">Próximos artigos — mês 3</span>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <div class="articles-grid" id="articlesGrid2">
+
+    <div class="article-card coming-soon" data-cats="malha-fina ir">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0"><span class="atag atag-gray">Declaração IR</span></div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Como saber se vou cair na malha fina antes de entregar o IR</div>
+      <div class="card-desc">Checklist preventivo para verificar inconsistências antes do envio da declaração.</div>
+      <div class="card-footer"><span class="card-date">Semana 9</span><span class="card-arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+    </div>
+
+    <div class="article-card coming-soon" data-cats="malha-fina">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0"><span class="atag atag-gray">Malha fina</span></div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">O que acontece depois da malha fina: multas, prazos e como regularizar</div>
+      <div class="card-desc">Guia prático sobre as consequências reais de ter a declaração retida e os caminhos de saída.</div>
+      <div class="card-footer"><span class="card-date">Semana 10</span><span class="card-arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+    </div>
+
+    <div class="article-card coming-soon" data-cats="perfis extrato">
+      <div class="card-top">
+        <div class="article-tags-row" style="margin:0"><span class="atag atag-gray">Perfis de risco</span></div>
+        <span class="coming-badge">Em breve</span>
+      </div>
+      <div class="card-title">Freelancer e Pessoa Física: quando o extrato vira problema fiscal</div>
+      <div class="card-desc">Profissionais que prestam serviços como PF concentram os maiores riscos de inconsistência.</div>
+      <div class="card-footer"><span class="card-date">Semana 11</span><span class="card-arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div>
+    </div>
+
+  </div>
+
+</div><!-- /blog-grid-wrap -->
+
+<!-- CTA -->
+<div class="blog-cta">
+  <div class="cta-block">
+    <div class="cta-label">Análise preventiva gratuita</div>
+    <div class="cta-title">Leu o suficiente sobre risco fiscal.<br>Hora de verificar o seu.</div>
+    <div class="cta-sub">O Guardião Fiscal analisa seu extrato bancário e mostra em segundos se sua movimentação é compatível com sua renda declarada — processamento 100% no seu navegador.</div>
+    <a class="cta-btn" href="https://oguardiaofiscal.com.br/#extrato">Analisar meu extrato gratuitamente →</a>
+    <div class="cta-note">Sem cadastro · Seus dados não saem do dispositivo · Resultado imediato</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a class="footer-logo" href="https://oguardiaofiscal.com.br">
+    <svg width="22" height="25" viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="#39B54A" opacity="0.25" stroke="#39B54A" stroke-width="1.5"/>
+      <path d="M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z" fill="#0f1720"/>
+      <rect x="23" y="43" width="9" height="21" rx="2.5" fill="#39B54A" opacity="0.5"/>
+      <rect x="36" y="33" width="9" height="31" rx="2.5" fill="#39B54A" opacity="0.8"/>
+      <rect x="49" y="23" width="9" height="41" rx="2.5" fill="#39B54A"/>
+    </svg>
+    <span style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.3px">Guardião Fiscal</span>
+  </a>
+  <div class="footer-links">
+    <a href="https://oguardiaofiscal.com.br">Início</a>
+    <a href="https://oguardiaofiscal.com.br/#extrato">Analisar extrato</a>
+    <a href="https://oguardiaofiscal.com.br/privacidade.html">Privacidade</a>
+    <a href="https://oguardiaofiscal.com.br/termos-de-uso.html">Termos de uso</a>
+  </div>
+  <p class="footer-copy">© 2026 Guardião Fiscal · Informação educacional · Não constitui assessoria tributária</p>
+</footer>
+
+<script>
+function filterArticles(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const allCards = document.querySelectorAll('[data-cats]');
+  let visible = 0;
+
+  allCards.forEach(card => {
+    const cats = card.getAttribute('data-cats') || '';
+    const show = cat === 'todos' || cats.includes(cat);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  document.getElementById('count').textContent = visible;
+}
+</script>
+
+</body>
+</html>
