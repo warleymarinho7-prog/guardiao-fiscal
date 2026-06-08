@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Cookies — Guardião Fiscal</title>
+<meta name="description" content="Política de Cookies do Guardião Fiscal — entenda como usamos cookies e como você pode gerenciá-los.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: hidden; scroll-behavior: smooth; }
+
+:root {
+  --ff: 'Inter', sans-serif;
+  --bg:      #050816;
+  --surface: #080D1A;
+  --surface2:#0C1220;
+  --border:  #1B2636;
+  --green:  #7CFF4F;
+  --yellow: #F5A623;
+  --text:   #FFFFFF;
+  --text2:  #B8C0CC;
+  --muted:  #7B8493;
+  --muted2: #B8C0CC;
+  --radius-card: 16px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text2);
+  font-family: var(--ff);
+  font-size: 15px;
+  line-height: 1.72;
+  margin: 0;
+  padding: 0;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,22,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo span { color: var(--green); }
+.nav-back {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color .2s;
+}
+.nav-back:hover { color: var(--text); }
+
+/* HERO */
+.hero {
+  padding: 56px 24px 40px;
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124,255,79,.08);
+  border: 1px solid rgba(124,255,79,.2);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: .4px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+.hero p {
+  font-size: 15px;
+  color: var(--muted2);
+  margin: 0;
+}
+.hero .updated {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* CONTEÚDO */
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 28px 32px;
+  margin-bottom: 16px;
+}
+@media (max-width: 480px) {
+  .card { padding: 20px 18px; }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.icon-green { background: rgba(124,255,79,.12); }
+.icon-yellow { background: rgba(245,166,35,.12); }
+.icon-blue { background: rgba(99,179,237,.12); }
+.icon-red { background: rgba(255,77,79,.12); }
+
+.card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.card p {
+  font-size: 14px;
+  color: var(--muted2);
+  margin: 0 0 12px;
+  line-height: 1.7;
+}
+.card p:last-child { margin-bottom: 0; }
+
+.card ul {
+  margin: 8px 0 12px 0;
+  padding-left: 18px;
+}
+.card ul li {
+  font-size: 14px;
+  color: var(--muted2);
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+.card ul li:last-child { margin-bottom: 0; }
+
+/* Tabela de cookies */
+.cookie-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.cookie-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--surface2);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.cookie-table th:first-child { border-radius: 8px 0 0 0; }
+.cookie-table th:last-child { border-radius: 0 8px 0 0; }
+.cookie-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted2);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.cookie-table tr:last-child td { border-bottom: none; }
+.cookie-table td strong { color: var(--text); font-weight: 600; }
+
+.tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.tag-green { background: rgba(124,255,79,.12); color: var(--green); }
+.tag-yellow { background: rgba(245,166,35,.12); color: var(--yellow); }
+.tag-blue { background: rgba(99,179,237,.12); color: #63b3ed; }
+
+/* Highlight box */
+.highlight {
+  background: rgba(124,255,79,.06);
+  border: 1px solid rgba(124,255,79,.15);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--muted2);
+  margin-top: 14px;
+  line-height: 1.65;
+}
+.highlight strong { color: var(--green); }
+
+/* Rodapé */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+footer a {
+  color: var(--muted2);
+  text-decoration: none;
+  transition: color .2s;
+}
+footer a:hover { color: var(--green); }
+footer .sep { margin: 0 8px; opacity: .4; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">🛡️ Guardião <span>Fiscal</span></a>
+  <a class="nav-back" href="/">← Voltar ao site</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">🍪 Cookies & Rastreamento</div>
+  <h1>Política de Cookies</h1>
+  <p>Transparência total sobre o que coletamos, por quê e como você pode controlar isso.</p>
+  <div class="updated">Última atualização: junho de 2025 · CNPJ em processo de registro</div>
+</div>
+
+<div class="content">
+
+  <!-- O que são cookies -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-blue">💡</div>
+      <h2>O que são cookies?</h2>
+    </div>
+    <p>Cookies são pequenos arquivos de texto armazenados no seu navegador quando você visita um site. Eles permitem que o site reconheça seu dispositivo em visitas posteriores, mantenha preferências e colete informações sobre como você usa o serviço.</p>
+    <p>No Guardião Fiscal usamos cookies de forma responsável, apenas para o que é necessário para o serviço funcionar e, com seu consentimento, para melhorar a experiência e medir o desempenho das nossas campanhas.</p>
+  </div>
+
+  <!-- Cookies essenciais -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-green">🔒</div>
+      <h2>Cookies essenciais <span class="tag tag-green" style="margin-left:8px;font-size:11px">Sempre ativos</span></h2>
+    </div>
+    <p>Esses cookies são indispensáveis para o funcionamento do serviço. Não requerem seu consentimento e não podem ser desativados sem comprometer funcionalidades básicas.</p>
+    <table class="cookie-table">
+      <thead>
+        <tr>
+          <th>Cookie</th>
+          <th>Finalidade</th>
+          <th>Duração</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>sb-*-auth-token</strong></td>
+          <td>Autenticação e manutenção da sessão do usuário (Supabase)</td>
+          <td>Sessão / 1 semana</td>
+        </tr>
+        <tr>
+          <td><strong>gf_cookie_consent</strong></td>
+          <td>Armazena sua preferência de consentimento de cookies</td>
+          <td>1 ano</td>
+        </tr>
+        <tr>
+          <td><strong>gf_profile</strong></td>
+          <td>Perfil selecionado no quiz para personalizar a análise</td>
+          <td>Sessão</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cookies de analytics -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-yellow">📊</div>
+      <h2>Cookies de analytics <span class="tag tag-yellow" style="margin-left:8px;font-size:11px">Com consentimento</span></h2>
+    </div>
+    <p>Utilizamos o <strong style="color:var(--text)">Microsoft Clarity</strong> para entender como os usuários interagem com o site — mapas de calor, gravações de sessão e métricas de uso. Essas informações nos ajudam a melhorar a experiência.</p>
+    <table class="cookie-table">
+      <thead>
+        <tr>
+          <th>Cookie</th>
+          <th>Finalidade</th>
+          <th>Duração</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>_clck</strong></td>
+          <td>Identifica o usuário de forma anônima para o Clarity</td>
+          <td>1 ano</td>
+        </tr>
+        <tr>
+          <td><strong>_clsk</strong></td>
+          <td>Agrupa visualizações de página em uma única sessão</td>
+          <td>1 dia</td>
+        </tr>
+        <tr>
+          <td><strong>CLID</strong></td>
+          <td>ID do Clarity para análise de comportamento</td>
+          <td>1 ano</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="highlight">
+      <strong>Nenhum dado bancário é enviado ao Clarity.</strong> As gravações de sessão capturam apenas interações com a interface (cliques, rolagem) — o conteúdo do extrato é processado localmente no seu navegador e nunca transmitido.
+    </div>
+  </div>
+
+  <!-- Cookies de marketing -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-red">📣</div>
+      <h2>Cookies de marketing <span class="tag tag-blue" style="margin-left:8px;font-size:11px">Com consentimento</span></h2>
+    </div>
+    <p>Utilizamos o <strong style="color:var(--text)">Meta Pixel</strong> para medir a efetividade dos nossos anúncios no Facebook e Instagram e para exibir anúncios relevantes a pessoas com perfil semelhante ao nosso público.</p>
+    <table class="cookie-table">
+      <thead>
+        <tr>
+          <th>Cookie</th>
+          <th>Finalidade</th>
+          <th>Duração</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>_fbp</strong></td>
+          <td>Identifica o navegador para o Meta Pixel (rastreamento de conversões)</td>
+          <td>90 dias</td>
+        </tr>
+        <tr>
+          <td><strong>_fbc</strong></td>
+          <td>Armazena o parâmetro de clique em anúncio (fbclid)</td>
+          <td>90 dias</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px;font-size:13px;">Pixel ID: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--muted2)">2144854999641148</code> — conta Meta Ads do Guardião Fiscal.</p>
+  </div>
+
+  <!-- Como gerenciar -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-green">⚙️</div>
+      <h2>Como gerenciar seus cookies</h2>
+    </div>
+    <p>Você pode alterar sua preferência a qualquer momento de três formas:</p>
+    <ul>
+      <li><strong style="color:var(--text)">Banner do site:</strong> ao acessar o Guardião Fiscal pela primeira vez, o banner de cookies permite aceitar todos ou apenas os essenciais.</li>
+      <li><strong style="color:var(--text)">Configurações do navegador:</strong> todos os navegadores modernos permitem bloquear ou excluir cookies. Consulte as instruções do seu navegador (Chrome, Firefox, Safari, Edge).</li>
+      <li><strong style="color:var(--text)">Opt-out do Meta:</strong> acesse <a href="https://www.facebook.com/privacy/policies/cookies/" target="_blank" rel="noopener" style="color:var(--green)">facebook.com/privacy/policies/cookies</a> para gerenciar preferências de publicidade.</li>
+      <li><strong style="color:var(--text)">Opt-out do Clarity:</strong> acesse <a href="https://clarity.microsoft.com/optout" target="_blank" rel="noopener" style="color:var(--green)">clarity.microsoft.com/optout</a>.</li>
+    </ul>
+    <div class="highlight">
+      Ao clicar em <strong>"Só essenciais"</strong> no banner, o Meta Pixel e o Microsoft Clarity são desativados imediatamente. Seus dados financeiros <strong>nunca</strong> são afetados por essa escolha — o processamento do extrato é sempre 100% local.
+    </div>
+  </div>
+
+  <!-- Base legal -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-blue">⚖️</div>
+      <h2>Base legal — LGPD</h2>
+    </div>
+    <p>O uso de cookies no Guardião Fiscal está em conformidade com a <strong style="color:var(--text)">Lei Geral de Proteção de Dados (Lei 13.709/2018)</strong>:</p>
+    <ul>
+      <li><strong style="color:var(--text)">Cookies essenciais:</strong> legítimo interesse (Art. 7º, IX) — necessários para execução do serviço contratado.</li>
+      <li><strong style="color:var(--text)">Cookies de analytics e marketing:</strong> consentimento livre e informado (Art. 7º, I) — coletado via banner e revogável a qualquer momento.</li>
+    </ul>
+    <p>Para exercer seus direitos como titular de dados (acesso, correção, exclusão, revogação de consentimento), entre em contato: <a href="mailto:privacidade@oguardiaofiscal.com.br" style="color:var(--green)">privacidade@oguardiaofiscal.com.br</a></p>
+  </div>
+
+  <!-- Atualizações -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-yellow">🔄</div>
+      <h2>Atualizações desta política</h2>
+    </div>
+    <p>Esta Política de Cookies pode ser atualizada periodicamente para refletir mudanças no serviço ou na legislação aplicável. A data de última atualização está sempre indicada no topo desta página. Mudanças significativas serão comunicadas por e-mail aos usuários cadastrados.</p>
+    <p>Dúvidas? Fale conosco: <a href="mailto:privacidade@oguardiaofiscal.com.br" style="color:var(--green)">privacidade@oguardiaofiscal.com.br</a></p>
+  </div>
+
+</div><!-- /content -->
+
+<footer>
+  <div style="margin-bottom:8px;">
+    <a href="/">Guardião Fiscal</a>
+    <span class="sep">·</span>
+    <a href="/privacidade">Política de Privacidade</a>
+    <span class="sep">·</span>
+    <a href="/termos-de-uso">Termos de Uso</a>
+    <span class="sep">·</span>
+    <a href="/politica-cookies.html">Cookies</a>
+  </div>
+  <div>© 2025 Guardião Fiscal · LGPD — Lei 13.709/2018</div>
+</footer>
+
+</body>
+</html>
