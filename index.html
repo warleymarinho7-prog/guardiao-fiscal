@@ -97,7 +97,7 @@
       "name": "Como saber se vou cair na malha fina?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A principal forma de identificar o risco antes da Receita Federal é analisar se sua movimentação bancária é compatível com a renda declarada. O Guardião Fiscal faz essa análise automaticamente a partir do seu extrato bancário, sem enviar seus dados para nenhum servidor."
+        "text": "A principal forma de identificar o risco antes da Receita Federal é analisar se sua movimentação bancária é compatível com a renda declarada. O Guardião Fiscal faz essa análise automaticamente a partir do seu extrato bancário. O processamento do extrato ocorre localmente no navegador — o arquivo nunca é enviado a servidores."
       }
     },
     {
@@ -105,7 +105,7 @@
       "name": "O Guardião Fiscal é seguro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sim. Todo o processamento do extrato bancário acontece diretamente no seu navegador, sem que os dados sejam enviados para nenhum servidor. O Guardião Fiscal não armazena nem tem acesso às suas informações financeiras."
+        "text": "Sim. O processamento do extrato bancário acontece diretamente no seu navegador — o arquivo nunca é transmitido a servidores. O Guardião Fiscal não armazena nem acessa seu conteúdo bancário. Dados de autenticação e métricas agregadas da análise (score, totais) são armazenados de forma segura para funcionamento do serviço, em conformidade com a LGPD."
       }
     },
     {
@@ -2641,7 +2641,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
         <label id="termosCheck" style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:10px;padding:10px 12px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:8px">
           <input type="checkbox" id="termosAceite" style="margin-top:3px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
-          <span style="font-size:11px;color:var(--muted2);line-height:1.6">Li e concordo com os <a href="/termos-de-uso.html" target="_blank" style="color:var(--green)">Termos de Uso</a> e a <a href="/politica-privacidade.html" target="_blank" style="color:var(--green)">Política de Privacidade</a>, incluindo o processamento dos meus dados conforme descrito.</span>
+          <span style="font-size:11px;color:var(--muted2);line-height:1.6">Li e concordo com os <a href="/termos-de-uso" target="_blank" style="color:var(--green)">Termos de Uso</a> e a <a href="/privacidade" target="_blank" style="color:var(--green)">Política de Privacidade</a>, incluindo o processamento dos meus dados conforme descrito.</span>
         </label>
         <button class="btn-next on" style="width:100%;margin-top:4px" onclick="extStep1Done()">
           <span id="extAuthBtnTxt">Criar conta e continuar →</span>
@@ -3169,7 +3169,7 @@ function guiaTab(banco) {
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">🔒 Privacidade e LGPD</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária ou fiscal. Apenas o e-mail de cadastro é salvo para controle de acesso, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>.</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária. Dados de autenticação (e-mail), métricas agregadas da análise (score, totais financeiros arredondados) e dados de pagamento são tratados de forma segura pelos serviços Supabase e Mercado Pago, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>. <a href="/privacidade" style="color:var(--green);text-decoration:underline">Política de Privacidade</a></div>
         </div>
         <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
           oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
@@ -4534,7 +4534,8 @@ function sanitizeFileContent(text) {
     .replace(/<[^>]{0,200}>/g, '')                // remove tags HTML (limite 200 chars para evitar ReDoS)
     .replace(/javascript:/gi, '')                 // remove JS URI
     .replace(/data:text\/html/gi, '')             // remove data URIs perigosos
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // remove control chars exceto \t \n \r
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // remove control chars exceto \t \n \r
+    .replace(/(^|[\n,\t])([=+\-@])/g, '$1\'$2'); // [fix-csv-injection] neutraliza formulas CSV
 }
 
 // ── Limite de tamanho de texto processado (anti DoS) ──
@@ -9686,8 +9687,8 @@ window.gFeedbackHistorico = function() {
 <div id="legalFooter">
   © 2026 Guardião Fiscal · Ferramenta educacional — não substitui consultoria tributária
   <br style="margin-bottom:6px">
-  <a href="/politica-privacidade.html" target="_blank">Política de Privacidade</a>
-  <a href="/termos-de-uso.html" target="_blank">Termos de Uso</a>
+  <a href="/privacidade" target="_blank">Política de Privacidade</a> · <a href="mailto:privacidade@oguardiaofiscal.com.br">privacidade@oguardiaofiscal.com.br</a>
+  <a href="/termos-de-uso" target="_blank">Termos de Uso</a>
   <a href="/politica-cookies.html" target="_blank">Cookies</a>
   <a href="mailto:contato@oguardiaofiscal.com.br">Contato</a>
 </div>
