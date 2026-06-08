@@ -2907,17 +2907,14 @@ function guiaTab(banco) {
         <!-- Upload de arquivos -->
         <div style="margin-bottom:12px">
 
-          <!-- Input real — oculto, ativado pelos botões abaixo -->
-          <input type="file" id="efi" aria-label="Selecionar extratos bancários"
-                 accept=".csv,.ofx,.pdf,.txt,.qfx" multiple
-                 onchange="eOnSel(event)"
-                 style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
-
-          <!-- Drop zone compacta — aparece abaixo dos botões -->
+          <!-- Drop zone compacta — input dentro para funcionar no mobile (iOS/Safari) -->
           <div class="drop-zone" id="dz"
                ondragover="eDov(event)" ondragleave="eDlv()" ondrop="eDrp(event)"
-               onclick="document.getElementById('efi').click()"
                style="padding:12px;cursor:pointer;margin-bottom:6px">
+            <input type="file" id="efi" aria-label="Selecionar extratos bancários"
+                   accept=".csv,.ofx,.pdf,.txt,.qfx" multiple
+                   onchange="eOnSel(event)"
+                   style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2">
             <span class="dz-ico" id="dzIco" style="font-size:20px">📂</span>
             <div class="dz-ttl" id="dzTtl" style="font-size:12px;margin:3px 0 1px">Ou arraste os arquivos aqui</div>
             <div class="dz-sub" style="font-size:11px">até 5 extratos · bancos diferentes</div>
