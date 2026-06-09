@@ -2687,28 +2687,28 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
         </div>
         <!-- cadastro pane -->
-        <div id="extCadPane">
+        <form id="extCadPane" autocomplete="on" onsubmit="return false">
           <div class="form-group">
             <label class="form-label" for="extEmail">E-mail</label>
-            <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com">
+            <input class="form-input" type="email" id="extEmail" placeholder="seu@email.com" autocomplete="email">
           </div>
           <div class="form-group">
             <label class="form-label" for="extSenha">Senha</label>
             <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="renderPasswordMeter('extSenhaMeter', this.value)">
             <div id="extSenhaMeter"></div>
           </div>
-        </div>
+        </form>
         <!-- login pane -->
-        <div id="extLogPane" style="display:none">
+        <form id="extLogPane" autocomplete="on" onsubmit="return false" style="display:none">
           <div class="form-group">
             <label class="form-label" for="extLoginEmail">E-mail</label>
-            <input class="form-input" type="email" id="extLoginEmail" placeholder="seu@email.com">
+            <input class="form-input" type="email" id="extLoginEmail" placeholder="seu@email.com" autocomplete="email">
           </div>
           <div class="form-group">
             <label class="form-label" for="extLoginSenha">Senha</label>
             <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha" autocomplete="current-password">
           </div>
-        </div>
+        </form>
         <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
         <label id="termosCheck" style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:10px;padding:10px 12px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:8px">
           <input type="checkbox" id="termosAceite" style="margin-top:3px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
@@ -3558,24 +3558,25 @@ function guiaTab(banco) {
     <div class="modal-step active" id="stepAccount">
       <div class="modal-title">Crie sua conta</div>
       <div class="modal-sub">Primeiro defina seu acesso. O pagamento é no próximo passo.</div>
-
-      <div class="form-group">
-        <label class="form-label" for="coName">Nome completo</label>
-        <input class="form-input" type="text" id="coName" placeholder="Seu nome">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="coEmail">E-mail</label>
-        <input class="form-input" type="email" id="coEmail" placeholder="seu@email.com">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="coSenha">Senha</label>
-        <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
-        <div id="coSenhaMeter"></div>
-      </div>
-      <div class="form-group" style="margin-bottom:20px">
-        <label class="form-label" for="coSenha2">Confirmar senha</label>
-        <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha" autocomplete="new-password">
-      </div>
+      <form autocomplete="on" onsubmit="return false">
+        <div class="form-group">
+          <label class="form-label" for="coName">Nome completo</label>
+          <input class="form-input" type="text" id="coName" placeholder="Seu nome" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="coEmail">E-mail</label>
+          <input class="form-input" type="email" id="coEmail" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="coSenha">Senha</label>
+          <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
+          <div id="coSenhaMeter"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="coSenha2">Confirmar senha</label>
+          <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+      </form>
 
       <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
 
@@ -3649,12 +3650,12 @@ function guiaTab(banco) {
     </div>
 
     <!-- LOGIN -->
-    <div id="authLoginPane">
+    <form id="authLoginPane" autocomplete="on" onsubmit="return false">
       <div class="modal-title">Entrar na sua conta</div>
       <div class="modal-sub">Acesse suas análises e histórico fiscal.</div>
       <div class="form-group" style="margin-top:16px">
         <label class="form-label" for="loginEmail">E-mail</label>
-        <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com">
+        <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email">
       </div>
       <div class="form-group">
         <label class="form-label" for="loginSenha">Senha</label>
@@ -3667,19 +3668,19 @@ function guiaTab(banco) {
       <div class="security-note" style="margin-top:8px;text-align:center">
         Não tem conta? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('cadastro')">Criar conta grátis →</span>
       </div>
-    </div>
+    </form>
 
     <!-- CADASTRO -->
-    <div id="authCadastroPane" style="display:none">
+    <form id="authCadastroPane" autocomplete="on" onsubmit="return false" style="display:none">
       <div class="modal-title">Criar conta gratuita</div>
       <div class="modal-sub">Salve suas análises e acesse de qualquer lugar.</div>
       <div class="form-group" style="margin-top:16px">
         <label class="form-label" for="cadNome">Nome</label>
-        <input class="form-input" type="text" id="cadNome" placeholder="Seu nome">
+        <input class="form-input" type="text" id="cadNome" placeholder="Seu nome" autocomplete="name">
       </div>
       <div class="form-group">
         <label class="form-label" for="cadEmail">E-mail</label>
-        <input class="form-input" type="email" id="cadEmail" placeholder="seu@email.com">
+        <input class="form-input" type="email" id="cadEmail" placeholder="seu@email.com" autocomplete="email">
       </div>
       <div class="form-group">
         <label class="form-label" for="cadSenha">Senha</label>
@@ -3692,7 +3693,7 @@ function guiaTab(banco) {
         <span id="cadBtnTxt">Criar conta →</span>
       </button>
       <div class="security-note" style="margin-top:10px;text-align:center">🔒 Gratuito — sem cobrança</div>
-    </div>
+    </form>
   </div>
 </div>
 
