@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; form-action https:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <!-- Guardião Fiscal v14.0.0 | 2026-06-07 -->
@@ -206,7 +206,6 @@ document.addEventListener('visibilitychange', function(){ if(document.visibility
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet"></noscript>
 <style>
@@ -2695,7 +2694,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
           <div class="form-group">
             <label class="form-label" for="extSenha">Senha</label>
-            <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('extSenhaMeter', this.value)">
+            <input class="form-input" type="password" id="extSenha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="renderPasswordMeter('extSenhaMeter', this.value)">
             <div id="extSenhaMeter"></div>
           </div>
         </div>
@@ -2707,7 +2706,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
           <div class="form-group">
             <label class="form-label" for="extLoginSenha">Senha</label>
-            <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha">
+            <input class="form-input" type="password" id="extLoginSenha" placeholder="Sua senha" autocomplete="current-password">
           </div>
         </div>
         <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
@@ -3570,12 +3569,12 @@ function guiaTab(banco) {
       </div>
       <div class="form-group">
         <label class="form-label" for="coSenha">Senha</label>
-        <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
+        <input class="form-input" type="password" id="coSenha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="renderPasswordMeter('coSenhaMeter', this.value)">
         <div id="coSenhaMeter"></div>
       </div>
       <div class="form-group" style="margin-bottom:20px">
         <label class="form-label" for="coSenha2">Confirmar senha</label>
-        <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha">
+        <input class="form-input" type="password" id="coSenha2" placeholder="Repita a senha" autocomplete="new-password">
       </div>
 
       <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
@@ -3659,7 +3658,7 @@ function guiaTab(banco) {
       </div>
       <div class="form-group">
         <label class="form-label" for="loginSenha">Senha</label>
-        <input class="form-input" type="password" id="loginSenha" placeholder="Sua senha">
+        <input class="form-input" type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password">
       </div>
       <div id="loginErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
       <button class="btn-pay" style="margin-bottom:14px" onclick="doLogin()">
@@ -3684,7 +3683,7 @@ function guiaTab(banco) {
       </div>
       <div class="form-group">
         <label class="form-label" for="cadSenha">Senha</label>
-        <input class="form-input" type="password" id="cadSenha" placeholder="Mínimo 8 caracteres" oninput="renderPasswordMeter('cadSenhaMeter', this.value)">
+        <input class="form-input" type="password" id="cadSenha" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="renderPasswordMeter('cadSenhaMeter', this.value)">
         <div id="cadSenhaMeter"></div>
       </div>
       <div id="cadErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
@@ -3726,7 +3725,8 @@ setTimeout(_loadSupabase, 4000);
 </script>
 <script>
 // ── Lazy loaders para bibliotecas pesadas ──────────────────────────
-// pdf.js (~500KB): carrega só quando usuário faz upload de PDF
+// pdf.js: worker servido localmente (/pdf.worker.min.js na raiz do repo)
+// CDN externa bloqueada por CORS no contexto Worker neste ambiente
 let _pdfjsLoading = false;
 function _loadPdfJs() {
   if (typeof pdfjsLib !== 'undefined' || _pdfjsLoading) return Promise.resolve();
@@ -3736,7 +3736,7 @@ function _loadPdfJs() {
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
     s.crossOrigin = 'anonymous';
     s.onload = () => {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
       resolve();
     };
     s.onerror = () => reject(new Error('Falha ao carregar pdf.js'));
@@ -5157,14 +5157,15 @@ function selectProfile(id, bodyId) {
   }, 900);
 }
 
-function revealResult(p, heroId, alertsId, isDesktop) {
-  // Paleta de risco — espelha :root CSS vars
+// Paleta de risco — constantes globais usadas em eRenderPreview, revealResult e motor
 const C_BAIXO    = '#7CFF4F';
 const C_ATENCAO  = '#F5A623';
 const C_MODERADO = '#f97316';
 const C_ELEVADO  = '#f04f60';
 const C_CRITICO  = '#FF4D4F';
 const CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critico: C_CRITICO };
+
+function revealResult(p, heroId, alertsId, isDesktop) {
   const LABELS = {
     baixo:   'Perfil compatível',
     moderado:'Sinais que merecem atenção',
@@ -5995,44 +5996,158 @@ async function eParsePDF(buffer){
     try {
       pdf = await Promise.race([loadTask.promise, timeout]);
     } catch(e) {
-      throw new Error('PDF corrompido ou ilegivel: ' + e.message);
+      throw new Error('PDF corrompido ou ilegível: ' + e.message);
     }
     if (pdf.numPages > ENGINE_CONFIG.PDF_MAX_PAGES) {
-      throw new Error('PDF com mais de ' + ENGINE_CONFIG.PDF_MAX_PAGES + ' paginas. Exporte apenas o periodo necessario.');
+      throw new Error('PDF com mais de ' + ENGINE_CONFIG.PDF_MAX_PAGES + ' páginas. Exporte apenas o período necessário (ex: 12 meses).');
     }
-    let text='';
-    for(let p=1;p<=pdf.numPages;p++){
-      const page=await pdf.getPage(p);
-      const tc=await page.getTextContent();
-      let lastY=null,line='';
+    let text = '';
+    const MAX_TEXT_CHARS = 400000; // ~400KB de texto — extrato de 12 meses tem ~50KB
+    for(let p = 1; p <= pdf.numPages; p++){
+      // yield a cada página — não trava a UI durante parse de PDFs grandes
+      await new Promise(r => setTimeout(r, 0));
+      const page = await pdf.getPage(p);
+      const tc = await page.getTextContent();
+      let lastY = null, line = '';
       for(const item of tc.items){
-        const y=Math.round(item.transform[5]);
-        if(lastY!==null&&Math.abs(y-lastY)>3){text+=line.trim()+'\n';line='';}
-        line+=(item.str||'')+' ';
-        lastY=y;
+        const y = Math.round(item.transform[5]);
+        if(lastY !== null && Math.abs(y - lastY) > 3){ text += line.trim() + '\n'; line = ''; }
+        line += (item.str || '') + ' ';
+        lastY = y;
       }
-      if(line.trim())text+=line.trim()+'\n';
-      page.cleanup(); // libera recursos canvas/stream da página
+      if(line.trim()) text += line.trim() + '\n';
+      page.cleanup();
+      // Limite por volume de texto — evita processar PDFs de centenas de páginas
+      if(text.length > MAX_TEXT_CHARS) {
+        console.warn('[GuardiaoFiscal] PDF truncado em ' + p + ' páginas por volume de texto');
+        break;
+      }
+    }
+    // Detecção de PDF escaneado — texto extraído é muito curto para ter transações
+    if(text.replace(/\s/g, '').length < 100) {
+      throw new Error('PDF_ESCANEADO');
     }
     return text;
   } finally {
-    if(pdf) await pdf.destroy(); // destrói documento PDF.js e libera memória do worker
+    if(pdf) await pdf.destroy();
   }
 }
 function eParsePDFText(text){
-  const lines=text.split('\n').filter(l=>l.trim());
-  const txns=[];
-  const skip=/saldo anterior|saldo final|data\s+descri|período|agência|conta\s*:|cliente|extrato|banco\s+/i;
-  // aceita DD/MM/YYYY ou DD/MM
-  const re=/(\d{2}[\/\-]\d{2}(?:[\/\-]\d{4})?)\s+(.+?)\s+([\-\+]?\s*\d[\d.,]*(?:\.\d{3})*(?:,\d{2})?)\s*(?:[\d.,]+)?\s*$/;
-  for(const line of lines){
-    if(skip.test(line))continue;
-    const m=line.match(re);
-    if(!m)continue;
-    const date=eParseDate(m[1]),desc=m[2].trim(),value=eParseBRL(m[3].replace(/\s/g,''));
-    if(date&&desc&&value!==0)txns.push({date,desc,value});
+  const lines = text.split('\n').filter(l => l.trim());
+  const u = text.substring(0, 2000).toUpperCase();
+
+  // ── Detecção de banco pelo conteúdo do PDF ──
+  const isNubank    = u.includes('NUBANK') || u.includes('NU PAGAMENTOS');
+  const isInter     = u.includes('BANCO INTER') || u.includes('INTERMEDIUM') || u.includes('INTER S/A');
+  const isItau      = u.includes('ITAÚ') || u.includes('ITAU UNIBANCO');
+  const isBradesco  = u.includes('BRADESCO');
+  const isBB        = u.includes('BANCO DO BRASIL') || u.includes('BANCOBRASIL');
+  const isCaixa     = u.includes('CAIXA ECONÔMICA') || u.includes('CAIXA ECONOMICA') || u.includes('CEF');
+  const isSantander = u.includes('SANTANDER');
+  const isC6        = u.includes('C6 BANK') || u.includes('C6BANK');
+  const isSicoob    = u.includes('SICOOB');
+  const isSicredi   = u.includes('SICREDI');
+
+  // Parser Nubank — formato: "DD MMM · Descrição R$ X,XX"
+  if (isNubank) {
+    const txns = [];
+    const reNu = /(\d{2}\s+\w{3})\s+(.+?)\s+R?\$?\s*([\-\+]?\d[\d.,]+)\s*$/;
+    const months = {jan:1,fev:2,mar:3,abr:4,mai:5,jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
+    for(const line of lines){
+      const m = line.match(reNu);
+      if(!m) continue;
+      const parts = m[1].trim().split(/\s+/);
+      const day = parseInt(parts[0]), monStr = (parts[1]||'').toLowerCase().substring(0,3);
+      const mon = months[monStr];
+      if(!day || !mon) continue;
+      const year = new Date().getFullYear();
+      const date = new Date(year, mon-1, day);
+      if(isNaN(date.getTime())) continue;
+      const value = eParseBRL(m[3].replace(/\s/g,''));
+      if(m[2].trim() && value !== 0) txns.push({date, desc: m[2].trim(), value: -Math.abs(value)});
+    }
+    if(txns.length > 0) return txns;
   }
-  return txns.length>0?txns:eParseGeneric(lines);
+
+  // Parser Inter — formato tabular: "DD/MM/YYYY Descrição Valor"
+  if (isInter) {
+    const txns = [];
+    const reInter = /(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*$/;
+    for(const line of lines){
+      const m = line.match(reInter);
+      if(!m) continue;
+      const date = eParseDate(m[1]);
+      const value = eParseBRL(m[3]);
+      if(date && m[2].trim() && value !== 0) txns.push({date, desc: m[2].trim(), value});
+    }
+    if(txns.length > 0) return txns;
+  }
+
+  // Parser Itaú — formato: "DD/MM HISTÓRICO VALOR DOC"
+  if (isItau) {
+    const txns = [];
+    const reItau = /(\d{2}\/\d{2})\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*(?:[\d.,]+)?\s*$/;
+    const year = new Date().getFullYear();
+    for(const line of lines){
+      const skip = /saldo|total|data|histórico|extrato|itaú/i;
+      if(skip.test(line)) continue;
+      const m = line.match(reItau);
+      if(!m) continue;
+      const date = eParseDate(m[1] + '/' + year);
+      const value = eParseBRL(m[3]);
+      if(date && m[2].trim() && value !== 0) txns.push({date, desc: m[2].trim(), value});
+    }
+    if(txns.length > 0) return txns;
+  }
+
+  // Parser Bradesco — formato: "DD/MM/YYYY Documento Histórico Valor"
+  if (isBradesco) {
+    const txns = [];
+    const reBrad = /(\d{2}\/\d{2}\/\d{4})\s+\d*\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*$/;
+    for(const line of lines){
+      const skip = /saldo|total|data|histórico|extrato|bradesco/i;
+      if(skip.test(line)) continue;
+      const m = line.match(reBrad);
+      if(!m) continue;
+      const date = eParseDate(m[1]);
+      const value = eParseBRL(m[3]);
+      if(date && m[2].trim() && value !== 0) txns.push({date, desc: m[2].trim(), value});
+    }
+    if(txns.length > 0) return txns;
+  }
+
+  // Parser BB — formato: "DD/MM/YYYY Histórico Documento Valor"
+  if (isBB) {
+    const txns = [];
+    const reBB = /(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+\d*\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*$/;
+    for(const line of lines){
+      const skip = /saldo|total|data|histórico|extrato|banco do brasil/i;
+      if(skip.test(line)) continue;
+      const m = line.match(reBB);
+      if(!m) continue;
+      const date = eParseDate(m[1]);
+      const value = eParseBRL(m[3]);
+      if(date && m[2].trim() && value !== 0) txns.push({date, desc: m[2].trim(), value});
+    }
+    if(txns.length > 0) return txns;
+  }
+
+  // Parser Caixa, Santander, C6, Sicoob, Sicredi e genérico
+  // Regex genérica: DD/MM/YYYY? + descrição + valor no final da linha
+  const skip = /saldo anterior|saldo final|data\s+descri|período|agência|conta\s*:|cliente|extrato|banco\s+/i;
+  const re   = /(\d{2}[\/\-]\d{2}(?:[\/\-]\d{2,4})?)\s+(.+?)\s+([\-\+]?\s*\d[\d.,]*(?:\.\d{3})*(?:,\d{2})?)\s*(?:[\d.,]+)?\s*$/;
+  const txns = [];
+  for(const line of lines){
+    if(skip.test(line)) continue;
+    const m = line.match(re);
+    if(!m) continue;
+    const date = eParseDate(m[1]);
+    const desc = m[2].trim();
+    const value = eParseBRL(m[3].replace(/\s/g,''));
+    if(date && desc && value !== 0) txns.push({date, desc, value});
+  }
+  // Se genérico também falhou, tenta eParseGeneric como último recurso
+  return txns.length > 0 ? txns : eParseGeneric(lines);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7849,10 +7964,28 @@ async function eRunAll(){
     try{
       let txns=[];
       if(f.type==='pdf'){
-        const text=await eParsePDF(f.content);
-        txns=eParsePDFText(text);
-        if(txns.length===0){eShowErr(`Não foi possível extrair de "${f.name}". Tente CSV ou OFX.`);continue;}
-        // Para PDF, atualiza banco real após extração do texto
+        let text;
+        try {
+          text = await eParsePDF(f.content);
+        } catch(pdfErr) {
+          if(pdfErr.message === 'PDF_ESCANEADO') {
+            eShowErr(`"${f.name}" parece ser um PDF escaneado (imagem). O Guardião precisa de texto digital. Exporte o extrato em PDF digital pelo app do banco, ou use o formato CSV ou OFX.`);
+          } else {
+            eShowErr(`Erro ao abrir "${f.name}": ${pdfErr.message}`);
+          }
+          continue;
+        }
+        txns = eParsePDFText(text);
+        if(txns.length === 0){
+          // Identifica banco para dar dica específica
+          const bankHint = f.detected?.banco || f.detected?.bank || '';
+          const dica = bankHint
+            ? `Banco detectado: ${bankHint}. Tente exportar o extrato no formato CSV pelo app do banco.`
+            : 'Tente exportar o extrato no formato CSV ou OFX pelo app do banco.';
+          eShowErr(`Não foi possível extrair transações de "${f.name}". ${dica}`);
+          continue;
+        }
+        // Atualiza banco real após extração do texto
         const pdfBankInfo=eDetectBankReal(text,'pdf',f.name);
         if(pdfBankInfo.banco) f.detected.banco=pdfBankInfo.banco;
         if(pdfBankInfo.conta) f.detected.conta=pdfBankInfo.conta;
@@ -7867,7 +8000,10 @@ async function eRunAll(){
         else if(fmt==='ofx') txns=eParseOFX(f.content);
         else txns=eParseGeneric(lines);
       }
-      if(txns.length===0){eShowErr(`Nenhuma transação em "${f.name}".`);continue;}
+      if(txns.length===0){
+        eShowErr(`Nenhuma transação encontrada em "${f.name}". Verifique se o arquivo está completo e no formato correto (CSV com vírgula/ponto-e-vírgula, ou OFX válido).`);
+        continue;
+      }
       parsed.push({
         txns,
         banco: f.detected.banco||f.detected.bank,
@@ -7924,6 +8060,11 @@ async function eRunAll(){
   eSetProgress(95,'Consolidando...');
   await new Promise(r=>setTimeout(r,300));
   const consolidated=eConsolidate(results);
+  if (!consolidated) {
+    eShowErr('Não foi possível consolidar os extratos. Verifique se o arquivo está no formato correto (CSV, OFX ou PDF).');
+    document.getElementById('btnGo').classList.add('on');
+    return;
+  }
   eAllTxns=consolidated.all;
   eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
 
@@ -8008,6 +8149,19 @@ async function eRunAll(){
 
 
 function eRenderPreview(c, sources) {
+  // Guard: consolidated pode ser null se todos os extratos falharam
+  if (!c) {
+    document.getElementById('previewReal').style.display = 'none';
+    document.getElementById('previewPlaceholder').style.display = 'block';
+    document.getElementById('previewPlaceholder').innerHTML =
+      '<div style="font-size:28px;margin-bottom:12px">⚠️</div>' +
+      '<div style="font-family:var(--ff);font-size:14px;font-weight:600;color:var(--red);margin-bottom:6px">Não foi possível processar o extrato</div>' +
+      '<div style="font-size:12px;color:var(--muted2);line-height:1.6">Verifique se o arquivo é CSV, OFX ou PDF de um banco compatível e tente novamente.</div>';
+    return;
+  }
+  // Garantir que alerts é sempre um array mesmo que eConsolidate tenha retornado objeto parcial
+  if (!Array.isArray(c.alerts)) c.alerts = [];
+
   // Mostra preview real, esconde placeholder
   document.getElementById('previewReal').style.display = 'block';
   document.getElementById('previewPlaceholder').style.display = 'none';
@@ -8108,9 +8262,10 @@ function eRenderPreview(c, sources) {
       <div style="font-size:10px;color:var(--muted);margin-top:2px">saídas/entradas</div>
     </div>`;
 
-  // Primeiros 2 alertas REAIS visíveis
-  const alertsVisiveis = c.alerts.slice(0, 2);
-  const alertsBloqueados = c.alerts.slice(2);
+  // Primeiros 2 alertas REAIS visíveis — guard defensivo: c.alerts pode ser undefined
+  const _safeAlerts = Array.isArray(c.alerts) ? c.alerts : [];
+  const alertsVisiveis = _safeAlerts.slice(0, 2);
+  const alertsBloqueados = _safeAlerts.slice(2);
   const _pvLC = document.getElementById('pvLockedCount'); if(_pvLC) _pvLC.textContent = alertsBloqueados.length;
 
   // P8: Card mês mais crítico e confiança do parser
