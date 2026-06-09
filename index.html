@@ -302,8 +302,12 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: rgba(11,17,32,0.98);
+  padding: 0 24px;
+  height: 60px;
+  background: rgba(5,8,22,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   will-change: transform;
 }
 
@@ -327,10 +331,12 @@ nav {
 .nav-links {
   display: none;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
-.nav-link {
+@media (min-width: 768px) {
+  .nav-links { display: flex; }
+}
   background: none;
   border: none;
   color: var(--muted);
@@ -379,7 +385,7 @@ nav {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 88px 24px 56px;
+  padding: 96px 24px 64px;
   max-width: 720px;
   margin: 0 auto;
 }
@@ -449,7 +455,7 @@ nav {
 .sim-wrap {
   max-width: 540px;
   margin: 0 auto;
-  padding: 0 12px 64px;
+  padding: 0 16px 80px;
   position: relative;
   z-index: 1;
 }
@@ -1660,10 +1666,22 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 }
 
 @media (min-width: 1024px) {
-  .hero { padding: 88px 40px 56px; }
+  .hero { padding: 96px 40px 64px; }
   .hero h1 { font-size: 52px; }
   .sim-wrap { max-width: 680px; }
   .plans-page { max-width: 900px; }
+}
+
+/* Mobile hero gets a border-bottom as section divider */
+@media (max-width: 1099px) {
+  #page-home > .hero {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+}
+
+/* Social proof strip hidden on desktop (split hero has its own metrics) */
+@media (min-width: 1100px) {
+  #socialProofMobile { display: none !important; }
 }
 
 /* ===== SPLIT HERO LAYOUT — DESKTOP WIDE ===== */
@@ -1688,10 +1706,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 /* Split home — sempre renderizado, escondido no mobile */
 .split-home {
   display: none;
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto;
-  padding: clamp(60px,7vw,88px) clamp(24px,4vw,48px);
-  gap: clamp(32px,4vw,56px);
+  padding: clamp(72px,8vw,96px) clamp(32px,4vw,56px) clamp(72px,8vw,96px);
+  gap: clamp(40px,5vw,72px);
   align-items: flex-start;
   position: relative;
   z-index: 1;
@@ -1700,8 +1718,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .split-left {
   flex: 1;
   min-width: 0;
-  padding-top: 24px;
-  max-width: 520px;
+  padding-top: 16px;
+  max-width: 540px;
 }
 
 .split-left .hero-tag {
@@ -1721,11 +1739,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .split-left h1 em { font-style: normal; color: var(--green); }
 
 .split-left p {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--muted2);
-  line-height: 1.8;
-  margin-bottom: 32px;
-  max-width: 420px;
+  line-height: 1.75;
+  margin-bottom: 36px;
+  max-width: 440px;
 }
 
 .split-left .hero-badges {
@@ -1757,7 +1775,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   transition: all 0.2s;
   letter-spacing: 0.01em;
 }
-.split-cta-primary:hover { background: #1d4ed8; box-shadow: 0 8px 28px rgba(59,130,246,0.3); transform: translateY(-1px); }
+.split-cta-primary:hover { background: var(--green2); box-shadow: var(--glow-green); transform: translateY(-1px); }
 
 .split-cta-quiz {
   width: 100%;
@@ -2298,23 +2316,23 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
 
       <!-- Mini métricas -->
-      <div style="display:flex;gap:24px;margin-top:40px;padding-top:28px;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:32px;margin-top:48px;padding-top:32px;border-top:1px solid var(--border)">
         <div>
-          <div style="font-family:var(--ff);font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">verificações fiscais</div>
+          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">40+</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">verificações fiscais</div>
         </div>
         <div>
-          <div style="font-family:var(--ff);font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">bancos suportados</div>
+          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">bancos suportados</div>
         </div>
         <div>
-          <div style="font-family:var(--ff);font-size:20px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">local no dispositivo</div>
+          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">local no dispositivo</div>
         </div>
       </div>
 
       <!-- O que cruzamos -->
-      <div style="margin-top:28px;display:flex;flex-direction:column;gap:8px">
+      <div style="margin-top:36px;display:flex;flex-direction:column;gap:8px">
         <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">// cruzamentos realizados</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📊 Pix × renda declarada</div>
@@ -2415,6 +2433,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <!-- FIM SPLIT HERO -->
 
   <!-- QUIZ MOBILE — IDs únicos, renderizado pelo JS separado -->
+  <div style="border-top:1px solid rgba(255,255,255,0.06);padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap" id="socialProofMobile">
+    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">🔒 Dados 100% locais</span>
+    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">📊 40+ verificações</span>
+    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">✅ Grátis para começar</span>
+  </div>
   <div class="sim-wrap" id="quizWrap">
     <div class="tabs">
       <button class="tab active">📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span></button>
@@ -2477,7 +2500,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 
   <!-- Bloco: O que o Guardião cruza — mobile (desktop fica na institucional) -->
-  <div style="padding:0 16px 8px;display:none" id="algoritmoBlocoMobile" class="algoritmo-mobile-show">
+  <div style="padding:0 16px 16px;display:none" id="algoritmoBlocoMobile" class="algoritmo-mobile-show">
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-card);padding:20px 16px;margin-bottom:8px">
       <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px">// o que analisamos</div>
       <div style="display:flex;flex-direction:column;gap:10px">
