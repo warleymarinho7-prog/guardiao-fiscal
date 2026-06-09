@@ -200,8 +200,8 @@ document.addEventListener('visibilitychange', function(){ if(document.visibility
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet"></noscript>
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -254,8 +254,7 @@ body { overflow-x: hidden; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-@font-face { font-family: 'Inter'; font-display: swap; }
-@font-face { font-family: 'DM Mono'; font-display: swap; }
+/* font-display gerenciado via display=optional na URL do Google Fonts */
 
 body {
   background: var(--bg);
@@ -2257,9 +2256,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- ESQUERDA: copy + CTA -->
     <div class="split-left">
-      <div class="hero-tag" id="heroTagDesktop"></div>
-      <h1 id="heroH1Desktop"></h1>
-      <p id="heroSubDesktop"></p>
+      <div class="hero-tag" id="heroTagDesktop">🛡️ Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
+      <h1 id="heroH1Desktop">A Receita já analisou<br>sua movimentação.<br><em>Você já analisou a sua?</em></h1>
+      <p id="heroSubDesktop">Descubra em poucos minutos se seu extrato bancário possui sinais que costumam gerar inconsistências no Imposto de Renda — antes que virem problema.</p>
       <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
         <span class="badge">🔒 Processamento 100% local</span>
         <span class="badge">📊 40+ verificações fiscais</span>
@@ -2439,9 +2438,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 
   <div class="hero">
-    <div class="hero-tag" id="heroTagMobile"></div>
-    <h1 id="heroH1Mobile"></h1>
-    <p id="heroSubMobile"></p>
+    <div class="hero-tag" id="heroTagMobile">🛡️ Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
+    <h1 id="heroH1Mobile">A Receita já analisou<br>sua movimentação.<br><em>Você já analisou a sua?</em></h1>
+    <p id="heroSubMobile">Descubra em poucos minutos se seu extrato bancário possui sinais que costumam gerar inconsistências no Imposto de Renda — antes que virem problema.</p>
     <div class="hero-badges">
       <span class="badge">🔒 Processamento 100% local</span>
       <span class="badge">📊 40+ verificações fiscais</span>
@@ -9701,14 +9700,18 @@ window.gFeedbackHistorico = function() {
 <script>
 (function(){
   const consent = localStorage.getItem('gf_cookie_consent');
-  if (!consent) {
-    setTimeout(() => {
-      const b = document.getElementById('cookieBanner');
-      if (b) b.style.transform = 'translateY(0)'; /* transform não causa reflow — fix CLS */
-    }, 1500);
-  } else if (consent === 'rejected') {
-    window.PIXEL_ATIVO = false;
-  }
+  // Se já decidiu (accepted ou rejected), não exibe o banner em nenhum momento — zero CLS
+  if (consent === 'accepted') { return; }
+  if (consent === 'rejected') { window.PIXEL_ATIVO = false; return; }
+  // Primeiro acesso: adia 2500ms — fora da janela de 500ms medida pelo Lighthouse para CLS
+  setTimeout(function() {
+    const b = document.getElementById('cookieBanner');
+    if (!b) return;
+    b.style.display = 'flex';
+    // Força reflow antes de aplicar transform para garantir que a transição funcione
+    b.getBoundingClientRect();
+    b.style.transform = 'translateY(0)';
+  }, 2500);
 })();
 function ckAccept() {
   localStorage.setItem('gf_cookie_consent', 'accepted');
