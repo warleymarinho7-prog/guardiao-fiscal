@@ -1762,6 +1762,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   min-width: 0;
   max-width: 540px;
   position: relative;
+  min-height: 420px;
+  contain: layout;
 }
 .split-right .sim-wrap {
   max-width: 100%;
@@ -2308,7 +2310,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
           // detecções em tempo real
         </div>
-        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:hidden"></div>
+        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;min-height:220px;overflow:hidden"></div>
       </div>
       <div class="sim-wrap">
         <div class="tabs">
@@ -9668,7 +9670,7 @@ window.gFeedbackHistorico = function() {
 
 <!-- ── Banner de cookies ── -->
 <style>
-#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff)}
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(100%);transition:transform 0.3s ease;will-change:transform}
 #cookieBanner p{font-size:12px;color:var(--muted2);margin:0;flex:1;min-width:180px;line-height:1.5}
 #cookieBanner a{color:var(--green)}
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
@@ -9702,7 +9704,7 @@ window.gFeedbackHistorico = function() {
   if (!consent) {
     setTimeout(() => {
       const b = document.getElementById('cookieBanner');
-      if (b) b.style.display = 'flex';
+      if (b) b.style.transform = 'translateY(0)'; /* transform não causa reflow — fix CLS */
     }, 1500);
   } else if (consent === 'rejected') {
     window.PIXEL_ATIVO = false;
@@ -9710,20 +9712,18 @@ window.gFeedbackHistorico = function() {
 })();
 function ckAccept() {
   localStorage.setItem('gf_cookie_consent', 'accepted');
-  document.getElementById('cookieBanner').style.display = 'none';
-  if (typeof _loadPixels === 'function') _loadPixels(); // carrega pixels agora
-  // Dispara Purchase pendente — aguarda o fbevents.js carregar (async)
+  document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+  if (typeof _loadPixels === 'function') _loadPixels();
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
       _att++;
-      // fbevents.js carregado E Pixel inicializado
       if (window.PIXEL_ATIVO) {
         clearInterval(_wait);
         window._firePurchase();
-      } else if (_att >= 50) { // 5s maximo
+      } else if (_att >= 50) {
         clearInterval(_wait);
-        window._firePurchase(); // dispara mesmo assim (usa a fila _fbqQueue)
+        window._firePurchase();
       }
     }, 100);
   }
@@ -9732,7 +9732,7 @@ function ckReject() {
   localStorage.setItem('gf_cookie_consent', 'rejected');
   window.PIXEL_ATIVO = false;
   window._pixelsLoaded = false;
-  document.getElementById('cookieBanner').style.display = 'none';
+  document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
 }
 </script>
 <!-- ===== WHATSAPP + FEEDBACK ===== -->
