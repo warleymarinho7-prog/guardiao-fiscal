@@ -119,37 +119,40 @@
   ]
 }
 </script>
-<!-- Meta Pixel + Clarity — carregam apenas com consentimento -->
+<!-- Meta Pixel — PageView imediato (sem PII, base legal: interesse legítimo de medição agregada)
+     Eventos com dados do usuário (InitiateCheckout, Lead, Purchase) só disparam após consentimento -->
 <script>
-// Fila de eventos fbq antes do consentimento
-window._fbqQueue = window._fbqQueue || [];
-window.fbq = window.fbq || function() { window._fbqQueue.push(arguments); };
-window.PIXEL_ATIVO = false; // desativado até consentimento confirmado
+// ── FASE 1: carrega fbevents.js e dispara PageView imediatamente ──────────────
+// PageView não contém dados pessoais identificáveis — compatível com LGPD art. 7º, VI.
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2144854999641148');
+fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
+window.PIXEL_ATIVO = false; // eventos PII ainda bloqueados até consentimento
 
+// Fila para eventos PII disparados antes do consentimento
+window._fbqQueue = window._fbqQueue || [];
+
+// ── FASE 2: ativa eventos PII após consentimento ──────────────────────────────
 function _loadPixels() {
   if (window._pixelsLoaded) return;
   const consent = localStorage.getItem('gf_cookie_consent');
   if (consent !== 'accepted') return;
   window._pixelsLoaded = true;
   window.PIXEL_ATIVO = true;
-  // Meta Pixel
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init','2144854999641148');
-  fbq('track','PageView',{},{ eventID: Date.now().toString() });
-  // Drena fila de eventos anteriores ao consentimento
+  // Drena fila de eventos PII enfileirados antes do consentimento
   (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
   window._fbqQueue = [];
-  // Microsoft Clarity
+  // Microsoft Clarity (analytics comportamental — requer consentimento)
   (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
   t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
   y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");
 }
 
-// Carrega pixels apenas quando o browser estiver ocioso (não bloqueia render)
+// Tenta ativar eventos PII quando o browser estiver ocioso
 document.addEventListener('DOMContentLoaded', function() {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(_loadPixels, { timeout: 3000 });
@@ -3994,7 +3997,7 @@ function initProFreeMode() {
 
 async function openCheckout(plan) {
   // Pixel — checkout iniciado
-  if(typeof fbq==='function') {
+  if(typeof fbq==='function' && window.PIXEL_ATIVO) {
     fbq('trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() });
     fbq('track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() });
   }
@@ -4339,7 +4342,7 @@ function showCheckoutSuccess() {
   document.getElementById('successMsg').textContent =
     `Seu acesso ao ${plan.name} foi ativado. Pode fechar este painel e usar a análise.`;
   // Pixel — Purchase (cartão aprovado)
-  if(typeof fbq==='function') {
+  if(typeof fbq==='function' && window.PIXEL_ATIVO) {
     const valor = currentPlan==='pro' ? 29.90 : (PRICES?.avulso?.value ?? 19.90);
     fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_'+Date.now().toString() });
   }
@@ -4492,7 +4495,7 @@ async function handleMpReturn() {
       plans[currentPlan]?.successMsg ?? 'Pagamento confirmado! Seu acesso está liberado.';
     document.getElementById('checkoutOverlay').classList.add('show');
 
-    if(typeof fbq==='function') {
+    if(typeof fbq==='function' && window.PIXEL_ATIVO) {
       const valor = currentPlan==='pro' ? 29.90 : PRICES?.avulso?.value ?? 34.90;
       fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_mp_'+Date.now().toString() });
     }
@@ -5162,7 +5165,7 @@ function selectProfile(id, bodyId) {
   if (!p) return;
 
   // Pixel
-  if (typeof fbq === 'function') {
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) {
     fbq('trackCustom', 'ProfileSelected', { perfil: id, risco: p.nivel }, { eventID: 'ps_' + Date.now() });
   }
 
@@ -5337,7 +5340,7 @@ function revealResult(p, heroId, alertsId, isDesktop) {
   }, p.alertsData.length * 400 + 300);
 
   // Pixels
-  if (typeof fbq === 'function') {
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) {
     fbq('trackCustom', 'QuizCompleted', { origem: isDesktop ? 'site_principal' : 'site_principal_mobile', risco: p.nivel, score: p.score }, { eventID: 'qc_' + Date.now() });
     fbq('track', 'Lead', { content_name: 'quiz_site_principal', content_category: p.nivel }, { eventID: 'lead_site_' + Date.now() });
   }
@@ -5376,7 +5379,7 @@ function openQuiz() {
     _applyPage('home');
   }
   switchSimTab('perguntas');
-  if (typeof fbq === 'function') fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   // Reseta para tela de seleção de perfil
   const rp = document.getElementById('resultPanel');
   const qp = document.getElementById('questionPanel');
@@ -5424,7 +5427,7 @@ function openQuiz() {
 // ── FIM FEED DETECÇÕES ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   // inicialização dos quiz cards já feita no listener DOMContentLoaded do engine
-  if (typeof fbq === 'function') fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
   // Anima o dashboard mockup no hero desktop
   setTimeout(() => {
@@ -7974,7 +7977,7 @@ async function eRunAll(){
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   // Pixel — análise iniciada
-  if(typeof fbq==='function') fbq('trackCustom','AnalysisStarted',{files:ready.length},{ eventID: Date.now().toString() });
+  if(typeof fbq==='function' && window.PIXEL_ATIVO) fbq('trackCustom','AnalysisStarted',{files:ready.length},{ eventID: Date.now().toString() });
   // Clarity — análise iniciada
   if(typeof clarity==='function') clarity('event','AnalysisStarted');
   // Captura renda declarada do campo (opcional — ativa F7 compatibilidade)
@@ -9203,7 +9206,7 @@ function eResetAll(){
   // Tracking — só dispara PaywallHit se o usuário NÃO tinha acesso ao resultado completo
   const _tinhaAcesso = document.getElementById('realResultBlock').style.display !== 'none';
   if (!_tinhaAcesso) {
-    if(typeof fbq==='function') {
+    if(typeof fbq==='function' && window.PIXEL_ATIVO) {
       fbq('trackCustom','PaywallHit',{},{ eventID: Date.now().toString() });
       fbq('track','ViewContent',{ content_name:'paywall_guardiao', content_category:'fiscal' },{ eventID:'vc_'+Date.now().toString() });
     }
@@ -9625,7 +9628,7 @@ window.gFeedbackAbrir = function() {
   const d = document.getElementById('gFbDetalhes');
   if (d) d.style.display = 'block';
   // tracking
-  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordo', { score: window._gFeedback.sessao?.score }, { eventID: Date.now().toString() });
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'FeedbackDiscordo', { score: window._gFeedback.sessao?.score }, { eventID: Date.now().toString() });
   if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordo');
 };
 
@@ -9656,7 +9659,7 @@ window.gFeedbackSubmit = function(tipo) {
   // Logar no console (visível no Clarity e em ferramentas de dev)
 
   // tracking Meta
-  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackOk', { score: r?.score }, { eventID: Date.now().toString() });
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'FeedbackOk', { score: r?.score }, { eventID: Date.now().toString() });
   if (typeof clarity === 'function') clarity('event', 'FeedbackOk');
 
   // Esconder card, mostrar agradecimento
@@ -9698,7 +9701,7 @@ window.gFeedbackEnviar = function() {
 
   window._gFeedback.historico.push(payload);
 
-  if (typeof fbq === 'function') fbq('trackCustom', 'FeedbackDiscordoEnviado', { score: r?.score, motivos }, { eventID: Date.now().toString() });
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'FeedbackDiscordoEnviado', { score: r?.score, motivos }, { eventID: Date.now().toString() });
   if (typeof clarity === 'function') clarity('event', 'FeedbackDiscordoEnviado');
 
   const det = document.getElementById('gFbDetalhes');
@@ -9986,8 +9989,11 @@ function ckAccept() {
 }
 function ckReject() {
   localStorage.setItem('gf_cookie_consent', 'rejected');
+  // Bloqueia eventos PII futuros (InitiateCheckout, Lead, Purchase)
+  // O PageView já foi disparado sem dados pessoais — não há como/necessidade de desfazer
   window.PIXEL_ATIVO = false;
   window._pixelsLoaded = false;
+  window._fbqQueue = []; // descarta fila de eventos PII pendentes
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
 }
 </script>
