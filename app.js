@@ -203,9 +203,13 @@ function initProFreeMode() {
 
 async function openCheckout(plan) {
   // Pixel — checkout iniciado
-  if(typeof fbq==='function' && window.PIXEL_ATIVO) {
-    fbq('trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() });
-    fbq('track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() });
+  // Enfileira sempre: garante disparo mesmo antes do pixel estar 100% pronto
+  window._fbqQueue = window._fbqQueue || [];
+  window._fbqQueue.push(['trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() }]);
+  window._fbqQueue.push(['track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() }]);
+  if (typeof fbq === 'function' && window._pixelInitDone) {
+    window._fbqQueue.forEach(function(a){ fbq.apply(null,a); });
+    window._fbqQueue = [];
   }
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
   // Se usuário já tem plano ativo — verifica no banco e vai direto para análise
@@ -6140,5 +6144,3 @@ window.gFeedbackHistorico = function() {
 };
 
 // extrato step 1 — handled by Supabase auth above
-
-
