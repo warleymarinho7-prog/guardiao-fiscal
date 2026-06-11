@@ -4041,15 +4041,14 @@ function _loadPixels() {
     document.head.appendChild(s);
   }
 
-  function _tryInit() {
-    _loadClarity(); // Clarity sempre — sem PII, sem depender de consentimento
-    _initPixel();   // Meta Pixel PageView — sem PII
-    _preloadMpSDK(); // MP SDK preload — elimina delay no checkout
-  }
+  // Pixel e Clarity: disparo imediato — script está no fim do body, sem render-blocking
+  _loadClarity();
+  _initPixel();
+  // MP SDK: lazy — não é crítico para o primeiro evento de pixel
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(_tryInit, { timeout: 4000 });
+    requestIdleCallback(_preloadMpSDK, { timeout: 4000 });
   } else {
-    setTimeout(_tryInit, 1500);
+    setTimeout(_preloadMpSDK, 1500);
   }
   // Instagram in-app browser: visibilitychange garante o disparo
   document.addEventListener('visibilitychange', function() {
