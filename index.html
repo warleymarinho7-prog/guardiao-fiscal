@@ -11,7 +11,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; form-action https:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v14.0.0 | 2026-06-07 -->
+<!-- Guardião Fiscal v15.1.0 | 2026-06-10 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -119,96 +119,19 @@
   ]
 }
 </script>
-<!-- Meta Pixel — PageView imediato (sem PII, base legal: interesse legítimo de medição agregada)
-     Eventos com dados do usuário (InitiateCheckout, Lead, Purchase) só disparam após consentimento -->
+<!-- Meta Pixel — stub mínimo no head (não bloqueia render)
+     fbevents.js + PageView carregam após LCP via requestIdleCallback -->
 <script>
-// ── FASE 1: carrega fbevents.js e dispara PageView imediatamente ──────────────
-// PageView não contém dados pessoais identificáveis — compatível com LGPD art. 7º, VI.
-!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init','2144854999641148');
-fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
-window.PIXEL_ATIVO = false; // eventos PII ainda bloqueados até consentimento
-
-// Fila para eventos PII disparados antes do consentimento
 window._fbqQueue = window._fbqQueue || [];
-
-// ── FASE 2: ativa eventos PII após consentimento ──────────────────────────────
-function _loadPixels() {
-  if (window._pixelsLoaded) return;
-  const consent = localStorage.getItem('gf_cookie_consent');
-  if (consent !== 'accepted') return;
-  window._pixelsLoaded = true;
-  window.PIXEL_ATIVO = true;
-  // Drena fila de eventos PII enfileirados antes do consentimento
-  (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
-  window._fbqQueue = [];
-  // Microsoft Clarity (analytics comportamental — requer consentimento)
-  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");
-}
-
-// Tenta ativar eventos PII quando o browser estiver ocioso
-document.addEventListener('DOMContentLoaded', function() {
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(_loadPixels, { timeout: 3000 });
-  } else {
-    setTimeout(_loadPixels, 1000);
-  }
-});
-// Também tenta no visibilitychange (Instagram pré-render)
-document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') _loadPixels(); });
-
-// ── PURCHASE EVENT (retorno Mercado Pago) ──────────────────────
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('mp') !== 'success') return;
-
-  const plan  = params.get('plan') || 'avulso';
-  const value = plan === 'pro' ? 29.90 : 19.90;
-
-  window._purchasePending = { plan: plan, value: value };
-
-  // Limpa URL imediatamente
-  window.history.replaceState({}, '', '/');
-
-  function _firePurchase() {
-    if (!window._purchasePending) return;
-    var p = window._purchasePending;
-    window._purchasePending = null;
-    // Usa _fbqQueue: funciona mesmo antes do fbevents.js carregar.
-    // _loadPixels() drena a fila automaticamente ao inicializar o Pixel.
-    window._fbqQueue = window._fbqQueue || [];
-    window._fbqQueue.push(['track', 'Purchase', {
-      value:        p.value,
-      currency:     'BRL',
-      content_name: 'Guardiao Fiscal - ' + (p.plan === 'pro' ? 'Pro Mensal' : 'Avulso'),
-      content_type: 'product',
-    }]);
-    // Se Pixel ja ativo, drena agora
-    if (window.PIXEL_ATIVO && typeof fbq === 'function') {
-      var ev = window._fbqQueue.pop();
-      if (ev) fbq.apply(null, ev);
-    }
-  }
-
-  window._firePurchase = _firePurchase;
-
-  // Caso 1: consentimento ja dado — dispara no DOMContentLoaded
-  document.addEventListener('DOMContentLoaded', function() {
-    if (window.PIXEL_ATIVO) _firePurchase();
-    // Caso 2: sem consentimento — dispara via ckAccept()
-  });
-})();
+window.fbq = window.fbq || function() { window._fbqQueue.push(arguments); };
+window.PIXEL_ATIVO = false;
 </script>
 <!-- Fim Pixel/Clarity -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+<link rel="dns-prefetch" href="https://connect.facebook.net">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet"></noscript>
 <style>
@@ -8585,7 +8508,7 @@ async function eUnlockResult(){
   });
   eActiveBankTab='all';
 
-  document.getElementById('pDbgPre').textContent = 'Motor: v8.0 · Site: v13.0.0\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nScore: '+c.score+'%\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\nÍndice espécie: '+Math.round((c.indiceEspecie||0)*100)+'%\nPadrões recorrentes: '+c.recorrentes+'\n'+sources.map(function(r){return '['+r.bank+'] '+r.totalTxns+' txns · score '+r.score+'% · fatores: '+(r.fatores||[]).map(function(f){return f.motivo;}).join(', ');}).join('\n');
+  document.getElementById('pDbgPre').textContent = 'Motor: v8.0 · Site: v15.1.0\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nScore: '+c.score+'%\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\nÍndice espécie: '+Math.round((c.indiceEspecie||0)*100)+'%\nPadrões recorrentes: '+c.recorrentes+'\n'+sources.map(function(r){return '['+r.bank+'] '+r.totalTxns+' txns · score '+r.score+'% · fatores: '+(r.fatores||[]).map(function(f){return f.motivo;}).join(', ');}).join('\n');
 
   _eCatFilter = 'all'; // reset categoria ao carregar novo resultado
   eRenderTxns('all');
@@ -10183,5 +10106,108 @@ async function sendFeedback() {
 }
 </script>
 
+
+<!-- ═══════════════════════════════════════════════════════════════
+     META PIXEL + CLARITY — carregam após LCP (não bloqueiam render)
+     PageView sem PII: base legal LGPD art. 7º VI
+     Eventos PII (InitiateCheckout, Lead, Purchase): só após consentimento
+     Clarity: só após consentimento
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+// ── Clarity: carrega uma única vez, após consentimento ────────────
+function _loadClarity() {
+  if (window._clarityLoaded) return;
+  window._clarityLoaded = true;
+  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");
+}
+
+// ── Pixel: init único após LCP ────────────────────────────────────
+function _initPixel() {
+  if (window._pixelInitDone) return;
+  window._pixelInitDone = true;
+  // Carrega fbevents.js e dispara PageView (sem PII — LGPD art. 7º VI)
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','2144854999641148');
+  fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
+  // Se consentimento já dado ao chegar aqui, drena fila PII
+  if (window.PIXEL_ATIVO) {
+    (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
+    window._fbqQueue = [];
+  }
+}
+
+// ── Ativa eventos PII + Clarity após aceitar cookies ─────────────
+function _loadPixels() {
+  if (window._pixelsLoaded) return;
+  const consent = localStorage.getItem('gf_cookie_consent');
+  if (consent !== 'accepted') return;
+  window._pixelsLoaded = true;
+  window.PIXEL_ATIVO = true;
+  // Clarity: carrega imediatamente — não depende do pixel estar inicializado
+  _loadClarity();
+  // Fila PII: drena agora se pixel já init, senão _initPixel() drena quando rodar
+  if (window._pixelInitDone && typeof fbq === 'function') {
+    (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
+    window._fbqQueue = [];
+  }
+}
+
+// Dispara _initPixel após LCP
+(function() {
+  function _tryInit() { _initPixel(); }
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(_tryInit, { timeout: 4000 });
+  } else {
+    setTimeout(_tryInit, 1500);
+  }
+  // Instagram in-app browser: visibilitychange garante o disparo
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') _initPixel();
+  });
+  // Também tenta quando consentimento já existe (visitante recorrente)
+  document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('gf_cookie_consent') === 'accepted') {
+      _loadPixels();
+    }
+  });
+})();
+
+// ── Purchase (retorno Mercado Pago) ────────────────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mp') !== 'success') return;
+  const plan  = params.get('plan') || 'avulso';
+  const value = plan === 'pro' ? 29.90 : 19.90;
+  window._purchasePending = { plan: plan, value: value };
+  window.history.replaceState({}, '', '/');
+
+  function _firePurchase() {
+    if (!window._purchasePending) return;
+    var p = window._purchasePending;
+    window._purchasePending = null;
+    window._fbqQueue = window._fbqQueue || [];
+    window._fbqQueue.push(['track', 'Purchase', {
+      value: p.value, currency: 'BRL',
+      content_name: 'Guardiao Fiscal - ' + (p.plan === 'pro' ? 'Pro Mensal' : 'Avulso'),
+      content_type: 'product',
+    }]);
+    if (window.PIXEL_ATIVO && typeof fbq === 'function' && window._pixelInitDone) {
+      var ev = window._fbqQueue.pop();
+      if (ev) fbq.apply(null, ev);
+    }
+  }
+  window._firePurchase = _firePurchase;
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.PIXEL_ATIVO) _firePurchase();
+  });
+})();
+</script>
+<!-- Fim Pixel/Clarity -->
 </body>
 </html>
