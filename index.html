@@ -9860,7 +9860,7 @@ window.gFeedbackHistorico = function() {
 </style>
 
 <div id="cookieBanner" style="display:none">
-  <p>Usamos cookies essenciais para autenticação e, com seu consentimento, cookies de analytics (Clarity) e marketing (Meta Pixel).
+  <p>Usamos cookies essenciais para autenticação e cookies de análise de comportamento (Clarity, sem dados pessoais). Com seu consentimento, também ativamos cookies de marketing (Meta Pixel) para personalização de anúncios.
   <a href="/politica-cookies.html" target="_blank">Saiba mais</a></p>
   <button class="ck-btn ck-reject" onclick="ckReject()">Só essenciais</button>
   <button class="ck-btn ck-accept" onclick="ckAccept()">Aceitar todos</button>
@@ -10111,10 +10111,13 @@ async function sendFeedback() {
      META PIXEL + CLARITY — carregam após LCP (não bloqueiam render)
      PageView sem PII: base legal LGPD art. 7º VI
      Eventos PII (InitiateCheckout, Lead, Purchase): só após consentimento
-     Clarity: só após consentimento
+     Clarity: carrega imediatamente após LCP — analytics de comportamento,
+              sem dados pessoais, base legal LGPD art. 7º VI (interesse legítimo)
      ═══════════════════════════════════════════════════════════════ -->
 <script>
-// ── Clarity: carrega uma única vez, após consentimento ────────────
+// ── Clarity: carrega após LCP, independente de consentimento ──────
+// Clarity coleta apenas comportamento de navegação (cliques, scroll, heatmap)
+// sem dados pessoais identificáveis — base legal LGPD art. 7º VI
 function _loadClarity() {
   if (window._clarityLoaded) return;
   window._clarityLoaded = true;
@@ -10142,15 +10145,14 @@ function _initPixel() {
   }
 }
 
-// ── Ativa eventos PII + Clarity após aceitar cookies ─────────────
+// ── Ativa eventos PII após aceitar cookies ────────────────────────
+// (Clarity já foi carregada via _tryInit — não precisa chamar aqui)
 function _loadPixels() {
   if (window._pixelsLoaded) return;
   const consent = localStorage.getItem('gf_cookie_consent');
   if (consent !== 'accepted') return;
   window._pixelsLoaded = true;
   window.PIXEL_ATIVO = true;
-  // Clarity: carrega imediatamente — não depende do pixel estar inicializado
-  _loadClarity();
   // Fila PII: drena agora se pixel já init, senão _initPixel() drena quando rodar
   if (window._pixelInitDone && typeof fbq === 'function') {
     (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
@@ -10158,9 +10160,12 @@ function _loadPixels() {
   }
 }
 
-// Dispara _initPixel após LCP
+// Dispara Clarity + Pixel após LCP
 (function() {
-  function _tryInit() { _initPixel(); }
+  function _tryInit() {
+    _loadClarity(); // Clarity sempre — sem PII, sem depender de consentimento
+    _initPixel();   // Meta Pixel PageView — sem PII
+  }
   if ('requestIdleCallback' in window) {
     requestIdleCallback(_tryInit, { timeout: 4000 });
   } else {
@@ -10168,9 +10173,9 @@ function _loadPixels() {
   }
   // Instagram in-app browser: visibilitychange garante o disparo
   document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') _initPixel();
+    if (document.visibilityState === 'visible') { _loadClarity(); _initPixel(); }
   });
-  // Também tenta quando consentimento já existe (visitante recorrente)
+  // Visitante recorrente com consentimento já dado: ativa PIXEL_ATIVO imediatamente
   document.addEventListener('DOMContentLoaded', function() {
     if (localStorage.getItem('gf_cookie_consent') === 'accepted') {
       _loadPixels();
