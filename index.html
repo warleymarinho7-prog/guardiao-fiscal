@@ -9853,17 +9853,17 @@ window.gFeedbackHistorico = function() {
 #cookieBanner a{color:var(--green)}
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
-.ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted)}
+.ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
 #legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0}
 #legalFooter a{color:var(--muted);text-decoration:none;margin:0 8px}
 #legalFooter a:hover{color:var(--muted2)}
 </style>
 
 <div id="cookieBanner" style="display:none">
-  <p>Usamos cookies essenciais para autenticação e cookies de análise de comportamento (Clarity, sem dados pessoais). Com seu consentimento, também ativamos cookies de marketing (Meta Pixel) para personalização de anúncios.
+  <p>Usamos cookies de análise e marketing para melhorar sua experiência. Ao continuar navegando, você concorda com o uso de cookies.
   <a href="/politica-cookies.html" target="_blank">Saiba mais</a></p>
-  <button class="ck-btn ck-reject" onclick="ckReject()">Só essenciais</button>
-  <button class="ck-btn ck-accept" onclick="ckAccept()">Aceitar todos</button>
+  <button class="ck-btn ck-reject" onclick="ckReject()">Recusar marketing</button>
+  <button class="ck-btn ck-accept" onclick="ckAccept()">Entendido</button>
 </div>
 
 <div id="legalFooter">
@@ -9879,44 +9879,41 @@ window.gFeedbackHistorico = function() {
 <script>
 (function(){
   const consent = localStorage.getItem('gf_cookie_consent');
-  // Se já decidiu (accepted ou rejected), não exibe o banner em nenhum momento — zero CLS
+  // Decisão anterior: respeita sem mostrar banner
   if (consent === 'accepted') { return; }
   if (consent === 'rejected') { window.PIXEL_ATIVO = false; return; }
   // Primeiro acesso: adia 2500ms — fora da janela de 500ms medida pelo Lighthouse para CLS
+  // Modelo opt-out: exibir o banner = consentimento implícito por continuidade de navegação.
+  // Pixels ativados ao mostrar o banner. Usuário pode optar por sair clicando em "Recusar marketing".
   setTimeout(function() {
     const b = document.getElementById('cookieBanner');
     if (!b) return;
     b.style.display = 'flex';
-    // Força reflow antes de aplicar transform para garantir que a transição funcione
     b.getBoundingClientRect();
     b.style.transform = 'translateY(0)';
+    // Opt-out: ativa pixels imediatamente ao exibir o banner
+    localStorage.setItem('gf_cookie_consent', 'accepted');
+    if (typeof _loadPixels === 'function') _loadPixels();
   }, 2500);
 })();
 function ckAccept() {
-  localStorage.setItem('gf_cookie_consent', 'accepted');
+  // Pixels já estão ativos (opt-out) — só fecha o banner
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-  if (typeof _loadPixels === 'function') _loadPixels();
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
       _att++;
-      if (window.PIXEL_ATIVO) {
-        clearInterval(_wait);
-        window._firePurchase();
-      } else if (_att >= 50) {
-        clearInterval(_wait);
-        window._firePurchase();
-      }
+      if (window.PIXEL_ATIVO) { clearInterval(_wait); window._firePurchase(); }
+      else if (_att >= 50) { clearInterval(_wait); window._firePurchase(); }
     }, 100);
   }
 }
 function ckReject() {
+  // Usuário opta por sair — revoga e desativa marketing
   localStorage.setItem('gf_cookie_consent', 'rejected');
-  // Bloqueia eventos PII futuros (InitiateCheckout, Lead, Purchase)
-  // O PageView já foi disparado sem dados pessoais — não há como/necessidade de desfazer
   window.PIXEL_ATIVO = false;
   window._pixelsLoaded = false;
-  window._fbqQueue = []; // descarta fila de eventos PII pendentes
+  window._fbqQueue = [];
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
 }
 </script>
