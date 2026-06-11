@@ -9781,7 +9781,7 @@ async function eCarregarHistorico() {
       alertas.forEach(function(al) {
         const cls = al.type==='red'?'p-red':al.type==='yellow'?'p-yel':al.type==='green'?'p-grn':'p-blu';
         alertasHtml += '<div class="pal '+cls+'" style="margin-bottom:6px">'
-          + '<span class="pal-ico">'+al.icon+'</span>'
+          + '<span class="pal-ico">'+sanitize(al.icon||'')+'</span>'
           + '<div><strong>'+sanitize(al.title)+'</strong><br>'
           + '<span style="font-size:11px;opacity:0.85">'+sanitize(al.text)+'</span></div>'
           + '</div>';
