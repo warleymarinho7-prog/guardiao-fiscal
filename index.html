@@ -3999,24 +3999,25 @@ function _initPixel() {
   window._pixelInitDone = true;
   // Carrega fbevents.js e dispara PageView após load
   (function() {
-    var f=window,b=document,e='script',v='https://connect.facebook.net/en_US/fbevents.js';
-    var n,t,s;
-    if(f.fbq)return;
-    n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
-    t=b.createElement(e);t.async=!0;t.src=v;
+    var b=document,e='script',v='https://connect.facebook.net/en_US/fbevents.js';
+    var t=b.createElement(e);
+    t.async=!0;t.src=v;
     t.onload=function(){
+      // SDK real carregado — reinicializa fbq e drena fila acumulada
+      var f=window;
+      var n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
       fbq('init','2144854999641148');
       fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
-      // SDK real carregado — drena fila PII independente de quando PIXEL_ATIVO foi setado
+      // Drena fila PII acumulada no stub
       window.PIXEL_ATIVO = window.PIXEL_ATIVO || (localStorage.getItem('gf_cookie_consent') === 'accepted');
       if (window.PIXEL_ATIVO) {
         (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
         window._fbqQueue = [];
       }
     };
-    (b.head || b.getElementsByTagName('head')[0] || b.body).appendChild(t);
+    (b.head || b.body).appendChild(t);
   })();
 }
 
