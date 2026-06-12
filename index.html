@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://www.clarity.ms https://*.clarity.ms https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.mercadopago.com https://*.mercadolibre.com; font-src https://fonts.gstatic.com data: https://*.mercadopago.com; img-src 'self' data: https:; connect-src https://nnhbxyuggmcemqwzdxbg.supabase.co wss://nnhbxyuggmcemqwzdxbg.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.clarity.ms https://www.facebook.com https://connect.facebook.net; frame-src https://*.mercadopago.com https://*.mercadolibre.com https://http2.mlstatic.com; form-action https:;">
+
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <!-- Guardião Fiscal v15.1.0 | 2026-06-10 -->
@@ -3997,19 +3997,26 @@ function _loadClarity() {
 function _initPixel() {
   if (window._pixelInitDone) return;
   window._pixelInitDone = true;
-  // Carrega fbevents.js e dispara PageView (sem PII — LGPD art. 7º VI)
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-  document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init','2144854999641148');
-  fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
-  // Se consentimento já dado ao chegar aqui, drena fila PII
-  if (window.PIXEL_ATIVO) {
-    (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
-    window._fbqQueue = [];
-  }
+  // Carrega fbevents.js e dispara PageView após load
+  (function() {
+    var f=window,b=document,e='script',v='https://connect.facebook.net/en_US/fbevents.js';
+    var n,t,s;
+    if(f.fbq)return;
+    n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+    t=b.createElement(e);t.async=!0;t.src=v;
+    t.onload=function(){
+      fbq('init','2144854999641148');
+      fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
+      // Drena fila PII acumulada antes do script carregar
+      if (window.PIXEL_ATIVO) {
+        (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
+        window._fbqQueue = [];
+      }
+    };
+    s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+  })();
 }
 
 // ── Ativa eventos PII após aceitar cookies ────────────────────────
