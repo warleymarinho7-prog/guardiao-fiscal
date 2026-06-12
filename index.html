@@ -4003,14 +4003,9 @@ function _initPixel() {
     var t=b.createElement(e);
     t.async=!0;t.src=v;
     t.onload=function(){
-      // SDK real carregado — reinicializa fbq e drena fila acumulada
-      var f=window;
-      var n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;
-      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+      // SDK carregou e substituiu o stub automaticamente — apenas init e drena fila
       fbq('init','2144854999641148');
       fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
-      // Drena fila PII acumulada no stub
       window.PIXEL_ATIVO = window.PIXEL_ATIVO || (localStorage.getItem('gf_cookie_consent') === 'accepted');
       if (window.PIXEL_ATIVO) {
         (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
@@ -4061,11 +4056,15 @@ function _loadPixels() {
     if (document.visibilityState === 'visible') { _loadClarity(); _initPixel(); }
   });
   // Visitante recorrente com consentimento já dado: ativa PIXEL_ATIVO imediatamente
-  document.addEventListener('DOMContentLoaded', function() {
-    if (localStorage.getItem('gf_cookie_consent') === 'accepted') {
-      _loadPixels();
-    }
-  });
+  // Garante _loadPixels mesmo se DOMContentLoaded já disparou (script no fim do body)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('gf_cookie_consent') === 'accepted') _loadPixels();
+    });
+  } else {
+    // DOM já pronto — chama direto
+    if (localStorage.getItem('gf_cookie_consent') === 'accepted') _loadPixels();
+  }
 })();
 
 // ── Purchase (retorno Mercado Pago) ────────────────────────────
