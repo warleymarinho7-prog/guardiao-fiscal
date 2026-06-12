@@ -11,7 +11,7 @@
 
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- Guardião Fiscal v15.1.0 | 2026-06-10 -->
+<!-- Guardião Fiscal v19.0.0 | 2026-06-12 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
 <meta name="robots" content="index, follow">
@@ -231,8 +231,6 @@ body::before {
   background: radial-gradient(ellipse 800px 400px at 50% -100px, rgba(59,130,246,0.06) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
-  will-change: transform;
-  contain: strict;
 }
 
 /* ===== NAV ===== */
@@ -310,21 +308,14 @@ nav {
 
 /* ===== PAGES ===== */
 .page {
-  /* content-visibility:hidden mantém layout em cache — troca de página sem reflow */
-  content-visibility: hidden;
-  display: block;
-  position: absolute;
-  pointer-events: none;
-  visibility: hidden;
-  /* padding-top estático em ambos os estados — evita layout shift na ativação */
-  padding-top: 60px;
-  min-height: calc(100vh - 60px);
+  display: none;
 }
 .page.active {
-  content-visibility: visible;
-  position: relative;
-  pointer-events: auto;
-  visibility: visible;
+  display: block;
+  min-height: calc(100vh - 60px);
+  padding-top: 60px;
+  /* Isola o layout desta página — evita reflow do DOM inteiro na troca */
+  contain: layout style;
 }
 
 /* ===== HOME PAGE ===== */
@@ -893,6 +884,8 @@ nav {
 .btn-plan-avulso:hover { background:rgba(255,193,7,0.2); }
 .btn-plan-pro { background:var(--green); color:#fff; }
 .btn-plan-pro:hover { background:var(--green2); box-shadow:0 6px 20px rgba(124,255,79,0.3); transform:translateY(-1px); }
+.btn-cta-institucional { padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:background 0.2s;margin-bottom:12px; }
+.btn-cta-institucional:hover { background:var(--green2); }
 
 /* ===== CHECKOUT STEPPER ===== */
 .co-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -1933,10 +1926,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   border-radius: 5px;
   font-family:var(--ff);
 }
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.85); }
-}
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -2044,8 +2033,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
   /* === BASE === */
   body { font-size: 15px; }
-  .page { padding-top: 56px; min-height: calc(100vh - 56px); }
-  .page.active { position: relative; }
+  .page.active { padding-top: 56px; min-height: calc(100vh - 56px); }
   .page-inner { padding: 32px 16px 64px; }
 
   /* === NAV === */
@@ -2322,28 +2310,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <div class="panel-header">
               <div class="panel-label">// identifique seu perfil</div>
             </div>
-            <div class="q-body" id="qBody"><div style="font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.5">Qual descreve melhor como você movimenta dinheiro?</div><div style="display:flex;flex-direction:column;gap:8px">
-        <button class="opt" onclick="selectProfile('freelancer','qBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">💻</span><span style="font-size:13px;font-weight:700;color:var(--text)">Freelancer Recorrente</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">Autônomo · Pix de clientes todo mês · sem nota fiscal sistemática</div>
-        </button>
-        <button class="opt" onclick="selectProfile('mei','qBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">🏪</span><span style="font-size:13px;font-weight:700;color:var(--text)">MEI Ativo</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">MEI · clientes fixos · mistura de conta PJ e pessoal</div>
-        </button>
-        <button class="opt" onclick="selectProfile('socio','qBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">🏢</span><span style="font-size:13px;font-weight:700;color:var(--text)">Sócio na Conta Pessoal</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">Empresário · recebe pró-labore ou repasse na conta pessoal</div>
-        </button>
-        <button class="opt" onclick="selectProfile('clt_extra','qBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">💼</span><span style="font-size:13px;font-weight:700;color:var(--text)">CLT com Extra</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">CLT formal · freela eventual · Pix esporádico de terceiros</div>
-        </button>
-        <button class="opt" onclick="selectProfile('investidor','qBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">📈</span><span style="font-size:13px;font-weight:700;color:var(--text)">Investidor PF</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">Renda variável · FII · dividendos · sem carnê-leão organizado</div>
-        </button>
-      </div></div>
+            <div class="q-body" id="qBody"></div>
           </div>
           <div id="resultPanel">
             <div class="result-box">
@@ -2402,28 +2369,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="panel-header">
         <div class="panel-label">// identifique seu perfil</div>
       </div>
-      <div class="q-body" id="mQBody"><div style="font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.5">Qual descreve melhor como você movimenta dinheiro?</div><div style="display:flex;flex-direction:column;gap:8px">
-        <button class="opt" onclick="selectProfile('freelancer','mQBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">💻</span><span style="font-size:13px;font-weight:700;color:var(--text)">Freelancer Recorrente</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">Autônomo · Pix de clientes todo mês · sem nota fiscal sistemática</div>
-        </button>
-        <button class="opt" onclick="selectProfile('mei','mQBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">🏪</span><span style="font-size:13px;font-weight:700;color:var(--text)">MEI Ativo</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">MEI · clientes fixos · mistura de conta PJ e pessoal</div>
-        </button>
-        <button class="opt" onclick="selectProfile('socio','mQBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">🏢</span><span style="font-size:13px;font-weight:700;color:var(--text)">Sócio na Conta Pessoal</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">Empresário · recebe pró-labore ou repasse na conta pessoal</div>
-        </button>
-        <button class="opt" onclick="selectProfile('clt_extra','mQBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">💼</span><span style="font-size:13px;font-weight:700;color:var(--text)">CLT com Extra</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">CLT formal · freela eventual · Pix esporádico de terceiros</div>
-        </button>
-        <button class="opt" onclick="selectProfile('investidor','mQBody')" style="text-align:left;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;min-height:56px;word-break:break-word">
-          <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:16px">📈</span><span style="font-size:13px;font-weight:700;color:var(--text)">Investidor PF</span></div>
-          <div style="font-size:11px;color:var(--muted2);padding-left:24px">Renda variável · FII · dividendos · sem carnê-leão organizado</div>
-        </button>
-      </div></div>
+      <div class="q-body" id="mQBody"></div>
     </div>
     <div id="mResultPanel" style="display:none">
       <div class="result-box">
@@ -3499,7 +3445,7 @@ function guiaTab(banco) {
 
     <!-- CTA final -->
     <div style="text-align:center;padding-top:8px">
-      <button onclick="showPage('extrato')" style="padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px" onmouseover="this.style.background='#69E837';this.style.color='#000'" onmouseout="this.style.background='var(--green)';this.style.color='#000'">
+      <button onclick="showPage('extrato')" class="btn-cta-institucional">Analisar meu extrato →</button>
         ⚠️ Verificar meu extrato agora →
       </button>
       <div style="font-size:12px;color:var(--muted);margin-top:8px">🔒 Processamento local · Nenhum dado enviado · Grátis para começar</div>
@@ -3510,7 +3456,7 @@ function guiaTab(banco) {
 <!-- ===== CHECKOUT MODAL ===== -->
 <div class="overlay" id="checkoutOverlay" onclick="closeCheckout(event)">
   <div class="modal" id="checkoutModal">
-    <button class="modal-close" onclick="closeCheckoutDirect()">✕</button>
+    <button class="modal-close" onclick="closeCheckoutDirect()" aria-label="Fechar">✕</button>
 
     <!-- STEPPER -->
     <div id="checkoutStepper" style="display:flex;align-items:center;gap:6px;margin-bottom:24px">
@@ -3620,7 +3566,7 @@ function guiaTab(banco) {
 <!-- ===== LOGIN MODAL ===== -->
 <div class="overlay" id="loginOverlay" onclick="closeLogin(event)">
   <div class="modal" id="loginModal">
-    <button class="modal-close" onclick="closeLoginDirect()">✕</button>
+    <button class="modal-close" onclick="closeLoginDirect()" aria-label="Fechar">✕</button>
 
     <!-- tabs -->
     <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
