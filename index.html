@@ -310,10 +310,20 @@ nav {
 
 /* ===== PAGES ===== */
 .page {
-  display: none;
+  /* content-visibility:hidden mantém layout em cache — troca de página sem reflow */
+  content-visibility: hidden;
+  /* Ocupa 0px quando oculto — sem interferência no layout da página ativa */
+  display: block;
+  position: absolute;
+  pointer-events: none;
+  visibility: hidden;
 }
 .page.active {
+  content-visibility: visible;
   display: block;
+  position: relative;
+  pointer-events: auto;
+  visibility: visible;
   min-height: calc(100vh - 60px);
   padding-top: 60px;
 }
@@ -2035,7 +2045,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
   /* === BASE === */
   body { font-size: 15px; }
-  .page.active { padding-top: 56px; min-height: calc(100vh - 56px); }
+  .page.active { padding-top: 56px; min-height: calc(100vh - 56px); position: relative; }
   .page-inner { padding: 32px 16px 64px; }
 
   /* === NAV === */
