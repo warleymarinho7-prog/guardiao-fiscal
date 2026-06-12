@@ -204,12 +204,12 @@ function initProFreeMode() {
 async function openCheckout(plan) {
   // Pixel — checkout iniciado
   // Enfileira sempre: garante disparo mesmo antes do pixel estar 100% pronto
-  window._fbqQueue = window._fbqQueue || [];
-  window._fbqQueue.push(['trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() }]);
-  window._fbqQueue.push(['track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() }]);
-  if (typeof fbq === 'function' && window._pixelInitDone) {
-    window._fbqQueue.forEach(function(a){ fbq.apply(null,a); });
-    window._fbqQueue = [];
+  // Pixel — disparo direto, sem fila
+  if (typeof fbq === 'function') {
+    try {
+      fbq('trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() });
+      fbq('track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() });
+    } catch(e) { console.warn('fbq InitiateCheckout error:', e); }
   }
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
   // Se usuário já tem plano ativo — verifica no banco e vai direto para análise
