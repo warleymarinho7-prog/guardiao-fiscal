@@ -4036,8 +4036,8 @@ function _loadPixels() {
   if (consent !== 'accepted') return;
   window._pixelsLoaded = true;
   window.PIXEL_ATIVO = true;
-  // Fila drenada apenas no onload do fbevents.js — não aqui
-  // Isso evita drenar para o stub antes do SDK real carregar
+  // Garante que fbevents.js seja carregado — _loadThirdParty é idempotente
+  if (typeof window._loadThirdParty === 'function') window._loadThirdParty();
 }
 
 // Dispara Clarity + Pixel após LCP
@@ -4054,18 +4054,30 @@ function _loadPixels() {
     document.head.appendChild(s);
   }
 
-  // Pixel e Clarity: disparo imediato — script está no fim do body, sem render-blocking
-  _loadClarity();
-  _initPixel();
-  // MP SDK: lazy — não é crítico para o primeiro evento de pixel
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(_preloadMpSDK, { timeout: 4000 });
-  } else {
-    setTimeout(_preloadMpSDK, 1500);
+  // ── Pixel e Clarity: defer pós-interação para não bloquear LCP ──
+  // Carrega após 1º scroll/clique/touch OU após 5s (fallback)
+  // Garante que o render do hero não compita com 8s+ de main thread do FB+Clarity
+  var _thirdPartyLoaded = false;
+  window._loadThirdParty = function _loadThirdParty() {
+    if (_thirdPartyLoaded) return;
+    _thirdPartyLoaded = true;
+    _loadClarity();
+    _initPixel();
+    // MP SDK: logo após terceiros — usuário já interagiu, checkout iminente
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(_preloadMpSDK, { timeout: 3000 });
+    } else {
+      setTimeout(_preloadMpSDK, 1000);
+    }
   }
-  // Instagram in-app browser: visibilitychange garante o disparo
+  // Gatilhos de interação (passive = não bloqueia scroll)
+  window.addEventListener('scroll',     window._loadThirdParty, { once: true, passive: true });
+  window.addEventListener('click',      window._loadThirdParty, { once: true });
+  window.addEventListener('touchstart', window._loadThirdParty, { once: true, passive: true });
+  window.addEventListener('keydown',    window._loadThirdParty, { once: true });
+  setTimeout(window._loadThirdParty, 5000);
   document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible') { _loadClarity(); _initPixel(); }
+    if (document.visibilityState === 'visible') window._loadThirdParty();
   });
   // Visitante recorrente com consentimento já dado: ativa PIXEL_ATIVO imediatamente
   // Garante _loadPixels mesmo se DOMContentLoaded já disparou (script no fim do body)
@@ -4083,6 +4095,8 @@ function _loadPixels() {
 (function() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('mp') !== 'success') return;
+  // Retorno do MP: carrega Pixel imediatamente — não pode esperar interação
+  if (typeof window._loadThirdParty === 'function') window._loadThirdParty();
   const plan  = params.get('plan') || 'avulso';
   const value = plan === 'pro' ? 29.90 : 19.90;
   window._purchasePending = { plan: plan, value: value };
@@ -4104,9 +4118,18 @@ function _loadPixels() {
     }
   }
   window._firePurchase = _firePurchase;
-  document.addEventListener('DOMContentLoaded', function() {
-    if (window.PIXEL_ATIVO) _firePurchase();
-  });
+  // DOMContentLoaded pode já ter disparado — usa retry até fbevents.js carregar
+  var _purchaseAttempts = 0;
+  var _purchaseInterval = setInterval(function() {
+    _purchaseAttempts++;
+    if (window._pixelInitDone && window.PIXEL_ATIVO) {
+      clearInterval(_purchaseInterval);
+      _firePurchase();
+    } else if (_purchaseAttempts >= 60) { // timeout 6s
+      clearInterval(_purchaseInterval);
+      _firePurchase(); // tenta mesmo assim — queue garante entrega
+    }
+  }, 100);
 })();
 </script>
 <!-- Fim Pixel/Clarity -->
