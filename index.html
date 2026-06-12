@@ -123,8 +123,13 @@
      fbevents.js + PageView carregam após LCP via requestIdleCallback -->
 <script>
 window._fbqQueue = window._fbqQueue || [];
-window.fbq = window.fbq || function() { window._fbqQueue.push(arguments); };
 window.PIXEL_ATIVO = false;
+// fbq stub: enfileira até SDK carregar
+window.fbq = window.fbq || function() {
+  var a = Array.prototype.slice.call(arguments);
+  window._fbqQueue.push(a);
+};
+window._fbq = window.fbq;
 </script>
 <!-- Fim Pixel/Clarity -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
@@ -3998,22 +4003,23 @@ function _initPixel() {
   if (window._pixelInitDone) return;
   window._pixelInitDone = true;
   // Carrega fbevents.js e dispara PageView após load
-  (function() {
-    var b=document,e='script',v='https://connect.facebook.net/en_US/fbevents.js';
-    var t=b.createElement(e);
-    t.async=!0;t.src=v;
+  // Padrão oficial Meta + onload para drenar fila acumulada
+  !function(f,b,e,v,n,t,s){
+    if(f.fbq)return;
+    n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
+    t=b.createElement(e);t.async=!0;t.src=v;
     t.onload=function(){
-      // SDK carregou e substituiu o stub automaticamente — apenas init e drena fila
       fbq('init','2144854999641148');
-      fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
-      window.PIXEL_ATIVO = window.PIXEL_ATIVO || (localStorage.getItem('gf_cookie_consent') === 'accepted');
-      if (window.PIXEL_ATIVO) {
-        (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
-        window._fbqQueue = [];
+      fbq('track','PageView',{},{ eventID:'pv_'+Date.now() });
+      window.PIXEL_ATIVO = window.PIXEL_ATIVO||(localStorage.getItem('gf_cookie_consent')==='accepted');
+      if(window.PIXEL_ATIVO){
+        (window._fbqQueue||[]).forEach(function(a){fbq.apply(null,a)});
+        window._fbqQueue=[];
       }
     };
-    (b.head || b.body).appendChild(t);
-  })();
+    s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+  }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
 }
 
 // ── Ativa eventos PII após aceitar cookies ────────────────────────
