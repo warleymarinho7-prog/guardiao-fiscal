@@ -203,7 +203,6 @@ function initProFreeMode() {
 
 async function openCheckout(plan) {
   // Pixel — checkout iniciado
-  // Usa fila se pixel ainda não inicializou, dispara direto se já estiver pronto
   (function() {
     var eventID = 'ic_' + Date.now().toString();
     var icArgs = ['track', 'InitiateCheckout', { content_name: 'plano_' + plan, currency: 'BRL', value: plan === 'pro' ? 29.90 : 19.90 }, { eventID: eventID }];
@@ -456,6 +455,79 @@ function _initProSubscriptionUI() {
     </div>`;
 }
 
+function _initAvulsoCheckoutProUI() {
+  const container = document.getElementById('mpBrickContainer');
+  if (!container) return;
+  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
+
+  container.innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+      <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
+        💳 <strong style="color:var(--text)">Cartão, Pix ou Boleto</strong> — pagamento único<br>
+        <span style="font-size:11px;color:var(--muted)">Você será redirecionado para finalizar o pagamento no Mercado Pago</span>
+      </div>
+      <div id="mpAvulsoErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+      <button class="btn-pay" id="btnAvulsoPay" onclick="startAvulsoCheckoutPro()" style="margin-bottom:0">
+        <span id="btnAvulsoTxt">Pagar R$19,90 →</span>
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px">🔒 Pagamento processado pelo Mercado Pago · PCI DSS</div>
+    </div>`;
+}
+
+async function startAvulsoCheckoutPro() {
+  const btn = document.getElementById('btnAvulsoTxt');
+  const errEl = document.getElementById('mpAvulsoErr');
+  if (errEl) errEl.style.display = 'none';
+  if (btn) btn.textContent = 'Gerando link de pagamento...';
+  document.getElementById('btnAvulsoPay').disabled = true;
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const newWin = !isMobile ? window.open('', '_blank') : null;
+
+  try {
+    if (!sb) throw new Error('Serviço indisponível. Recarregue a página.');
+    const { data: { session }, error: sessErr } = await sb.auth.getSession();
+    if (sessErr || !session) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-mp-preference`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ plan: 'avulso' }),
+    });
+
+    if (!res.ok) {
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    const url = data.init_point || data.sandbox_url;
+    const _urlOk = url && (url.startsWith('https://www.mercadopago.com') || url.startsWith('https://mercadopago.com') || url.startsWith('https://sandbox.mercadopago.com'));
+    if (!_urlOk) throw new Error('Link de pagamento inválido. Tente novamente.');
+
+    if (newWin) {
+      newWin.location.href = url;
+      if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
+      document.getElementById('btnAvulsoPay').disabled = false;
+    } else {
+      if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
+      const btnEl = document.getElementById('btnAvulsoPay');
+      btnEl.disabled = false;
+      btnEl.onclick = function() { window.location.href = url; };
+      if (errEl) {
+        errEl.style.cssText = 'display:block;background:rgba(255,77,79,0.08);border:1px solid rgba(255,77,79,0.2);border-radius:8px;padding:10px;font-size:12px;color:var(--muted2);margin-bottom:12px';
+        errEl.innerHTML = '✅ Link gerado! Clique em <strong>Prosseguir no Mercado Pago</strong> para continuar.';
+      }
+    }
+  } catch(e) {
+    if (newWin) newWin.close();
+    if (errEl) { errEl.textContent = e.message || 'Erro inesperado.'; errEl.style.display = 'block'; }
+    if (btn) btn.textContent = 'Pagar R$19,90 →';
+    document.getElementById('btnAvulsoPay').disabled = false;
+  }
+}
+
 async function startProSubscription() {
   const btn = document.getElementById('btnProSubTxt');
   const errEl = document.getElementById('mpProErr');
@@ -612,9 +684,10 @@ function setCheckoutStep(n) {
         // Pro: mostra botão de assinatura em vez do Brick
         _initProSubscriptionUI();
       } else {
-        if (tabOutros) tabOutros.style.display = '';
-        // Avulso: inicializa Brick normalmente
-        if (!_mpBrick) initMpBrick();
+        if (tabOutros) tabOutros.style.display = 'none';
+        if (payPaneOutros) payPaneOutros.style.display = 'none';
+        // Avulso: Checkout Pro (mesmo padrão do Pro — Brick desativado)
+        _initAvulsoCheckoutProUI();
       }
     }, 100);
   }
