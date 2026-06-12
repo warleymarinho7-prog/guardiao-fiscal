@@ -4006,7 +4006,13 @@ function _initPixel() {
   if (window._pixelInitDone) return;
   window._pixelInitDone = true;
   // Carrega fbevents.js e dispara PageView após load
-  // loadPixel — arquitetura limpa sem conflito de versões
+  // Cria fbq antes de carregar o SDK — padrão Meta sem o if(fbq)return
+  var n = window.fbq = function() {
+    n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+  };
+  if (!window._fbq) window._fbq = n;
+  n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
+
   var s = document.createElement('script');
   s.src = 'https://connect.facebook.net/en_US/fbevents.js';
   s.async = true;
