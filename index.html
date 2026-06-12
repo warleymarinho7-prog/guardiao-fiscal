@@ -136,16 +136,23 @@ window.trackFb = function() {
 </script>
 <!-- Fim Pixel/Clarity -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 90'><rect width='80' height='90' fill='%230f1720'/><path d='M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z' fill='%2339B54A' opacity='0.15' stroke='%2339B54A' stroke-width='1.5'/><path d='M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z' fill='%230f1720'/><rect x='23' y='43' width='9' height='21' rx='2.5' fill='%2339B54A' opacity='0.38'/><rect x='36' y='33' width='9' height='31' rx='2.5' fill='%2339B54A' opacity='0.7'/><rect x='49' y='23' width='9' height='41' rx='2.5' fill='%2339B54A'/></svg>">
+<!-- Instagram WebView: desativa animações — reduz custo de compositing em devices fracos -->
+<script>if(/Instagram|FB_IAB|FBAV/.test(navigator.userAgent)){document.documentElement.classList.add('igwv');}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
 <link rel="dns-prefetch" href="https://connect.facebook.net">
+<link rel="preconnect" href="https://www.clarity.ms" crossorigin>
+<link rel="dns-prefetch" href="https://scripts.clarity.ms">
+<link rel="preconnect" href="https://sdk.mercadopago.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400&display=optional" rel="stylesheet"></noscript>
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 html { overflow-x: hidden; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body { overflow-x: hidden; }
+/* Instagram WebView: sem animações — performance em devices fracos */
+.igwv *{animation:none!important;transition:none!important;will-change:auto!important;}
 
 :root {
   /* Glow & radius */
