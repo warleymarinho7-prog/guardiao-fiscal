@@ -312,20 +312,19 @@ nav {
 .page {
   /* content-visibility:hidden mantém layout em cache — troca de página sem reflow */
   content-visibility: hidden;
-  /* Ocupa 0px quando oculto — sem interferência no layout da página ativa */
   display: block;
   position: absolute;
   pointer-events: none;
   visibility: hidden;
+  /* padding-top estático em ambos os estados — evita layout shift na ativação */
+  padding-top: 60px;
+  min-height: calc(100vh - 60px);
 }
 .page.active {
   content-visibility: visible;
-  display: block;
   position: relative;
   pointer-events: auto;
   visibility: visible;
-  min-height: calc(100vh - 60px);
-  padding-top: 60px;
 }
 
 /* ===== HOME PAGE ===== */
@@ -2045,7 +2044,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
   /* === BASE === */
   body { font-size: 15px; }
-  .page.active { padding-top: 56px; min-height: calc(100vh - 56px); position: relative; }
+  .page { padding-top: 56px; min-height: calc(100vh - 56px); }
+  .page.active { position: relative; }
   .page-inner { padding: 32px 16px 64px; }
 
   /* === NAV === */
