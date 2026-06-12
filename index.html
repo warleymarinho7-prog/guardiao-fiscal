@@ -4009,13 +4009,14 @@ function _initPixel() {
     t.onload=function(){
       fbq('init','2144854999641148');
       fbq('track','PageView',{},{ eventID: 'pv_' + Date.now().toString() });
-      // Drena fila PII acumulada antes do script carregar
+      // SDK real carregado — drena fila PII independente de quando PIXEL_ATIVO foi setado
+      window.PIXEL_ATIVO = window.PIXEL_ATIVO || (localStorage.getItem('gf_cookie_consent') === 'accepted');
       if (window.PIXEL_ATIVO) {
         (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
         window._fbqQueue = [];
       }
     };
-    s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+    (b.head || b.getElementsByTagName('head')[0] || b.body).appendChild(t);
   })();
 }
 
@@ -4027,11 +4028,8 @@ function _loadPixels() {
   if (consent !== 'accepted') return;
   window._pixelsLoaded = true;
   window.PIXEL_ATIVO = true;
-  // Fila PII: drena agora se pixel já init, senão _initPixel() drena quando rodar
-  if (window._pixelInitDone && typeof fbq === 'function') {
-    (window._fbqQueue||[]).forEach(function(a){ fbq.apply(null,a); });
-    window._fbqQueue = [];
-  }
+  // Fila drenada apenas no onload do fbevents.js — não aqui
+  // Isso evita drenar para o stub antes do SDK real carregar
 }
 
 // Dispara Clarity + Pixel após LCP
