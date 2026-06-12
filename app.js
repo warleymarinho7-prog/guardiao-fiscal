@@ -203,14 +203,19 @@ function initProFreeMode() {
 
 async function openCheckout(plan) {
   // Pixel — checkout iniciado
-  // Enfileira sempre: garante disparo mesmo antes do pixel estar 100% pronto
-  // Pixel — disparo direto, sem fila
-  if (typeof fbq === 'function') {
-    try {
-      fbq('trackCustom','CheckoutStarted',{plan},{ eventID: Date.now().toString() });
-      fbq('track','InitiateCheckout',{ content_name:'plano_'+plan, currency:'BRL', value: plan==='pro'?29.90:0 },{ eventID:'ic_'+Date.now().toString() });
-    } catch(e) { console.warn('fbq InitiateCheckout error:', e); }
-  }
+  // Usa fila se pixel ainda não inicializou, dispara direto se já estiver pronto
+  (function() {
+    var eventID = 'ic_' + Date.now().toString();
+    var icArgs = ['track', 'InitiateCheckout', { content_name: 'plano_' + plan, currency: 'BRL', value: plan === 'pro' ? 29.90 : 19.90 }, { eventID: eventID }];
+    var csArgs = ['trackCustom', 'CheckoutStarted', { plan: plan }, { eventID: 'cs_' + Date.now().toString() }];
+    if (typeof fbq === 'function' && window.PIXEL_ATIVO && window._pixelInitDone) {
+      try { fbq.apply(null, icArgs); fbq.apply(null, csArgs); } catch(e) { console.warn('fbq InitiateCheckout error:', e); }
+    } else {
+      window._fbqQueue = window._fbqQueue || [];
+      window._fbqQueue.push(icArgs);
+      window._fbqQueue.push(csArgs);
+    }
+  })();
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
   // Se usuário já tem plano ativo — verifica no banco e vai direto para análise
   if (_currentUser && sb) {
