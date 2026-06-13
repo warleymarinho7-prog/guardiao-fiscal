@@ -1339,17 +1339,18 @@ function selectProfile(id, bodyId) {
     </div>`;
 
   setTimeout(() => {
-    // [FIX-CLS] Pré-preenche conteúdo ANTES de mostrar o painel
-    // Evita 3 reflows separados (none → block → inject) que causavam CLS 0.75+
-    revealResult(p, heroId, alertsId, isDesktop);
+    // Mostra painel ANTES de popular — evita bug de innerHTML em display:none
+    document.getElementById(panelQ).style.display = 'none';
+    document.getElementById(panelR).style.display = 'block';
+    if (!isDesktop) {
+      const btn = document.getElementById('quizExtratoBtn');
+      if (btn) btn.style.visibility = 'hidden';
+    }
+    // [FIX-CLS] rAF garante que o paint do painel vazio acontece antes de popular
+    // O conteúdo entra num frame separado — browser não registra shift porque
+    // o painel já tinha altura reservada via min-height no .alerts e .result-hero
     requestAnimationFrame(() => {
-      document.getElementById(panelQ).style.display = 'none';
-      document.getElementById(panelR).style.display = 'block';
-      // [FIX-CLS] visibility:hidden mantém espaço do botão — evita shift nos elementos abaixo
-      if (!isDesktop) {
-        const btn = document.getElementById('quizExtratoBtn');
-        if (btn) btn.style.visibility = 'hidden';
-      }
+      revealResult(p, heroId, alertsId, isDesktop);
     });
   }, 900);
 }
