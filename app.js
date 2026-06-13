@@ -1339,9 +1339,13 @@ function selectProfile(id, bodyId) {
     </div>`;
 
   setTimeout(() => {
-    document.getElementById(panelQ).style.display = 'none';
-    document.getElementById(panelR).style.display = 'block';
+    // [FIX-CLS] Pré-preenche conteúdo ANTES de mostrar o painel
+    // Evita 3 reflows separados (none → block → inject) que causavam CLS 0.75+
     revealResult(p, heroId, alertsId, isDesktop);
+    requestAnimationFrame(() => {
+      document.getElementById(panelQ).style.display = 'none';
+      document.getElementById(panelR).style.display = 'block';
+    });
   }, 900);
 }
 
