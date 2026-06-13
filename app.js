@@ -1345,6 +1345,11 @@ function selectProfile(id, bodyId) {
     requestAnimationFrame(() => {
       document.getElementById(panelQ).style.display = 'none';
       document.getElementById(panelR).style.display = 'block';
+      // [FIX-CLS] visibility:hidden mantém espaço do botão — evita shift nos elementos abaixo
+      if (!isDesktop) {
+        const btn = document.getElementById('quizExtratoBtn');
+        if (btn) btn.style.visibility = 'hidden';
+      }
     });
   }, 900);
 }
@@ -1491,6 +1496,8 @@ function restart() {
 function mRestart() {
   document.getElementById('mResultPanel').style.display = 'none';
   document.getElementById('mQuestionPanel').style.display = 'block';
+  const btn = document.getElementById('quizExtratoBtn');
+  if (btn) btn.style.visibility = 'visible';
   document.getElementById('mResultHero').innerHTML = '';
   document.getElementById('mResultAlerts').innerHTML = '';
   renderProfileCards('mQBody');
