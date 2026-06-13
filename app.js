@@ -1353,6 +1353,12 @@ function selectProfile(id, bodyId) {
       if (!isDesktop) {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
+        // Ajusta quizWrap para altura exata do resultado — sem scroll vazio, sem CLS
+        requestAnimationFrame(() => {
+          const stack = document.getElementById('mPanelStack');
+          const qw = document.getElementById('quizWrap');
+          if (stack && qw) qw.style.minHeight = stack.scrollHeight + 'px';
+        });
       }
     });
   }, 900);
