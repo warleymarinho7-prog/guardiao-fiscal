@@ -1544,16 +1544,7 @@ function openQuiz() {
     yellow: { bg: 'rgba(245,166,35,0.07)',   border: 'rgba(245,166,35,0.18)',   text: '#fbbf24' },
     green:  { bg: 'rgba(124,255,79,0.07)',   border: 'rgba(124,255,79,0.18)',   text: '#34d399' },
   };
-  feed.innerHTML = items.map(d => {
-    const c = colors[d.type];
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${c.bg};border:1px solid ${c.border};border-radius:8px;flex-shrink:0">
-      <span style="font-size:13px;flex-shrink:0">${d.icon}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:11px;font-weight:600;color:${c.text};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.label}</div>
-        <div style="font-size:10px;color:var(--muted2);margin-top:1px">${d.val}</div>
-      </div>
-    </div>`;
-  }).join('');
+  // detectFeed já renderizado estaticamente no HTML — sem JS para evitar CLS
   window._stopDetectionFeed = () => {};
 })();
 
