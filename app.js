@@ -2416,15 +2416,19 @@ async function eRunAll(){
     document.getElementById('s2num').textContent='✓';
     document.getElementById('s2num').style.background='var(--green)';
     document.getElementById('s2num').style.color='#000';
-    const s3=document.getElementById('extStep3');s3.style.display='block';
+    const s3=document.getElementById('extStep3');
     document.getElementById('s3num').classList.remove('locked');
     const nContas=results.length;const nArquivos=parsed.length;
     const msg=nArquivos>nContas?`${nArquivos} arquivo(s) → ${nContas} conta(s) identificada(s)`:`${nContas} extrato(s) analisado(s)`;
     document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
     _eConsolidated=consolidated;_eSources=results;
     if(_currentUser&&sb){(async()=>{try{const _nivel=consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo';const _payload={user_id:_currentUser.id,score:consolidated.score,nivel_risco:_nivel,nivel_label:consolidated.score<=20?'Baixo risco':consolidated.score<=45?'Atenção':consolidated.score<=70?'Risco elevado':'Risco crítico',perfil_usuario:window._perfilUsuario||null,renda_declarada:window._rendaDeclaradaMensal||null,total_creditos:Math.round(consolidated.totalCredits||0),total_debitos:Math.round(consolidated.totalDebits||0),total_txns:consolidated.totalTxns||0,pix_total:Math.round(consolidated.pixTotal||0),especie_total:Math.round(consolidated.especieTotal||0),indice_consumo:Math.round((consolidated.indiceConsumo||0)*100),pix_pct:consolidated.totalCredits>0?Math.round(consolidated.pixTotal/consolidated.totalCredits*100):0,num_alertas:(consolidated.alerts||[]).length,num_fontes:results.length,versao_engine:'v8.0',created_at:new Date().toISOString(),fatores:JSON.stringify((results||[]).flatMap(r=>(r.fatores||[]).filter(f=>f.peso>0)).sort((a,b)=>b.peso-a.peso).slice(0,6).map(f=>({motivo:f.motivo||'',peso:f.peso||0,fatorKey:f.fatorKey||'',quandoNaoERisco:f.quandoNaoERisco||'',confianca:Math.round((f.confianca||0)*100)}))),alertas:JSON.stringify((consolidated.alerts||[]).map(a=>({type:a.type||'',icon:a.icon||'',title:a.title||'',text:a.text||''})))};await sb.from('analyses').insert(_payload);}catch(e){}})();}
+    // [FIX-CLS] Popula conteúdo com s3 ainda oculto, depois mostra e scrolla num único frame
     eRenderPreview(consolidated,results);
-    s3.scrollIntoView({behavior:'smooth',block:'start'});
+    requestAnimationFrame(() => {
+      s3.style.display='block';
+      s3.scrollIntoView({behavior:'smooth',block:'start'});
+    });
   }finally{
     _analysisRunning=false;
   }
@@ -2504,8 +2508,12 @@ async function eUnlockResult(){
   const allowed=await _verifyPlanBeforeUnlock();
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
   document.getElementById('paywallBlock').style.display='none';
-  document.getElementById('realResultBlock').style.display='block';
-  setTimeout(()=>document.getElementById('realResultBlock').scrollIntoView({behavior:'smooth',block:'start'}),100);
+  // [FIX-CLS] Renderiza conteúdo com visibility:hidden antes de revelar
+  // Evita dezenas de shifts causados por innerHTML sequencial em elemento visível
+  const _rrb=document.getElementById('realResultBlock');
+  _rrb.style.visibility='hidden';
+  _rrb.style.display='block';
+  setTimeout(()=>_rrb.scrollIntoView({behavior:'smooth',block:'start'}),100);
   const c=_eConsolidated,sources=_eSources;
   if(!c||!sources)return;
   let emoji,level,color,levelHumano;
