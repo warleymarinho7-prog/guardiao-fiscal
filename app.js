@@ -1339,27 +1339,18 @@ function selectProfile(id, bodyId) {
     </div>`;
 
   setTimeout(() => {
-    // [FIX-CLS] Esconde liveDetectDemo para liberar espaço antes do resultado aparecer
-    // Isso evita que o split-right cresça quando o resultPanel (maior) substitui o questionPanel
     if (isDesktop) {
       const demo = document.getElementById('liveDetectDemo');
       if (demo) demo.style.display = 'none';
     }
-    // [FIX-CLS] Popular ANTES de mostrar — painel aparece já completo
-    revealResult(p, heroId, alertsId, isDesktop);
     requestAnimationFrame(() => {
       document.getElementById(panelQ).style.display = 'none';
       document.getElementById(panelR).style.display = 'block';
       if (!isDesktop) {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
-        // Ajusta quizWrap para altura exata do resultado — sem scroll vazio, sem CLS
-        requestAnimationFrame(() => {
-          const stack = document.getElementById('mPanelStack');
-          const qw = document.getElementById('quizWrap');
-          if (stack && qw) qw.style.minHeight = stack.scrollHeight + 'px';
-        });
       }
+      revealResult(p, heroId, alertsId, isDesktop);
     });
   }, 900);
 }
