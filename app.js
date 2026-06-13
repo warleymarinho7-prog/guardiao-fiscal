@@ -1339,16 +1339,18 @@ function selectProfile(id, bodyId) {
     </div>`;
 
   setTimeout(() => {
-    // Mostra painel ANTES de popular — evita bug de innerHTML em display:none
+    // [FIX-CLS] Esconde liveDetectDemo para liberar espaço antes do resultado aparecer
+    // Isso evita que o split-right cresça quando o resultPanel (maior) substitui o questionPanel
+    if (isDesktop) {
+      const demo = document.getElementById('liveDetectDemo');
+      if (demo) demo.style.display = 'none';
+    }
     document.getElementById(panelQ).style.display = 'none';
     document.getElementById(panelR).style.display = 'block';
     if (!isDesktop) {
       const btn = document.getElementById('quizExtratoBtn');
       if (btn) btn.style.visibility = 'hidden';
     }
-    // [FIX-CLS] rAF garante que o paint do painel vazio acontece antes de popular
-    // O conteúdo entra num frame separado — browser não registra shift porque
-    // o painel já tinha altura reservada via min-height no .alerts e .result-hero
     requestAnimationFrame(() => {
       revealResult(p, heroId, alertsId, isDesktop);
     });
@@ -1491,6 +1493,8 @@ function restart() {
   document.getElementById('questionPanel').style.display = 'block';
   document.getElementById('resultHero').innerHTML = '';
   document.getElementById('resultAlerts').innerHTML = '';
+  const demo = document.getElementById('liveDetectDemo');
+  if (demo) demo.style.display = 'block';
   renderProfileCards('qBody');
 }
 
