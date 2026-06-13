@@ -3732,7 +3732,7 @@ function _loadJsPDF() {
 #legalFooter a:hover{color:var(--muted2)}
 </style>
 
-<div id="cookieBanner" style="display:none">
+<div id="cookieBanner">
   <p>Usamos cookies de análise e marketing para melhorar sua experiência. Ao continuar navegando, você concorda com o uso de cookies.
   <a href="/politica-cookies.html" target="_blank">Saiba mais</a></p>
   <button class="ck-btn ck-reject" onclick="ckReject()">Recusar marketing</button>
@@ -3761,8 +3761,6 @@ function _loadJsPDF() {
   setTimeout(function() {
     const b = document.getElementById('cookieBanner');
     if (!b) return;
-    b.style.display = 'flex';
-    b.getBoundingClientRect();
     b.style.transform = 'translateY(0)';
     // Opt-out: ativa pixels imediatamente ao exibir o banner
     localStorage.setItem('gf_cookie_consent', 'accepted');
@@ -3800,6 +3798,7 @@ function ckReject() {
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 16px rgba(37,211,102,0.35);
   transition: transform 0.2s, box-shadow 0.2s;
+  will-change: transform; contain: layout style;
 }
 #btnWhatsapp:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
 #btnWhatsapp svg { width: 28px; height: 28px; fill: #fff; }
@@ -3814,6 +3813,7 @@ function ckReject() {
   display: flex; align-items: center; gap: 6px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   transition: all 0.2s; white-space: nowrap;
+  will-change: transform; contain: layout style;
 }
 #btnFeedback:hover { border-color: var(--border); color: var(--text2); }
 
