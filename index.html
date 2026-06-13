@@ -470,7 +470,7 @@ nav {
 .step-dot.done { background: rgba(59,130,246,0.4); }
 .step-dot.active { background: var(--green); box-shadow: none; }
 
-.q-body { padding: 32px 28px 24px; min-height: 320px; contain: layout; }
+.q-body { padding: 32px 28px 24px; }
 .q-num { font-family:var(--ff); font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
 .q-title { font-family:var(--ff); font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
 .q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
@@ -567,7 +567,7 @@ nav {
 .score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
 .score-label { font-size:11px; color:var(--muted); font-family:var(--ff); }
 
-.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; min-height:380px; contain: layout; }
+.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
 .alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
 .alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
 .alert-red { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.12); }
@@ -1765,7 +1765,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   min-width: 0;
   max-width: 540px;
   position: relative;
-  min-height: 1100px;
+  min-height: 600px;
   contain: layout;
 }
 .split-right .sim-wrap {
@@ -2066,7 +2066,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .tabs { flex-wrap: wrap; }
   .tab { font-size: 12px; padding: 8px 10px; }
   /* quiz body e opções mais compactos no mobile */
-  .q-body { padding: 20px 16px 16px; min-height: 280px; }
+  .q-body { padding: 20px 16px 16px; }
   .q-title { font-size: 17px; }
   .q-sub { font-size: 13px; margin-bottom: 16px; }
   .opt { padding: 12px 14px; gap: 10px; min-height: 52px; }
@@ -2474,7 +2474,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
   </div>
 
-  <div class="hero">
+  <div class="hero" style="contain:layout">
     <div class="hero-tag" id="heroTagMobile">🛡️ Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
     <h1 id="heroH1Mobile">A Receita já analisou<br>sua movimentação.<br><em>Você já analisou a sua?</em></h1>
     <p id="heroSubMobile">Descubra em poucos minutos se seu extrato bancário possui sinais que costumam gerar inconsistências no Imposto de Renda — antes que virem problema.</p>
