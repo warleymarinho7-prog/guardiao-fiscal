@@ -2437,7 +2437,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
     </div>
     <!-- Botão abaixo do quiz — leva ao fluxo de extrato -->
-    <div style="margin-top:16px;padding:0 4px 8px">
+    <!-- [FIX-CLS] visibility:hidden mantém espaço quando resultado aparece, evita shift -->
+    <div id="quizExtratoBtn" style="margin-top:16px;padding:0 4px 8px">
       <button onclick="showPage('extrato')" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
     </div>
   </div>
