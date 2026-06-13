@@ -1341,7 +1341,7 @@ function selectProfile(id, bodyId) {
   setTimeout(() => {
     if (isDesktop) {
       const demo = document.getElementById('liveDetectDemo');
-      if (demo) demo.style.display = 'none';
+      if (demo) demo.style.visibility = 'hidden';
     }
     // 1. Popula conteúdo com painel ainda invisível
     revealResult(p, heroId, alertsId, isDesktop);
@@ -1500,7 +1500,7 @@ function restart() {
   document.getElementById('resultHero').innerHTML = '';
   document.getElementById('resultAlerts').innerHTML = '';
   const demo = document.getElementById('liveDetectDemo');
-  if (demo) demo.style.display = 'block';
+  if (demo) demo.style.visibility = 'visible';
   renderProfileCards('qBody');
 }
 
