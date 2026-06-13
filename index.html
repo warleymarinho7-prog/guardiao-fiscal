@@ -539,8 +539,7 @@ nav {
 .btn-next.on:hover { background:var(--green2); box-shadow:0 6px 20px rgba(124,255,79,0.3); transform:translateY(-1px); }
 
 /* RESULT */
-#resultPanel { display:none; }
-#resultPanel.show { display:block; }
+/* resultPanel controlado via visibility no JS */
 
 .result-box {
   background:var(--surface);
@@ -2353,7 +2352,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             </div>
             <div class="q-body" id="qBody"></div>
           </div>
-          <div id="resultPanel" style="grid-area:1/1">
+          <div id="resultPanel" style="visibility:hidden;grid-area:1/1">
             <div class="result-box">
               <div class="result-hero" id="resultHero"></div>
               <div class="alerts" id="resultAlerts"></div>
@@ -2441,7 +2440,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
       <div class="q-body" id="mQBody"></div>
     </div>
-    <div id="mResultPanel" style="display:none;grid-area:1/1">
+    <div id="mResultPanel" style="visibility:hidden;grid-area:1/1">
       <div class="result-box">
         <div class="result-hero" id="mResultHero"></div>
         <div class="alerts" id="mResultAlerts"></div>
@@ -2468,7 +2467,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div><!-- /mPanelStack -->
     <!-- Botão abaixo do quiz — leva ao fluxo de extrato -->
     <!-- [FIX-CLS] visibility:hidden mantém espaço quando resultado aparece, evita shift -->
-    <div id="quizExtratoBtn" style="position:absolute;bottom:16px;left:4px;right:4px;padding:0 4px 8px">
+    <div id="quizExtratoBtn" style="margin-top:16px;padding:0 4px 8px">
       <button onclick="showPage('extrato')" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
     </div>
   </div>
