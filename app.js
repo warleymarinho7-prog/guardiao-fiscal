@@ -1349,9 +1349,14 @@ function selectProfile(id, bodyId) {
       // 2. Fixa altura do container no valor atual (antes da troca)
       // para que o quizWrap não encolha quando questionPanel some
       if (!isDesktop) {
-        // Fixa quizWrap inteiro (inclui mPanelStack + quizExtratoBtn)
-        const qw = document.getElementById('quizWrap');
-        if (qw) qw.style.minHeight = qw.scrollHeight + 'px';
+        // Mede mResultPanel diretamente — scrollHeight correto mesmo com visibility:hidden
+        const qw  = document.getElementById('quizWrap');
+        const mrp = document.getElementById('mResultPanel');
+        const btn = document.getElementById('quizExtratoBtn');
+        if (qw && mrp) {
+          const btnH = btn ? btn.offsetHeight + 16 : 0;
+          qw.style.minHeight = (mrp.scrollHeight + btnH + 60) + 'px';
+        }
       }
       // 3. Troca visibilidade — conteúdo já está pronto, container já tem altura
       document.getElementById(panelQ).style.visibility = 'hidden';
