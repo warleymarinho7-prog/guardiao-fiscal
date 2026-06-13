@@ -1362,10 +1362,17 @@ function revealResult(p, heroId, alertsId, isDesktop) {
     elevado: 'As combinações do seu perfil são exatamente as que o sistema da Receita prioriza no cruzamento entre extrato e declaração. Sem verificar os dados reais, você não sabe o que o sistema já viu.',
     critico: 'Seu perfil reúne as principais características que ativam cruzamento automático no e-Financeira. A análise com o extrato real precisa acontecer antes que uma notificação chegue.',
   };
+  const URGENCIA = {
+    critico:  { badge: '🚨 Risco crítico detectado', sub: 'Seu perfil ativa cruzamento automático no e-Financeira. Confirme os valores reais antes que a Receita notifique.', btnColor: '#FF4D4F', btnText: '#fff', btnLabel: 'Ver os valores exatos no meu extrato →', trust: '⚡ Análise em menos de 2 min · sem envio de dados' },
+    elevado:  { badge: '⚠️ Atenção — risco elevado', sub: 'Identificamos padrões que a Receita prioriza no cruzamento. Veja quais transações específicas estão em risco.', btnColor: '#FF4D4F', btnText: '#fff', btnLabel: 'Ver quais transações estão em risco →', trust: '🔒 Extrato processado localmente · Nenhum dado sai do seu dispositivo' },
+    moderado: { badge: '🟡 Sinais que merecem atenção', sub: 'Esses padrões podem gerar inconsistência com sua declaração. Vale confirmar antes da Receita fazer o cruzamento.', btnColor: '#7CFF4F', btnText: '#000', btnLabel: 'Confirmar se minha movimentação está compatível →', trust: '🔒 Análise 100% local · Gratuito para começar' },
+    baixo:    { badge: '✅ Perfil com baixo risco', sub: 'Seu perfil não apresenta sinais críticos. Confirme com o extrato real para ter certeza antes da declaração.', btnColor: '#7CFF4F', btnText: '#000', btnLabel: 'Confirmar que está tudo certo no extrato →', trust: '🔒 Análise 100% local · Gratuito para começar' },
+  };
 
   const color = CORES[p.nivel];
   const level = LABELS[p.nivel];
   const desc  = DESCS[p.nivel];
+  const u     = URGENCIA[p.nivel] || URGENCIA.moderado;
 
   const gaugeR = 70, cx = 110, cy = 100;
   const startAngle = 210, totalDeg = 300;
@@ -1382,6 +1389,21 @@ function revealResult(p, heroId, alertsId, isDesktop) {
   }
   const needleStart = polarToXY(startAngle, gaugeR - 14);
 
+  // [FIX-CLS] Renderiza TODO o conteúdo de uma vez — sem setTimeout escalonados
+  // Animações de entrada via CSS (não causam CLS)
+  const alertsHtml = p.alertsData.map((a, i) => `
+    <div class="alert-item ${a.cls}" style="animation:_fadeUp 0.35s ease both;animation-delay:${i * 80}ms">
+      <span class="alert-icon">${a.icon}</span>
+      <span><strong style="font-weight:600;display:block;margin-bottom:2px">${sanitize(a.title)}</strong>${sanitize(a.text)}</span>
+    </div>`).join('');
+
+  const lockedHtml = p.lockedData.map(d => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px;min-width:0">
+      <span style="color:var(--muted2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.label}</span>
+      <span style="font-family:var(--ff);font-weight:700;color:var(--red);flex-shrink:0">${d.val}</span>
+    </div>`).join('');
+
+  // Gauge HTML
   const rh = document.getElementById(heroId);
   if (rh) rh.innerHTML = `
     <div class="result-glow" style="background:${color}"></div>
@@ -1416,6 +1438,31 @@ function revealResult(p, heroId, alertsId, isDesktop) {
       </div>
     </div>`;
 
+  // Alertas + blurBlock + CTA — tudo de uma vez no alertsId
+  const ra = document.getElementById(alertsId);
+  if (!ra) return;
+  ra.innerHTML = `
+    ${alertsHtml}
+    <div style="margin-top:8px;border-radius:14px;overflow:hidden;position:relative;box-sizing:border-box;width:100%">
+      <div style="filter:blur(5px);user-select:none;pointer-events:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;box-sizing:border-box">
+        ${lockedHtml}
+      </div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,24,39,0.2) 0%,rgba(17,24,39,0.92) 55%);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px">
+        <div style="font-size:20px;margin-bottom:6px">🔒</div>
+        <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${p.lockedData.length} padrões no seu perfil</div>
+        <div style="font-size:11px;color:var(--muted2);text-align:center;line-height:1.5">Confirme com seu extrato real para ver os detalhes exatos</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;box-sizing:border-box;width:100%;animation:_fadeUp 0.4s ease 0.2s both">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;white-space:nowrap">${u.badge}</div>
+      <div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:14px;box-sizing:border-box;word-break:break-word">${u.sub}</div>
+      <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${u.btnColor};border:none;border-radius:12px;color:${u.btnText};font-family:var(--ff);font-size:clamp(13px,3.5vw,15px);font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:-0.01em;box-sizing:border-box;word-break:break-word;${(p.nivel==='critico'||p.nivel==='elevado') ? 'box-shadow:0 0 20px rgba(255,77,79,0.4)' : 'box-shadow:var(--glow-green)'}">
+        ${u.btnLabel}
+      </button>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">${u.trust}</div>
+    </div>`;
+
+  // Anima gauge após render (só SVG/CSS — sem injeção de DOM)
   setTimeout(() => {
     const arc   = document.getElementById(heroId + 'Arc');
     const ndl   = document.getElementById(heroId + 'Needle');
@@ -1426,62 +1473,6 @@ function revealResult(p, heroId, alertsId, isDesktop) {
     const step = () => { n = Math.min(n + 2, p.score); if (numEl) numEl.textContent = n; if (n < p.score) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   }, 100);
-
-  const ra = document.getElementById(alertsId);
-  if (!ra) return;
-  ra.innerHTML = '';
-
-  p.alertsData.forEach((a, i) => {
-    setTimeout(() => {
-      const div = document.createElement('div');
-      div.className = `alert-item ${a.cls}`;
-      div.style.cssText = 'opacity:0;transform:translateY(8px);transition:all 0.35s ease';
-      div.innerHTML = `<span class="alert-icon">${a.icon}</span><span><strong style="font-weight:600;display:block;margin-bottom:2px">${sanitize(a.title)}</strong>${sanitize(a.text)}</span>`;
-      ra.appendChild(div);
-      setTimeout(() => { div.style.opacity='1'; div.style.transform='translateY(0)'; }, 30);
-    }, i * 400);
-  });
-
-  setTimeout(() => {
-    const blurBlock = document.createElement('div');
-    blurBlock.style.cssText = 'margin-top:8px;border-radius:14px;overflow:hidden;position:relative;box-sizing:border-box;width:100%';
-    blurBlock.innerHTML = `
-      <div style="filter:blur(5px);user-select:none;pointer-events:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;box-sizing:border-box">
-        ${p.lockedData.map(d => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px;min-width:0">
-            <span style="color:var(--muted2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.label}</span>
-            <span style="font-family:var(--ff);font-weight:700;color:var(--red);flex-shrink:0">${d.val}</span>
-          </div>`).join('')}
-      </div>
-      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(17,24,39,0.2) 0%,rgba(17,24,39,0.92) 55%);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px">
-        <div style="font-size:20px;margin-bottom:6px">🔒</div>
-        <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px">Detectamos ${p.lockedData.length} padrões no seu perfil</div>
-        <div style="font-size:11px;color:var(--muted2);text-align:center;line-height:1.5">Confirme com seu extrato real para ver os detalhes exatos</div>
-      </div>`;
-    ra.appendChild(blurBlock);
-
-    setTimeout(() => {
-      const URGENCIA = {
-        critico:  { badge: '🚨 Risco crítico detectado', sub: 'Seu perfil ativa cruzamento automático no e-Financeira. Confirme os valores reais antes que a Receita notifique.', btnColor: '#FF4D4F', btnText: '#fff', btnLabel: 'Ver os valores exatos no meu extrato →', trust: '⚡ Análise em menos de 2 min · sem envio de dados' },
-        elevado:  { badge: '⚠️ Atenção — risco elevado', sub: 'Identificamos padrões que a Receita prioriza no cruzamento. Veja quais transações específicas estão em risco.', btnColor: '#FF4D4F', btnText: '#fff', btnLabel: 'Ver quais transações estão em risco →', trust: '🔒 Extrato processado localmente · Nenhum dado sai do seu dispositivo' },
-        moderado: { badge: '🟡 Sinais que merecem atenção', sub: 'Esses padrões podem gerar inconsistência com sua declaração. Vale confirmar antes da Receita fazer o cruzamento.', btnColor: '#7CFF4F', btnText: '#000', btnLabel: 'Confirmar se minha movimentação está compatível →', trust: '🔒 Análise 100% local · Gratuito para começar' },
-        baixo:    { badge: '✅ Perfil com baixo risco', sub: 'Seu perfil não apresenta sinais críticos. Confirme com o extrato real para ter certeza antes da declaração.', btnColor: '#7CFF4F', btnText: '#000', btnLabel: 'Confirmar que está tudo certo no extrato →', trust: '🔒 Análise 100% local · Gratuito para começar' },
-      };
-      const u = URGENCIA[p.nivel] || URGENCIA.moderado;
-
-      const ctaBlock = document.createElement('div');
-      ctaBlock.style.cssText = 'margin-top:16px;opacity:0;transform:translateY(10px);transition:all 0.4s ease;box-sizing:border-box;width:100%';
-      ctaBlock.innerHTML = `
-        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;white-space:nowrap">${u.badge}</div>
-        <div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:14px;box-sizing:border-box;word-break:break-word">${u.sub}</div>
-        <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${u.btnColor};border:none;border-radius:12px;color:${u.btnText};font-family:var(--ff);font-size:clamp(13px,3.5vw,15px);font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:-0.01em;box-sizing:border-box;word-break:break-word;${(p.nivel==='critico'||p.nivel==='elevado') ? 'box-shadow:0 0 20px rgba(255,77,79,0.4)' : 'box-shadow:var(--glow-green)'}">
-          ${u.btnLabel}
-        </button>
-        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">${u.trust}</div>`;
-      ra.appendChild(ctaBlock);
-      setTimeout(() => { ctaBlock.style.opacity='1'; ctaBlock.style.transform='translateY(0)'; }, 30);
-    }, 300);
-  }, p.alertsData.length * 400 + 300);
 
   if (typeof fbq === 'function' && window.PIXEL_ATIVO) {
     fbq('trackCustom', 'QuizCompleted', { origem: isDesktop ? 'site_principal' : 'site_principal_mobile', risco: p.nivel, score: p.score }, { eventID: 'qc_' + Date.now() });
