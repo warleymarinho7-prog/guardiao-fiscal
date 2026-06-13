@@ -1344,8 +1344,8 @@ function selectProfile(id, bodyId) {
       if (demo) demo.style.display = 'none';
     }
     requestAnimationFrame(() => {
-      document.getElementById(panelQ).style.display = 'none';
-      document.getElementById(panelR).style.display = 'block';
+      document.getElementById(panelQ).style.visibility = 'hidden';
+      document.getElementById(panelR).style.visibility = 'visible';
       if (!isDesktop) {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
@@ -1487,8 +1487,8 @@ function revealResult(p, heroId, alertsId, isDesktop) {
 }
 
 function restart() {
-  document.getElementById('resultPanel').style.display = 'none';
-  document.getElementById('questionPanel').style.display = 'block';
+  document.getElementById('resultPanel').style.visibility = 'hidden';
+  document.getElementById('questionPanel').style.visibility = 'visible';
   document.getElementById('resultHero').innerHTML = '';
   document.getElementById('resultAlerts').innerHTML = '';
   const demo = document.getElementById('liveDetectDemo');
@@ -1497,8 +1497,8 @@ function restart() {
 }
 
 function mRestart() {
-  document.getElementById('mResultPanel').style.display = 'none';
-  document.getElementById('mQuestionPanel').style.display = 'block';
+  document.getElementById('mResultPanel').style.visibility = 'hidden';
+  document.getElementById('mQuestionPanel').style.visibility = 'visible';
   const btn = document.getElementById('quizExtratoBtn');
   if (btn) btn.style.visibility = 'visible';
   document.getElementById('mResultHero').innerHTML = '';
