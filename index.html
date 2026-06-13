@@ -567,7 +567,7 @@ nav {
 .score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
 .score-label { font-size:11px; color:var(--muted); font-family:var(--ff); }
 
-.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
+.alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; min-height:380px; contain: layout; }
 .alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
 .alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
 .alert-red { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.12); }
@@ -2499,7 +2499,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   </div>
 
   <!-- ===== SEÇÃO: O QUE O GUARDIÃO ENCONTRA ===== -->
-  <div style="padding:0 16px 40px;max-width:720px;margin:0 auto">
+  <div style="padding:0 16px 40px;max-width:720px;margin:0 auto;contain:layout">
     <div style="text-align:center;margin-bottom:24px">
       <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1.8px;color:var(--green);text-transform:uppercase;margin-bottom:10px">O que o Guardião encontra</div>
       <h2 style="font-family:var(--ff);font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1.25;margin:0">Sinais que a Receita Federal já consegue ver</h2>
