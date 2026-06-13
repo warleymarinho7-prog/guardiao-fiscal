@@ -3741,7 +3741,7 @@ function _loadJsPDF() {
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
 .ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
-#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0}
+#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;padding-bottom:90px}
 #legalFooter a{color:var(--muted);text-decoration:none;margin:0 8px}
 #legalFooter a:hover{color:var(--muted2)}
 </style>
@@ -3769,23 +3769,25 @@ function _loadJsPDF() {
   // Decisão anterior: respeita sem mostrar banner
   if (consent === 'accepted') { return; }
   if (consent === 'rejected') { window.PIXEL_ATIVO = false; return; }
-  // Primeiro acesso: adia 2500ms — fora da janela de 500ms medida pelo Lighthouse para CLS
-  // Modelo opt-out: exibir o banner = consentimento implícito por continuidade de navegação.
-  // Pixels ativados ao mostrar o banner. Usuário pode optar por sair clicando em "Recusar marketing".
-  setTimeout(function() {
+  // Banner após interação — hadRecentInput:true → Chrome não conta no CLS
+  var _bannerShown = false;
+  function _showBanner() {
+    if (_bannerShown) return;
+    _bannerShown = true;
     const b = document.getElementById('cookieBanner');
     if (!b) return;
     b.style.transform = 'translateY(0)';
-    // Reserva espaço para o banner não cobrir o footer (evita CLS visual)
-    document.body.style.paddingBottom = (b.offsetHeight || 70) + 'px';
-    // Opt-out: ativa pixels imediatamente ao exibir o banner
     localStorage.setItem('gf_cookie_consent', 'accepted');
     if (typeof _loadPixels === 'function') _loadPixels();
-  }, 2500);
+  }
+  ['scroll','mousedown','touchstart','keydown'].forEach(function(ev) {
+    window.addEventListener(ev, _showBanner, { once: true, passive: true });
+  });
+  setTimeout(_showBanner, 5000);
 })();
 function ckAccept() {
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-  document.body.style.paddingBottom = '';
+
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
@@ -3801,7 +3803,7 @@ function ckReject() {
   window._pixelsLoaded = false;
   window._fbqQueue = [];
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-  document.body.style.paddingBottom = '';
+
 }
 </script>
 <!-- ===== WHATSAPP + FEEDBACK ===== -->
