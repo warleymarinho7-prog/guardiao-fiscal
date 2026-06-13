@@ -631,6 +631,12 @@ nav {
 }
 
 .result-cta { padding:16px 22px 22px; contain: layout; }
+
+/* [FIX-CLS] Animação de entrada via CSS — não causa CLS (substitui setTimeout escalonados) */
+@keyframes _fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .btn-restart {
   width:100%; padding:12px;
   background:transparent; border:1px solid var(--border);
