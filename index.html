@@ -3953,15 +3953,18 @@ async function sendFeedback() {
               sem dados pessoais, base legal LGPD art. 7º VI (interesse legítimo)
      ═══════════════════════════════════════════════════════════════ -->
 <script>
-// ── Clarity: carrega após LCP, independente de consentimento ──────
+// ── Clarity: delay de 3s após interação para não competir com LCP ──
 // Clarity coleta apenas comportamento de navegação (cliques, scroll, heatmap)
 // sem dados pessoais identificáveis — base legal LGPD art. 7º VI
+// Delay de 3s: garante que LCP já renderizou antes do XHR do Clarity
 function _loadClarity() {
   if (window._clarityLoaded) return;
   window._clarityLoaded = true;
-  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");
+  setTimeout(function() {
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wwevjwbax6");
+  }, 3000);
 }
 
 // ── Pixel: init único após LCP ────────────────────────────────────
