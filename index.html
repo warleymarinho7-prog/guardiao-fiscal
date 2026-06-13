@@ -3776,14 +3776,16 @@ function _loadJsPDF() {
     const b = document.getElementById('cookieBanner');
     if (!b) return;
     b.style.transform = 'translateY(0)';
+    // Reserva espaço para o banner não cobrir o footer (evita CLS visual)
+    document.body.style.paddingBottom = (b.offsetHeight || 70) + 'px';
     // Opt-out: ativa pixels imediatamente ao exibir o banner
     localStorage.setItem('gf_cookie_consent', 'accepted');
     if (typeof _loadPixels === 'function') _loadPixels();
   }, 2500);
 })();
 function ckAccept() {
-  // Pixels já estão ativos (opt-out) — só fecha o banner
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+  document.body.style.paddingBottom = '';
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
@@ -3794,12 +3796,12 @@ function ckAccept() {
   }
 }
 function ckReject() {
-  // Usuário opta por sair — revoga e desativa marketing
   localStorage.setItem('gf_cookie_consent', 'rejected');
   window.PIXEL_ATIVO = false;
   window._pixelsLoaded = false;
   window._fbqQueue = [];
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+  document.body.style.paddingBottom = '';
 }
 </script>
 <!-- ===== WHATSAPP + FEEDBACK ===== -->
