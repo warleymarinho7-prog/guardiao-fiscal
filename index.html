@@ -2346,14 +2346,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
           </button>
         </div>
-        <div id="simPerguntas" style="position:relative;min-height:520px;overflow:visible">
-          <div class="panel" id="questionPanel">
+        <div id="simPerguntas" style="display:grid">
+          <div class="panel" id="questionPanel" style="grid-area:1/1">
             <div class="panel-header">
               <div class="panel-label">// identifique seu perfil</div>
             </div>
             <div class="q-body" id="qBody"></div>
           </div>
-          <div id="resultPanel" style="width:100%">
+          <div id="resultPanel" style="grid-area:1/1">
             <div class="result-box">
               <div class="result-hero" id="resultHero"></div>
               <div class="alerts" id="resultAlerts"></div>
@@ -2406,13 +2406,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="tabs">
       <button class="tab active">📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span></button>
     </div>
-    <div class="panel" id="mQuestionPanel">
+    <div id="mPanelStack" style="display:grid">
+    <div class="panel" id="mQuestionPanel" style="grid-area:1/1">
       <div class="panel-header">
         <div class="panel-label">// identifique seu perfil</div>
       </div>
       <div class="q-body" id="mQBody"></div>
     </div>
-    <div id="mResultPanel" style="display:none">
+    <div id="mResultPanel" style="display:none;grid-area:1/1">
       <div class="result-box">
         <div class="result-hero" id="mResultHero"></div>
         <div class="alerts" id="mResultAlerts"></div>
@@ -2436,9 +2437,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
     </div>
+    </div><!-- /mPanelStack -->
     <!-- Botão abaixo do quiz — leva ao fluxo de extrato -->
     <!-- [FIX-CLS] visibility:hidden mantém espaço quando resultado aparece, evita shift -->
-    <div id="quizExtratoBtn" style="margin-top:16px;padding:0 4px 8px">
+    <div id="quizExtratoBtn" style="position:absolute;bottom:16px;left:4px;right:4px;padding:0 4px 8px">
       <button onclick="showPage('extrato')" style="width:100%;padding:14px 20px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s">Analisar meu extrato →</button>
     </div>
   </div>
