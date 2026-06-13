@@ -253,7 +253,7 @@ function switchPayTab(tab) {
     tabC.style.color      = 'var(--text)';
     tabO.style.background = 'transparent';
     tabO.style.color      = 'var(--muted)';
-    if (!_mpBrick) initMpBrick();
+    // Checkout Pro: não inicializa Brick aqui
   } else {
     paneCartao.style.display = 'none';
     paneOutros.style.display = 'block';
