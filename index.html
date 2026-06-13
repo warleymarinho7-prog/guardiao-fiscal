@@ -2299,7 +2299,36 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
           // detecções em tempo real
         </div>
-        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;min-height:220px;overflow:hidden"></div>
+        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;min-height:220px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:8px;flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0">🚨</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:600;color:#f87171;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Incompatibilidade de renda</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">+162% acima do declarado</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.18);border-radius:8px;flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0">⚠️</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:600;color:#fbbf24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Pix recorrentes sem origem</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">R$ 32.880 em 4 meses</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:8px;flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0">🚨</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:600;color:#f87171;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Atividade comercial não declarada</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">7 recebimentos mensais</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(124,255,79,0.07);border:1px solid rgba(124,255,79,0.18);border-radius:8px;flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0">✅</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:600;color:#34d399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Score de coerência fiscal</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">23/100 — perfil compatível</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="sim-wrap">
         <div class="tabs">
