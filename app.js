@@ -1343,14 +1343,22 @@ function selectProfile(id, bodyId) {
       const demo = document.getElementById('liveDetectDemo');
       if (demo) demo.style.display = 'none';
     }
+    // 1. Popula conteúdo com painel ainda invisível
+    revealResult(p, heroId, alertsId, isDesktop);
     requestAnimationFrame(() => {
+      // 2. Fixa altura do container no valor atual (antes da troca)
+      // para que o quizWrap não encolha quando questionPanel some
+      if (!isDesktop) {
+        const stack = document.getElementById('mPanelStack');
+        if (stack) stack.style.minHeight = stack.scrollHeight + 'px';
+      }
+      // 3. Troca visibilidade — conteúdo já está pronto, container já tem altura
       document.getElementById(panelQ).style.visibility = 'hidden';
       document.getElementById(panelR).style.visibility = 'visible';
       if (!isDesktop) {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
       }
-      revealResult(p, heroId, alertsId, isDesktop);
     });
   }, 900);
 }
