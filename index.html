@@ -682,6 +682,9 @@ nav {
 
 .ext-card-body { padding:16px; }
 
+/* [FIX-CLS] extStep3: conteúdo renderizado antes de display:block — sem shift */
+#extStep3 { contain: layout; }
+
 /* upload zone */
 .upload-zone {
   border:2px dashed var(--border2);
