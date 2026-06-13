@@ -1345,14 +1345,15 @@ function selectProfile(id, bodyId) {
       const demo = document.getElementById('liveDetectDemo');
       if (demo) demo.style.display = 'none';
     }
-    document.getElementById(panelQ).style.display = 'none';
-    document.getElementById(panelR).style.display = 'block';
-    if (!isDesktop) {
-      const btn = document.getElementById('quizExtratoBtn');
-      if (btn) btn.style.visibility = 'hidden';
-    }
+    // [FIX-CLS] Popular ANTES de mostrar — painel aparece já completo
+    revealResult(p, heroId, alertsId, isDesktop);
     requestAnimationFrame(() => {
-      revealResult(p, heroId, alertsId, isDesktop);
+      document.getElementById(panelQ).style.display = 'none';
+      document.getElementById(panelR).style.display = 'block';
+      if (!isDesktop) {
+        const btn = document.getElementById('quizExtratoBtn');
+        if (btn) btn.style.visibility = 'hidden';
+      }
     });
   }, 900);
 }
