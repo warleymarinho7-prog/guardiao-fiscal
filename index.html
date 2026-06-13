@@ -395,6 +395,7 @@ nav {
   padding: 0 16px 80px;
   position: relative;
   z-index: 1;
+  contain: layout;
 }
 
 .tabs {
@@ -469,7 +470,7 @@ nav {
 .step-dot.done { background: rgba(59,130,246,0.4); }
 .step-dot.active { background: var(--green); box-shadow: none; }
 
-.q-body { padding: 32px 28px 24px; }
+.q-body { padding: 32px 28px 24px; min-height: 320px; contain: layout; }
 .q-num { font-family:var(--ff); font-size:11px; font-weight:600; color:var(--muted2); letter-spacing:0.5px; margin-bottom:10px; text-transform:uppercase; }
 .q-title { font-family:var(--ff); font-size:19px; font-weight:700; line-height:1.32; letter-spacing:-0.5px; margin-bottom:8px; }
 .q-sub { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:22px; }
@@ -551,6 +552,7 @@ nav {
 .result-hero {
   padding:32px 24px; text-align:center;
   border-bottom:1px solid var(--border); position:relative;
+  min-height: 180px; contain: layout;
 }
 .result-glow {
   position:absolute; top:-80px; left:50%; transform:translateX(-50%);
@@ -576,6 +578,7 @@ nav {
 .result-upgrade {
   padding:20px 22px;
   border-bottom:1px solid var(--border);
+  contain: layout;
 }
 
 .upgrade-label {
@@ -626,7 +629,7 @@ nav {
   margin-bottom:4px; display:inline-block;
 }
 
-.result-cta { padding:16px 22px 22px; }
+.result-cta { padding:16px 22px 22px; contain: layout; }
 .btn-restart {
   width:100%; padding:12px;
   background:transparent; border:1px solid var(--border);
@@ -2053,7 +2056,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   .tabs { flex-wrap: wrap; }
   .tab { font-size: 12px; padding: 8px 10px; }
   /* quiz body e opções mais compactos no mobile */
-  .q-body { padding: 20px 16px 16px; }
+  .q-body { padding: 20px 16px 16px; min-height: 280px; }
   .q-title { font-size: 17px; }
   .q-sub { font-size: 13px; margin-bottom: 16px; }
   .opt { padding: 12px 14px; gap: 10px; min-height: 52px; }
