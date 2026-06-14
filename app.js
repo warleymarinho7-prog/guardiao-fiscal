@@ -169,19 +169,21 @@ function initProFreeMode() {
 }
 
 async function openCheckout(plan) {
+  console.log('[openCheckout] plano:', plan, '| logado:', !!_currentUser);
   // Se usuário já tem plano ativo — verifica antes de disparar Pixel
   if (_currentUser && sb) {
     let data = null;
-    try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { data = null; }
+    try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { console.warn('[openCheckout] erro Supabase:', e); data = null; }
     const planoAtual = data?.plano;
+    console.log('[openCheckout] planoAtual:', planoAtual);
     if (planoAtual) _currentUser._plano = planoAtual;
     if (planoAtual === 'pro' || (planoAtual === 'avulso' && plan === 'avulso')) {
+      console.log('[openCheckout] tem plano → eUnlockResult');
       if (_eConsolidated) { eUnlockResult(); return; }
       showPage('extrato'); return;
     }
   }
-
-  // [FIX-PIXEL] Pixel só dispara aqui — depois de confirmar que não tem plano ativo
+  console.log('[openCheckout] abrindo modal checkout...');
   if (typeof window.trackFb === 'function') {
     window.trackFb('track', 'InitiateCheckout', { content_name: 'plano_' + plan, currency: 'BRL', value: plan === 'pro' ? 29.90 : 19.90 }, { eventID: 'ic_' + Date.now() });
     window.trackFb('trackCustom', 'CheckoutStarted', { plan: plan }, { eventID: 'cs_' + Date.now() });
