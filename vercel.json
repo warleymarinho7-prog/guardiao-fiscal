@@ -1,9 +1,13 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/app/index.html"
+    },
+    {
       "has": [{ "type": "host", "value": "app.oguardiaofiscal.com.br" }],
-      "source": "/(.*)",
-      "destination": "/app/$1"
+      "source": "/:path*",
+      "destination": "/app/:path*"
     }
   ],
 
@@ -17,7 +21,6 @@
         { "key": "Permissions-Policy",      "value": "camera=(), microphone=(), geolocation=()" }
       ]
     },
-
     {
       "source": "/app/(.*)",
       "headers": [
@@ -31,7 +34,6 @@
         }
       ]
     },
-
     {
       "source": "/((?!app/).*)",
       "headers": [
