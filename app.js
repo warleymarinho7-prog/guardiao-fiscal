@@ -1346,24 +1346,21 @@ function selectProfile(id, bodyId) {
     // 1. Popula conteúdo com painel ainda invisível
     revealResult(p, heroId, alertsId, isDesktop);
     requestAnimationFrame(() => {
-      if (!isDesktop) {
-        const qw  = document.getElementById('quizWrap');
-        const btn = document.getElementById('quizExtratoBtn');
-        if (qw && btn) {
-          // Mede posição atual do botão antes da troca
-          // e garante que o quizWrap seja alto o suficiente para mantê-lo visível
-          const qwRect  = qw.getBoundingClientRect();
-          const btnRect = btn.getBoundingClientRect();
-          const btnBottom = btnRect.bottom - qwRect.top;
-          qw.style.minHeight = Math.max(qw.offsetHeight, btnBottom + 16) + 'px';
-        }
-      }
-      // 4. Troca visibilidade
+      // 2. Troca visibilidade
       document.getElementById(panelQ).style.visibility = 'hidden';
       document.getElementById(panelR).style.visibility = 'visible';
       if (!isDesktop) {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
+        // 3. Segundo rAF: mResultPanel já está visível, mede altura real
+        requestAnimationFrame(() => {
+          const qw  = document.getElementById('quizWrap');
+          const mrp = document.getElementById('mResultPanel');
+          if (qw && mrp) {
+            // scrollHeight agora é correto pois mrp está visibility:visible
+            qw.style.minHeight = (mrp.scrollHeight + 80) + 'px';
+          }
+        });
       }
     });
   }, 900);
