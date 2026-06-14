@@ -123,6 +123,9 @@ const plans = {
 
 let currentPlan = 'pro';
 
+// [FIX-BUG5] _initPrices removida do DOMContentLoaded — sobrescrevia conteúdo após paint causando CLS.
+// Os preços devem estar corretos diretamente no HTML estático (R$19,90 e R$29,90).
+// Mantém a função caso seja necessária futuramente para preços dinâmicos via API.
 function _initPrices() {
   const pr = PRICES.pro.label;
   const avHtml = PRICES.avulso.label;
@@ -131,7 +134,6 @@ function _initPrices() {
   ['splitProPrice1','splitProPrice2','planProPrice']
     .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = pr; });
 }
-document.addEventListener('DOMContentLoaded', _initPrices);
 
 // ===== PRO FREE MODE =====
 const PRO_FREE_MODE = false;
@@ -169,27 +171,19 @@ function initProFreeMode() {
 }
 
 async function openCheckout(plan) {
-  console.log('[openCheckout] plano:', plan, '| logado:', !!_currentUser);
   // Se usuário já tem plano ativo — verifica antes de disparar Pixel
   if (_currentUser && sb) {
     let data = null;
-    try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { console.warn('[openCheckout] erro Supabase:', e); data = null; }
+    try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { data = null; }
     const planoAtual = data?.plano;
-    console.log('[openCheckout] planoAtual:', planoAtual);
     if (planoAtual) _currentUser._plano = planoAtual;
     if (planoAtual === 'pro' || (planoAtual === 'avulso' && plan === 'avulso')) {
-      console.log('[openCheckout] tem plano → eUnlockResult');
       if (_eConsolidated) { eUnlockResult(); return; }
-      // Tem plano mas sem análise — vai para extrato e rola para o upload
-      showPage('extrato');
-      setTimeout(()=>{
-        const step2=document.getElementById('extStep2');
-        if(step2) step2.scrollIntoView({behavior:'smooth',block:'start'});
-      },150);
-      return;
+      showPage('extrato'); return;
     }
   }
-  console.log('[openCheckout] abrindo modal checkout...');
+
+  // [FIX-PIXEL] Pixel só dispara aqui — depois de confirmar que não tem plano ativo
   if (typeof window.trackFb === 'function') {
     window.trackFb('track', 'InitiateCheckout', { content_name: 'plano_' + plan, currency: 'BRL', value: plan === 'pro' ? 29.90 : 19.90 }, { eventID: 'ic_' + Date.now() });
     window.trackFb('trackCustom', 'CheckoutStarted', { plan: plan }, { eventID: 'cs_' + Date.now() });
@@ -1346,9 +1340,6 @@ function selectProfile(id, bodyId) {
       Cruzando com critérios do e-Financeira…
     </div>`;
 
-  // [FIX-INP] setTimeout(0) cede o thread imediatamente → browser pinta o estado de loading
-  // antes de executar revealResult. Antes era 900ms de delay artificial que bloqueava o INP.
-  // O efeito visual de "processando" é mantido pelo próprio estado de loading acima.
   setTimeout(() => {
     if (isDesktop) {
       const demo = document.getElementById('liveDetectDemo');
@@ -1358,14 +1349,18 @@ function selectProfile(id, bodyId) {
     revealResult(p, heroId, alertsId, isDesktop);
 
     if (!isDesktop) {
+      // [FIX-CLS v2] Reserva altura ANTES de trocar visibilidade — zero layout shift
+      // rAF1: quizWrap ainda exibe mQuestionPanel (visível) + mResultPanel (invisível mas populado)
+      //       scrollHeight captura altura total real — visibility:hidden não zera o pai
+      // rAF2: troca visibilidade com espaço já reservado — browser não precisa reajustar layout
       requestAnimationFrame(() => {
-        const btn = document.getElementById('quizExtratoBtn');
-        if (btn) btn.style.visibility = 'hidden';
         const qw = document.getElementById('quizWrap');
         if (qw) qw.style.minHeight = qw.scrollHeight + 'px';
         requestAnimationFrame(() => {
           document.getElementById(panelQ).style.visibility = 'hidden';
           document.getElementById(panelR).style.visibility = 'visible';
+          // [FIX-BUG2] Revela o botão junto com o resultado — estava sendo ocultado e nunca revelado
+          const btn = document.getElementById('quizExtratoBtn');
           if (btn) btn.style.visibility = 'visible';
         });
       });
@@ -1375,7 +1370,7 @@ function selectProfile(id, bodyId) {
         document.getElementById(panelR).style.visibility = 'visible';
       });
     }
-  }, 0);
+  }, 0); // [FIX-INP] era 900ms — bloqueava resposta visual ao clique
 }
 
 function revealResult(p, heroId, alertsId, isDesktop) {
@@ -1544,10 +1539,11 @@ function openQuiz() {
   }
   switchSimTab('perguntas');
   if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
+  // [FIX-BUG3] visibility em vez de display — consistente com o resto do código do quiz
   const rp = document.getElementById('resultPanel');
   const qp = document.getElementById('questionPanel');
-  if (rp) rp.style.display = 'none';
-  if (qp) qp.style.display = 'block';
+  if (rp) rp.style.visibility = 'hidden';
+  if (qp) qp.style.visibility = 'visible';
   renderProfileCards('qBody');
   setTimeout(() => {
     const isMobile = window.innerWidth < 1100;
@@ -2447,6 +2443,7 @@ async function eRunAll(){
     document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
     _eConsolidated=consolidated;_eSources=results;
     if(_currentUser&&sb){(async()=>{try{const _nivel=consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo';const _payload={user_id:_currentUser.id,score:consolidated.score,nivel_risco:_nivel,nivel_label:consolidated.score<=20?'Baixo risco':consolidated.score<=45?'Atenção':consolidated.score<=70?'Risco elevado':'Risco crítico',perfil_usuario:window._perfilUsuario||null,renda_declarada:window._rendaDeclaradaMensal||null,total_creditos:Math.round(consolidated.totalCredits||0),total_debitos:Math.round(consolidated.totalDebits||0),total_txns:consolidated.totalTxns||0,pix_total:Math.round(consolidated.pixTotal||0),especie_total:Math.round(consolidated.especieTotal||0),indice_consumo:Math.round((consolidated.indiceConsumo||0)*100),pix_pct:consolidated.totalCredits>0?Math.round(consolidated.pixTotal/consolidated.totalCredits*100):0,num_alertas:(consolidated.alerts||[]).length,num_fontes:results.length,versao_engine:'v8.0',created_at:new Date().toISOString(),fatores:JSON.stringify((results||[]).flatMap(r=>(r.fatores||[]).filter(f=>f.peso>0)).sort((a,b)=>b.peso-a.peso).slice(0,6).map(f=>({motivo:f.motivo||'',peso:f.peso||0,fatorKey:f.fatorKey||'',quandoNaoERisco:f.quandoNaoERisco||'',confianca:Math.round((f.confianca||0)*100)}))),alertas:JSON.stringify((consolidated.alerts||[]).map(a=>({type:a.type||'',icon:a.icon||'',title:a.title||'',text:a.text||''})))};await sb.from('analyses').insert(_payload);}catch(e){}})();}
+    // [FIX-CLS] Popula conteúdo com s3 ainda oculto, depois mostra e scrolla num único frame
     eRenderPreview(consolidated,results);
     requestAnimationFrame(() => {
       s3.style.display='block';
@@ -2527,21 +2524,12 @@ function eRenderPreview(c,sources){
   document.getElementById('pvAlerts').innerHTML=alertsVisiveis.map(a=>{const cls=a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu';const showText=a.type!=='green';return`<div class="pal ${cls}"><span class="pal-ico">${a.icon}</span><div><strong>${sanitize(a.title||'')}</strong>${showText?'<br><span style="font-size:12px;opacity:0.85">'+sanitize(a.text||'')+'</span>':''}</div></div>`;}).join('');
 }
 
-// [FIX] _verifyPlanBeforeUnlock: verifica se o usuário tem plano ativo antes de revelar resultado.
-// Consultada por eUnlockResult() e por eUnlockResult() chamada via setUser/onAuthStateChange.
+// [FIX] _verifyPlanBeforeUnlock estava sendo chamada mas nunca definida
 async function _verifyPlanBeforeUnlock() {
-  console.log('[_verify] _currentUser:', !!_currentUser, '| _plano cache:', _currentUser?._plano);
   if (!_currentUser || !sb) return false;
-  if (_currentUser._plano === 'pro' || _currentUser._plano === 'avulso') {
-    console.log('[_verify] cache hit → true');
-    return true;
-  }
+  if (_currentUser._plano === 'pro' || _currentUser._plano === 'avulso') return true;
   try {
-    const { data } = await sb.from('profiles')
-      .select('plano, expires_at')
-      .eq('id', _currentUser.id)
-      .single();
-    console.log('[_verify] Supabase data:', data);
+    const { data } = await sb.from('profiles').select('plano, expires_at').eq('id', _currentUser.id).single();
     if (!data) return false;
     const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
     const isExpired = expiresAt && expiresAt < new Date();
@@ -2550,40 +2538,21 @@ async function _verifyPlanBeforeUnlock() {
       return true;
     }
     return false;
-  } catch(e) {
-    console.error('[_verify] erro:', e);
-    return false;
-  }
+  } catch(e) { return false; }
 }
 
 async function eUnlockResult(){
-  console.log('[eUnlockResult] chamado | _eConsolidated:', !!_eConsolidated);
   const allowed=await _verifyPlanBeforeUnlock();
-  console.log('[eUnlockResult] allowed:', allowed);
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
-  // [FIX] Verifica se há análise antes de ocultar o paywall — sem análise não há o que mostrar
-  const c=_eConsolidated,sources=_eSources;
-  console.log('[eUnlockResult] c:', !!c, '| sources:', !!sources);
-  if(!c||!sources){
-    // Tem plano mas não tem análise — mantém paywall visível e indica o próximo passo
-    document.getElementById('paywallBlock').style.display='block';
-    const sub=document.getElementById('paywallDynamicSub');
-    if(sub) sub.textContent='Plano ativo! Faça o upload do seu extrato acima para ver a análise completa.';
-    const badge=document.getElementById('paywallDynamicBadge');
-    if(badge) badge.innerHTML='✅ Plano Pro ativo';
-    // Oculta botões de compra pois já tem plano
-    const btnPro=document.querySelector('.btn-unlock-pro');
-    const btnAv=document.querySelector('.btn-unlock-avulso');
-    if(btnPro) btnPro.style.display='none';
-    if(btnAv) btnAv.style.display='none';
-    return;
-  }
   document.getElementById('paywallBlock').style.display='none';
   // [FIX-CLS] Renderiza conteúdo com visibility:hidden antes de revelar
+  // Evita dezenas de shifts causados por innerHTML sequencial em elemento visível
   const _rrb=document.getElementById('realResultBlock');
   _rrb.style.visibility='hidden';
   _rrb.style.display='block';
   setTimeout(()=>_rrb.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  const c=_eConsolidated,sources=_eSources;
+  if(!c||!sources)return;
   let emoji,level,color,levelHumano;
   if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#7CFF4F';levelHumano='Sua movimentação está dentro do padrão esperado.';}
   else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';levelHumano='Encontramos pontos que merecem uma revisão.';}
@@ -2645,6 +2614,9 @@ async function eUnlockResult(){
   _eCatFilter='all';eRenderTxns('all');
   setTimeout(_initCatCounts,100);
   setTimeout(()=>{if(!document.getElementById('gFeedbackCard')&&typeof gRenderFeedbackCard==='function'){const target=document.getElementById('pAlertList')?.parentElement||document.getElementById('realResultBlock');if(target)gRenderFeedbackCard(target,c);}},300);
+  // [FIX-CORE] Revela realResultBlock após todo conteúdo renderizado.
+  // Era setado para visibility:hidden na linha ~2547 e nunca revelado — tela em branco.
+  requestAnimationFrame(()=>{ _rrb.style.visibility='visible'; });
 }
 
 function eResetAll(){
@@ -2664,7 +2636,10 @@ function eResetAll(){
   document.getElementById('paywallBlock').style.display='block';
   const _tinhaAcesso=document.getElementById('realResultBlock').style.display!=='none';
   if(!_tinhaAcesso){if(typeof fbq==='function'&&window.PIXEL_ATIVO){fbq('trackCustom','PaywallHit',{},{eventID:Date.now().toString()});fbq('track','ViewContent',{content_name:'paywall_guardiao',content_category:'fiscal'},{eventID:'vc_'+Date.now().toString()});}if(typeof clarity==='function')clarity('event','PaywallHit');}
-  document.getElementById('realResultBlock').style.display='none';
+  // [FIX-BUG4] Reseta visibility junto com display — sem isso, próximo eUnlockResult começa invisível
+  const _rrbReset = document.getElementById('realResultBlock');
+  _rrbReset.style.visibility = '';
+  _rrbReset.style.display='none';
   const previewReal=document.getElementById('previewReal');const previewPlaceholder=document.getElementById('previewPlaceholder');
   if(previewReal)previewReal.style.display='none';if(previewPlaceholder)previewPlaceholder.style.display='block';
   const pvBar=document.getElementById('pvBarFill');if(pvBar)pvBar.style.width='0%';
@@ -2698,18 +2673,158 @@ async function eCarregarHistorico(){
   }catch(e){el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Erro ao carregar histórico. Tente novamente.</div>';}
 }
 
-// ── FEEDBACK ──────────────────────────────────────────────────
-// [FIX] Inicializa _gFeedback antes de qualquer uso — evita "Cannot set properties of undefined"
-window._gFeedback = window._gFeedback || { sessao: null, historico: [] };
+// ── FUNÇÕES DO RESULTADO — chamadas pelo HTML mas não definidas ──
 
-// [FIX] FEEDBACK_MOTIVOS não estava definida — causava ReferenceError em gRenderFeedbackCard
+// Filtra transações por risco (botões "Todas" / "⚠ Risco")
+function eFilt(filter) {
+  const pfAll  = document.getElementById('pfAll');
+  const pfRisk = document.getElementById('pfRisk');
+  if (pfAll)  pfAll.classList.toggle('on',  filter === 'all');
+  if (pfRisk) pfRisk.classList.toggle('on', filter === 'risk');
+  eRenderTxns(filter);
+}
+
+// Filtra transações por categoria (Pix, Suspeitas, Espécie, Saídas)
+let _eFiltMode = 'all';
+function eCatFilt(cat) {
+  _eCatFilter = cat;
+  ['rcAll','rcPix','rcSusp','rcEspecie','rcSaida'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('on', id === 'rc' + (cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)));
+  });
+  eRenderTxns(_eFiltMode === 'risk' ? 'risk' : 'all');
+}
+
+// Troca o banco ativo nas tabs do resultado
+function eSwitchBank(bank) {
+  eActiveBankTab = bank;
+  document.querySelectorAll('.btab').forEach(btn => {
+    btn.classList.toggle('on', btn.textContent === (bank === 'all' ? 'Todos' : bank));
+  });
+  eRenderTxns('all');
+}
+
+// Expande/colapsa card de fator de risco no resultado
+function _toggleFator(id) {
+  const el  = document.getElementById(id);
+  const tog = document.getElementById(id + '_tog');
+  const card = el?.closest('[role="button"]');
+  if (!el) return;
+  const open = el.style.display === 'none' || !el.style.display;
+  el.style.display = open ? 'block' : 'none';
+  if (tog) tog.textContent = open ? 'fechar ▴' : 'ver ▾';
+  if (card) card.setAttribute('aria-expanded', String(open));
+}
+
+// Expande/colapsa card de histórico
+function histToggle(headerEl) {
+  const cardId = headerEl.getAttribute('data-histid');
+  if (!cardId) return;
+  const body    = document.getElementById(cardId);
+  const chevron = headerEl.querySelector('.hist-chevron');
+  if (!body) return;
+  const open = body.style.display === 'none' || !body.style.display;
+  body.style.display    = open ? 'block' : 'none';
+  if (chevron) chevron.textContent = open ? '▲' : '▼';
+}
+
+// Mostra/esconde painel de debug
+function eToggleDbg() {
+  const bd  = document.getElementById('pDbgBd');
+  const tog = document.getElementById('pDbgTog');
+  if (!bd) return;
+  const open = bd.style.display === 'none' || !bd.style.display;
+  bd.style.display  = open ? 'block' : 'none';
+  if (tog) tog.textContent = open ? '▲ fechar' : '▼ ver';
+}
+
+// Exporta relatório em PDF via janela de impressão
+async function gerarRelatorioPDF() {
+  const c = _eConsolidated;
+  const sources = _eSources;
+  if (!c || !sources) { alert('Dados da análise não encontrados. Refaça a análise.'); return; }
+  const btn = document.getElementById('btnExportPDF');
+  if (btn) { btn.textContent = '⏳ Gerando PDF...'; btn.style.opacity = '0.7'; btn.disabled = true; }
+  try {
+    await _loadJsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, M = 14, CW = W - M * 2;
+    let Y = 0;
+    const C = {white:[255,255,255],bg:[248,249,251],surface:[255,255,255],card:[243,244,246],border:[229,231,235],text:[17,24,39],muted:[107,114,128],muted2:[156,163,175],green:[16,185,129],yellow:[245,158,11],red:[239,68,68],orange:[249,115,22],blue:[59,130,246],greenBg:[236,253,245],yellowBg:[254,243,199],redBg:[254,226,226],blueBg:[239,246,255],accent:[59,130,246]};
+    function sColor(s){if(s<=20)return{line:C.green,bg:C.greenBg,label:'Perfil Compatível'};if(s<=45)return{line:C.yellow,bg:C.yellowBg,label:'Sinais de Atenção'};if(s<=70)return{line:C.orange,bg:C.yellowBg,label:'Nível de Atenção Elevado'};return{line:C.red,bg:C.redBg,label:'Requer Análise Urgente'};}
+    function aColor(type){if(type==='red')return{line:C.red,bg:C.redBg};if(type==='yellow')return{line:C.yellow,bg:C.yellowBg};if(type==='green')return{line:C.green,bg:C.greenBg};return{line:C.blue,bg:C.blueBg};}
+    function txt(text,x,y,opts={}){const{size=9,color=C.text,bold=false,maxW=CW,align='left',italic=false}=opts;doc.setFontSize(size);doc.setTextColor(...color);const style=bold?'bold':italic?'italic':'normal';doc.setFont('helvetica',style);const lines=doc.splitTextToSize(String(text),maxW);doc.text(lines,x,y,{align});return lines.length*(size*0.42);}
+    function rect(x,y,w,h,fill,stroke=null,r=1.5){doc.setFillColor(...fill);if(stroke){doc.setDrawColor(...stroke);doc.setLineWidth(0.3);doc.roundedRect(x,y,w,h,r,r,'FD');}else{doc.roundedRect(x,y,w,h,r,r,'F');}}
+    function section(label,y){doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...C.accent);doc.text(label.toUpperCase(),M,y);doc.setDrawColor(...C.accent);doc.setLineWidth(0.2);doc.line(M+doc.getTextWidth(label.toUpperCase())+2,y-0.5,W-M,y-0.5);return y+6;}
+    function drawFooter(p){doc.setFillColor(...C.bg);doc.rect(0,285,W,12,'F');doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted2);doc.text('Guardião Fiscal · oguardiaofiscal.com.br · Diagnóstico preventivo e educacional',M,290);doc.text('Este documento não substitui orientação de contador ou advogado tributarista.',M,294);doc.setTextColor(...C.muted);doc.text('Pág. '+p,W-M,290,{align:'right'});doc.text('Processamento 100% local · LGPD',W-M,294,{align:'right'});}
+    function newPage(){doc.addPage();doc.setFillColor(...C.accent);doc.rect(0,0,W,1.5,'F');drawFooter(doc.internal.getNumberOfPages());return 14;}
+    function checkY(needed){if(Y+needed>272){Y=newPage();}}
+    doc.setFillColor(...C.accent);doc.rect(0,0,W,2,'F');
+    rect(0,2,W,46,C.bg,null,0);
+    doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(...C.accent);doc.text('Guardião',M,20);doc.setTextColor(...C.text);doc.text(' Fiscal',M+doc.getTextWidth('Guardião'),20);
+    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted);doc.text('Relatório de Análise de Coerência Fiscal',M,27);
+    const now=new Date();const dataStr=now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    txt(dataStr,W-M,20,{size:8,color:C.muted,align:'right'});txt(sources.length+' extrato(s) · '+c.totalTxns+' transações analisadas',W-M,27,{size:8,color:C.muted2,align:'right'});
+    doc.setDrawColor(...C.border);doc.setLineWidth(0.3);doc.line(M,36,W-M,36);
+    txt('🔒 Processamento 100% local — nenhum dado bancário foi enviado a servidores externos',M,42,{size:7.5,color:C.muted,italic:true});Y=56;
+    const sc=c.score,scTheme=sColor(sc);
+    rect(M,Y,CW,38,C.surface,C.border,3);doc.setFillColor(...scTheme.line);doc.roundedRect(M,Y,4,38,1.5,1.5,'F');
+    doc.setFontSize(36);doc.setFont('helvetica','bold');doc.setTextColor(...scTheme.line);doc.text(sc+'%',M+12,Y+24);
+    const barX=M+52,barY=Y+10,barW=CW-62,barH=4;rect(barX,barY,barW,barH,C.card,null,1);rect(barX,barY,Math.max(2,Math.round(barW*sc/100)),barH,scTheme.line,null,1);
+    doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...scTheme.line);doc.text(scTheme.label,barX,Y+22);
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted);doc.text('Score de Coerência Fiscal · Motor v8 · '+sources.length+' fonte(s)',barX,Y+28);
+    doc.text('Índice calculado por 6 fatores ponderados: compatibilidade, Pix, espécie, recorrência, anomalia temporal e perfil.',barX,Y+33,{maxWidth:barW});Y+=46;
+    const todosFatores=(sources||[]).flatMap(r=>r.fatores||[]);const fatoresTop=todosFatores.filter(f=>f.peso>0).sort((a,b)=>b.peso-a.peso).slice(0,6);
+    if(fatoresTop.length>0){checkY(10+fatoresTop.length*10+6);Y=section('Fatores que compõem o score',Y);fatoresTop.forEach((f,i)=>{checkY(12);const fColor=f.peso>=15?C.red:f.peso>=8?C.yellow:C.muted;rect(M,Y,CW,9,i%2===0?C.bg:C.surface,null,1);txt(f.motivo,M+4,Y+5.5,{size:8,maxW:CW-40});const pw=Math.min(CW-10,Math.round((f.peso/20)*40));const barFX=W-M-46;doc.setFillColor(...C.card);doc.roundedRect(barFX,Y+2.5,40,4,1,1,'F');doc.setFillColor(...fColor);doc.roundedRect(barFX,Y+2.5,pw,4,1,1,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...fColor);doc.text('+'+f.peso,W-M-2,Y+5.5,{align:'right'});Y+=10;});Y+=4;}
+    checkY(20+sources.length*14);Y=section('Extratos analisados',Y);
+    sources.forEach((r,i)=>{checkY(14);const rTheme=sColor(r.score);rect(M,Y,CW,12,i%2===0?C.surface:C.bg,C.border,2);doc.setFillColor(...rTheme.line);doc.roundedRect(M,Y,3,12,1,1,'F');txt(r.bank,M+6,Y+4.5,{size:9,bold:true});txt(r.totalTxns+' transações · '+r.months+' mês(es)',M+6,Y+9,{size:7.5,color:C.muted});txt(fmtBRL(r.totalCredits),W-M-20,Y+4.5,{size:9,bold:true,color:C.green,align:'right'});txt(r.score+'%',W-M,Y+4.5,{size:9,bold:true,color:rTheme.line,align:'right'});txt(rTheme.label,W-M,Y+9,{size:7,color:C.muted2,align:'right'});Y+=13;});Y+=4;
+    const icConsumo=Math.round((c.indiceConsumo||0)*100),icEspecie=Math.round((c.indiceEspecie||0)*100),pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
+    const metricas=[{label:'Total de créditos',val:fmtBRL(c.totalCredits),sub:c.creditCount+' entradas',color:C.green},{label:'Pix recebidos',val:fmtBRL(c.pixTotal),sub:pixPct+'% das entradas',color:pixPct>=50?C.red:pixPct>=30?C.yellow:C.text},{label:'Índice de consumo',val:icConsumo+'%',sub:'saídas ÷ entradas',color:icConsumo>=120?C.red:icConsumo>=90?C.yellow:C.green},{label:'Movimentações em espécie',val:icEspecie+'%',sub:'das entradas',color:icEspecie>=20?C.red:icEspecie>=10?C.yellow:C.green},{label:'Movimentos para revisão',val:String(c.suspCount),sub:'merecem atenção',color:c.suspCount>0?C.red:C.green},{label:'Padrões recorrentes',val:String(c.recorrentes),sub:'atividade regular detectada',color:c.recorrentes>3?C.yellow:C.text}];
+    checkY(20+Math.ceil(metricas.length/3)*22);Y=section('Indicadores fiscais',Y);
+    const cw3=(CW-4)/3;metricas.forEach((m,i)=>{const col=i%3,row=Math.floor(i/3);const mx=M+col*(cw3+2),my=Y+row*22;checkY(22);rect(mx,my,cw3,19,C.surface,C.border,2);txt(m.label,mx+4,my+5,{size:7,color:C.muted,maxW:cw3-6});txt(m.val,mx+4,my+12,{size:11.5,color:m.color,maxW:cw3-6,bold:true});txt(m.sub,mx+4,my+17,{size:6.5,color:C.muted2,maxW:cw3-6});});Y+=Math.ceil(metricas.length/3)*22+6;
+    if(c.alerts&&c.alerts.length>0){checkY(16);Y=section('Sinais e orientações',Y);c.alerts.forEach(a=>{const ac=aColor(a.type);const titleLines=doc.splitTextToSize(a.title||'',CW-12);const textLines=doc.splitTextToSize(a.text||'',CW-14);const bH=5+titleLines.length*4.5+textLines.length*3.8+4;checkY(bH+3);rect(M,Y,CW,bH,ac.bg,null,2);doc.setFillColor(...ac.line);doc.roundedRect(M,Y,2.5,bH,1,1,'F');doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(...ac.line);doc.text(titleLines,M+6,Y+5.5);const tH=titleLines.length*4.5;doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...C.muted);doc.text(textLines,M+6,Y+5.5+tH+1);Y+=bH+3;});Y+=4;}
+    const todasComerciais=(sources||[]).flatMap(r=>r.comercialOculta||[]);
+    if(todasComerciais.length>0){checkY(16);Y=section('Padrões recorrentes detectados',Y);txt('Recebimentos com frequência e ticket regular — possível atividade comercial não declarada.',M,Y,{size:7.5,color:C.muted,italic:true});Y+=7;todasComerciais.slice(0,8).forEach((r,i)=>{checkY(14);rect(M,Y,CW,12,i%2===0?C.surface:C.bg,C.border,2);const label=r.desc?r.desc.slice(0,38):('Padrão '+(i+1));txt(label,M+4,Y+4.5,{size:8.5,bold:true});txt(r.count+' recebimentos · Ticket médio: '+fmtBRL(Math.round(r.media))+' · Total: '+fmtBRL(r.total),M+4,Y+9,{size:7.5,color:C.muted});rect(W-M-30,Y+2,28,8,C.yellowBg,null,2);txt('Periodicidade regular',W-M-2,Y+6.5,{size:6.5,color:C.yellow,align:'right'});Y+=13;});Y+=4;}
+    const txnsRevisao=eAllTxns.filter(t=>t.risk!=='normal').sort((a,b)=>{const o={suspicious:0,attention:1};return(o[a.risk]||2)-(o[b.risk]||2)||b.value-a.value;}).slice(0,25);
+    if(txnsRevisao.length>0){checkY(20);Y=section('Movimentações que merecem revisão',Y);txt('Lista das transações com maior relevância fiscal, ordenadas por prioridade de revisão.',M,Y,{size:7.5,color:C.muted,italic:true});Y+=7;rect(M,Y,CW,7,C.card,null,1);const cols=[{label:'Data',x:M+2,w:22},{label:'Descrição',x:M+26,w:82},{label:'Banco',x:M+110,w:28},{label:'Valor',x:M+140,w:30},{label:'Revisão',x:M+172,w:24}];cols.forEach(col=>{doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...C.muted);doc.text(col.label,col.x,Y+4.5);});Y+=8;txnsRevisao.forEach((t,i)=>{checkY(8);const rTheme=t.risk==='suspicious'?{bg:[254,226,226],color:C.red,label:'Prioritária'}:{bg:[254,243,199],color:C.yellow,label:'Moderada'};rect(M,Y,CW,6.5,i%2===0?C.surface:C.bg,null,0);doc.setFillColor(...rTheme.color);doc.rect(M,Y,1.5,6.5,'F');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...C.text);doc.text(fmtDate(t.date),cols[0].x,Y+4.2);const dsc=doc.splitTextToSize(t.desc||'—',cols[1].w)[0];doc.text(dsc,cols[1].x,Y+4.2);doc.setTextColor(...C.muted);doc.text((t.bank||'').slice(0,10),cols[2].x,Y+4.2);if(t.value>=0){doc.setTextColor(...C.green);}else{doc.setTextColor(...C.text);}doc.text(fmtBRL(t.value),cols[3].x,Y+4.2);doc.setTextColor(...rTheme.color);doc.text(rTheme.label,cols[4].x,Y+4.2);Y+=7;});Y+=4;}
+    checkY(38);Y=section('Próximos passos recomendados',Y);
+    [{icon:'📊',text:'Compare os créditos identificados com o total declarado no IR. Divergências superiores a 20% são as mais frequentemente retidas.'},{icon:'📁',text:'Tenha comprovantes de origem disponíveis para todas as entradas relevantes — especialmente transferências, Pix recorrentes e depósitos em espécie.'},{icon:'👨‍💼',text:'Consulte um contador antes da entrega da declaração para validar os pontos de atenção identificados neste relatório.'},{icon:'🔄',text:'Se já entregou a declaração, avalie a possibilidade de retificação preventiva. Após notificação, multas e juros se aplicam automaticamente.'}].forEach((o,i)=>{checkY(14);rect(M,Y,CW,11,i%2===0?C.bg:C.surface,C.border,2);txt(o.icon,M+3,Y+7,{size:9});txt(o.text,M+12,Y+4.5,{size:7.5,color:C.text,maxW:CW-16});Y+=12;});
+    checkY(20);Y+=6;rect(M,Y,CW,16,C.card,C.border,2);txt('⚠️  Aviso Legal',M+4,Y+5,{size:8,bold:true,color:C.muted});txt('Este relatório é uma ferramenta de diagnóstico educacional e preventivo. Os resultados são estimativas com base em padrões fiscais conhecidos e não constituem parecer jurídico, contábil ou auditoria fiscal. O Guardião Fiscal não tem acesso à sua declaração de IR nem ao sistema da Receita Federal. Consulte sempre um profissional habilitado para decisões fiscais.',M+4,Y+9.5,{size:7,color:C.muted,maxW:CW-6,italic:true});Y+=18;
+    const totalPages=doc.internal.getNumberOfPages();for(let p=1;p<=totalPages;p++){doc.setPage(p);drawFooter(p);}
+    doc.save('guardiao-fiscal-'+now.toISOString().slice(0,10)+'.pdf');
+  } catch(err) {
+    console.error('[GuardiaoFiscal] Erro ao gerar PDF:', err);
+    alert('Erro ao gerar o PDF: ' + err.message);
+  } finally {
+    if (btn) { btn.innerHTML = '📄 Exportar relatório em PDF'; btn.style.opacity = '1'; btn.disabled = false; }
+  }
+}
+
+// Seletor de perfil no step 2 do extrato (CLT / MEI / Investidor)
+function selecionarPerfil(perfil, btn) {
+  window._perfilUsuario = perfil;
+  document.querySelectorAll('#perfilBtns button').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--muted2)';
+    b.style.background = 'var(--surface2)';
+  });
+  btn.style.borderColor = 'rgba(0,217,110,0.6)';
+  btn.style.color = 'var(--green)';
+  btn.style.background = 'rgba(0,217,110,0.06)';
+}
+
+
+// ── FEEDBACK ──────────────────────────────────────────────────
+// [FIX] _gFeedback e FEEDBACK_MOTIVOS não estavam definidos
+window._gFeedback = window._gFeedback || { sessao: null, historico: [] };
 const FEEDBACK_MOTIVOS = [
-  { id: 'pix',       label: 'Pix classificado errado' },
-  { id: 'renda',     label: 'Renda declarada incompatível' },
-  { id: 'transfer',  label: 'Transferência entre contas próprias' },
-  { id: 'comercial', label: 'Atividade comercial incorreta' },
-  { id: 'especie',   label: 'Espécie classificada errado' },
-  { id: 'outro',     label: 'Outro motivo' },
+  { id: 'pix',      label: 'Pix classificado errado' },
+  { id: 'renda',    label: 'Renda declarada incompatível' },
+  { id: 'transfer', label: 'Transferência entre contas próprias' },
+  { id: 'comercial',label: 'Atividade comercial incorreta' },
+  { id: 'especie',  label: 'Espécie classificada errado' },
+  { id: 'outro',    label: 'Outro motivo' },
 ];
 function gRenderFeedbackCard(containerEl,resultado){
   if(!containerEl||!resultado)return;
