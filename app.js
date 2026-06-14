@@ -2522,6 +2522,32 @@ function eRenderPreview(c,sources){
   document.getElementById('pvAlerts').innerHTML=alertsVisiveis.map(a=>{const cls=a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu';const showText=a.type!=='green';return`<div class="pal ${cls}"><span class="pal-ico">${a.icon}</span><div><strong>${sanitize(a.title||'')}</strong>${showText?'<br><span style="font-size:12px;opacity:0.85">'+sanitize(a.text||'')+'</span>':''}</div></div>`;}).join('');
 }
 
+// [FIX] _verifyPlanBeforeUnlock: verifica se o usuário tem plano ativo antes de revelar resultado.
+// Consultada por eUnlockResult() e por eUnlockResult() chamada via setUser/onAuthStateChange.
+async function _verifyPlanBeforeUnlock() {
+  // Sem usuário logado — bloqueia
+  if (!_currentUser || !sb) return false;
+  // Plano já em cache e não expirado — libera imediatamente
+  if (_currentUser._plano === 'pro' || _currentUser._plano === 'avulso') return true;
+  // Consulta Supabase para confirmar plano atual
+  try {
+    const { data } = await sb.from('profiles')
+      .select('plano, expires_at')
+      .eq('id', _currentUser.id)
+      .single();
+    if (!data) return false;
+    const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
+    const isExpired = expiresAt && expiresAt < new Date();
+    if ((data.plano === 'pro' || data.plano === 'avulso') && !isExpired) {
+      _currentUser._plano = data.plano; // atualiza cache
+      return true;
+    }
+    return false;
+  } catch(e) {
+    return false;
+  }
+}
+
 async function eUnlockResult(){
   const allowed=await _verifyPlanBeforeUnlock();
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
