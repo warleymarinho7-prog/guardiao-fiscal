@@ -11,6 +11,20 @@
 
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<!-- [FIX-CLS #8] Oculta banner de cookies ANTES do first paint para usuários com consent já dado.
+     Sem isso, o banner aparece via JS após DOMContentLoaded e causa CLS 0,32 nos elementos fixed.
+     Para visitantes novos: banner nasce visível no HTML (transform:translateY(0)), sem JS showBanner.
+     Para visitantes recorrentes: este script injeta a regra de ocultação antes de qualquer paint. -->
+<script>
+(function(){
+  try {
+    var c = localStorage.getItem('gf_cookie_consent');
+    if (c === 'accepted' || c === 'rejected') {
+      document.write('<style>#cookieBanner{transform:translateY(100%)!important;transition:none!important}</style>');
+    }
+  } catch(e) {}
+})();
+</script>
 <!-- Guardião Fiscal v19.0.0 | 2026-06-12 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
@@ -3735,12 +3749,14 @@ function _loadJsPDF() {
 
 <!-- ── Banner de cookies ── -->
 <style>
-#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(100%);transition:transform 0.3s ease;will-change:transform}
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(0);transition:transform 0.3s ease;will-change:transform}
 #cookieBanner p{font-size:12px;color:var(--muted2);margin:0;flex:1;min-width:180px;line-height:1.5}
 #cookieBanner a{color:var(--green)}
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
 .ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
+/* [FIX-CLS #8] padding-bottom reserva espaço do cookieBanner (≈68px) para visitantes novos.
+   Banner nasce visível no HTML — legalFooter já tem o espaço certo desde o first paint. */
 #legalFooter{text-align:center;padding:20px 16px 90px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
 #legalFooter a{color:var(--muted);text-decoration:none;margin:0 8px}
 #legalFooter a:hover{color:var(--muted2)}
@@ -3765,28 +3781,27 @@ function _loadJsPDF() {
 
 <script>
 (function(){
-  const consent = localStorage.getItem('gf_cookie_consent');
-  // Decisão anterior: respeita sem mostrar banner
+  var consent = localStorage.getItem('gf_cookie_consent');
+  // Visitante recorrente: banner já foi ocultado pelo script do <head>.
+  // Apenas garante PIXEL_ATIVO correto para o fluxo de pixels.
   if (consent === 'accepted') { return; }
   if (consent === 'rejected') { window.PIXEL_ATIVO = false; return; }
-  // Banner após interação — hadRecentInput:true → Chrome não conta no CLS
-  var _bannerShown = false;
-  function _showBanner() {
-    if (_bannerShown) return;
-    _bannerShown = true;
-    const b = document.getElementById('cookieBanner');
-    if (!b) return;
-    b.style.transform = 'translateY(0)';
+  // Visitante novo: banner já está visível no HTML (transform:translateY(0)).
+  // Aceita automaticamente ao interagir — igual ao comportamento anterior,
+  // mas sem o _showBanner que causava CLS ao aparecer após o first paint.
+  var _accepted = false;
+  function _autoAccept() {
+    if (_accepted) return;
+    _accepted = true;
     localStorage.setItem('gf_cookie_consent', 'accepted');
-    // Pixels carregam com delay após banner — evita reflow no mesmo frame do scroll
     setTimeout(function() {
       if (typeof _loadPixels === 'function') _loadPixels();
     }, 2000);
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(function(ev) {
-    window.addEventListener(ev, _showBanner, { once: true, passive: true });
+    window.addEventListener(ev, _autoAccept, { once: true, passive: true });
   });
-  setTimeout(_showBanner, 5000);
+  setTimeout(_autoAccept, 5000);
 })();
 function ckAccept() {
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
