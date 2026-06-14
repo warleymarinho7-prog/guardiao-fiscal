@@ -11,10 +11,6 @@
 
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-<!-- [FIX-CLS #8] Script inline: oculta cookieBanner e restaura posição dos botões ANTES do
-     primeiro paint para visitantes recorrentes (consent já dado). Zero CLS nesses casos.
-     Para visitantes novos: banner nasce visível (translateY(0) no CSS), botões sobem via
-     html:not(.banner-hidden) — tudo em CSS puro, sem JS no critical path. -->
 <script>
 (function(){
   try {
@@ -702,15 +698,7 @@ nav {
 
 .ext-card-body { padding:16px; }
 
-/* [FIX-CLS #12] previewReal/previewPlaceholder: contain:layout no paywallBlock isola o reflow
-   da troca placeholder→real dentro do próprio card, sem afetar elementos externos.
-   previewReal é populado pelo JS ANTES de display:block — conteúdo pronto no mesmo frame. */
-#paywallBlock { contain: layout; }
-#previewReal { display: none; overflow: hidden; width: 100%; box-sizing: border-box; }
-#previewPlaceholder { width: 100%; }
-
-/* [FIX-CLS #10] extStep3: contain:layout isola o reflow quando display:block é ativado —
-   o crescimento do card não propaga para elementos externos. display:none/block via JS original. */
+/* [FIX-CLS] extStep3: conteúdo renderizado antes de display:block — sem shift */
 #extStep3 { contain: layout; }
 
 /* upload zone */
@@ -2389,7 +2377,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                       <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
                     </div>
                     <div class="uc-price">
-                      <div class="uc-value" id="splitAvulsoPrice1"></div>
+                      <div class="uc-value" id="splitAvulsoPrice1">R$19,90</div>
                       <div class="uc-period">uso único</div>
                     </div>
                   </button>
@@ -2401,7 +2389,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                       <div class="uc-desc"><span id="ucProText">Análises ilimitadas + múltiplos extratos + histórico</span></div>
                     </div>
                     <div class="uc-price">
-                      <div class="uc-value" id="splitProPrice1"></div>
+                      <div class="uc-value" id="splitProPrice1">R$29,90</div>
                       <div class="uc-period">/mês</div>
                     </div>
                   </button>
@@ -2473,12 +2461,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <button class="upgrade-card" onclick="openCheckout('avulso')">
               <div class="uc-icon uc-icon-avulso">📄</div>
               <div class="uc-info"><div class="uc-name">Análise Avulsa</div><div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div></div>
-              <div class="uc-price"><div class="uc-value" id="splitAvulsoPrice2"></div><div class="uc-period">uso único</div></div>
+              <div class="uc-price"><div class="uc-value" id="splitAvulsoPrice2">R$19,90</div><div class="uc-period">uso único</div></div>
             </button>
             <button class="upgrade-card featured" onclick="openCheckout('pro')">
               <div class="uc-icon uc-icon-pro">🛡️</div>
               <div class="uc-info"><div class="best-tag">MELHOR CUSTO</div><div class="uc-name">Plano Pro</div><div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div></div>
-              <div class="uc-price"><div class="uc-value" id="splitProPrice2"></div><div class="uc-period">/mês</div></div>
+              <div class="uc-price"><div class="uc-value" id="splitProPrice2">R$29,90</div><div class="uc-period">/mês</div></div>
             </button>
           </div>
         </div>
@@ -3085,7 +3073,7 @@ function guiaTab(banco) {
                 Veja cada fator de risco com os valores exatos do seu extrato.
               </div>
               <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:6px;white-space:normal;line-height:1.4;padding:14px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:var(--ff);font-size:13px;font-weight:800;cursor:pointer;box-shadow:var(--glow-green)">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
-              <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--muted2);font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer">📄 Análise avulsa — <span id="paywallAvulsoPrice"></span></button>
+              <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--muted2);font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer">📄 Análise avulsa — <span id="paywallAvulsoPrice">R$19,90</span></button>
               <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">🔒 Nenhum dado enviado · Processamento local · Cancele quando quiser</div>
             </div>
 
@@ -3173,81 +3161,77 @@ function guiaTab(banco) {
           <div id="pCausasTop" style="display:none"></div>
         </div>
       </div>
-
-      <!-- [FIX-CLS #13] Seção de credibilidade movida para DENTRO do extStep3.
-           Antes estava fora → quando extStep3 expandia de height:0, ela era empurrada para baixo → CLS 0,43.
-           Agora aparece e some junto com o card → zero shift externo. -->
-      <div style="max-width:min(600px,100%);margin:0 auto;padding:32px 16px 48px;box-sizing:border-box">
-        <div style="border-top:1px solid var(--border);padding-top:32px">
-
-          <!-- Scanner fiscal — título + descrição -->
-          <div style="margin-bottom:28px">
-            <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-family:var(--ff)">Scanner fiscal</div>
-            <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita Federal. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
-          </div>
-
-          <!-- Grid 4 benefícios -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-              <div style="font-size:18px;margin-bottom:6px">🔍</div>
-              <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
-            </div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-              <div style="font-size:18px;margin-bottom:6px">⚠️</div>
-              <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
-            </div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-              <div style="font-size:18px;margin-bottom:6px">📊</div>
-              <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
-            </div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-              <div style="font-size:18px;margin-bottom:6px">📄</div>
-              <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
-              <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
-            </div>
-          </div>
-
-          <!-- O que a engine detecta -->
-          <div style="margin-bottom:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;font-family:var(--ff)">// 40+ verificações automáticas</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-              <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
-              <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
-              <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
-              <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
-              <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
-              <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
-            </div>
-            <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">A Receita Federal usa mais de 160 filtros automatizados para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira — antes da sua declaração ser entregue.</div>
-          </div>
-
-          <!-- LGPD detalhado + Metodologia -->
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-              <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">📋 Metodologia</div>
-              <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
-            </div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-              <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">🔒 Privacidade e LGPD</div>
-              <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária. Dados de autenticação (e-mail), métricas agregadas da análise (score, totais financeiros arredondados) e dados de pagamento são tratados de forma segura pelos serviços Supabase e Mercado Pago, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>. <a href="/privacidade" style="color:var(--green);text-decoration:underline">Política de Privacidade</a></div>
-            </div>
-            <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
-              oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
-              Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
-              <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
-            </div>
-          </div>
-
-        </div>
-      </div>
-      <!-- /FIX-CLS #13 -->
-
-    </div><!-- /ext-card extStep3 -->
+    </div>
 
   </div>
+  </div>
+
+  <!-- ── Seção de credibilidade (abaixo do fold) ── -->
+  <div style="max-width:min(600px,100%);margin:0 auto;padding:32px 16px 48px;box-sizing:border-box">
+    <div style="border-top:1px solid var(--border);padding-top:32px">
+
+      <!-- Scanner fiscal — título + descrição -->
+      <div style="margin-bottom:28px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-family:var(--ff)">Scanner fiscal</div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita Federal. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
+      </div>
+
+      <!-- Grid 4 benefícios -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">🔍</div>
+          <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">⚠️</div>
+          <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">📊</div>
+          <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:18px;margin-bottom:6px">📄</div>
+          <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
+        </div>
+      </div>
+
+      <!-- O que a engine detecta -->
+      <div style="margin-bottom:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;font-family:var(--ff)">// 40+ verificações automáticas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Espécie × e-Financeira</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Atividade comercial oculta</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Anomalia temporal</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
+          <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">A Receita Federal usa mais de 160 filtros automatizados para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira — antes da sua declaração ser entregue.</div>
+      </div>
+
+      <!-- LGPD detalhado + Metodologia -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">📋 Metodologia</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">🔒 Privacidade e LGPD</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária. Dados de autenticação (e-mail), métricas agregadas da análise (score, totais financeiros arredondados) e dados de pagamento são tratados de forma segura pelos serviços Supabase e Mercado Pago, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>. <a href="/privacidade" style="color:var(--green);text-decoration:underline">Política de Privacidade</a></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
+          oguardiaofiscal.com.br · Simulador educacional e preventivo<br>
+          Os resultados são estimativas com base em padrões fiscais conhecidos.<br>
+          <strong>Não constituem parecer jurídico ou contábil.</strong> Consulte sempre um profissional habilitado.
+        </div>
+      </div>
+
+    </div>
   </div>
 
 </div>
@@ -3304,7 +3288,7 @@ function guiaTab(banco) {
           <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV, OFX e PDF (25 bancos)</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
         </div>
-        <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — <span id="planAvulsoCta"></span> →</button>
+        <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — <span id="planAvulsoCta">R$19,90</span> →</button>
       </div>
 
       <!-- Pro -->
@@ -3317,7 +3301,7 @@ function guiaTab(banco) {
             <div class="plan-tagline">Monitoramento fiscal o ano todo</div>
           </div>
           <div class="plan-price">
-            <div class="plan-value" id="planProPrice"></div>
+            <div class="plan-value" id="planProPrice">R$29,90</div>
             <div class="plan-period">/mês</div>
           </div>
         </div>
@@ -3763,20 +3747,17 @@ function _loadJsPDF() {
 <!-- ── Banner de cookies ── -->
 <style>
 #cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(0);transition:transform 0.3s ease;will-change:transform}
-/* [FIX-CLS #8] Visitante novo: banner visível por padrão → botões ficam acima desde o first paint.
-   Visitante recorrente: html.banner-hidden (adicionado pelo head script) → posição padrão. */
-html:not(.banner-hidden) #btnWhatsapp { bottom: 92px; }
-html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
-#btnWhatsapp, #btnFeedback { transition: bottom 0.3s ease, transform 0.2s, box-shadow 0.2s; }
+html.banner-hidden #cookieBanner{display:none!important}
+html:not(.banner-hidden) #btnWhatsapp{bottom:92px}
+html:not(.banner-hidden) #btnFeedback{bottom:152px}
+#btnWhatsapp,#btnFeedback{transition:bottom 0.3s ease,transform 0.2s,box-shadow 0.2s}
+#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
 #cookieBanner p{font-size:12px;color:var(--muted2);margin:0;flex:1;min-width:180px;line-height:1.5}
 #cookieBanner a{color:var(--green)}
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
 .ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
-/* [FIX-CLS #14] legalFooter: padding fixo em 28px sempre.
-   O cookieBanner é position:fixed e não empurra o legalFooter —
-   reservar padding para ele causava CLS quando banner-hidden mudava o valor. */
-#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
+#legalFooter{text-align:center;padding:20px 16px 90px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
 #legalFooter a{color:var(--muted);text-decoration:none;margin:0 8px}
 #legalFooter a:hover{color:var(--muted2)}
 </style>
@@ -3801,26 +3782,18 @@ html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
 <script>
 (function(){
   const consent = localStorage.getItem('gf_cookie_consent');
-  // [FIX-CLS #8] Visitante recorrente: banner já oculto pelo head script, só garante PIXEL_ATIVO.
   if (consent === 'accepted') { return; }
   if (consent === 'rejected') { window.PIXEL_ATIVO = false; return; }
-  // Visitante novo: banner já está visível no HTML (translateY(0) no CSS).
-  // _autoAccept grava consent e carrega pixels após interação — sem tocar no DOM do banner.
+  // Visitante novo: banner já visível no HTML. _autoAccept grava consent e oculta.
   var _accepted = false;
   function _autoAccept() {
     if (_accepted) return;
     _accepted = true;
     localStorage.setItem('gf_cookie_consent', 'accepted');
-    // [FIX-CLS #14] Oculta banner e adiciona banner-hidden → legalFooter padding vai de 90px→28px
-    // dentro da janela hadRecentInput (disparado por scroll/click) — Chrome não conta como CLS.
-    // Para o timeout de 5s: oculta mesmo assim pois o shift pós-5s é menos impactante que
-    // ter o padding permanentemente errado na próxima visita.
     var b = document.getElementById('cookieBanner');
     if (b) { b.style.transform = 'translateY(100%)'; setTimeout(function(){ b.style.display='none'; }, 350); }
     document.documentElement.classList.add('banner-hidden');
-    setTimeout(function() {
-      if (typeof _loadPixels === 'function') _loadPixels();
-    }, 2000);
+    setTimeout(function() { if (typeof _loadPixels === 'function') _loadPixels(); }, 2000);
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(function(ev) {
     window.addEventListener(ev, _autoAccept, { once: true, passive: true });
@@ -3831,6 +3804,7 @@ function ckAccept() {
   var b = document.getElementById('cookieBanner');
   if (b) { b.style.transform = 'translateY(100%)'; setTimeout(function(){ b.style.display='none'; }, 350); }
   document.documentElement.classList.add('banner-hidden');
+
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
