@@ -1346,19 +1346,27 @@ function selectProfile(id, bodyId) {
     // 1. Popula conteúdo com painel ainda invisível
     revealResult(p, heroId, alertsId, isDesktop);
     requestAnimationFrame(() => {
-      // 2. Fixa altura do container no valor atual (antes da troca)
-      // para que o quizWrap não encolha quando questionPanel some
       if (!isDesktop) {
-        // Mede mResultPanel diretamente — scrollHeight correto mesmo com visibility:hidden
-        const qw  = document.getElementById('quizWrap');
+        // 2. Torna mResultPanel visível temporariamente para medir altura real
         const mrp = document.getElementById('mResultPanel');
-        const btn = document.getElementById('quizExtratoBtn');
-        if (qw && mrp) {
-          const btnH = btn ? btn.offsetHeight + 16 : 0;
-          qw.style.minHeight = (mrp.scrollHeight + btnH + 60) + 'px';
+        const qw  = document.getElementById('quizWrap');
+        if (mrp && qw) {
+          mrp.style.visibility = 'visible';
+          mrp.style.position = 'absolute';
+          mrp.style.pointerEvents = 'none';
+          const h = mrp.scrollHeight;
+          mrp.style.visibility = 'hidden';
+          mrp.style.position = '';
+          mrp.style.pointerEvents = '';
+          // 3. Fixa quizWrap com altura real medida
+          const tabs = qw.querySelector('.tabs');
+          const btn  = document.getElementById('quizExtratoBtn');
+          const tabsH = tabs ? tabs.offsetHeight : 48;
+          const btnH  = btn  ? btn.offsetHeight + 16 : 71;
+          qw.style.minHeight = (h + tabsH + btnH) + 'px';
         }
       }
-      // 3. Troca visibilidade — conteúdo já está pronto, container já tem altura
+      // 4. Troca visibilidade
       document.getElementById(panelQ).style.visibility = 'hidden';
       document.getElementById(panelR).style.visibility = 'visible';
       if (!isDesktop) {
