@@ -20,7 +20,7 @@
   try {
     var c = localStorage.getItem('gf_cookie_consent');
     if (c === 'accepted' || c === 'rejected') {
-      document.write('<style>#cookieBanner{transform:translateY(100%)!important;transition:none!important}</style>');
+      document.write('<style>#cookieBanner{display:none!important}</style>');
       document.documentElement.classList.add('banner-hidden');
     }
   } catch(e) {}
@@ -3781,7 +3781,7 @@ html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
 #legalFooter a:hover{color:var(--muted2)}
 </style>
 
-<div id="cookieBanner">
+<div id="cookieBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:9999;transform:translateY(0)">
   <p>Usamos cookies de análise e marketing para melhorar sua experiência. Ao continuar navegando, você concorda com o uso de cookies.
   <a href="/politica-cookies.html" target="_blank">Saiba mais</a></p>
   <button class="ck-btn ck-reject" onclick="ckReject()">Recusar marketing</button>
@@ -3816,7 +3816,7 @@ html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
     // Para o timeout de 5s: oculta mesmo assim pois o shift pós-5s é menos impactante que
     // ter o padding permanentemente errado na próxima visita.
     var b = document.getElementById('cookieBanner');
-    if (b) b.style.transform = 'translateY(100%)';
+    if (b) { b.style.transform = 'translateY(100%)'; setTimeout(function(){ b.style.display='none'; }, 350); }
     document.documentElement.classList.add('banner-hidden');
     setTimeout(function() {
       if (typeof _loadPixels === 'function') _loadPixels();
@@ -3828,8 +3828,9 @@ html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
   setTimeout(_autoAccept, 5000);
 })();
 function ckAccept() {
-  document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-  document.documentElement.classList.add('banner-hidden'); // botões descem via CSS transition
+  var b = document.getElementById('cookieBanner');
+  if (b) { b.style.transform = 'translateY(100%)'; setTimeout(function(){ b.style.display='none'; }, 350); }
+  document.documentElement.classList.add('banner-hidden');
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
@@ -3844,8 +3845,9 @@ function ckReject() {
   window.PIXEL_ATIVO = false;
   window._pixelsLoaded = false;
   window._fbqQueue = [];
-  document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-  document.documentElement.classList.add('banner-hidden'); // botões descem via CSS transition
+  var bR = document.getElementById('cookieBanner');
+  if (bR) { bR.style.transform = 'translateY(100%)'; setTimeout(function(){ bR.style.display='none'; }, 350); }
+  document.documentElement.classList.add('banner-hidden');
 }
 </script>
 <!-- ===== WHATSAPP + FEEDBACK ===== -->
