@@ -2440,10 +2440,10 @@ async function eRunAll(){
     document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
     _eConsolidated=consolidated;_eSources=results;
     if(_currentUser&&sb){(async()=>{try{const _nivel=consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo';const _payload={user_id:_currentUser.id,score:consolidated.score,nivel_risco:_nivel,nivel_label:consolidated.score<=20?'Baixo risco':consolidated.score<=45?'Atenção':consolidated.score<=70?'Risco elevado':'Risco crítico',perfil_usuario:window._perfilUsuario||null,renda_declarada:window._rendaDeclaradaMensal||null,total_creditos:Math.round(consolidated.totalCredits||0),total_debitos:Math.round(consolidated.totalDebits||0),total_txns:consolidated.totalTxns||0,pix_total:Math.round(consolidated.pixTotal||0),especie_total:Math.round(consolidated.especieTotal||0),indice_consumo:Math.round((consolidated.indiceConsumo||0)*100),pix_pct:consolidated.totalCredits>0?Math.round(consolidated.pixTotal/consolidated.totalCredits*100):0,num_alertas:(consolidated.alerts||[]).length,num_fontes:results.length,versao_engine:'v8.0',created_at:new Date().toISOString(),fatores:JSON.stringify((results||[]).flatMap(r=>(r.fatores||[]).filter(f=>f.peso>0)).sort((a,b)=>b.peso-a.peso).slice(0,6).map(f=>({motivo:f.motivo||'',peso:f.peso||0,fatorKey:f.fatorKey||'',quandoNaoERisco:f.quandoNaoERisco||'',confianca:Math.round((f.confianca||0)*100)}))),alertas:JSON.stringify((consolidated.alerts||[]).map(a=>({type:a.type||'',icon:a.icon||'',title:a.title||'',text:a.text||''})))};await sb.from('analyses').insert(_payload);}catch(e){}})();}
-    // [FIX-CLS #10] visibility em vez de display:block — extStep3 já está no DOM, zero reflow
+    // [FIX-CLS #10] classList.add('visible') revela extStep3 sem reflow externo
     eRenderPreview(consolidated,results);
     requestAnimationFrame(() => {
-      s3.style.visibility='visible';
+      s3.classList.add('visible');
       s3.scrollIntoView({behavior:'smooth',block:'start'});
     });
   }finally{
@@ -2606,7 +2606,7 @@ function eResetAll(){
   document.getElementById('fileList').innerHTML='';
   document.getElementById('limitBar').classList.remove('visible'); // [FIX-CLS #11]
   document.getElementById('actBar').classList.remove('visible');   // [FIX-CLS #11]
-  document.getElementById('extStep3').style.visibility='hidden';  // [FIX-CLS #10]
+  document.getElementById('extStep3').classList.remove('visible'); // [FIX-CLS #10]
   document.getElementById('pFillExt').style.width='0%';
   document.getElementById('dzIco').textContent='📂';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
