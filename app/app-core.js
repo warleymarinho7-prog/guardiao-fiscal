@@ -899,12 +899,12 @@ function _bootSupabase() {
   _initSession();
 }
 
-if (typeof supabase !== 'undefined') {
-  _bootSupabase();
-} else {
-  window._supabaseQueue = window._supabaseQueue || [];
-  window._supabaseQueue.push(_bootSupabase);
-}
+// [LAZY] Supabase boot movido para app-auth.js
+// app-core.js não inicializa Supabase diretamente
+window._supabaseQueue = window._supabaseQueue || [];
+window._supabaseQueue.push(function() {
+  if (typeof _bootSupabase === 'function') _bootSupabase();
+});
 
 function setUser(user) {
   _currentUser = user;
