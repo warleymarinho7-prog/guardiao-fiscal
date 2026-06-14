@@ -1360,6 +1360,8 @@ function selectProfile(id, bodyId) {
         requestAnimationFrame(() => {
           document.getElementById(panelQ).style.visibility = 'hidden';
           document.getElementById(panelR).style.visibility = 'visible';
+          // [FIX] Revela botão junto com o resultado — estava ficando oculto permanentemente
+          if (btn) btn.style.visibility = 'visible';
         });
       });
     } else {
