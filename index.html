@@ -687,19 +687,12 @@ nav {
 
 .ext-card-body { padding:16px; }
 
-/* [FIX-CLS #12] previewReal/previewPlaceholder: visibility em vez de display.
-   paywallBlock reserva altura do maior filho (previewReal) desde o first paint —
-   a troca de conteúdo não altera o tamanho externo, zero shift. */
-#paywallBlock { position: relative; }
-#previewReal, #previewPlaceholder { width: 100%; box-sizing: border-box; }
-#previewReal {
-  overflow: hidden;
-  visibility: hidden;    /* oculto até JS revelar */
-  position: absolute;    /* sai do fluxo para não empilhar com placeholder */
-  top: 0; left: 0; right: 0;
-}
-#previewPlaceholder { visibility: visible; }
-   JS faz visibility:visible — nunca mais display:none→block, que causava shift 0,43. */
+/* [FIX-CLS #12] previewReal/previewPlaceholder: contain:layout no paywallBlock isola o reflow
+   da troca placeholder→real dentro do próprio card, sem afetar elementos externos.
+   previewReal é populado pelo JS ANTES de display:block — conteúdo pronto no mesmo frame. */
+#paywallBlock { contain: layout; }
+#previewReal { display: none; overflow: hidden; width: 100%; box-sizing: border-box; }
+#previewPlaceholder { width: 100%; }
 #extStep3 { contain: layout; visibility: hidden; }
 
 /* upload zone */
@@ -3043,7 +3036,7 @@ function guiaTab(banco) {
         <div id="paywallBlock">
 
           <!-- ── PRÉVIA REAL (preenchida pelo JS após análise) ── -->
-          <div id="previewReal" style="overflow:hidden;width:100%;box-sizing:border-box">
+          <div id="previewReal" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
             <!-- Score e nível — VISÍVEL -->
             <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-bottom:8px">
