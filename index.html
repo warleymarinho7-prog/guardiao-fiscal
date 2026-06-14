@@ -3773,13 +3773,10 @@ html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
 .ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
-#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout;transition:padding-bottom 0.3s ease}
-/* [FIX-CLS #14] padding-bottom reserva espaço do banner apenas quando ele está visível.
-   Visitante recorrente (banner-hidden no head): padding normal desde o first paint — zero shift.
-   Visitante novo: 90px reservado; quando banner some (ckAccept/ckReject), padding transiciona
-   suavemente para 28px junto com o banner saindo — browser não registra como layout shift
-   porque ocorre dentro da janela de 500ms do input do usuário (hadRecentInput). */
-html:not(.banner-hidden) #legalFooter { padding-bottom: 90px; }
+/* [FIX-CLS #14] legalFooter: padding fixo em 28px sempre.
+   O cookieBanner é position:fixed e não empurra o legalFooter —
+   reservar padding para ele causava CLS quando banner-hidden mudava o valor. */
+#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
 #legalFooter a{color:var(--muted);text-decoration:none;margin:0 8px}
 #legalFooter a:hover{color:var(--muted2)}
 </style>
