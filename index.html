@@ -709,10 +709,9 @@ nav {
 #previewReal { display: none; overflow: hidden; width: 100%; box-sizing: border-box; }
 #previewPlaceholder { width: 100%; }
 
-/* [FIX-CLS #10] extStep3: height:0 + overflow:hidden quando oculto → zero espaço em branco.
-   JS usa classList.add('visible') para revelar — contain:layout isola reflow interno. */
-#extStep3 { contain: layout; visibility: hidden; height: 0; overflow: hidden; }
-#extStep3.visible { visibility: visible; height: auto; overflow: visible; }
+/* [FIX-CLS #10] extStep3: contain:layout isola o reflow quando display:block é ativado —
+   o crescimento do card não propaga para elementos externos. display:none/block via JS original. */
+#extStep3 { contain: layout; }
 
 /* upload zone */
 .upload-zone {
@@ -1109,9 +1108,7 @@ nav {
 .chip{font-size:11px;padding:3px 10px;border-radius:var(--radius-card);border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
 .chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
 .limit-bar{display:flex;align-items:center;gap:8px;margin-top:8px;
-  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;
-  visibility:hidden;height:0;overflow:hidden;padding-top:0;padding-bottom:0;margin-top:0}
-.limit-bar.visible{visibility:visible;height:auto;padding:10px 14px;margin-top:8px;overflow:visible}
+  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
 .limit-dots{display:none}
 .ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
   display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
@@ -1135,10 +1132,7 @@ nav {
 .fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
 .fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
 .fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
-/* [FIX-CLS #11] actBar e limitBar: visibility:hidden+height:0 em vez de display:none.
-   Assim o JS pode revelar com visibility:visible sem nenhum reflow no layout externo. */
-.act-bar{padding:10px 16px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:6px;visibility:hidden;height:0;overflow:hidden;padding-top:0;padding-bottom:0;border-top:none;transition:visibility 0s,height 0s}
-.act-bar.visible{visibility:visible;height:auto;padding:10px 16px;border-top:1px solid var(--border);overflow:visible}
+.act-bar{padding:10px 16px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .prog-ext{flex:1;min-width:80px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
 .act-msg{font-size:12px;color:var(--muted2);flex:1;min-width:80px}
@@ -2991,14 +2985,14 @@ function guiaTab(banco) {
             <div class="dz-sub" style="font-size:11px">até 5 extratos · bancos diferentes</div>
           </div>
 
-        <div class="limit-bar" id="limitBar">
+        <div class="limit-bar" id="limitBar" style="display:none">
           <div class="limit-dots" id="ldots"></div>
           <div class="limit-txt"><strong id="limitTxt">0 de 5</strong> extratos</div>
           <span id="limitNote" style="font-size:11px;color:var(--muted2);margin-left:auto"></span>
         </div>
         <div class="file-list" id="fileList"></div>
         <div class="err-ext" id="errExt"></div>
-      <div class="act-bar" id="actBar">
+      <div class="act-bar" id="actBar" style="display:none">
         <div class="prog-ext"><div class="prog-ext-fill" id="pFillExt" style="width:0%"></div></div>
         <span class="act-msg" id="actMsg">Pronto para analisar</span>
 
@@ -3041,7 +3035,7 @@ function guiaTab(banco) {
     </div>
 
     <!-- STEP 3: resultado com paywall -->
-    <div class="ext-card" id="extStep3">
+    <div class="ext-card" id="extStep3" style="display:none">
       <div class="ext-card-header">
         <div class="ext-step-num locked" id="s3num">3</div>
         <div class="ext-step-info">
