@@ -6,19 +6,7 @@
     },
     {
       "source": "/app.js",
-      "destination": "/app/app-core.js"
-    },
-    {
-      "source": "/app-core.js",
-      "destination": "/app/app-core.js"
-    },
-    {
-      "source": "/app-auth.js",
-      "destination": "/app/app-auth.js"
-    },
-    {
-      "source": "/app-extrato.js",
-      "destination": "/app/app-extrato.js"
+      "destination": "/app/app.js"
     },
     {
       "source": "/fiscal-worker.js",
