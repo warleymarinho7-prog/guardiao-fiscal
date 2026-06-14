@@ -1343,18 +1343,18 @@ function selectProfile(id, bodyId) {
     revealResult(p, heroId, alertsId, isDesktop);
 
     if (!isDesktop) {
-      // [FIX-CLS v2] Reserva altura ANTES de trocar visibilidade — zero layout shift
-      // rAF1: quizWrap ainda exibe mQuestionPanel (visível) + mResultPanel (invisível mas populado)
-      //       scrollHeight captura altura total real — visibility:hidden não zera o pai
-      // rAF2: troca visibilidade com espaço já reservado — browser não precisa reajustar layout
+      // [FIX-CLS v3] Esconde quizExtratoBtn ANTES de medir scrollHeight.
+      // Problema anterior: minHeight era capturado com o botão visível (inclui sua altura).
+      // No rAF2 o botão sumia → mResultPanel aparecia menor que o espaço reservado → conteúdo
+      // abaixo subia → shift 0,0822. Agora a medição já exclui o botão, altura bate certa.
       requestAnimationFrame(() => {
+        const btn = document.getElementById('quizExtratoBtn');
+        if (btn) btn.style.visibility = 'hidden';
         const qw = document.getElementById('quizWrap');
         if (qw) qw.style.minHeight = qw.scrollHeight + 'px';
         requestAnimationFrame(() => {
           document.getElementById(panelQ).style.visibility = 'hidden';
           document.getElementById(panelR).style.visibility = 'visible';
-          const btn = document.getElementById('quizExtratoBtn');
-          if (btn) btn.style.visibility = 'hidden';
         });
       });
     } else {
