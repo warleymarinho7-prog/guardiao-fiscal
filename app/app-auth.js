@@ -3,6 +3,257 @@
 // Módulo de autenticação e checkout — carregado sob demanda
 // Supabase + Login + Cadastro + Mercado Pago
 // ═══════════════════════════════════════════════
+
+async function openCheckout(plan) {
+  // Se usuário já tem plano ativo — verifica antes de disparar Pixel
+  if (_currentUser && sb) {
+    let data = null;
+    try { const res = await sb.from('profiles').select('plano').eq('id', _currentUser.id).single(); data = res.data; } catch(e) { data = null; }
+    const planoAtual = data?.plano;
+    if (planoAtual) _currentUser._plano = planoAtual;
+    if (planoAtual === 'pro' || (planoAtual === 'avulso' && plan === 'avulso')) {
+      if (_eConsolidated) { eUnlockResult(); return; }
+      showPage('extrato'); return;
+    }
+  }
+
+  // [FIX-PIXEL] Pixel só dispara aqui — depois de confirmar que não tem plano ativo
+  if (typeof window.trackFb === 'function') {
+    window.trackFb('track', 'InitiateCheckout', { content_name: 'plano_' + plan, currency: 'BRL', value: plan === 'pro' ? 29.90 : 19.90 }, { eventID: 'ic_' + Date.now() });
+    window.trackFb('trackCustom', 'CheckoutStarted', { plan: plan }, { eventID: 'cs_' + Date.now() });
+  }
+  if(typeof clarity==='function') clarity('event','CheckoutStarted');
+
+  if (PRO_FREE_MODE && plan !== 'avulso') {
+    if (_eConsolidated) {
+      closeCheckoutDirect();
+      eUnlockResult();
+    } else {
+      showPage('extrato');
+      setTimeout(() => {
+        const step2 = document.getElementById('extStep2');
+        if (step2) step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+    return;
+  }
+
+  currentPlan = plan;
+  const p = plans[plan];
+
+  const _os = document.getElementById('orderSummary');
+  if (_os) {
+    _os.innerHTML = `
+    <div class="os-icon">${sanitize(p.icon||'')}</div>
+    <div class="os-info">
+      <div class="os-name">${sanitize(p.name||'')}</div>
+      <div class="os-desc">${sanitize(p.desc||'')}</div>
+    </div>
+    <div class="os-price">${sanitize(p.price||'')}<span style="font-size:11px;color:var(--muted);font-family:var(--ff);font-weight:400"> ${sanitize(p.period||'')}</span></div>
+  `;
+  }
+
+  if (_currentUser) {
+    setCheckoutStep(2);
+  } else {
+    setCheckoutStep(1);
+  }
+  closeAllOverlays();
+  document.getElementById('checkoutOverlay').classList.add('show');
+  document.getElementById('checkoutModal').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+// ── MERCADO PAGO ─────────────────────────────────────────────
+var MP_PUBLIC_KEY = 'APP_USR-60e9c4f7-757b-48da-a367-8b3785a4cf72';
+var _mpInstance = null;
+var _mpBrick    = null;
+// [FIX-TIMEOUT] Referência do setTimeout do checkout para cancelamento
+var _checkoutStepTimer = null;
+
+function getMpInstance() {
+  if (!_mpInstance) _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+  return _mpInstance;
+}
+
+function switchPayTab(tab) {
+  const paneCartao = document.getElementById('payPaneCartao');
+  const paneOutros = document.getElementById('payPaneOutros');
+  const tabC = document.getElementById('tabCartao');
+  const tabO = document.getElementById('tabOutros');
+
+  if (tab === 'cartao') {
+    paneCartao.style.display = 'block';
+    paneOutros.style.display = 'none';
+    tabC.style.background = 'var(--surface)';
+    tabC.style.color      = 'var(--text)';
+    tabO.style.background = 'transparent';
+    tabO.style.color      = 'var(--muted)';
+    // Checkout Pro: não inicializa Brick aqui
+  } else {
+    paneCartao.style.display = 'none';
+    paneOutros.style.display = 'block';
+    tabC.style.background = 'transparent';
+    tabC.style.color      = 'var(--muted)';
+    tabO.style.background = 'var(--surface)';
+    tabO.style.color      = 'var(--text)';
+  }
+}
+
+async function initMpBrick() {
+  const container = document.getElementById('mpBrickContainer');
+  if (!container) return;
+
+  const isProd = window.location.hostname === 'oguardiaofiscal.com.br' ||
+                 window.location.hostname === 'www.oguardiaofiscal.com.br';
+
+  if (!isProd) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:24px 16px">
+        <div style="font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6">
+          O formulário de cartão está disponível apenas no site oficial.<br>
+          <strong style="color:var(--text)">oguardiaofiscal.com.br</strong>
+        </div>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
+
+  if (typeof MercadoPago === 'undefined') {
+    if (window._mpSDKPreloading) {
+      await new Promise((resolve) => {
+        const poll = setInterval(() => {
+          if (typeof MercadoPago !== 'undefined' || !window._mpSDKPreloading) {
+            clearInterval(poll);
+            resolve();
+          }
+        }, 100);
+        setTimeout(() => { clearInterval(poll); resolve(); }, 5000);
+      });
+    }
+
+    if (typeof MercadoPago === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://sdk.mercadopago.com/js/v2';
+        script.onload  = () => resolve();
+        script.onerror = (e) => { reject(new Error('Não foi possível carregar o SDK do Mercado Pago. Tente desativar extensões do navegador (ex: ad blocker) e recarregue a página.')); };
+        document.head.appendChild(script);
+      }).catch(err => {
+        showBrickFallback(container, err.message);
+        return null;
+      });
+    }
+
+    if (typeof MercadoPago === 'undefined') {
+      showBrickFallback(container, 'SDK bloqueado. Desative extensões como ad blocker e tente novamente, ou use Pix/Boleto.');
+      return;
+    }
+  }
+
+  try {
+    const mp = getMpInstance();
+    const bricksBuilder = mp.bricks();
+    const amountVal = PRICES[currentPlan]?.value ?? PRICES.avulso.value;
+
+    const brickTimeout = setTimeout(() => {
+      if (container && container.innerHTML.includes('Carregando')) {
+        showBrickFallback(container, 'Tempo limite excedido ao carregar o formulário.');
+      }
+    }, 15000);
+
+    _mpBrick = await bricksBuilder.create('cardPayment', 'mpBrickContainer', {
+      initialization: {
+        amount: amountVal,
+        payer: { email: _currentUser?.email || '' },
+      },
+      customization: {
+        visual: { style: { theme: 'dark' }, hideFormTitle: true, hidePaymentButton: false },
+        paymentMethods: { maxInstallments: currentPlan === 'pro' ? 1 : 3 },
+      },
+      callbacks: {
+        onReady: () => { clearTimeout(brickTimeout); },
+        onSubmit: async (cardData) => { clearTimeout(brickTimeout); await processCardPayment(cardData); },
+        onError: (err) => {
+          clearTimeout(brickTimeout);
+          const cause = err?.cause?.[0]?.description || err?.message || JSON.stringify(err);
+          showBrickFallback(container, cause);
+        },
+      },
+    });
+  } catch (e) {
+    showBrickFallback(container, e?.message || String(e));
+  }
+}
+
+function showBrickFallback(container, msg) {
+  if (!container) return;
+  container.innerHTML = `
+    <div style="text-align:center;padding:20px;font-size:13px">
+      <div style="color:var(--red);margin-bottom:8px;font-weight:600">Não foi possível carregar o formulário de cartão.</div>
+      <div style="color:var(--muted);font-size:11px;margin-bottom:16px;line-height:1.5">${msg || 'Erro desconhecido'}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="_mpBrick=null;initMpBrick()" style="padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer">🔄 Tentar novamente</button>
+        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:8px;color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
+      </div>
+    </div>`;
+}
+
+function _initProSubscriptionUI() {
+  const container = document.getElementById('mpBrickContainer');
+  if (!container) return;
+  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
+
+  container.innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+      <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
+        💳 <strong style="color:var(--text)">Cartão de crédito</strong> — cobrança automática mensal<br>
+        <span style="font-size:11px;color:var(--muted)">Você será redirecionado para autorizar a assinatura no Mercado Pago</span>
+      </div>
+      <div id="mpProErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+      <button class="btn-pay" id="btnProSubscribe" onclick="startProSubscription()" style="margin-bottom:0">
+        <span id="btnProSubTxt">Assinar Pro — R$29,90/mês →</span>
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px">⚠️ Você será redirecionado para autorizar a cobrança recorrente</div>
+    </div>`;
+}
+
+function _initAvulsoCheckoutProUI() {
+  const container = document.getElementById('mpBrickContainer');
+  if (!container) return;
+  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
+
+  container.innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+      <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
+        💳 <strong style="color:var(--text)">Cartão, Pix ou Boleto</strong> — pagamento único<br>
+        <span style="font-size:11px;color:var(--muted)">Você será redirecionado para finalizar o pagamento no Mercado Pago</span>
+      </div>
+      <div id="mpAvulsoErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+      <button class="btn-pay" id="btnAvulsoPay" onclick="startAvulsoCheckoutPro()" style="margin-bottom:0">
+        <span id="btnAvulsoTxt">Pagar R$19,90 →</span>
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px">🔒 Pagamento processado pelo Mercado Pago · PCI DSS</div>
+    </div>`;
+}
+
+async function startAvulsoCheckoutPro() {
+  const btn = document.getElementById('btnAvulsoTxt');
+  const errEl = document.getElementById('mpAvulsoErr');
+  if (errEl) errEl.style.display = 'none';
+  if (btn) btn.textContent = 'Gerando link de pagamento...';
+  document.getElementById('btnAvulsoPay').disabled = true;
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const newWin = !isMobile ? window.open('', '_blank') : null;
+
+  try {
+    if (!sb) throw new Error('Serviço indisponível. Recarregue a página.');
+    const { data: { session }, error: sessErr } = await sb.auth.getSession();
+    if (sessErr || !session) throw new Error('Sessão expirada. Faça login novamente.');
+
     const res = await fetch(`${SUPA_URL}/functions/v1/create-mp-preference`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
@@ -150,7 +401,7 @@ function showCheckoutSuccess() {
   if (_eConsolidated) setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 2000);
 }
 
-function _closeCheckoutDirectImpl() {
+function closeCheckoutDirect() {
   // [FIX-TIMEOUT] Cancela o timer do setCheckoutStep para evitar init do Brick em modal fechado
   if (_checkoutStepTimer) { clearTimeout(_checkoutStepTimer); _checkoutStepTimer = null; }
   if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
@@ -299,7 +550,7 @@ async function handleMpReturn() {
   }
 }
 
-async function _goToPayImpl() {
+async function goToPay() {
   const name = document.getElementById('coName').value.trim();
   const email = document.getElementById('coEmail').value.trim();
   const senha = document.getElementById('coSenha').value;
@@ -369,7 +620,7 @@ function shake(id) {
   setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
 }
 
-function _closeCheckoutImpl(e) {
+function closeCheckout(e) {
   if (e.target === document.getElementById('checkoutOverlay')) closeCheckoutDirect();
 }
 
@@ -377,7 +628,7 @@ function _closeCheckoutImpl(e) {
 // ║         MÓDULO DE SEGURANÇA — GUARDIÃO FISCAL   ║
 // ╚══════════════════════════════════════════════════╝
 
-const _authAttempts = {};
+var _authAttempts = {};
 function authRateLimit(email) {
   const key = email.toLowerCase().trim();
   const now = Date.now();
@@ -424,7 +675,7 @@ function sanitizeFileContent(text) {
     .replace(/(^|[\n,\t])([=+\-@])/g, '$1\'$2');
 }
 
-const MAX_TEXT_CHARS = 2_000_000;
+var MAX_TEXT_CHARS = 2_000_000;
 
 function validateFileName(name) {
   if (!name || typeof name !== 'string') return false;
@@ -435,16 +686,16 @@ function validateFileName(name) {
   return true;
 }
 
-const AUTH_INPUT_LIMITS = { email: 254, nome: 80, senha: 128 };
+var AUTH_INPUT_LIMITS = { email: 254, nome: 80, senha: 128 };
 function capAuthInput(value, type) {
   return String(value).slice(0, AUTH_INPUT_LIMITS[type] || 128);
 }
 
-const SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
-const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uaGJ4eXVnZ21jZW1xd3pkeGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTc1NDQsImV4cCI6MjA5NDMzMzU0NH0.0KMETdyHYs0NR8qQKp2KZeSnp5Al58JVDrSGDJEG_WQ';
+var SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
+var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uaGJ4eXVnZ21jZW1xd3pkeGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTc1NDQsImV4cCI6MjA5NDMzMzU0NH0.0KMETdyHYs0NR8qQKp2KZeSnp5Al58JVDrSGDJEG_WQ';
 
-let sb = null;
-let _currentUser = null;
+var sb = null;
+var _currentUser = null;
 
 function _initSupabase() {
   try {
@@ -596,13 +847,13 @@ function autoSkipExtStep1(email) {
   }
 }
 
-async function _doLogoutImpl() {
+async function doLogout() {
   if (!sb) return;
   await sb.auth.signOut();
 }
 
 // ===== LOGIN MODAL =====
-function _switchAuthTabImpl(tab) {
+function switchAuthTab(tab) {
   const isLogin = tab === 'login';
   document.getElementById('authLoginPane').style.display   = isLogin ? 'block' : 'none';
   document.getElementById('authCadastroPane').style.display = isLogin ? 'none' : 'block';
@@ -612,14 +863,14 @@ function _switchAuthTabImpl(tab) {
   document.getElementById('tabCadastroBtn').style.color      = isLogin ? 'var(--muted)' : 'var(--text)';
 }
 
-let _checkoutPendingPlan = null;
+var _checkoutPendingPlan = null;
 function openLoginFromCheckout() {
   _checkoutPendingPlan = currentPlan || 'pro';
   closeCheckoutDirect();
   openLogin();
 }
 
-async function _doLoginImpl() {
+async function doLogin() {
   const email = capAuthInput(document.getElementById('loginEmail').value.trim(), 'email');
   const senha  = capAuthInput(document.getElementById('loginSenha').value, 'senha');
   const err    = document.getElementById('loginErr');
@@ -646,7 +897,7 @@ async function _doLoginImpl() {
   }
 }
 
-async function _doCadastroImpl() {
+async function doCadastro() {
   const nome  = capAuthInput(document.getElementById('cadNome').value.trim(), 'nome');
   const email = capAuthInput(document.getElementById('cadEmail').value.trim(), 'email');
   const senha = capAuthInput(document.getElementById('cadSenha').value, 'senha');
@@ -669,9 +920,9 @@ async function _doCadastroImpl() {
   setTimeout(() => closeLoginDirect(), 2000);
 }
 
-let _extTab = 'cad';
+var _extTab = 'cad';
 
-function _extSwitchTabImpl(tab) {
+function extSwitchTab(tab) {
   _extTab = tab;
   const isCad = tab === 'cad';
   document.getElementById('extCadPane').style.display = isCad ? 'block' : 'none';
@@ -683,7 +934,7 @@ function _extSwitchTabImpl(tab) {
   document.getElementById('extAuthBtnTxt').textContent  = isCad ? 'Criar conta e continuar →' : 'Entrar e continuar →';
 }
 
-const _authRL = { count: 0, resetAt: 0 };
+var _authRL = { count: 0, resetAt: 0 };
 function _authRateOk() {
   const now = Date.now();
   if (now > _authRL.resetAt) { _authRL.count = 0; _authRL.resetAt = now + 120000; }
@@ -692,7 +943,7 @@ function _authRateOk() {
   return true;
 }
 
-async function _extStep1DoneImpl() {
+async function extStep1Done() {
   if (_currentUser) { autoSkipExtStep1(_currentUser.email); return; }
   if (!_authRateOk()) {
     const err = document.getElementById('extAuthErr');
@@ -785,21 +1036,21 @@ function renderPasswordMeter(containerId, senha) {
     </div>`;
 }
 
-function _openLoginImpl() {
+function openLogin() {
   closeAllOverlays();
   document.getElementById('loginOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
 }
-function _closeLoginImpl(e) {
+function closeLogin(e) {
   if (e.target === document.getElementById('loginOverlay')) closeLoginDirect();
 }
-function _closeLoginDirectImpl() {
+function closeLoginDirect() {
   document.getElementById('loginOverlay').classList.remove('show');
   document.body.style.overflow = '';
 }
 
 // ===== SIMULADOR / QUIZ =====
-const PROFILES = [
+var PROFILES = [
   {
     id: 'freelancer', nome: 'Freelancer Recorrente',
     desc: 'Autônomo · Pix de clientes todo mês · sem nota fiscal sistemática', icon: '💻',
@@ -877,12 +1128,12 @@ const PROFILES = [
   },
 ];
 
-const C_BAIXO    = '#7CFF4F';
-const C_ATENCAO  = '#F5A623';
-const C_MODERADO = '#f97316';
-const C_ELEVADO  = '#f04f60';
-const C_CRITICO  = '#FF4D4F';
-const CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critico: C_CRITICO };
+var C_BAIXO    = '#7CFF4F';
+var C_ATENCAO  = '#F5A623';
+var C_MODERADO = '#f97316';
+var C_ELEVADO  = '#f04f60';
+var C_CRITICO  = '#FF4D4F';
+var CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critico: C_CRITICO };
 
 // [FIX-CLS #3] renderProfileCards preenche divs vazias no HTML (qBody/mQBody)
 // O HTML foi esvaziado para eliminar o CLS causado pela sobreescrita de conteúdo inline
@@ -1218,8 +1469,24 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(err) {}
   })();
 });
+
 // Boot Supabase quando módulo carrega
 if (typeof _bootSupabase === 'function' && !window._supabaseBooted) {
   window._supabaseBooted = true;
   _bootSupabase();
 }
+
+// Expõe implementações para os stubs do app-core.js
+window._openLoginImpl        = openLogin;
+window._closeLoginImpl       = closeLogin;
+window._closeLoginDirectImpl = closeLoginDirect;
+window._openCheckoutImpl     = openCheckout;
+window._closeCheckoutImpl    = closeCheckout;
+window._closeCheckoutDirectImpl = closeCheckoutDirect;
+window._doLoginImpl          = doLogin;
+window._doCadastroImpl       = doCadastro;
+window._doLogoutImpl         = doLogout;
+window._goToPayImpl          = goToPay;
+window._extStep1DoneImpl     = extStep1Done;
+window._switchAuthTabImpl    = switchAuthTab;
+window._extSwitchTabImpl     = extSwitchTab;
