@@ -2361,6 +2361,15 @@ function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=p
 const MAX_FILES=5;
 const SRC_COLORS=['#7CFF4F','#4d9fff','#f5a623','#c084fc','#fb7185'];
 
+// [PERF] Worker singleton — instanciado uma vez, reutilizado entre análises
+let _fiscalWorker = null;
+function _getFiscalWorker() {
+  if (!_fiscalWorker) {
+    _fiscalWorker = new Worker('/fiscal-worker.js');
+  }
+  return _fiscalWorker;
+}
+
 async function eRunAll(){
   // [FIX-RACE] Proteção contra duplo clique
   if(_analysisRunning)return;
@@ -2375,11 +2384,15 @@ async function eRunAll(){
     const _rInput=document.getElementById('rendaDeclaradaInput');
     const _rawRenda=_rInput?_rInput.value.replace(/\./g,'').replace(',','.').trim():'';
     window._rendaDeclaradaMensal=_rawRenda?Math.max(0,parseFloat(_rawRenda)||0):0;
-    const results=[];const parsed=[];
+
+    // ── Fase 1: parsing de arquivos (CSV/OFX síncrono; PDF via pdf.js assíncrono)
+    // Esta fase permanece no main thread pois pdf.js usa canvas/DOM internamente.
+    const parsed=[];
     for(let i=0;i<ready.length;i++){
       const f=ready[i];
       eSetProgress(Math.round((i/ready.length)*60),`Processando ${f.name}...`);
-      await new Promise(r=>setTimeout(r,200));
+      // Pequeno yield para atualizar a progress bar sem bloquear o paint
+      await new Promise(r=>requestAnimationFrame(r));
       try{
         let txns=[];
         if(f.type==='pdf'){
@@ -2410,25 +2423,75 @@ async function eRunAll(){
       }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${e.message}`;eShowErr(msg);}
     }
     if(parsed.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
+
+    // Libera memória dos conteúdos brutos
     eFiles.forEach(f=>{f.content=null;});
+
+    // ── Fase 2: agrupa por conta
     eSetProgress(70,'Identificando contas...');
     const grupos={};
     parsed.forEach(p=>{const chave=p.conta?`${p.banco}|${p.conta}`:`${p.banco}|${p.label}`;if(!grupos[chave])grupos[chave]={txns:[],banco:p.banco,conta:p.conta,label:p.label,formatos:[]};grupos[chave].txns.push(...p.txns);if(!grupos[chave].formatos.includes(p.formato))grupos[chave].formatos.push(p.formato);});
-    const grupoKeys=Object.keys(grupos);
-    for(let i=0;i<grupoKeys.length;i++){
-      const g=grupos[grupoKeys[i]];
-      eSetProgress(70+Math.round((i/grupoKeys.length)*25),`Analisando ${g.banco}...`);
-      await new Promise(r=>setTimeout(r,100));
-      const fmtLabel=g.formatos.length>1?` [${g.formatos.join('+')}]`:'';
-      const bankLabel=g.conta?`${g.banco} ···${g.conta.slice(-4)}${fmtLabel}`:g.banco+fmtLabel;
-      const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel,window._rendaDeclaradaMensal||0,window._perfilUsuario||null);
-      if(r){results.push(r);if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){window._debugMotor=r;}}
-    }
-    if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
-    eSetProgress(95,'Consolidando...');
-    await new Promise(r=>setTimeout(r,300));
-    const consolidated=eConsolidate(results);
+
+    // ── Fase 3: motor fiscal no Web Worker (main thread totalmente livre)
+    const { consolidated, sources: results } = await new Promise((resolve, reject) => {
+      const worker = _getFiscalWorker();
+
+      // Serializa grupos para envio via postMessage (Date → ISO string)
+      const gruposSerializados = {};
+      for (const [chave, g] of Object.entries(grupos)) {
+        gruposSerializados[chave] = {
+          ...g,
+          txns: g.txns.map(t => ({
+            ...t,
+            date: t.date instanceof Date ? t.date.toISOString() : t.date
+          }))
+        };
+      }
+
+      worker.onmessage = (ev) => {
+        const { type, payload } = ev.data;
+        if (type === 'PROGRESS') {
+          eSetProgress(payload.pct, payload.msg);
+        } else if (type === 'RESULT') {
+          // Reconstrói Date objects nas transações classificadas
+          if (payload.consolidated && payload.consolidated.all) {
+            payload.consolidated.all = payload.consolidated.all.map(t => ({
+              ...t,
+              date: t.date ? new Date(t.date) : null
+            }));
+          }
+          if (payload.sources) {
+            payload.sources.forEach(r => {
+              if (r.classified) r.classified = r.classified.map(t => ({
+                ...t,
+                date: t.date ? new Date(t.date) : null
+              }));
+            });
+          }
+          resolve(payload);
+        } else if (type === 'ERROR') {
+          reject(new Error(payload.message));
+        }
+      };
+
+      worker.onerror = (err) => reject(err);
+
+      worker.postMessage({
+        type: 'ANALYZE',
+        payload: {
+          grupos: gruposSerializados,
+          rendaDeclarada: window._rendaDeclaradaMensal || 0,
+          perfilUsuario: window._perfilUsuario || null
+        }
+      });
+    });
+
+    if(!results||results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
     if(!consolidated){eShowErr('Não foi possível consolidar os extratos. Verifique se o arquivo está no formato correto (CSV, OFX ou PDF).');document.getElementById('btnGo').classList.add('on');return;}
+
+    // Debug local
+    if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){window._debugMotor=results[0];}
+
     eAllTxns=consolidated.all;
     eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
     document.getElementById('extStep2').style.opacity='0.6';
@@ -2449,6 +2512,9 @@ async function eRunAll(){
       s3.style.display='block';
       s3.scrollIntoView({behavior:'smooth',block:'start'});
     });
+  }catch(err){
+    eShowErr('Erro na análise: ' + (err.message || 'Tente novamente.'));
+    document.getElementById('btnGo').classList.add('on');
   }finally{
     _analysisRunning=false;
   }
