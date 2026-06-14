@@ -2222,7 +2222,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <a class="nav-link" href="/blog" style="text-decoration:none">Blog</a>
   </div>
   <!-- Auth area sempre visível — populada pelo JS (setUser) -->
-  <div id="navAuthArea" style="display:flex;align-items:center;gap:8px"></div>
+  <div id="navAuthArea" style="align-items:center;gap:8px"></div>
   <!-- Hamburger mobile (só aparece em <768px) -->
   <button class="nav-hamburger" id="navHamburger" onclick="toggleDrawer()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -3741,7 +3741,7 @@ function _loadJsPDF() {
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
 .ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
-#legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;padding-bottom:90px}
+#legalFooter{text-align:center;padding:20px 16px 90px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
 #legalFooter a{color:var(--muted);text-decoration:none;margin:0 8px}
 #legalFooter a:hover{color:var(--muted2)}
 </style>
@@ -3778,7 +3778,10 @@ function _loadJsPDF() {
     if (!b) return;
     b.style.transform = 'translateY(0)';
     localStorage.setItem('gf_cookie_consent', 'accepted');
-    if (typeof _loadPixels === 'function') _loadPixels();
+    // Pixels carregam com delay após banner — evita reflow no mesmo frame do scroll
+    setTimeout(function() {
+      if (typeof _loadPixels === 'function') _loadPixels();
+    }, 2000);
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(function(ev) {
     window.addEventListener(ev, _showBanner, { once: true, passive: true });
