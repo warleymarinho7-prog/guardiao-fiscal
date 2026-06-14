@@ -2674,6 +2674,16 @@ async function eCarregarHistorico(){
 // ── FEEDBACK ──────────────────────────────────────────────────
 // [FIX] Inicializa _gFeedback antes de qualquer uso — evita "Cannot set properties of undefined"
 window._gFeedback = window._gFeedback || { sessao: null, historico: [] };
+
+// [FIX] FEEDBACK_MOTIVOS não estava definida — causava ReferenceError em gRenderFeedbackCard
+const FEEDBACK_MOTIVOS = [
+  { id: 'pix',       label: 'Pix classificado errado' },
+  { id: 'renda',     label: 'Renda declarada incompatível' },
+  { id: 'transfer',  label: 'Transferência entre contas próprias' },
+  { id: 'comercial', label: 'Atividade comercial incorreta' },
+  { id: 'especie',   label: 'Espécie classificada errado' },
+  { id: 'outro',     label: 'Outro motivo' },
+];
 function gRenderFeedbackCard(containerEl,resultado){
   if(!containerEl||!resultado)return;
   window._gFeedback.sessao=resultado;
