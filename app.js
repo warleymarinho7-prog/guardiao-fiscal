@@ -2530,34 +2530,40 @@ function eRenderPreview(c,sources){
 // [FIX] _verifyPlanBeforeUnlock: verifica se o usuário tem plano ativo antes de revelar resultado.
 // Consultada por eUnlockResult() e por eUnlockResult() chamada via setUser/onAuthStateChange.
 async function _verifyPlanBeforeUnlock() {
-  // Sem usuário logado — bloqueia
+  console.log('[_verify] _currentUser:', !!_currentUser, '| _plano cache:', _currentUser?._plano);
   if (!_currentUser || !sb) return false;
-  // Plano já em cache e não expirado — libera imediatamente
-  if (_currentUser._plano === 'pro' || _currentUser._plano === 'avulso') return true;
-  // Consulta Supabase para confirmar plano atual
+  if (_currentUser._plano === 'pro' || _currentUser._plano === 'avulso') {
+    console.log('[_verify] cache hit → true');
+    return true;
+  }
   try {
     const { data } = await sb.from('profiles')
       .select('plano, expires_at')
       .eq('id', _currentUser.id)
       .single();
+    console.log('[_verify] Supabase data:', data);
     if (!data) return false;
     const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
     const isExpired = expiresAt && expiresAt < new Date();
     if ((data.plano === 'pro' || data.plano === 'avulso') && !isExpired) {
-      _currentUser._plano = data.plano; // atualiza cache
+      _currentUser._plano = data.plano;
       return true;
     }
     return false;
   } catch(e) {
+    console.error('[_verify] erro:', e);
     return false;
   }
 }
 
 async function eUnlockResult(){
+  console.log('[eUnlockResult] chamado | _eConsolidated:', !!_eConsolidated);
   const allowed=await _verifyPlanBeforeUnlock();
+  console.log('[eUnlockResult] allowed:', allowed);
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
   // [FIX] Verifica se há análise antes de ocultar o paywall — sem análise não há o que mostrar
   const c=_eConsolidated,sources=_eSources;
+  console.log('[eUnlockResult] c:', !!c, '| sources:', !!sources);
   if(!c||!sources){
     // Tem plano mas não tem análise — mantém paywall visível e indica o próximo passo
     document.getElementById('paywallBlock').style.display='block';
