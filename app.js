@@ -1716,7 +1716,35 @@ function eSplitCSV(line,sep=','){const r=[];let cur='',q=false;for(let i=0;i<lin
 function eDetectSep(l){const s={',':0,';':0,'\t':0};for(const c of l)if(s[c]!==undefined)s[c]++;return Object.keys(s).reduce((a,b)=>s[a]>s[b]?a:b);}
 function eParseNubankCartao(lines){return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<3)return null;const date=eParseDate(c[0]),desc=(c[1]||'').trim(),value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
 function eParseNubankConta(lines){if(lines.length<2)return[];const hdr=eSplitCSV(lines[0]).map(c=>c.toLowerCase().replace(/['"]/g,'').trim());const iDate=hdr.findIndex(h=>h.includes('data')||h==='date');const iDesc=hdr.findIndex(h=>h.includes('descri')||h.includes('description')||h.includes('histórico')||h.includes('historico'));const iVal=hdr.findIndex(h=>h==='valor'||h==='value'||h==='amount'||h.includes('valor'));const iId=hdr.findIndex(h=>h.includes('identif'));return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<2)return null;const date=eParseDate(c[iDate>=0?iDate:0]);const desc=(iDesc>=0?c[iDesc]:(iId>=0?c[iId]:c[1]||'')).replace(/['"]/g,'').trim();const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-1]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
-function eParseInter(lines){let s=0;for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i;break;}}const sep=eDetectSep(lines[s]||lines[0]||'');const hdr=lines[s].split(sep).map(x=>x.replace(/['"]/g,'').trim().toLowerCase());const iDt=hdr.findIndex(h=>h.includes('data'));const iHist=hdr.findIndex(h=>h.includes('hist'));const iDesc=hdr.findIndex(h=>h.includes('descri'));const iVal=hdr.findIndex(h=>h==='valor'||h.includes('valor'));return lines.slice(s+1).filter(l=>l.trim()).map(l=>{const c=l.split(sep).map(x=>x.replace(/['"]/g,'').trim());if(c.length<3)return null;const date=eParseDate(c[iDt>=0?iDt:0]);const hist=iHist>=0?c[iHist]:'';const desc=iDesc>=0?c[iDesc]:c[1]||'';const label=[hist,desc].filter(Boolean).join(' — ').trim();const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-2]||c[c.length-1]);if(!date||!label)return null;let senderName=null;const mInter=desc.match(/Cp\s*:\d+-(.+)/i);if(mInter)senderName=mInter[1].trim().toUpperCase();return{date,desc:label,value,senderName};}).filter(Boolean);}
+function eParseInter(lines){
+  // [FIX] Normaliza CRLF
+  lines=lines.map(l=>l.replace(/\r/g,''));
+  let s=0;
+  for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('hist\u00f3rico')||l.includes('historico'))){s=i;break;}}
+  const headerLine=lines[s]||lines[0]||'';
+  const sep=eDetectSep(headerLine);
+  const hdr=headerLine.split(sep).map(x=>x.replace(/['"]/g,'').trim().toLowerCase());
+  const iDt=hdr.findIndex(h=>h.includes('data'));
+  const iHist=hdr.findIndex(h=>h.includes('hist'));
+  const iDesc=hdr.findIndex(h=>h.includes('descri'));
+  const iVal=hdr.findIndex(h=>h==='valor'||h.includes('valor'));
+  return lines.slice(s+1).filter(l=>l.trim()).map(l=>{
+    const c=l.split(sep).map(x=>x.replace(/['"]/g,'').trim());
+    if(c.length<3)return null;
+    const date=eParseDate(c[iDt>=0?iDt:0]);
+    const hist=iHist>=0?c[iHist]:'';
+    const desc=iDesc>=0?c[iDesc]:c[1]||'';
+    const histLabel=(hist&&hist.length>1)?hist:'';
+    const label=[histLabel,desc].filter(Boolean).join(' — ').trim()||desc;
+    let value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-2]||c[c.length-1]);
+    if(hist==='D'&&value>0)value=-value;
+    if(!date||!label)return null;
+    let senderName=null;
+    const mInter=desc.match(/Cp\s*:\d+-(.+)/i);
+    if(mInter)senderName=mInter[1].trim().toUpperCase();
+    return{date,desc:label,value,senderName};
+  }).filter(Boolean);
+}
 function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break;}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'',cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
 function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;let m;while((m=re.exec(content))!==null){const b=m[1],date=eParseDate(eGetTag(b,'DTPOSTED')),value=parseFloat(eGetTag(b,'TRNAMT')||'0'),desc=(eGetTag(b,'MEMO')||eGetTag(b,'NAME')||'Sem descrição').trim();if(date)txns.push({date,desc,value});}if(txns.length>0)return txns;const lines=content.split('\n');let cur={};for(const line of lines){const t=line.trim();if(t==='<STMTTRN>'){cur={};continue;}if(t==='</STMTTRN>'){if(cur.date&&cur.value!==undefined)txns.push({...cur});cur={};continue;}const mm=t.match(/^<([A-Z]+)>(.+)$/);if(mm){const[,tg,v]=mm;if(tg==='DTPOSTED')cur.date=eParseDate(v);if(tg==='TRNAMT')cur.value=parseFloat(v)||0;if((tg==='MEMO'||tg==='NAME')&&!cur.desc)cur.desc=v.trim();}}return txns;}
 function eGetTag(str,name){const r=new RegExp(`<${name}>([^<]+)`,'i');const m=str.match(r);return m?m[1].trim():null;}
