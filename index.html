@@ -11,6 +11,21 @@
 
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<!-- [FIX-CLS #8] Script inline: oculta cookieBanner e restaura posição dos botões ANTES do
+     primeiro paint para visitantes recorrentes (consent já dado). Zero CLS nesses casos.
+     Para visitantes novos: banner nasce visível (translateY(0) no CSS), botões sobem via
+     html:not(.banner-hidden) — tudo em CSS puro, sem JS no critical path. -->
+<script>
+(function(){
+  try {
+    var c = localStorage.getItem('gf_cookie_consent');
+    if (c === 'accepted' || c === 'rejected') {
+      document.write('<style>#cookieBanner{transform:translateY(100%)!important;transition:none!important}</style>');
+      document.documentElement.classList.add('banner-hidden');
+    }
+  } catch(e) {}
+})();
+</script>
 <!-- Guardião Fiscal v19.0.0 | 2026-06-12 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
 <meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
@@ -3753,7 +3768,12 @@ function _loadJsPDF() {
 
 <!-- ── Banner de cookies ── -->
 <style>
-#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(100%);transition:transform 0.3s ease;will-change:transform}
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(0);transition:transform 0.3s ease;will-change:transform}
+/* [FIX-CLS #8] Visitante novo: banner visível por padrão → botões ficam acima desde o first paint.
+   Visitante recorrente: html.banner-hidden (adicionado pelo head script) → posição padrão. */
+html:not(.banner-hidden) #btnWhatsapp { bottom: 92px; }
+html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
+#btnWhatsapp, #btnFeedback { transition: bottom 0.3s ease, transform 0.2s, box-shadow 0.2s; }
 #cookieBanner p{font-size:12px;color:var(--muted2);margin:0;flex:1;min-width:180px;line-height:1.5}
 #cookieBanner a{color:var(--green)}
 .ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
@@ -3784,31 +3804,28 @@ function _loadJsPDF() {
 <script>
 (function(){
   const consent = localStorage.getItem('gf_cookie_consent');
-  // Decisão anterior: respeita sem mostrar banner
+  // [FIX-CLS #8] Visitante recorrente: banner já oculto pelo head script, só garante PIXEL_ATIVO.
   if (consent === 'accepted') { return; }
   if (consent === 'rejected') { window.PIXEL_ATIVO = false; return; }
-  // Banner após interação — hadRecentInput:true → Chrome não conta no CLS
-  var _bannerShown = false;
-  function _showBanner() {
-    if (_bannerShown) return;
-    _bannerShown = true;
-    const b = document.getElementById('cookieBanner');
-    if (!b) return;
-    b.style.transform = 'translateY(0)';
+  // Visitante novo: banner já está visível no HTML (translateY(0) no CSS).
+  // _autoAccept grava consent e carrega pixels após interação — sem tocar no DOM do banner.
+  var _accepted = false;
+  function _autoAccept() {
+    if (_accepted) return;
+    _accepted = true;
     localStorage.setItem('gf_cookie_consent', 'accepted');
-    // Pixels carregam com delay após banner — evita reflow no mesmo frame do scroll
     setTimeout(function() {
       if (typeof _loadPixels === 'function') _loadPixels();
     }, 2000);
   }
   ['scroll','mousedown','touchstart','keydown'].forEach(function(ev) {
-    window.addEventListener(ev, _showBanner, { once: true, passive: true });
+    window.addEventListener(ev, _autoAccept, { once: true, passive: true });
   });
-  setTimeout(_showBanner, 5000);
+  setTimeout(_autoAccept, 5000);
 })();
 function ckAccept() {
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-
+  document.documentElement.classList.add('banner-hidden'); // botões descem via CSS transition
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
     var _wait = setInterval(function() {
@@ -3824,7 +3841,7 @@ function ckReject() {
   window._pixelsLoaded = false;
   window._fbqQueue = [];
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
-
+  document.documentElement.classList.add('banner-hidden'); // botões descem via CSS transition
 }
 </script>
 <!-- ===== WHATSAPP + FEEDBACK ===== -->
