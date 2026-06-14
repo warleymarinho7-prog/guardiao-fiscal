@@ -1343,26 +1343,30 @@ function selectProfile(id, bodyId) {
       const demo = document.getElementById('liveDetectDemo');
       if (demo) demo.style.visibility = 'hidden';
     }
-    // 1. Popula conteúdo com painel ainda invisível
+    // 1. Popula conteúdo com painéis ainda invisíveis
     revealResult(p, heroId, alertsId, isDesktop);
-    requestAnimationFrame(() => {
-      // 2. Troca visibilidade
-      document.getElementById(panelQ).style.visibility = 'hidden';
-      document.getElementById(panelR).style.visibility = 'visible';
-      if (!isDesktop) {
-        const btn = document.getElementById('quizExtratoBtn');
-        if (btn) btn.style.visibility = 'hidden';
-        // 3. Segundo rAF: mResultPanel já está visível, mede altura real
+
+    if (!isDesktop) {
+      // [FIX-CLS v2] Reserva altura ANTES de trocar visibilidade — zero layout shift
+      // rAF1: quizWrap ainda exibe mQuestionPanel (visível) + mResultPanel (invisível mas populado)
+      //       scrollHeight captura altura total real — visibility:hidden não zera o pai
+      // rAF2: troca visibilidade com espaço já reservado — browser não precisa reajustar layout
+      requestAnimationFrame(() => {
+        const qw = document.getElementById('quizWrap');
+        if (qw) qw.style.minHeight = qw.scrollHeight + 'px';
         requestAnimationFrame(() => {
-          const qw  = document.getElementById('quizWrap');
-          const mrp = document.getElementById('mResultPanel');
-          if (qw && mrp) {
-            // scrollHeight agora é correto pois mrp está visibility:visible
-            qw.style.minHeight = (mrp.scrollHeight + 80) + 'px';
-          }
+          document.getElementById(panelQ).style.visibility = 'hidden';
+          document.getElementById(panelR).style.visibility = 'visible';
+          const btn = document.getElementById('quizExtratoBtn');
+          if (btn) btn.style.visibility = 'hidden';
         });
-      }
-    });
+      });
+    } else {
+      requestAnimationFrame(() => {
+        document.getElementById(panelQ).style.visibility = 'hidden';
+        document.getElementById(panelR).style.visibility = 'visible';
+      });
+    }
   }, 900);
 }
 
