@@ -1573,7 +1573,6 @@ function openQuiz() {
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
   setTimeout(() => {
     const bar = document.getElementById('mockBar');
@@ -2846,4 +2845,3 @@ window.gFeedbackHistorico=function(){return window._gFeedback.historico;};
 window.gSyntheticTest=function(k){if(window.location.hostname!=='localhost'&&window.location.hostname!=='127.0.0.1'){console.log('gSyntheticTest disponível apenas em localhost');return;}console.log('Cole os SYNTHETIC_PROFILES do app.js original para testes sintéticos.');};
 window.gMotorDiag=function(resultado){const r=resultado||window._debugMotor;if(!r){console.warn('Rode uma análise primeiro.');return null;}const fatores=(r.fatores||[]).filter(f=>f.peso>0);console.group('🛡️ Motor Diag');console.log('Score:',r.score,'%');console.log('Fatores:',fatores.map(f=>({peso:f.peso,motivo:(f.motivo||'').slice(0,60)})));console.groupEnd();return{scoreFinal:r.score,fatores};};
 window._perfilUsuario=null;
-
