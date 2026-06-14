@@ -1708,12 +1708,13 @@ function extSwitchTab(tab) {
 }
 
 // showPage — intercepta 'extrato' para pré-carregar módulo
-const _showPageOriginal = showPage;
-function showPage(id) {
-  if (id === 'extrato' || id === 'historico') {
-    _loadExtratoModule().then(() => _showPageOriginal(id));
-    _loadAuthModule(); // auth também necessário no extrato
-    return;
-  }
-  _showPageOriginal(id);
-}
+(function() {
+  const _orig = showPage;
+  window.showPage = function(id) {
+    if (id === 'extrato' || id === 'historico') {
+      Promise.all([_loadExtratoModule(), _loadAuthModule()]).then(() => _orig(id));
+      return;
+    }
+    _orig(id);
+  };
+})();
