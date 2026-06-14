@@ -180,7 +180,13 @@ async function openCheckout(plan) {
     if (planoAtual === 'pro' || (planoAtual === 'avulso' && plan === 'avulso')) {
       console.log('[openCheckout] tem plano → eUnlockResult');
       if (_eConsolidated) { eUnlockResult(); return; }
-      showPage('extrato'); return;
+      // Tem plano mas sem análise — vai para extrato e rola para o upload
+      showPage('extrato');
+      setTimeout(()=>{
+        const step2=document.getElementById('extStep2');
+        if(step2) step2.scrollIntoView({behavior:'smooth',block:'start'});
+      },150);
+      return;
     }
   }
   console.log('[openCheckout] abrindo modal checkout...');
@@ -2550,15 +2556,28 @@ async function _verifyPlanBeforeUnlock() {
 async function eUnlockResult(){
   const allowed=await _verifyPlanBeforeUnlock();
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
+  // [FIX] Verifica se há análise antes de ocultar o paywall — sem análise não há o que mostrar
+  const c=_eConsolidated,sources=_eSources;
+  if(!c||!sources){
+    // Tem plano mas não tem análise — mantém paywall visível e indica o próximo passo
+    document.getElementById('paywallBlock').style.display='block';
+    const sub=document.getElementById('paywallDynamicSub');
+    if(sub) sub.textContent='Plano ativo! Faça o upload do seu extrato acima para ver a análise completa.';
+    const badge=document.getElementById('paywallDynamicBadge');
+    if(badge) badge.innerHTML='✅ Plano Pro ativo';
+    // Oculta botões de compra pois já tem plano
+    const btnPro=document.querySelector('.btn-unlock-pro');
+    const btnAv=document.querySelector('.btn-unlock-avulso');
+    if(btnPro) btnPro.style.display='none';
+    if(btnAv) btnAv.style.display='none';
+    return;
+  }
   document.getElementById('paywallBlock').style.display='none';
   // [FIX-CLS] Renderiza conteúdo com visibility:hidden antes de revelar
-  // Evita dezenas de shifts causados por innerHTML sequencial em elemento visível
   const _rrb=document.getElementById('realResultBlock');
   _rrb.style.visibility='hidden';
   _rrb.style.display='block';
   setTimeout(()=>_rrb.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  const c=_eConsolidated,sources=_eSources;
-  if(!c||!sources)return;
   let emoji,level,color,levelHumano;
   if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#7CFF4F';levelHumano='Sua movimentação está dentro do padrão esperado.';}
   else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';levelHumano='Encontramos pontos que merecem uma revisão.';}
