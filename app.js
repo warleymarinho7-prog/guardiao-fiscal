@@ -1347,23 +1347,15 @@ function selectProfile(id, bodyId) {
     revealResult(p, heroId, alertsId, isDesktop);
     requestAnimationFrame(() => {
       if (!isDesktop) {
-        // 2. Torna mResultPanel visível temporariamente para medir altura real
-        const mrp = document.getElementById('mResultPanel');
         const qw  = document.getElementById('quizWrap');
-        if (mrp && qw) {
-          mrp.style.visibility = 'visible';
-          mrp.style.position = 'absolute';
-          mrp.style.pointerEvents = 'none';
-          const h = mrp.scrollHeight;
-          mrp.style.visibility = 'hidden';
-          mrp.style.position = '';
-          mrp.style.pointerEvents = '';
-          // 3. Fixa quizWrap com altura real medida
-          const tabs = qw.querySelector('.tabs');
-          const btn  = document.getElementById('quizExtratoBtn');
-          const tabsH = tabs ? tabs.offsetHeight : 48;
-          const btnH  = btn  ? btn.offsetHeight + 16 : 71;
-          qw.style.minHeight = (h + tabsH + btnH) + 'px';
+        const btn = document.getElementById('quizExtratoBtn');
+        if (qw && btn) {
+          // Mede posição atual do botão antes da troca
+          // e garante que o quizWrap seja alto o suficiente para mantê-lo visível
+          const qwRect  = qw.getBoundingClientRect();
+          const btnRect = btn.getBoundingClientRect();
+          const btnBottom = btnRect.bottom - qwRect.top;
+          qw.style.minHeight = Math.max(qw.offsetHeight, btnBottom + 16) + 'px';
         }
       }
       // 4. Troca visibilidade
