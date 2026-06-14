@@ -2325,7 +2325,7 @@ function eAddFile(file){
   }
 }
 
-function eRemoveFile(idx){eFiles.splice(idx,1);eRenderFileList();eUpdateActionBar();if(eFiles.length===0)document.getElementById('actBar').style.display='none';}
+function eRemoveFile(idx){eFiles.splice(idx,1);eRenderFileList();eUpdateActionBar();if(eFiles.length===0)document.getElementById('actBar').classList.remove('visible');} // [FIX-CLS #11]
 
 function eRenderFileList(){
   document.getElementById('fileList').innerHTML=eFiles.map((f,i)=>`
@@ -2337,19 +2337,19 @@ function eRenderFileList(){
     </div>`).join('');
   const lb=document.getElementById('limitBar');
   if(eFiles.length>0){
-    lb.style.display='flex';
+    lb.classList.add('visible'); // [FIX-CLS #11] classe em vez de display:flex — zero reflow externo
     document.getElementById('limitTxt').textContent=`${eFiles.length} de ${MAX_FILES}`;
     document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'✅':'📂';
     document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
     document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
     document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'✓':''}</div>`).join('');
-  }else{lb.style.display='none';document.getElementById('dzIco').textContent='📂';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
+  }else{lb.classList.remove('visible');document.getElementById('dzIco').textContent='📂';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
 
 function eUpdateActionBar(){
   const ready=eFiles.filter(f=>f.status==='ok').length;
   const ab=document.getElementById('actBar');
-  if(ready>0){ab.style.display='flex';document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;document.getElementById('btnGo').classList.add('on');}
+  if(ready>0){ab.classList.add('visible');document.getElementById('actMsg').textContent=`${ready} extrato(s) prontos`;document.getElementById('btnGo').classList.add('on');} // [FIX-CLS #11]
   else document.getElementById('btnGo').classList.remove('on');
 }
 function eShowErr(msg){const b=document.getElementById('errExt');b.textContent=msg;b.classList.toggle('show',!!msg);}
@@ -2440,10 +2440,10 @@ async function eRunAll(){
     document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
     _eConsolidated=consolidated;_eSources=results;
     if(_currentUser&&sb){(async()=>{try{const _nivel=consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo';const _payload={user_id:_currentUser.id,score:consolidated.score,nivel_risco:_nivel,nivel_label:consolidated.score<=20?'Baixo risco':consolidated.score<=45?'Atenção':consolidated.score<=70?'Risco elevado':'Risco crítico',perfil_usuario:window._perfilUsuario||null,renda_declarada:window._rendaDeclaradaMensal||null,total_creditos:Math.round(consolidated.totalCredits||0),total_debitos:Math.round(consolidated.totalDebits||0),total_txns:consolidated.totalTxns||0,pix_total:Math.round(consolidated.pixTotal||0),especie_total:Math.round(consolidated.especieTotal||0),indice_consumo:Math.round((consolidated.indiceConsumo||0)*100),pix_pct:consolidated.totalCredits>0?Math.round(consolidated.pixTotal/consolidated.totalCredits*100):0,num_alertas:(consolidated.alerts||[]).length,num_fontes:results.length,versao_engine:'v8.0',created_at:new Date().toISOString(),fatores:JSON.stringify((results||[]).flatMap(r=>(r.fatores||[]).filter(f=>f.peso>0)).sort((a,b)=>b.peso-a.peso).slice(0,6).map(f=>({motivo:f.motivo||'',peso:f.peso||0,fatorKey:f.fatorKey||'',quandoNaoERisco:f.quandoNaoERisco||'',confianca:Math.round((f.confianca||0)*100)}))),alertas:JSON.stringify((consolidated.alerts||[]).map(a=>({type:a.type||'',icon:a.icon||'',title:a.title||'',text:a.text||''})))};await sb.from('analyses').insert(_payload);}catch(e){}})();}
-    // [FIX-CLS] Popula conteúdo com s3 ainda oculto, depois mostra e scrolla num único frame
+    // [FIX-CLS #10] visibility em vez de display:block — extStep3 já está no DOM, zero reflow
     eRenderPreview(consolidated,results);
     requestAnimationFrame(() => {
-      s3.style.display='block';
+      s3.style.visibility='visible';
       s3.scrollIntoView({behavior:'smooth',block:'start'});
     });
   }finally{
@@ -2604,9 +2604,9 @@ function eResetAll(){
   document.querySelectorAll('#perfilBtns button').forEach(b=>{b.style.borderColor='var(--border)';b.style.color='var(--muted2)';b.style.background='var(--surface2)';});
   const _ri=document.getElementById('rendaDeclaradaInput');if(_ri)_ri.value='';
   document.getElementById('fileList').innerHTML='';
-  document.getElementById('limitBar').style.display='none';
-  document.getElementById('actBar').style.display='none';
-  document.getElementById('extStep3').style.display='none';
+  document.getElementById('limitBar').classList.remove('visible'); // [FIX-CLS #11]
+  document.getElementById('actBar').classList.remove('visible');   // [FIX-CLS #11]
+  document.getElementById('extStep3').style.visibility='hidden';  // [FIX-CLS #10]
   document.getElementById('pFillExt').style.width='0%';
   document.getElementById('dzIco').textContent='📂';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
