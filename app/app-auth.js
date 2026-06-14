@@ -65,11 +65,11 @@ async function openCheckout(plan) {
 }
 
 // ── MERCADO PAGO ─────────────────────────────────────────────
-var MP_PUBLIC_KEY = 'APP_USR-60e9c4f7-757b-48da-a367-8b3785a4cf72';
-var _mpInstance = null;
-var _mpBrick    = null;
+MP_PUBLIC_KEY = 'APP_USR-60e9c4f7-757b-48da-a367-8b3785a4cf72';
+_mpInstance = null;
+_mpBrick    = null;
 // [FIX-TIMEOUT] Referência do setTimeout do checkout para cancelamento
-var _checkoutStepTimer = null;
+_checkoutStepTimer = null;
 
 function getMpInstance() {
   if (!_mpInstance) _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
@@ -628,7 +628,7 @@ function closeCheckout(e) {
 // ║         MÓDULO DE SEGURANÇA — GUARDIÃO FISCAL   ║
 // ╚══════════════════════════════════════════════════╝
 
-var _authAttempts = {};
+_authAttempts = {};
 function authRateLimit(email) {
   const key = email.toLowerCase().trim();
   const now = Date.now();
@@ -675,7 +675,7 @@ function sanitizeFileContent(text) {
     .replace(/(^|[\n,\t])([=+\-@])/g, '$1\'$2');
 }
 
-var MAX_TEXT_CHARS = 2_000_000;
+MAX_TEXT_CHARS = 2_000_000;
 
 function validateFileName(name) {
   if (!name || typeof name !== 'string') return false;
@@ -686,16 +686,16 @@ function validateFileName(name) {
   return true;
 }
 
-var AUTH_INPUT_LIMITS = { email: 254, nome: 80, senha: 128 };
+AUTH_INPUT_LIMITS = { email: 254, nome: 80, senha: 128 };
 function capAuthInput(value, type) {
   return String(value).slice(0, AUTH_INPUT_LIMITS[type] || 128);
 }
 
-var SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
-var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uaGJ4eXVnZ21jZW1xd3pkeGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTc1NDQsImV4cCI6MjA5NDMzMzU0NH0.0KMETdyHYs0NR8qQKp2KZeSnp5Al58JVDrSGDJEG_WQ';
+SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
+SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uaGJ4eXVnZ21jZW1xd3pkeGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTc1NDQsImV4cCI6MjA5NDMzMzU0NH0.0KMETdyHYs0NR8qQKp2KZeSnp5Al58JVDrSGDJEG_WQ';
 
-var sb = null;
-var _currentUser = null;
+sb = null;
+_currentUser = null;
 
 function _initSupabase() {
   try {
@@ -863,7 +863,7 @@ function switchAuthTab(tab) {
   document.getElementById('tabCadastroBtn').style.color      = isLogin ? 'var(--muted)' : 'var(--text)';
 }
 
-var _checkoutPendingPlan = null;
+_checkoutPendingPlan = null;
 function openLoginFromCheckout() {
   _checkoutPendingPlan = currentPlan || 'pro';
   closeCheckoutDirect();
@@ -920,7 +920,7 @@ async function doCadastro() {
   setTimeout(() => closeLoginDirect(), 2000);
 }
 
-var _extTab = 'cad';
+_extTab = 'cad';
 
 function extSwitchTab(tab) {
   _extTab = tab;
@@ -934,7 +934,7 @@ function extSwitchTab(tab) {
   document.getElementById('extAuthBtnTxt').textContent  = isCad ? 'Criar conta e continuar →' : 'Entrar e continuar →';
 }
 
-var _authRL = { count: 0, resetAt: 0 };
+_authRL = { count: 0, resetAt: 0 };
 function _authRateOk() {
   const now = Date.now();
   if (now > _authRL.resetAt) { _authRL.count = 0; _authRL.resetAt = now + 120000; }
@@ -1050,7 +1050,7 @@ function closeLoginDirect() {
 }
 
 // ===== SIMULADOR / QUIZ =====
-var PROFILES = [
+PROFILES = [
   {
     id: 'freelancer', nome: 'Freelancer Recorrente',
     desc: 'Autônomo · Pix de clientes todo mês · sem nota fiscal sistemática', icon: '💻',
@@ -1128,12 +1128,12 @@ var PROFILES = [
   },
 ];
 
-var C_BAIXO    = '#7CFF4F';
-var C_ATENCAO  = '#F5A623';
-var C_MODERADO = '#f97316';
-var C_ELEVADO  = '#f04f60';
-var C_CRITICO  = '#FF4D4F';
-var CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critico: C_CRITICO };
+C_BAIXO    = '#7CFF4F';
+C_ATENCAO  = '#F5A623';
+C_MODERADO = '#f97316';
+C_ELEVADO  = '#f04f60';
+C_CRITICO  = '#FF4D4F';
+CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critico: C_CRITICO };
 
 // [FIX-CLS #3] renderProfileCards preenche divs vazias no HTML (qBody/mQBody)
 // O HTML foi esvaziado para eliminar o CLS causado pela sobreescrita de conteúdo inline
