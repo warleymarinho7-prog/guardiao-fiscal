@@ -3814,6 +3814,13 @@ html:not(.banner-hidden) #legalFooter { padding-bottom: 90px; }
     if (_accepted) return;
     _accepted = true;
     localStorage.setItem('gf_cookie_consent', 'accepted');
+    // [FIX-CLS #14] Oculta banner e adiciona banner-hidden → legalFooter padding vai de 90px→28px
+    // dentro da janela hadRecentInput (disparado por scroll/click) — Chrome não conta como CLS.
+    // Para o timeout de 5s: oculta mesmo assim pois o shift pós-5s é menos impactante que
+    // ter o padding permanentemente errado na próxima visita.
+    var b = document.getElementById('cookieBanner');
+    if (b) b.style.transform = 'translateY(100%)';
+    document.documentElement.classList.add('banner-hidden');
     setTimeout(function() {
       if (typeof _loadPixels === 'function') _loadPixels();
     }, 2000);
