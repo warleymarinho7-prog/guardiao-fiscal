@@ -2481,10 +2481,10 @@ function _initCatCounts(){
 }
 
 function eRenderPreview(c,sources){
-  if(!c){document.getElementById('previewReal').style.visibility='hidden';document.getElementById('previewPlaceholder').style.visibility='visible';document.getElementById('previewPlaceholder').innerHTML='<div style="font-size:28px;margin-bottom:12px">⚠️</div><div style="font-family:var(--ff);font-size:14px;font-weight:600;color:var(--red);margin-bottom:6px">Não foi possível processar o extrato</div><div style="font-size:12px;color:var(--muted2);line-height:1.6">Verifique se o arquivo é CSV, OFX ou PDF de um banco compatível e tente novamente.</div>';return;}// [FIX-CLS #12]
+  if(!c){document.getElementById('previewReal').style.display='none';document.getElementById('previewPlaceholder').style.display='block';document.getElementById('previewPlaceholder').innerHTML='<div style="font-size:28px;margin-bottom:12px">⚠️</div><div style="font-family:var(--ff);font-size:14px;font-weight:600;color:var(--red);margin-bottom:6px">Não foi possível processar o extrato</div><div style="font-size:12px;color:var(--muted2);line-height:1.6">Verifique se o arquivo é CSV, OFX ou PDF de um banco compatível e tente novamente.</div>';return;}
   if(!Array.isArray(c.alerts))c.alerts=[];
-  document.getElementById('previewReal').style.visibility='visible'; // [FIX-CLS #12]
-  document.getElementById('previewPlaceholder').style.visibility='hidden'; // [FIX-CLS #12]
+  document.getElementById('previewReal').style.display='block';
+  document.getElementById('previewPlaceholder').style.display='none';
   let emoji,level,color;
   if(c.score<=20){emoji='🟢';level='BAIXO RISCO';color='#7CFF4F';}
   else if(c.score<=45){emoji='🟡';level='ATENÇÃO';color='#f5a623';}
@@ -2615,7 +2615,7 @@ function eResetAll(){
   if(!_tinhaAcesso){if(typeof fbq==='function'&&window.PIXEL_ATIVO){fbq('trackCustom','PaywallHit',{},{eventID:Date.now().toString()});fbq('track','ViewContent',{content_name:'paywall_guardiao',content_category:'fiscal'},{eventID:'vc_'+Date.now().toString()});}if(typeof clarity==='function')clarity('event','PaywallHit');}
   document.getElementById('realResultBlock').style.display='none';
   const previewReal=document.getElementById('previewReal');const previewPlaceholder=document.getElementById('previewPlaceholder');
-  if(previewReal)previewReal.style.visibility='hidden';if(previewPlaceholder)previewPlaceholder.style.visibility='visible'; // [FIX-CLS #12]
+  if(previewReal)previewReal.style.display='none';if(previewPlaceholder)previewPlaceholder.style.display='block';
   const pvBar=document.getElementById('pvBarFill');if(pvBar)pvBar.style.width='0%';
   const s2=document.getElementById('extStep2');
   if(_currentUser){s2.style.opacity='1';s2.style.pointerEvents='auto';}else{s2.style.opacity='0.45';s2.style.pointerEvents='none';}
