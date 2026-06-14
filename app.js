@@ -1338,6 +1338,9 @@ function selectProfile(id, bodyId) {
       Cruzando com critérios do e-Financeira…
     </div>`;
 
+  // [FIX-INP] setTimeout(0) cede o thread imediatamente → browser pinta o estado de loading
+  // antes de executar revealResult. Antes era 900ms de delay artificial que bloqueava o INP.
+  // O efeito visual de "processando" é mantido pelo próprio estado de loading acima.
   setTimeout(() => {
     if (isDesktop) {
       const demo = document.getElementById('liveDetectDemo');
@@ -1347,11 +1350,6 @@ function selectProfile(id, bodyId) {
     revealResult(p, heroId, alertsId, isDesktop);
 
     if (!isDesktop) {
-      // [FIX-CLS v3] Esconde quizExtratoBtn ANTES de medir scrollHeight.
-      // Bug anterior: minHeight era capturado COM o botão visível, mas no rAF2 o botão
-      // sumia → mResultPanel aparecia menor que o espaço reservado → shift 0,0822.
-      // Agora: botão some no rAF1 antes da medição → scrollHeight já exclui a altura dele
-      // → espaço reservado bate exato com o conteúdo exibido → CLS zero.
       requestAnimationFrame(() => {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
@@ -1360,7 +1358,6 @@ function selectProfile(id, bodyId) {
         requestAnimationFrame(() => {
           document.getElementById(panelQ).style.visibility = 'hidden';
           document.getElementById(panelR).style.visibility = 'visible';
-          // [FIX] Revela botão junto com o resultado — estava ficando oculto permanentemente
           if (btn) btn.style.visibility = 'visible';
         });
       });
@@ -1370,7 +1367,7 @@ function selectProfile(id, bodyId) {
         document.getElementById(panelR).style.visibility = 'visible';
       });
     }
-  }, 900);
+  }, 0);
 }
 
 function revealResult(p, heroId, alertsId, isDesktop) {
@@ -2675,6 +2672,8 @@ async function eCarregarHistorico(){
 }
 
 // ── FEEDBACK ──────────────────────────────────────────────────
+// [FIX] Inicializa _gFeedback antes de qualquer uso — evita "Cannot set properties of undefined"
+window._gFeedback = window._gFeedback || { sessao: null, historico: [] };
 function gRenderFeedbackCard(containerEl,resultado){
   if(!containerEl||!resultado)return;
   window._gFeedback.sessao=resultado;
