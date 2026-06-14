@@ -20,7 +20,9 @@
   try {
     var c = localStorage.getItem('gf_cookie_consent');
     if (c === 'accepted' || c === 'rejected') {
+      // Visitante recorrente: oculta banner e restaura posição dos botões antes do paint
       document.write('<style>#cookieBanner{transform:translateY(100%)!important;transition:none!important}</style>');
+      document.documentElement.classList.add('banner-hidden');
     }
   } catch(e) {}
 })();
@@ -3805,6 +3807,7 @@ function _loadJsPDF() {
 })();
 function ckAccept() {
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+  document.documentElement.classList.add('banner-hidden'); // botões descem suavemente via CSS transition
 
   if (typeof window._firePurchase === 'function') {
     var _att = 0;
@@ -3821,13 +3824,23 @@ function ckReject() {
   window._pixelsLoaded = false;
   window._fbqQueue = [];
   document.getElementById('cookieBanner').style.transform = 'translateY(100%)';
+  document.documentElement.classList.add('banner-hidden'); // botões descem suavemente via CSS transition
 
 }
 </script>
 <!-- ===== WHATSAPP + FEEDBACK ===== -->
 <style>
-/* Botão WhatsApp fixo */
-#btnWhatsapp {
+/* [FIX-CLS #9] Quando o cookieBanner está visível (visitante novo), os botões fixed
+   precisam estar ACIMA do banner desde o first paint — sem JS, sem shift.
+   html.banner-hidden = visitante recorrente (consent dado) → botões em posição padrão.
+   Sem a classe (default, visitante novo) = banner visível → botões sobem automaticamente via CSS. */
+html:not(.banner-hidden) #btnWhatsapp { bottom: 92px; }
+html:not(.banner-hidden) #btnFeedback { bottom: 152px; }
+
+/* Transição suave quando banner some (ckAccept/ckReject adiciona banner-hidden via JS) */
+#btnWhatsapp, #btnFeedback {
+  transition: bottom 0.3s ease, transform 0.2s, box-shadow 0.2s;
+}
   position: fixed; bottom: 24px; right: 24px; z-index: 999;
   width: 52px; height: 52px; border-radius: 50%;
   background: #25d366; border: none; cursor: pointer;
