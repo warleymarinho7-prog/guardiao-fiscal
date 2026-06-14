@@ -185,8 +185,13 @@ async function openCheckout(plan) {
 
   // [FIX-PIXEL] Pixel só dispara aqui — depois de confirmar que não tem plano ativo
   if (typeof window.trackFb === 'function') {
-    window.trackFb('track', 'InitiateCheckout', { content_name: 'plano_' + plan, currency: 'BRL', value: plan === 'pro' ? 29.90 : 19.90 }, { eventID: 'ic_' + Date.now() });
-    window.trackFb('trackCustom', 'CheckoutStarted', { plan: plan }, { eventID: 'cs_' + Date.now() });
+    window.trackFb('track', 'InitiateCheckout', {
+      content_name: 'plano_' + plan,
+      currency: 'BRL',
+      value: plan === 'pro' ? 29.90 : 19.90,
+      content_type: 'product',
+      content_ids: ['plano_' + plan]
+    }, { eventID: 'ic_' + Date.now() });
   }
   if(typeof clarity==='function') clarity('event','CheckoutStarted');
 
@@ -562,7 +567,13 @@ function showCheckoutSuccess() {
     `Seu acesso ao ${plan.name} foi ativado. Pode fechar este painel e usar a análise.`;
   if(typeof fbq==='function' && window.PIXEL_ATIVO) {
     const valor = currentPlan==='pro' ? 29.90 : (PRICES?.avulso?.value ?? 19.90);
-    fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_'+Date.now().toString() });
+    trackFbWithEmail('track', 'Purchase', {
+      value: valor,
+      currency: 'BRL',
+      content_name: 'plano_' + currentPlan,
+      content_type: 'product',
+      content_ids: ['plano_' + currentPlan]
+    }, { eventID: 'purchase_' + Date.now().toString() });
   }
   if (_eConsolidated) setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 2000);
 }
@@ -697,8 +708,14 @@ async function handleMpReturn() {
     document.getElementById('checkoutOverlay').classList.add('show');
 
     if(typeof fbq==='function' && window.PIXEL_ATIVO) {
-      const valor = currentPlan==='pro' ? 29.90 : PRICES?.avulso?.value ?? 34.90;
-      fbq('track','Purchase',{ value: valor, currency:'BRL', content_name:'plano_'+currentPlan },{ eventID:'purchase_mp_'+Date.now().toString() });
+      const valor = currentPlan==='pro' ? 29.90 : PRICES?.avulso?.value ?? 19.90;
+      trackFbWithEmail('track', 'Purchase', {
+        value: valor,
+        currency: 'BRL',
+        content_name: 'plano_' + currentPlan,
+        content_type: 'product',
+        content_ids: ['plano_' + currentPlan]
+      }, { eventID: 'purchase_mp_' + Date.now().toString() });
     }
     if (_eConsolidated) {
       setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 1500);
@@ -788,6 +805,27 @@ function shake(id) {
 
 function closeCheckout(e) {
   if (e.target === document.getElementById('checkoutOverlay')) closeCheckoutDirect();
+}
+
+
+// ── Meta CAPI helper — hash SHA256 para qualidade de correspondência ──────────
+async function _hashEmail(email) {
+  if (!email) return null;
+  try {
+    const normalized = email.toLowerCase().trim();
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch(e) { return null; }
+}
+
+// Versão enriquecida do trackFb com email hasheado
+async function trackFbWithEmail(event, eventName, params, options) {
+  const email = _currentUser?.email || null;
+  const hashedEmail = email ? await _hashEmail(email) : null;
+  const userData = hashedEmail ? { em: hashedEmail } : {};
+  if (typeof window.trackFb === 'function') {
+    window.trackFb(event, eventName, { ...params, ...userData }, options);
+  }
 }
 
 // ╔══════════════════════════════════════════════════╗
@@ -1500,7 +1538,13 @@ function revealResult(p, heroId, alertsId, isDesktop) {
 
   if (typeof fbq === 'function' && window.PIXEL_ATIVO) {
     fbq('trackCustom', 'QuizCompleted', { origem: isDesktop ? 'site_principal' : 'site_principal_mobile', risco: p.nivel, score: p.score }, { eventID: 'qc_' + Date.now() });
-    fbq('track', 'Lead', { content_name: 'quiz_site_principal', content_category: p.nivel }, { eventID: 'lead_site_' + Date.now() });
+    // Lead com email hasheado para melhorar qualidade de correspondência (6.1 → 8+)
+    trackFbWithEmail('track', 'Lead', {
+      content_name: 'quiz_site_principal',
+      content_category: p.nivel,
+      value: 0,
+      currency: 'BRL'
+    }, { eventID: 'lead_site_' + Date.now() });
   }
 }
 
@@ -1573,6 +1617,7 @@ function openQuiz() {
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
+  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
   setTimeout(() => {
     const bar = document.getElementById('mockBar');
