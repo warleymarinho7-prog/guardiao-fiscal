@@ -5,6 +5,18 @@
       "destination": "/app/index.html"
     },
     {
+      "source": "/app.js",
+      "destination": "/app/app.js"
+    },
+    {
+      "source": "/fiscal-worker.js",
+      "destination": "/app/fiscal-worker.js"
+    },
+    {
+      "source": "/pdf.worker.min.js",
+      "destination": "/app/pdf.worker.min.js"
+    },
+    {
       "has": [{ "type": "host", "value": "app.oguardiaofiscal.com.br" }],
       "source": "/:path*",
       "destination": "/app/:path*"
