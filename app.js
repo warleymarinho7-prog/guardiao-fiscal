@@ -123,11 +123,15 @@ const plans = {
 
 let currentPlan = 'pro';
 
-// [FIX-CLS #4] _initPrices removida — preços fixos agora estão no HTML estático.
-// Os IDs splitAvulsoPrice1/2, paywallAvulsoPrice, planAvulsoCta, splitProPrice1/2, planProPrice
-// devem conter os valores corretos diretamente no index.html.
-// Valores de referência: avulso = R$19,90 | pro = R$29,90
-function _initPrices() { /* no-op: preços no HTML estático */ }
+function _initPrices() {
+  const pr = PRICES.pro.label;
+  const avHtml = PRICES.avulso.label;
+  ['splitAvulsoPrice1','splitAvulsoPrice2','paywallAvulsoPrice','planAvulsoCta']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = avHtml; });
+  ['splitProPrice1','splitProPrice2','planProPrice']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = pr; });
+}
+document.addEventListener('DOMContentLoaded', _initPrices);
 
 // ===== PRO FREE MODE =====
 const PRO_FREE_MODE = false;
@@ -141,23 +145,26 @@ function showProFreeBanner() {
 }
 
 function initProFreeMode() {
-  // [FIX-CLS #5] PRO_FREE_MODE=false: textos de botão agora estão no HTML estático.
-  // Os IDs btnProText, paywallProText, ucProText, planProBadge e .btn-plan-pro span
-  // devem conter o texto final correto diretamente no index.html.
-  // Textos de referência:
-  //   btnProText / .btn-plan-pro span → "Assinar Pro — R$29,90/mês →"
-  //   paywallProText                  → "Acessar Pro — R$29,90/mês"
-  //   ucProText                       → "Acessar Pro — R$29,90/mês"
-  //   planProBadge                    → "⭐ MELHOR CUSTO-BENEFÍCIO"
-  if (PRO_FREE_MODE) {
-    const plansWrap = document.querySelector('#page-planos .plans-page');
-    if (plansWrap && !document.getElementById('proFreeBanner')) {
-      const banner = document.createElement('div');
-      banner.id = 'proFreeBanner';
-      banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
-      banner.innerHTML = '<div style="font-family:var(--ff);font-size:14px;font-weight:700;color:#7CFF4F;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:var(--muted2);line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
-      plansWrap.insertBefore(banner, plansWrap.firstChild);
-    }
+  if (!PRO_FREE_MODE) {
+    const btnPro = document.querySelector('.btn-plan-pro span');
+    if (btnPro) btnPro.textContent = 'Assinar Pro — R$29,90/mês →';
+    const btnProEl = document.getElementById('btnProText');
+    if (btnProEl) btnProEl.textContent = 'Assinar Pro — R$29,90/mês →';
+    const pwPro = document.getElementById('paywallProText');
+    if (pwPro) pwPro.textContent = 'Acessar Pro — R$29,90/mês';
+    const ucPro = document.getElementById('ucProText');
+    if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
+    const popular = document.getElementById('planProBadge');
+    if (popular) popular.textContent = '⭐ MELHOR CUSTO-BENEFÍCIO';
+    return;
+  }
+  const plansWrap = document.querySelector('#page-planos .plans-page');
+  if (plansWrap && !document.getElementById('proFreeBanner')) {
+    const banner = document.createElement('div');
+    banner.id = 'proFreeBanner';
+    banner.style.cssText = 'display:none;background:linear-gradient(135deg,rgba(0,217,110,0.1),rgba(0,150,100,0.06));border:1px solid rgba(0,217,110,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;text-align:center';
+    banner.innerHTML = '<div style="font-family:var(--ff);font-size:14px;font-weight:700;color:#7CFF4F;margin-bottom:5px">🎉 Período de Lançamento — Pro Gratuito</div><div style="font-size:12px;color:var(--muted2);line-height:1.6">Durante o lançamento todos os recursos Pro estão liberados gratuitamente.<br>Aproveite e nos dê seu feedback!</div>';
+    plansWrap.insertBefore(banner, plansWrap.firstChild);
   }
 }
 
@@ -961,8 +968,7 @@ function setUser(user) {
     autoSkipExtStep1(user.email);
     const nh = document.getElementById('navHistorico');
     const dh = document.getElementById('drawerHistorico');
-    // [FIX-CLS #6] visibility ao invés de display — reserva espaço no layout, zero shift
-    if (nh) nh.style.visibility = 'visible';
+    if (nh) nh.style.display = 'inline-block';
     if (dh) dh.style.display = 'block';
   } else {
     area.innerHTML = '';
@@ -975,7 +981,7 @@ function setUser(user) {
     if (da) da.innerHTML = '<button class="nav-btn-login" style="width:100%;text-align:center;padding:12px" onclick="openLogin();closeDrawer()">Entrar</button>';
     const _nh = document.getElementById('navHistorico');
     const _dh = document.getElementById('drawerHistorico');
-    if (_nh) _nh.style.visibility = 'hidden';
+    if (_nh) _nh.style.display = 'none';
     if (_dh) _dh.style.display = 'none';
   }
 }
@@ -1298,8 +1304,6 @@ const CORES = { baixo: C_BAIXO, moderado: C_MODERADO, elevado: C_ELEVADO, critic
 function renderProfileCards(bodyId) {
   const body = document.getElementById(bodyId);
   if (!body) return;
-  // [FIX-CLS #7] Não re-renderiza se já foi populado (evita shift duplo)
-  if (body.querySelector('.opt')) return;
   body.innerHTML = `
     <div style="font-size:13px;color:var(--muted2);margin-bottom:14px;line-height:1.5">Qual descreve melhor como você movimenta dinheiro?</div>
     <div style="display:flex;flex-direction:column;gap:8px">
@@ -1344,9 +1348,10 @@ function selectProfile(id, bodyId) {
 
     if (!isDesktop) {
       // [FIX-CLS v3] Esconde quizExtratoBtn ANTES de medir scrollHeight.
-      // Problema anterior: minHeight era capturado com o botão visível (inclui sua altura).
-      // No rAF2 o botão sumia → mResultPanel aparecia menor que o espaço reservado → conteúdo
-      // abaixo subia → shift 0,0822. Agora a medição já exclui o botão, altura bate certa.
+      // Bug anterior: minHeight era capturado COM o botão visível, mas no rAF2 o botão
+      // sumia → mResultPanel aparecia menor que o espaço reservado → shift 0,0822.
+      // Agora: botão some no rAF1 antes da medição → scrollHeight já exclui a altura dele
+      // → espaço reservado bate exato com o conteúdo exibido → CLS zero.
       requestAnimationFrame(() => {
         const btn = document.getElementById('quizExtratoBtn');
         if (btn) btn.style.visibility = 'hidden';
