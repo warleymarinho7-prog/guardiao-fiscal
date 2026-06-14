@@ -693,7 +693,11 @@ nav {
 #paywallBlock { contain: layout; }
 #previewReal { display: none; overflow: hidden; width: 100%; box-sizing: border-box; }
 #previewPlaceholder { width: 100%; }
-#extStep3 { contain: layout; visibility: hidden; }
+
+/* [FIX-CLS #10] extStep3: height:0 + overflow:hidden quando oculto → zero espaço em branco.
+   JS usa classList.add('visible') para revelar — contain:layout isola reflow interno. */
+#extStep3 { contain: layout; visibility: hidden; height: 0; overflow: hidden; }
+#extStep3.visible { visibility: visible; height: auto; overflow: visible; }
 
 /* upload zone */
 .upload-zone {
