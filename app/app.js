@@ -2421,44 +2421,99 @@ let _eConsolidated=null;
 let _eSources=null;
 let _analysisRunning=false;
 
-function eDov(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
+function eDov(e){
+  e.preventDefault();
+  document.getElementById('dz').classList.add('drag');
+  _trackUpload('dz_drag_enter');
+}
 function eDlv(){document.getElementById('dz').classList.remove('drag')}
-function eDrp(e){e.preventDefault();eDlv();Array.from(e.dataTransfer.files).forEach(eAddFile)}
-function eOnSel(e){Array.from(e.target.files).forEach(eAddFile);e.target.value='';}
+function eDrp(e){
+  e.preventDefault();
+  eDlv();
+  _trackUpload('dz_dropped', { files: e.dataTransfer.files.length });
+  Array.from(e.dataTransfer.files).forEach(eAddFile);
+}
+function eOnSel(e){
+  const files = Array.from(e.target.files);
+  if (files.length > 0) {
+    _trackUpload('file_selected', { files: files.length, format: files[0].name.split('.').pop().toLowerCase() });
+  }
+  files.forEach(eAddFile);
+  e.target.value='';
+}
 
 function eAddFile(file){
   eShowErr('');
-  if(eFiles.length>=MAX_FILES){eShowErr(`Limite de ${MAX_FILES} extratos atingido.`);return;}
-  if(!validateFileName(file.name)){eShowErr('Nome de arquivo inválido ou suspeito.');return;}
-  if(eFiles.find(f=>f.name===file.name)){eShowErr(`"${sanitize(file.name)}" já foi adicionado.`);return;}
+  if(eFiles.length>=MAX_FILES){
+    eShowErr(`Limite de ${MAX_FILES} extratos atingido.`);
+    _trackUpload('file_rejected', { reason: 'limit_reached' });
+    return;
+  }
+  if(!validateFileName(file.name)){
+    eShowErr('Nome de arquivo inválido ou suspeito.');
+    _trackUpload('file_rejected', { reason: 'invalid_name' });
+    return;
+  }
+  if(eFiles.find(f=>f.name===file.name)){
+    eShowErr(`"${sanitize(file.name)}" já foi adicionado.`);
+    _trackUpload('file_rejected', { reason: 'duplicate' });
+    return;
+  }
   const MAX_SIZE=10*1024*1024;
-  if(file.size>MAX_SIZE){eShowErr(`"${sanitize(file.name)}" excede o limite de 10MB.`);return;}
+  if(file.size>MAX_SIZE){
+    eShowErr(`"${sanitize(file.name)}" excede o limite de 10MB.`);
+    _trackUpload('file_rejected', { reason: 'too_large', size_mb: Math.round(file.size/1024/1024) });
+    return;
+  }
   const allowedExt=['pdf','csv','ofx','qfx','txt'];
   const ext=file.name.split('.').pop().toLowerCase();
-  if(!allowedExt.includes(ext)){eShowErr(`Formato não suportado: .${sanitize(ext)}. Use PDF, CSV, OFX ou TXT.`);return;}
+  if(!allowedExt.includes(ext)){
+    eShowErr(`Formato não suportado: .${sanitize(ext)}. Use PDF, CSV, OFX ou TXT.`);
+    _trackUpload('file_rejected', { reason: 'unsupported_format', format: ext });
+    return;
+  }
   const entry={name:file.name,content:null,type:null,detected:null,status:'loading'};
   eFiles.push(entry);eRenderFileList();
   if(ext==='pdf'){
     const r=new FileReader();
     r.onload=async e=>{
-      try{await validatePDFMagicBytes(e.target.result);await _loadPdfJs();entry.content=e.target.result;entry.type='pdf';entry.detected={format:'pdf',bank:'PDF'};entry.status='ok';}
-      catch(err){entry.status='err';eShowErr(`"${sanitize(file.name)}": ${err.message}`);}
+      try{
+        await validatePDFMagicBytes(e.target.result);
+        await _loadPdfJs();
+        entry.content=e.target.result;entry.type='pdf';entry.detected={format:'pdf',bank:'PDF'};entry.status='ok';
+        _trackUpload('file_ready', { format: 'pdf' });
+      }catch(err){
+        entry.status='err';
+        eShowErr(`"${sanitize(file.name)}": ${err.message}`);
+        _trackUpload('file_rejected', { reason: 'pdf_error', error: err.message.slice(0,40) });
+      }
       eRenderFileList();eUpdateActionBar();
     };
     r.readAsArrayBuffer(file);
   }else{
     const enc=['UTF-8','ISO-8859-1','windows-1252'];let idx=0;
     const tryNext=()=>{
-      if(idx>=enc.length){entry.status='err';eRenderFileList();return;}
+      if(idx>=enc.length){
+        entry.status='err';
+        eRenderFileList();
+        _trackUpload('file_rejected', { reason: 'encoding_error', format: ext });
+        return;
+      }
       const r=new FileReader();
       r.onload=e=>{
         let c=e.target.result;
         const bad=(c.match(/\uFFFD/g)||[]).length;
         if(bad>20&&idx<enc.length-1){idx++;tryNext();return;}
-        if(c.length>MAX_TEXT_CHARS){eShowErr(`"${sanitize(file.name)}" tem conteúdo excessivo.`);entry.status='err';eRenderFileList();return;}
+        if(c.length>MAX_TEXT_CHARS){
+          eShowErr(`"${sanitize(file.name)}" tem conteúdo excessivo.`);
+          entry.status='err';eRenderFileList();
+          _trackUpload('file_rejected', { reason: 'content_too_large', format: ext });
+          return;
+        }
         const isOFX=ext==='ofx'||ext==='qfx'||c.substring(0,500).toUpperCase().includes('OFXHEADER');
         if(!isOFX)c=sanitizeFileContent(c);
         entry.content=c;entry.type='text';entry.detected=eDetectFormat(c,file.name);entry.status='ok';
+        _trackUpload('file_ready', { format: entry.detected?.format || ext, bank: entry.detected?.bank || 'unknown' });
         eRenderFileList();eUpdateActionBar();
       };
       r.readAsText(file,enc[idx]);
@@ -2500,6 +2555,30 @@ function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=p
 const MAX_FILES=5;
 const SRC_COLORS=['#7CFF4F','#4d9fff','#f5a623','#c084fc','#fb7185'];
 
+// ── Funil de upload — tracking centralizado ───────────────────────────────
+// Eventos: dz_clicked | file_selected | file_rejected | file_ready
+//          analysis_started | analysis_completed | analysis_failed
+// Destinos: Meta Pixel (fbq) + Microsoft Clarity (clarity)
+function _trackUpload(event, props) {
+  try {
+    // Meta Pixel
+    if (typeof fbq === 'function' && window.PIXEL_ATIVO) {
+      fbq('trackCustom', 'UploadFunnel_' + event, props || {}, { eventID: event + '_' + Date.now() });
+    }
+    // Microsoft Clarity
+    if (typeof clarity === 'function') {
+      clarity('event', 'UploadFunnel_' + event);
+      // Clarity aceita tags para filtrar sessões
+      if (props && props.error) clarity('set', 'upload_error', props.error);
+      if (props && props.format) clarity('set', 'file_format', props.format);
+    }
+    // Debug local
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('[GF Funnel]', event, props || '');
+    }
+  } catch(e) { /* silencioso */ }
+}
+
 async function eRunAll(){
   // [FIX-RACE] Proteção contra duplo clique
   if(_analysisRunning)return;
@@ -2509,6 +2588,7 @@ async function eRunAll(){
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   try{
+    _trackUpload('analysis_started', { files: ready.length });
     if(typeof fbq==='function'&&window.PIXEL_ATIVO)fbq('trackCustom','AnalysisStarted',{files:ready.length},{eventID:Date.now().toString()});
     if(typeof clarity==='function')clarity('event','AnalysisStarted');
     const _rInput=document.getElementById('rendaDeclaradaInput');
@@ -2548,7 +2628,12 @@ async function eRunAll(){
         parsed.push({txns,banco:f.detected.banco||f.detected.bank,conta:f.detected.conta||null,label:f.detected.bank,formato:f.detected.format});
       }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${e.message}`;eShowErr(msg);}
     }
-    if(parsed.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
+    if(parsed.length===0){
+      eSetProgress(0,'Erro — nenhum extrato processado');
+      document.getElementById('btnGo').classList.add('on');
+      _trackUpload('analysis_failed', { reason: 'no_parsed_files' });
+      return;
+    }
     eFiles.forEach(f=>{f.content=null;});
     eSetProgress(70,'Identificando contas...');
     const grupos={};
@@ -2563,11 +2648,21 @@ async function eRunAll(){
       const r=eAnalyzeSingle(deduplicateTxns(g.txns),bankLabel,window._rendaDeclaradaMensal||0,window._perfilUsuario||null);
       if(r){results.push(r);if(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'){window._debugMotor=r;}}
     }
-    if(results.length===0){eSetProgress(0,'Erro — nenhum extrato processado');document.getElementById('btnGo').classList.add('on');return;}
+    if(results.length===0){
+      eSetProgress(0,'Erro — nenhum extrato processado');
+      document.getElementById('btnGo').classList.add('on');
+      _trackUpload('analysis_failed', { reason: 'no_results' });
+      return;
+    }
     eSetProgress(95,'Consolidando...');
     await new Promise(r=>setTimeout(r,300));
     const consolidated=eConsolidate(results);
-    if(!consolidated){eShowErr('Não foi possível consolidar os extratos. Verifique se o arquivo está no formato correto (CSV, OFX ou PDF).');document.getElementById('btnGo').classList.add('on');return;}
+    if(!consolidated){
+      eShowErr('Não foi possível consolidar os extratos. Verifique se o arquivo está no formato correto (CSV, OFX ou PDF).');
+      document.getElementById('btnGo').classList.add('on');
+      _trackUpload('analysis_failed', { reason: 'consolidation_failed' });
+      return;
+    }
     eAllTxns=consolidated.all;
     eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
     document.getElementById('extStep2').style.opacity='0.6';
@@ -2584,6 +2679,12 @@ async function eRunAll(){
     if(_currentUser&&sb){(async()=>{try{const _nivel=consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo';const _payload={user_id:_currentUser.id,score:consolidated.score,nivel_risco:_nivel,nivel_label:consolidated.score<=20?'Baixo risco':consolidated.score<=45?'Atenção':consolidated.score<=70?'Risco elevado':'Risco crítico',perfil_usuario:window._perfilUsuario||null,renda_declarada:window._rendaDeclaradaMensal||null,total_creditos:Math.round(consolidated.totalCredits||0),total_debitos:Math.round(consolidated.totalDebits||0),total_txns:consolidated.totalTxns||0,pix_total:Math.round(consolidated.pixTotal||0),especie_total:Math.round(consolidated.especieTotal||0),indice_consumo:Math.round((consolidated.indiceConsumo||0)*100),pix_pct:consolidated.totalCredits>0?Math.round(consolidated.pixTotal/consolidated.totalCredits*100):0,num_alertas:(consolidated.alerts||[]).length,num_fontes:results.length,versao_engine:'v8.0',created_at:new Date().toISOString(),fatores:JSON.stringify((results||[]).flatMap(r=>(r.fatores||[]).filter(f=>f.peso>0)).sort((a,b)=>b.peso-a.peso).slice(0,6).map(f=>({motivo:f.motivo||'',peso:f.peso||0,fatorKey:f.fatorKey||'',quandoNaoERisco:f.quandoNaoERisco||'',confianca:Math.round((f.confianca||0)*100)}))),alertas:JSON.stringify((consolidated.alerts||[]).map(a=>({type:a.type||'',icon:a.icon||'',title:a.title||'',text:a.text||''})))};await sb.from('analyses').insert(_payload);}catch(e){}})();}
     // [FIX-CLS] Popula conteúdo com s3 ainda oculto, depois mostra e scrolla num único frame
     eRenderPreview(consolidated,results);
+    _trackUpload('analysis_completed', {
+      score: consolidated.score,
+      nivel: consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo',
+      txns: consolidated.totalTxns,
+      sources: results.length
+    });
     requestAnimationFrame(() => {
       s3.style.display='block';
       s3.scrollIntoView({behavior:'smooth',block:'start'});
