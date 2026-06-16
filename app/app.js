@@ -107,6 +107,26 @@ const PRICES = {
   pro:    { value: 29.90, label: 'R$29,90' },
 };
 
+// ── Guias de exportação por banco — fonte única ────────────────────────────
+const BANK_GUIDES = {
+  nubank:   { label:'NUBANK · Exportar CSV',   color:'#a78bfa', bg:'rgba(130,80,255,0.05)', border:'rgba(130,80,255,0.15)', steps:['Abra o <strong>app do Nubank</strong> no celular','Toque em <strong>Extrato</strong> → role até o fim','Toque em <strong>"Exportar para Excel"</strong>','Salve o arquivo e selecione abaixo'] },
+  inter:    { label:'INTER · Exportar CSV',    color:'#fb923c', bg:'rgba(255,100,0,0.05)',  border:'rgba(255,100,0,0.2)',   steps:['Abra o <strong>app do Inter</strong> no celular','Vá em <strong>Extrato</strong> → toque no ícone de compartilhar','Selecione <strong>"Exportar CSV"</strong> e salve','Selecione o arquivo abaixo'] },
+  bb:       { label:'BANCO DO BRASIL · Exportar OFX', color:'#60a5fa', bg:'rgba(0,100,220,0.05)', border:'rgba(0,100,220,0.2)', steps:['Acesse o <strong>Internet Banking</strong> do BB pelo computador','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Salvar/Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  itau:     { label:'ITAÚ · Exportar OFX',    color:'#fbbf24', bg:'rgba(230,150,0,0.05)', border:'rgba(230,150,0,0.2)',  steps:['Acesse <strong>itau.com.br</strong> ou o app do Itaú','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  bradesco: { label:'BRADESCO · Exportar OFX', color:'#f87171', bg:'rgba(220,30,30,0.05)', border:'rgba(220,30,30,0.2)',  steps:['Acesse <strong>bradesco.com.br</strong> pelo computador','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+};
+
+function renderBankGuide(banco, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const g = BANK_GUIDES[banco];
+  if (!g) return;
+  el.innerHTML = `<div style="background:${g.bg};border:1px solid ${g.border};border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:7px">
+    <div style="font-size:10px;font-weight:700;color:${g.color};letter-spacing:0.5px;margin-bottom:2px">${g.label}</div>
+    ${g.steps.map((s,i)=>`<div style="display:flex;gap:8px;align-items:flex-start"><span style="min-width:20px;height:20px;border-radius:50%;background:${g.bg.replace('0.05','0.15')};color:${g.color};font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</span><span style="font-size:12px;color:var(--text2);line-height:1.5">${s}</span></div>`).join('')}
+  </div>`;
+}
+
 // ===== CHECKOUT =====
 const plans = {
   avulso: {
@@ -1388,18 +1408,20 @@ function selectProfile(id, bodyId) {
 
     if (!isDesktop) {
       // [FIX-CLS v2] Reserva altura ANTES de trocar visibilidade — zero layout shift
-      // rAF1: quizWrap ainda exibe mQuestionPanel (visível) + mResultPanel (invisível mas populado)
-      //       scrollHeight captura altura total real — visibility:hidden não zera o pai
-      // rAF2: troca visibilidade com espaço já reservado — browser não precisa reajustar layout
+      // Garante que inlineGuiaContent está populado antes de ler scrollHeight
+      const inlineBlock = document.getElementById('inlineUploadBlock');
+      if (inlineBlock && !document.getElementById('inlineGuiaContent')?.children.length) {
+        renderBankGuide('nubank', 'inlineGuiaContent');
+      }
       requestAnimationFrame(() => {
         const qw = document.getElementById('quizWrap');
-        if (qw) qw.style.minHeight = qw.scrollHeight + 'px';
+        // [FIX-CLS] Reserva altura incluindo o bloco inline antes de trocar visibilidade
+        if (qw) qw.style.minHeight = (qw.scrollHeight + (inlineBlock ? inlineBlock.scrollHeight : 0)) + 'px';
         requestAnimationFrame(() => {
           document.getElementById(panelQ).style.visibility = 'hidden';
           document.getElementById(panelR).style.visibility = 'visible';
-          // [FIX-BUG2] Revela o botão junto com o resultado — estava sendo ocultado e nunca revelado
-          const btn = document.getElementById('quizExtratoBtn');
-          if (btn) btn.style.visibility = 'visible';
+          // [INLINE-UPLOAD] Revela o bloco de upload inline junto com o resultado
+          if (inlineBlock) inlineBlock.style.visibility = 'visible';
         });
       });
     } else {
@@ -1518,7 +1540,7 @@ function revealResult(p, heroId, alertsId, isDesktop) {
     <div style="margin-top:16px;box-sizing:border-box;width:100%;animation:_fadeUp 0.4s ease 0.2s both">
       <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;white-space:nowrap">${u.badge}</div>
       <div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:14px;box-sizing:border-box;word-break:break-word">${u.sub}</div>
-      <button onclick="showPage('extrato')" style="width:100%;padding:16px;background:${u.btnColor};border:none;border-radius:12px;color:${u.btnText};font-family:var(--ff);font-size:clamp(13px,3.5vw,15px);font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:-0.01em;box-sizing:border-box;word-break:break-word;${(p.nivel==='critico'||p.nivel==='elevado') ? 'box-shadow:0 0 20px rgba(255,77,79,0.4)' : 'box-shadow:var(--glow-green)'}">
+      <button onclick="${isDesktop ? "showPage('extrato')" : "document.getElementById('inlineUploadBlock').scrollIntoView({behavior:'smooth',block:'start'})"}" style="width:100%;padding:16px;background:${u.btnColor};border:none;border-radius:12px;color:${u.btnText};font-family:var(--ff);font-size:clamp(13px,3.5vw,15px);font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:-0.01em;box-sizing:border-box;word-break:break-word;${(p.nivel==='critico'||p.nivel==='elevado') ? 'box-shadow:0 0 20px rgba(255,77,79,0.4)' : 'box-shadow:var(--glow-green)'}">
         ${u.btnLabel}
       </button>
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">${u.trust}</div>
@@ -1536,9 +1558,58 @@ function revealResult(p, heroId, alertsId, isDesktop) {
     requestAnimationFrame(step);
   }, 100);
 
+  // [RESULT-MODE] Desktop: ativa layout 40/60 com reserva de altura anti-CLS
+  // Ordem correta: 1) injetar HTML (ainda oculto), 2) ler scrollHeight, 3) reservar min-height, 4) rAF → classList.add
+  if (isDesktop) {
+    const splitHome = document.querySelector('.split-home');
+    const splitRight = document.querySelector('.split-right');
+    const diu = document.getElementById('desktopInlineUpload');
+
+    // Passo 1: injetar HTML do upload inline ANTES de mudar o layout
+    if (diu) {
+      diu.innerHTML = `
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;box-sizing:border-box">
+          <div style="font-family:var(--ff);font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px">Confirme com seu extrato real</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.55;margin-bottom:14px">O simulador detectou sinais com base nas suas respostas. Veja o que a Receita enxerga nos dados reais.</div>
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.15);border-radius:8px;padding:8px 12px;margin-bottom:14px">
+            <span>🔒</span><span style="font-size:12px;color:var(--accent);font-weight:600">Processado 100% no seu dispositivo · nenhum dado sai daqui</span>
+          </div>
+          <div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:0.5px;margin-bottom:8px">Selecione seu banco:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="desktopBankTabs">
+            ${['nubank','inter','bb','itau','bradesco'].map((b,i)=>`<button onclick="desktopGuiaTab('${b}')" id="dgtab-${b}" style="padding:6px 13px;border-radius:var(--radius-card);border:${i===0?'1.5px solid rgba(130,80,255,0.5)':'1px solid var(--border)'};background:${i===0?'rgba(130,80,255,0.1)':'transparent'};color:${i===0?'#a78bfa':'var(--muted2)'};font-family:var(--ff);font-size:12px;font-weight:${i===0?700:600};cursor:pointer">${{nubank:'Nubank',inter:'Inter',bb:'Banco do Brasil',itau:'Itaú',bradesco:'Bradesco'}[b]}</button>`).join('')}
+          </div>
+          <div id="desktopGuiaContent" style="margin-bottom:14px"></div>
+          <div style="border:1.5px dashed rgba(255,255,255,0.15);border-radius:10px;padding:18px;text-align:center;cursor:pointer;position:relative;margin-bottom:12px"
+               onclick="inlineUploadClick()"
+               ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+               ondragleave="this.style.borderColor='rgba(255,255,255,0.15)'"
+               ondrop="inlineDropHandle(event)">
+            <div style="font-size:22px;margin-bottom:5px">📂</div>
+            <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px">Clique para selecionar o arquivo</div>
+            <div style="font-size:12px;color:var(--muted2)">CSV · OFX · PDF · até 5 extratos</div>
+          </div>
+          <button onclick="inlineGoToExtrato()" style="width:100%;padding:14px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer">Analisar extrato agora →</button>
+          <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">⚡ Análise em menos de 2 min · sem envio de dados</div>
+        </div>`;
+      // Renderiza guia do Nubank ANTES de ler scrollHeight
+      renderBankGuide('nubank', 'desktopGuiaContent');
+    }
+
+    // Passo 2: reservar altura do split-right antes de mudar o layout (rAF1 = leitura)
+    requestAnimationFrame(() => {
+      if (splitRight) splitRight.style.minHeight = splitRight.scrollHeight + 'px';
+      // Passo 3: rAF2 = aplicar mudança com espaço já reservado
+      requestAnimationFrame(() => {
+        if (splitHome) splitHome.classList.add('result-mode');
+        if (diu) diu.style.display = 'block';
+        // Limpa o min-height após a transição de layout (250ms — suficiente para o CSS transition)
+        setTimeout(() => { if (splitRight) splitRight.style.minHeight = ''; }, 300);
+      });
+    });
+  }
+
   if (typeof fbq === 'function' && window.PIXEL_ATIVO) {
     fbq('trackCustom', 'QuizCompleted', { origem: isDesktop ? 'site_principal' : 'site_principal_mobile', risco: p.nivel, score: p.score }, { eventID: 'qc_' + Date.now() });
-    // Lead com email hasheado para melhorar qualidade de correspondência (6.1 → 8+)
     trackFbWithEmail('track', 'Lead', {
       content_name: 'quiz_site_principal',
       content_category: p.nivel,
@@ -1548,11 +1619,29 @@ function revealResult(p, heroId, alertsId, isDesktop) {
   }
 }
 
+// Seletor de banco — bloco desktop inline
+function desktopGuiaTab(banco) {
+  const cores = { nubank:'rgba(130,80,255,0.5)', inter:'rgba(255,100,0,0.4)', bb:'rgba(0,100,220,0.4)', itau:'rgba(230,150,0,0.4)', bradesco:'rgba(220,30,30,0.4)' };
+  const bgs   = { nubank:'rgba(130,80,255,0.1)', inter:'rgba(255,100,0,0.08)', bb:'rgba(0,100,220,0.08)', itau:'rgba(230,150,0,0.08)', bradesco:'rgba(220,30,30,0.08)' };
+  const cols  = { nubank:'#a78bfa', inter:'#fb923c', bb:'#60a5fa', itau:'#fbbf24', bradesco:'#f87171' };
+  ['nubank','inter','bb','itau','bradesco'].forEach(b => {
+    const btn = document.getElementById('dgtab-' + b);
+    if (!btn) return;
+    if (b === banco) { btn.style.border='1.5px solid '+cores[b]; btn.style.background=bgs[b]; btn.style.color=cols[b]; btn.style.fontWeight='700'; }
+    else { btn.style.border='1px solid var(--border)'; btn.style.background='transparent'; btn.style.color='var(--muted2)'; btn.style.fontWeight='600'; }
+  });
+  renderBankGuide(banco, 'desktopGuiaContent');
+}
+
 function restart() {
+  const splitHome = document.querySelector('.split-home');
+  if (splitHome) splitHome.classList.remove('result-mode');
   document.getElementById('resultPanel').style.visibility = 'hidden';
   document.getElementById('questionPanel').style.visibility = 'visible';
   document.getElementById('resultHero').innerHTML = '';
   document.getElementById('resultAlerts').innerHTML = '';
+  const diu = document.getElementById('desktopInlineUpload');
+  if (diu) { diu.style.display = 'none'; diu.innerHTML = ''; }
   const demo = document.getElementById('liveDetectDemo');
   if (demo) demo.style.visibility = 'visible';
   renderProfileCards('qBody');
@@ -1561,8 +1650,12 @@ function restart() {
 function mRestart() {
   document.getElementById('mResultPanel').style.visibility = 'hidden';
   document.getElementById('mQuestionPanel').style.visibility = 'visible';
-  const btn = document.getElementById('quizExtratoBtn');
-  if (btn) btn.style.visibility = 'visible';
+  // [INLINE-UPLOAD] Oculta o bloco inline ao refazer a simulação
+  const inlineBlock = document.getElementById('inlineUploadBlock');
+  if (inlineBlock) inlineBlock.style.visibility = 'hidden';
+  // Reseta minHeight do quizWrap
+  const qw = document.getElementById('quizWrap');
+  if (qw) qw.style.minHeight = '';
   document.getElementById('mResultHero').innerHTML = '';
   document.getElementById('mResultAlerts').innerHTML = '';
   renderProfileCards('mQBody');
@@ -1573,6 +1666,8 @@ function mRestart() {
 document.addEventListener('DOMContentLoaded', function () {
   renderProfileCards('qBody');
   renderProfileCards('mQBody');
+  // Inicializa guia inline com Nubank por padrão
+  renderBankGuide('nubank', 'inlineGuiaContent');
 });
 
 function openQuiz() {
