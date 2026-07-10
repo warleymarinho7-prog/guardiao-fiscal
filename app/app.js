@@ -2305,6 +2305,7 @@ function calcularIndiceMaturidade(manifestacoes){
     documentosConferidos,
     divergenciasEncontradas,
     divergenciasResolvidas,
+    totalVerificadas, // [FIX] estava calculado mas não exposto — _updateMaturidadeBadge() dependia disso
     percentualVerificado, // 0-100 — quanto do diagnóstico já foi conferido, não o quão arriscado ele é
   };
 }
@@ -3065,7 +3066,11 @@ function _mnfCardHtml(m) {
       </div>
     </div>
     <div class="mnf-guided" id="mnfDoc_${sanitize(m.categoria)}">
-      <div class="mnf-guided-q">Informe o valor total que consta no documento (informe/comprovante) para confirmarmos com evidência.</div>
+      <div class="mnf-guided-q">Informe o valor que consta no documento (informe/comprovante) para confirmarmos com evidência.</div>
+      <div style="display:flex;gap:14px;margin-bottom:8px;font-size:12px;color:var(--text2)">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="mnfPeriodo_${sanitize(m.categoria)}" value="anual" checked style="accent-color:var(--green)"> Total do ano (o que o DMED/informe normalmente traz)</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="mnfPeriodo_${sanitize(m.categoria)}" value="mensal" style="accent-color:var(--green)"> Valor mensal (vou fazer a conta pra você)</label>
+      </div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="number" step="0.01" min="0" id="mnfDocInput_${sanitize(m.categoria)}" placeholder="Valor no documento (R$)" style="flex:1;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--ff);font-size:13px">
         <button class="mnf-cta" style="width:auto;padding:10px 16px" onclick="confirmarDocumentoManifestacao('${sanitize(m.categoria)}')">Confirmar</button>
@@ -3186,11 +3191,18 @@ function abrirConfirmacaoDocumental(categoria) {
 function confirmarDocumentoManifestacao(categoria) {
   const input = document.getElementById('mnfDocInput_' + categoria);
   if (!input) return;
-  const valor = parseFloat((input.value || '').replace(',', '.'));
-  if (isNaN(valor) || valor < 0) { input.style.borderColor = 'var(--red)'; return; }
+  const valorDigitado = parseFloat((input.value || '').replace(',', '.'));
+  if (isNaN(valorDigitado) || valorDigitado < 0) { input.style.borderColor = 'var(--red)'; return; }
   const atual = _eManifestacoesState[categoria];
   if (!atual) return;
-  const atualizado = confirmarComEvidenciaDocumental(atual, valor);
+  // [FIX-UX] O usuário tende a digitar valor mensal mesmo quando o campo pede o total do
+  // documento (achado em teste com usuário real, jul/2026). Deixamos explícito e normalizamos
+  // pra anual antes de comparar, em vez de depender só do texto do campo.
+  const periodoEl = document.querySelector('input[name="mnfPeriodo_' + categoria + '"]:checked');
+  const periodo = periodoEl ? periodoEl.value : 'anual';
+  const meses = atual.mesesDetectados || 12;
+  const valorComparado = periodo === 'mensal' ? valorDigitado * meses : valorDigitado;
+  const atualizado = confirmarComEvidenciaDocumental(atual, valorComparado);
   _eManifestacoesState[categoria] = atualizado;
   const docEl = document.getElementById('mnfDoc_' + categoria);
   const resultEl = document.getElementById('mnfResult_' + categoria);
@@ -3199,7 +3211,8 @@ function confirmarDocumentoManifestacao(categoria) {
     const tagClass = atualizado.resolvido ? 'resolvido' : 'pendente';
     const tagLabel = atualizado.resolvido ? 'Confirmado por documento — sem divergência' : 'Confirmado por documento — divergência encontrada';
     const evidHtml = (atualizado.evidencias || []).slice(-1).map(e => `<div class="mnf-evid">${e.ok ? '✓' : '▸'} ${sanitize(e.texto)}</div>`).join('');
-    resultEl.innerHTML = `<span class="mnf-result-tag ${tagClass}">${tagLabel}</span>${evidHtml}<div class="mnf-next" style="margin-top:8px">${sanitize(atualizado.proximaEtapa || '')}</div>`;
+    const conversaoHtml = periodo === 'mensal' ? `<div class="mnf-evid">▸ Considerado ${sanitize(fmtBRL(valorDigitado))}/mês × ${meses} meses = ${sanitize(fmtBRL(valorComparado))} no ano</div>` : '';
+    resultEl.innerHTML = `<span class="mnf-result-tag ${tagClass}">${tagLabel}</span>${conversaoHtml}${evidHtml}<div class="mnf-next" style="margin-top:8px">${sanitize(atualizado.proximaEtapa || '')}</div>`;
     resultEl.classList.add('open');
   }
   const cta = document.getElementById('mnfCta_' + categoria);
