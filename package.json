@@ -1,0 +1,16 @@
+{
+  "name": "guardiao-fiscal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Guardião Fiscal — TaxTech de análise preventiva de compatibilidade fiscal (Livro III, Cap. 12: Arquitetura de Testes)",
+  "main": "app.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": ["guardiao-fiscal", "testes", "arquitetura"],
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}

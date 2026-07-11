@@ -1,0 +1,49 @@
+name: Testes (Cap. 16 — CI/CD)
+
+# Livro III, Cap. 16.1: "Nenhuma alteração chega à produção sem provar que
+# respeita a arquitetura." Este workflow faz cumprir automaticamente a
+# DEC-019: todo push e todo PR rodam a suíte de testes (Motor → Contrato →
+# Parser) antes de qualquer merge ser permitido.
+#
+# Este workflow NÃO faz deploy — o deploy continua a cargo do Vercel via
+# sua própria integração com o GitHub. Este é apenas o "gate" (Cap. 16.3:
+# Código → Testes → Validação Arquitetural → Build → Deploy), a etapa que
+# faltava antes do Deploy acontecer.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: npm test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Validar sintaxe do app.js (gate rápido antes dos testes)
+        run: node --check app/app.js
+
+      - name: Rodar suíte de testes (Motor → Contrato → Parser)
+        run: npm test
+
+      - name: Resultado
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✓ Contrato válido — merge permitido (DEC-019 / Cap. 16.3)"
+          else
+            echo "✗ Regressão detectada — merge bloqueado até correção (DEC-019 / Cap. 16.3)"
+          fi
