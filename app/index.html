@@ -165,48 +165,112 @@ body { overflow-x: hidden; }
 .igwv *{animation:none!important;transition:none!important;will-change:auto!important;}
 
 :root {
-  /* Glow & radius */
-  --glow-green: 0 0 10px rgba(124,255,79,.4), 0 0 30px rgba(124,255,79,.25), 0 0 60px rgba(124,255,79,.15);
-  --radius-card: 24px;
+  /* =========================================================
+     DESIGN TOKENS — Guardião Fiscal (Livro II, Cap. 22)
+     Árvore oficial: Foundation > Colors > Typography > Spacing
+     > Radius > Shadow > Motion > Layout > Components
+     Mantidos em um único bloco :root (arquivo único do projeto —
+     reorganização física em múltiplos arquivos já foi rejeitada).
+     Nenhum componente deve usar valor cru; sempre var(--token).
+     ========================================================= */
 
-  /* Font stack */
-  --ff: 'Inter', 'Inter-fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* ---------- Foundation: Colors (paleta bruta) ---------- */
+  --raw-bg:      #050816;
+  --raw-surface: #080D1A;
+  --raw-surface2:#0C1220;
+  --raw-border:  #1B2636;
+  --raw-border2: #1F2E42;
+  --raw-green:   #4ADE80;
+  --raw-green2:  #22C55E;
+  --raw-yellow:  #F5A623;
+  --raw-red:     #FF4D4F;
+  --raw-white:   #FFFFFF;
 
-  /* Fundo escuro profundo — identidade Guardião Fiscal */
-  --bg:      #050816;
-  --surface: #080D1A;
-  --surface2:#0C1220;
-  --border:  #1B2636;
-  --border2: #1F2E42;
+  /* ---------- Colors: nomes semânticos (Cap. 22.3) ---------- */
+  --color-action:      var(--raw-green);
+  --color-action-hover:var(--raw-green2);
+  --color-information: #3B82F6;
+  --color-warning:     var(--raw-yellow);
+  --color-danger:      var(--raw-red);
+  --color-neutral:     #7B8493;
+  --color-surface:     var(--raw-surface);
+  --color-surface-2:   var(--raw-surface2);
+  --color-border:      var(--raw-border);
+  --color-border-strong:var(--raw-border2);
+  --color-bg:          var(--raw-bg);
 
-  /* Verde neon — ação, segurança, destaque */
-  --green:  #7CFF4F;
-  --green2: #69E837;
-
-  /* Acento secundário (positivo) */
-  --accent: #7CFF4F;
-
-  /* Laranja/âmbar — alerta médio */
-  --yellow: #F5A623;
-
-  /* Vermelho — risco crítico */
-  --red: #FF4D4F;
-
-  /* Escala semafórica do motor de risco */
-  --risk-critico:  #FF4D4F;
+  /* Escala semafórica do motor de risco — deriva das cores semânticas (4.11) */
+  --risk-critico:  var(--color-danger);
   --risk-elevado:  #f04f60;
   --risk-moderado: #f97316;
-  --risk-atencao:  #F5A623;
-  --risk-baixo:    #7CFF4F;
+  --risk-atencao:  var(--color-warning);
+  --risk-baixo:    var(--color-action);
   --risk-text-red:    #f87171;
   --risk-text-yellow: #fbbf24;
   --risk-text-green:  #34d399;
 
-  /* Hierarquia de texto */
-  --text:   #FFFFFF;
-  --text2:  #B8C0CC;
-  --muted:  #7B8493;
-  --muted2: #B8C0CC;
+  /* Hierarquia de texto (Cap. 3.11) */
+  --text-primary:   var(--raw-white);
+  --text-secondary: #B8C0CC;
+  --text-tertiary:  #7B8493;
+  --text-accent:    var(--color-action);
+
+  /* Aliases legados (nomes usados no restante do arquivo hoje) */
+  --bg: var(--color-bg); --surface: var(--color-surface); --surface2: var(--color-surface-2);
+  --border: var(--color-border); --border2: var(--color-border-strong);
+  --green: var(--color-action); --green2: var(--color-action-hover); --accent: var(--color-action);
+  --yellow: var(--color-warning); --red: var(--color-danger);
+  --text: var(--text-primary); --text2: var(--text-secondary);
+  --muted: var(--text-tertiary); --muted2: var(--text-secondary);
+
+  /* ---------- Typography (Cap. 3, Cap. 22.4/22.5) ---------- */
+  --ff: 'Inter', 'Inter-fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family-primary: var(--ff);
+  --font-size-xs: 12px; --font-size-sm: 14px; --font-size-md: 16px; --font-size-lg: 18px;
+  --font-size-h4: 20px; --font-size-h3: 24px; --font-size-h2: 32px; --font-size-h1: 40px;
+  --font-size-display: 56px;
+  --font-weight-regular: 400; --font-weight-medium: 500;
+  --font-weight-semibold: 600; --font-weight-bold: 700;
+
+  /* ---------- Spacing (Cap. 22.6) — escala space-1..9 ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  /* ---------- Radius (Cap. 22.7) — cinco níveis ---------- */
+  --radius-xs: 4px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+  --radius-card: var(--radius-xl);
+
+  /* ---------- Shadow (Cap. 22.8) ---------- */
+  --shadow-soft:    0 2px 8px rgba(0,0,0,.24);
+  --shadow-card:    0 8px 24px rgba(0,0,0,.32);
+  --shadow-modal:   0 16px 48px rgba(0,0,0,.45);
+  --shadow-floating:0 24px 64px rgba(0,0,0,.5);
+  --glow-green: 0 0 16px rgba(74,222,128,.28);
+  --glow-action-sm: 0 6px 20px rgba(74,222,128,.3);
+  --glow-action-soft: 0 2px 12px rgba(74,222,128,.06), 0 0 0 1px rgba(74,222,128,.2);
+  --ring-action: 0 0 0 3px rgba(74,222,128,.1);
+  --glow-information: 0 8px 28px rgba(59,130,246,.35);
+  --shadow-whatsapp: 0 4px 16px rgba(37,211,102,.35);
+  --shadow-whatsapp-hover: 0 6px 24px rgba(37,211,102,.5);
+  --glow-danger: 0 0 20px rgba(255,77,79,.4);
+
+  /* ---------- Borders (Cap. 22.9) ---------- */
+  --border-focus: 2px solid var(--color-information);
+
+  /* ---------- Motion (Cap. 22.10) ---------- */
+  --motion-fast: 120ms; --motion-normal: 200ms; --motion-medium: 320ms; --motion-slow: 480ms;
+  --ease-in: cubic-bezier(.4,0,1,1); --ease-out: cubic-bezier(0,0,.2,1); --ease-in-out: cubic-bezier(.4,0,.2,1);
+
+  /* ---------- Z-index (Cap. 22.11) — nomes semânticos, nunca números soltos ---------- */
+  --z-behind: 0; --z-base: 1; --z-dropdown: 20; --z-sticky: 90; --z-nav: 100;
+  --z-overlay: 200; --z-fab: 999; --z-modal: 1000; --z-toast: 9999;
+
+  /* ---------- Opacity (Cap. 22.12) ---------- */
+  --opacity-disabled: .5; --opacity-muted: .7; --opacity-overlay: .85;
+
+  /* ---------- Layout (Cap. 22.13/22.14/22.15) ---------- */
+  --bp-mobile: 480px; --bp-tablet: 768px; --bp-desktop: 1024px; --bp-wide: 1280px;
+  --container-sm: 640px; --container-md: 768px; --container-lg: 1024px; --container-xl: 1200px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -240,14 +304,14 @@ body::before {
   top: 0; left: 0; right: 0; bottom: 0;
   background: radial-gradient(ellipse 800px 400px at 50% -100px, rgba(59,130,246,0.06) 0%, transparent 60%);
   pointer-events: none;
-  z-index: 0;
+  z-index: var(--z-behind);
 }
 
 /* ===== NAV ===== */
 nav {
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 100;
+  z-index: var(--z-nav);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -295,7 +359,7 @@ nav {
   font-size: 14px;
   font-weight: 500;
   padding: 8px 16px;
-  border-radius: 10px;
+  border-radius:var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -310,7 +374,7 @@ nav {
   font-size: 13px;
   font-weight: 600;
   padding: 9px 18px;
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -331,7 +395,7 @@ nav {
 /* ===== HOME PAGE ===== */
 .hero {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
   text-align: center;
   padding: 96px 24px 64px;
   max-width: 720px;
@@ -405,7 +469,7 @@ nav {
   margin: 0 auto;
   padding: 0 16px 80px;
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
   contain: layout;
 }
 
@@ -422,7 +486,7 @@ nav {
 .tab {
   flex: 1;
   padding: 11px;
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   border: none;
   font-family:var(--ff);
   font-size: 12px;
@@ -437,12 +501,12 @@ nav {
   justify-content: center;
   gap: 6px;
 }
-.tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); box-shadow: var(--shadow-soft); }
 
 .tbadge {
   font-size: 9px;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius:var(--radius-xs);
   font-weight: 700;
 }
 .tbadge-green { background: rgba(0,230,118,0.15); color: var(--green); }
@@ -451,9 +515,9 @@ nav {
 .panel {
   background: var(--surface);
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px;
+  border-radius:var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.05) inset;
+  box-shadow: var(--shadow-modal), 0 1px 0 rgba(255,255,255,0.05) inset;
 }
 
 .panel-header {
@@ -473,7 +537,7 @@ nav {
 
 .steps { display: flex; gap: 5px; }
 .step-dot {
-  height: 2px; border-radius: 2px;
+  height: 2px; border-radius:var(--radius-xs);
   transition: all 0.4s ease;
   background: var(--border);
   flex: 1;
@@ -493,14 +557,14 @@ nav {
   padding:15px 18px;
   background:var(--surface2);
   border:1px solid var(--border);
-  border-radius:14px;
+  border-radius:var(--radius-lg);
   cursor:pointer; transition:all 0.2s ease;
   text-align:left; width:100%; color:var(--text);
   font-family:var(--ff); position:relative;
   min-height: 58px;
 }
-.opt:hover { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.04); transform:translateX(3px); box-shadow:0 2px 12px rgba(16,185,129,0.06); }
-.opt.sel { border-color:var(--green); background:rgba(16,185,129,0.08); box-shadow:0 0 0 1px rgba(16,185,129,0.2); }
+.opt:hover { border-color:rgba(74,222,128,0.3); background:rgba(74,222,128,0.04); transform:translateX(3px); box-shadow: var(--glow-action-soft); }
+.opt.sel { border-color:var(--green); background:rgba(74,222,128,0.08); box-shadow: var(--glow-action-soft); }
 
 .opt-radio {
   width:18px; height:18px; border-radius:50%;
@@ -516,9 +580,9 @@ nav {
 
 .risk-pill {
   font-size:10px; font-family:var(--ff); font-weight:600;
-  letter-spacing:0.2px; padding:3px 9px; border-radius:6px; flex-shrink:0;
+  letter-spacing:0.2px; padding:3px 9px; border-radius:var(--radius-sm); flex-shrink:0;
 }
-.rp-green { background:rgba(16,185,129,0.1); color:#6ee7b7; }
+.rp-green { background:rgba(74,222,128,0.1); color:#6ee7b7; }
 .rp-yellow { background:rgba(245,158,11,0.1); color:#fcd34d; }
 .rp-red { background:rgba(248,113,113,0.1); color:#fca5a5; }
 
@@ -531,7 +595,7 @@ nav {
 .btn-back {
   padding:13px 20px;
   background:transparent; border:1px solid var(--border);
-  border-radius:12px; color:var(--muted2);
+  border-radius:var(--radius-md); color:var(--muted2);
   font-family:var(--ff); font-size:14px;
   cursor:pointer; transition:all 0.2s;
 }
@@ -540,14 +604,14 @@ nav {
 
 .btn-next {
   flex:1; padding:14px;
-  background:var(--green); border:none; border-radius:11px;
+  background:var(--green); border:none; border-radius:var(--radius-md);
   color:#000; font-family:var(--ff); font-size:14px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   opacity:0.35; pointer-events:none;
   min-height: 48px;
 }
 .btn-next.on { opacity:1; pointer-events:all; }
-.btn-next.on:hover { background:var(--green2); box-shadow:0 6px 20px rgba(124,255,79,0.3); transform:translateY(-1px); }
+.btn-next.on:hover { background:var(--green2); box-shadow: var(--glow-action-sm); transform:translateY(-1px); }
 
 /* RESULT */
 /* resultPanel controlado via visibility no JS */
@@ -555,8 +619,8 @@ nav {
 .result-box {
   background:var(--surface);
   border:1px solid var(--border);
-  border-radius:24px; overflow:hidden;
-  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  border-radius:var(--radius-xl); overflow:hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .result-hero {
@@ -573,12 +637,12 @@ nav {
 .result-emoji { font-size:64px; display:block; margin-bottom:14px; }
 .result-level { font-family:var(--ff); font-size:30px; font-weight:800; letter-spacing:-1.5px; margin-bottom:8px; line-height:1.1; }
 .result-desc { font-size:16px; color:var(--muted2); margin-bottom:32px; line-height:1.7; font-weight:400; }
-.score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; margin-bottom:8px; }
-.score-bar-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+.score-bar-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:var(--radius-xs); overflow:hidden; margin-bottom:8px; }
+.score-bar-fill { height:100%; border-radius:var(--radius-xs); transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
 .score-label { font-size:11px; color:var(--muted); font-family:var(--ff); }
 
 .alerts { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; gap:8px; }
-.alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:10px; font-size:12px; line-height:1.5; align-items:flex-start; }
+.alert-item { display:flex; gap:10px; padding:12px 14px; border-radius:var(--radius-md); font-size:12px; line-height:1.5; align-items:flex-start; }
 .alert-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
 .alert-red { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.12); }
 .alert-yellow { background:rgba(252,211,77,0.06); border:1px solid rgba(252,211,77,0.12); }
@@ -614,11 +678,11 @@ nav {
   text-align:left;
   min-height:80px;
 }
-.upgrade-card:hover { border-color:rgba(59,130,246,0.25); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+.upgrade-card:hover { border-color:rgba(59,130,246,0.25); transform:translateY(-2px); box-shadow: var(--shadow-card); }
 .upgrade-card.featured { border-color:rgba(59,130,246,0.3); background:rgba(59,130,246,0.04); }
 
 .uc-icon {
-  width:40px; height:40px; border-radius:10px;
+  width:40px; height:40px; border-radius:var(--radius-md);
   display:flex; align-items:center; justify-content:center;
   font-size:20px; flex-shrink:0;
 }
@@ -636,7 +700,7 @@ nav {
 .best-tag {
   font-size:9px; font-family:var(--ff); font-weight:700;
   background:var(--green); color:#000;
-  padding:2px 7px; border-radius:4px; letter-spacing:0.5px;
+  padding:2px 7px; border-radius:var(--radius-xs); letter-spacing:0.5px;
   margin-bottom:4px; display:inline-block;
 }
 
@@ -650,19 +714,19 @@ nav {
 .btn-restart {
   width:100%; padding:12px;
   background:transparent; border:1px solid var(--border);
-  border-radius:10px; color:var(--muted);
+  border-radius:var(--radius-md); color:var(--muted);
   font-family:var(--ff); font-size:13px;
   cursor:pointer; transition:all 0.2s;
 }
 .btn-restart:hover { color:var(--text); border-color:var(--border2); }
-.alert-paywall{background:rgba(59,130,246,0.06);border:1px dashed rgba(59,130,246,0.3);border-radius:14px;padding:20px 18px;text-align:center;margin-top:8px}
+.alert-paywall{background:rgba(59,130,246,0.06);border:1px dashed rgba(59,130,246,0.3);border-radius:var(--radius-lg);padding:20px 18px;text-align:center;margin-top:8px}
 .apw-lock{font-size:28px;margin-bottom:8px}
 .apw-title{font-family:var(--ff);font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
 .apw-desc{font-size:13px;color:var(--muted2);line-height:1.65;margin-bottom:16px;max-width:340px;margin-left:auto;margin-right:auto}
-.apw-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:10px;font-family:var(--ff);font-size:14px;font-weight:700;color:#000;cursor:pointer;margin-bottom:8px;transition:all .2s;box-shadow:var(--glow-green)}
+.apw-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:var(--radius-md);font-family:var(--ff);font-size:14px;font-weight:700;color:#000;cursor:pointer;margin-bottom:8px;transition:all .2s;box-shadow:var(--glow-green)}
 .apw-btn:hover{opacity:.88}
 .apw-or{font-size:11px;color:var(--muted);margin:6px 0}
-.apw-btn-sec{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;font-family:var(--ff);font-size:13px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s}
+.apw-btn-sec{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:var(--radius-md);font-family:var(--ff);font-size:13px;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s}
 .apw-btn-sec:hover{border-color:var(--green);color:var(--green)}
 .alert-item strong{font-weight:600;display:block;margin-bottom:2px;color:var(--text)}
 
@@ -683,7 +747,7 @@ nav {
 }
 
 .ext-step-num {
-  width:28px; height:28px; border-radius:8px;
+  width:28px; height:28px; border-radius:var(--radius-sm);
   background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.2);
   display:flex; align-items:center; justify-content:center;
   font-family:var(--ff); font-size:12px; font-weight:700; color:var(--green);
@@ -704,7 +768,7 @@ nav {
 /* upload zone */
 .upload-zone {
   border:2px dashed var(--border2);
-  border-radius:12px;
+  border-radius:var(--radius-md);
   padding:32px 20px;
   text-align:center;
   cursor:pointer;
@@ -723,7 +787,7 @@ nav {
 .bank-chip {
   font-size:11px; color:var(--muted2);
   background:var(--surface2); border:1px solid var(--border);
-  padding:4px 10px; border-radius:6px;
+  padding:4px 10px; border-radius:var(--radius-sm);
 }
 
 /* file selected state */
@@ -733,7 +797,7 @@ nav {
   padding:14px 16px;
   background:rgba(0,230,118,0.06);
   border:1px solid rgba(0,230,118,0.2);
-  border-radius:10px; margin-top:12px;
+  border-radius:var(--radius-md); margin-top:12px;
 }
 .file-selected.show { display:flex; }
 .file-name { font-size:13px; font-weight:500; flex:1; }
@@ -746,10 +810,10 @@ nav {
 }
 .analyzing-block.show { display:block; }
 .analyzing-bar {
-  height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:10px;
+  height:4px; background:var(--border); border-radius:var(--radius-xs); overflow:hidden; margin-bottom:10px;
 }
 .analyzing-fill {
-  height:100%; background:var(--green); border-radius:2px;
+  height:100%; background:var(--green); border-radius:var(--radius-xs);
   animation:analyzeProgress 2.5s ease forwards;
 }
 @keyframes analyzeProgress {
@@ -767,14 +831,14 @@ nav {
 .paywall-result.show { display:block; }
 
 .paywall-preview {
-  position:relative; overflow:hidden; border-radius:12px; margin-bottom:16px;
+  position:relative; overflow:hidden; border-radius:var(--radius-md); margin-bottom:16px;
 }
 
 .preview-content {
   padding:16px;
   background:var(--surface2);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:var(--radius-md);
   filter:blur(4px);
   user-select:none; pointer-events:none;
 }
@@ -795,7 +859,7 @@ nav {
   position:absolute; inset:0;
   background:linear-gradient(to bottom, rgba(8,14,26,0.3) 0%, rgba(8,14,26,0.97) 60%);
   display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-  padding:20px; border-radius:12px;
+  padding:20px; border-radius:var(--radius-md);
 }
 
 .lock-icon { font-size:28px; margin-bottom:8px; }
@@ -809,7 +873,7 @@ nav {
 .btn-unlock-avulso {
   width:100%; padding:12px 10px;
   background:rgba(255,193,7,0.12); border:1px solid rgba(255,193,7,0.3);
-  border-radius:10px; color:var(--yellow);
+  border-radius:var(--radius-md); color:var(--yellow);
   font-family:var(--ff); font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   line-height:1.4; text-align:center;
@@ -817,7 +881,7 @@ nav {
 .btn-unlock-avulso:hover { background:rgba(255,193,7,0.2); }
 .btn-unlock-pro {
   width:100%; padding:12px 10px;
-  background:var(--green); border:none; border-radius:10px;
+  background:var(--green); border:none; border-radius:var(--radius-md);
   color:#000; font-family:var(--ff); font-size:12px; font-weight:700;
   cursor:pointer; transition:all 0.2s;
   line-height:1.4; text-align:center;
@@ -827,7 +891,7 @@ nav {
 /* ===== PLANOS PAGE ===== */
 .plans-page {
   max-width:960px; margin:0 auto; padding:64px clamp(20px,4vw,48px) 80px;
-  position:relative; z-index:1;
+  position:relative; z-index:var(--z-base);
 }
 
 /* ===== INNER PAGE WRAPPER — padrão para todas as páginas ===== */
@@ -852,12 +916,12 @@ nav {
 .plan-card {
   background:var(--surface);
   border:1px solid var(--border);
-  border-radius:24px;
+  border-radius:var(--radius-xl);
   padding:32px 28px;
   position:relative;
   transition:all 0.2s;
 }
-.plan-card:hover { border-color:rgba(16,185,129,0.3); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.25); }
+.plan-card:hover { border-color:rgba(74,222,128,0.3); transform:translateY(-3px); box-shadow: var(--shadow-modal); }
 .plan-card.featured {
   border-color:rgba(0,230,118,0.4);
   background:linear-gradient(135deg, rgba(0,230,118,0.04), var(--surface));
@@ -905,8 +969,8 @@ nav {
 .btn-plan-avulso { background:rgba(255,193,7,0.1); color:var(--yellow); border:1px solid rgba(255,193,7,0.25); }
 .btn-plan-avulso:hover { background:rgba(255,193,7,0.2); }
 .btn-plan-pro { background:var(--green); color:#fff; }
-.btn-plan-pro:hover { background:var(--green2); box-shadow:0 6px 20px rgba(124,255,79,0.3); transform:translateY(-1px); }
-.btn-cta-institucional { padding:14px 32px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:background 0.2s;margin-bottom:12px; }
+.btn-plan-pro:hover { background:var(--green2); box-shadow: var(--glow-action-sm); transform:translateY(-1px); }
+.btn-cta-institucional { padding:14px 32px;background:var(--green);border:none;border-radius:var(--radius-md);color:#000;font-family:var(--ff);font-size:15px;font-weight:700;cursor:pointer;transition:background 0.2s;margin-bottom:12px; }
 .btn-cta-institucional:hover { background:var(--green2); }
 
 /* ===== CHECKOUT STEPPER ===== */
@@ -930,7 +994,7 @@ nav {
   display:none; position:fixed;
   top:0;left:0;right:0;bottom:0;
   background:rgba(4,9,18,0.92);
-  z-index:200;
+  z-index:var(--z-overlay);
   align-items:flex-end;
   justify-content:center;
 }
@@ -943,14 +1007,14 @@ nav {
 .modal {
   background:var(--surface);
   border:1px solid var(--border);
-  border-radius:28px 28px 0 0;
+  border-radius:var(--radius-xl) 28px 0 0;
   padding:36px 32px 52px;
   width:100%; max-width:500px;
   position:relative;
   animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1);
   max-height:92vh;
   overflow-y:auto;
-  box-shadow:0 -8px 40px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-floating);
 }
 
 @media(min-width:600px) {
@@ -966,7 +1030,7 @@ nav {
   position:absolute; top:16px; right:16px;
   width:30px; height:30px;
   background:var(--surface2); border:1px solid var(--border);
-  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center;
   cursor:pointer; font-size:14px; color:var(--muted);
   transition:all 0.2s;
 }
@@ -982,7 +1046,7 @@ nav {
 .order-summary {
   background:var(--surface2);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:var(--radius-md);
   padding:16px;
   margin-bottom:20px;
   display:flex;
@@ -1004,13 +1068,13 @@ nav {
 .form-input {
   width:100%; padding:14px 18px;
   background:var(--surface2); border:1px solid var(--border);
-  border-radius:12px; color:var(--text);
+  border-radius:var(--radius-md); color:var(--text);
   font-family:var(--ff); font-size:15px;
   outline:none; transition:all 0.2s; margin-bottom:16px;
   min-height: 50px;
   letter-spacing:0.01em;
 }
-.form-input:focus { border-color:rgba(16,185,129,0.5); box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
+.form-input:focus { border-color:rgba(74,222,128,0.5); box-shadow: var(--ring-action); }
 .form-input:focus { border-color:rgba(0,230,118,0.4); }
 .form-input::placeholder { color:var(--muted); }
 
@@ -1029,7 +1093,7 @@ nav {
 .pix-title { font-family:var(--ff); font-size:15px; font-weight:700; margin-bottom:8px; }
 .pix-key {
   background:var(--surface2); border:1px solid var(--border);
-  border-radius:8px; padding:10px 14px;
+  border-radius:var(--radius-sm); padding:10px 14px;
   font-family:monospace; font-size:13px; color:var(--green);
   letter-spacing:1px; margin-bottom:12px;
 }
@@ -1041,7 +1105,7 @@ nav {
 .ptab {
   flex:1; padding:10px;
   background:var(--surface2); border:1px solid var(--border);
-  border-radius:9px; cursor:pointer; transition:all 0.2s;
+  border-radius:var(--radius-sm); cursor:pointer; transition:all 0.2s;
   font-family:var(--ff); font-size:11px; font-weight:600;
   color:var(--muted); text-align:center;
 }
@@ -1052,13 +1116,13 @@ nav {
 
 .btn-pay {
   width:100%; padding:16px;
-  background:var(--green); border:none; border-radius:14px;
+  background:var(--green); border:none; border-radius:var(--radius-lg);
   color:#fff; font-family:var(--ff); font-size:15px; font-weight:700;
   cursor:pointer; transition:all 0.2s; margin-top:4px;
   min-height: 54px;
   letter-spacing:0.01em;
 }
-.btn-pay:hover { box-shadow:0 8px 28px rgba(59,130,246,0.35); transform:translateY(-1px); filter:brightness(1.1); }
+.btn-pay:hover { box-shadow: var(--glow-information); transform:translateY(-1px); filter:brightness(1.1); }
 
 .security-note {
   display:flex; align-items:center; gap:6px;
@@ -1085,7 +1149,7 @@ nav {
 
 /* ===== ANIMATIONS ===== */
 /* ===== PARSER V3 — MULTI-EXTRATO ===== */
-.drop-zone{border:2px dashed var(--border2);border-radius:12px;
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--radius-md);
   padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
 .drop-zone:hover,.drop-zone.drag{border-color:rgba(0,217,110,0.5);background:rgba(0,217,110,0.03)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -1096,9 +1160,9 @@ nav {
 .chip{font-size:11px;padding:3px 10px;border-radius:var(--radius-card);border:1px solid var(--border);color:var(--muted2);background:var(--surface2)}
 .chip.ok{border-color:rgba(0,217,110,0.3);color:var(--green);background:rgba(0,217,110,0.06)}
 .limit-bar{display:flex;align-items:center;gap:8px;margin-top:8px;
-  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
+  padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)}
 .limit-dots{display:none}
-.ldot{width:20px;height:20px;border-radius:6px;background:var(--border);
+.ldot{width:20px;height:20px;border-radius:var(--radius-sm);background:var(--border);
   display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s}
 .ldot.used{background:rgba(0,217,110,0.15);border:1px solid rgba(0,217,110,0.3)}
 .ldot.full{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
@@ -1106,7 +1170,7 @@ nav {
 .limit-txt strong{color:var(--text);font-weight:600}
 .file-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .file-item{display:flex;align-items:center;gap:8px;padding:8px 12px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:13px}
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px}
 .file-item.ok{border-color:rgba(0,217,110,0.25)}
 .file-item.err{border-color:rgba(240,79,96,0.3);background:rgba(240,79,96,0.05)}
 .file-ico{font-size:18px;flex-shrink:0}
@@ -1114,17 +1178,17 @@ nav {
 .file-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .file-bank{font-size:11px;color:var(--muted2);margin-top:1px}
 .file-rm{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 8px;
-  border-radius:6px;transition:all 0.15s;border:1px solid transparent;flex-shrink:0}
+  border-radius:var(--radius-sm);transition:all 0.15s;border:1px solid transparent;flex-shrink:0}
 .file-rm:hover{color:var(--red);border-color:rgba(240,79,96,0.3)}
-.file-status{font-size:10px;font-family:var(--ff);font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.file-status{font-size:10px;font-family:var(--ff);font-weight:700;padding:2px 7px;border-radius:var(--radius-xs);flex-shrink:0}
 .fs-ok{background:rgba(0,217,110,0.12);color:var(--green)}
 .fs-err{background:rgba(240,79,96,0.12);color:var(--red)}
 .fs-load{background:rgba(77,159,255,0.12);color:#4d9fff}
 .act-bar{padding:10px 16px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.prog-ext{flex:1;min-width:80px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
-.prog-ext-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s}
+.prog-ext{flex:1;min-width:80px;height:3px;background:var(--border);border-radius:var(--radius-xs);overflow:hidden}
+.prog-ext-fill{height:100%;background:var(--green);border-radius:var(--radius-xs);transition:width 0.4s}
 .act-msg{font-size:12px;color:var(--muted2);flex:1;min-width:80px}
-.btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:9px;
+.btn-go{padding:11px 22px;background:var(--green);border:none;border-radius:var(--radius-sm);
   color:#000;font-family:var(--ff);font-size:13px;font-weight:700;
   cursor:pointer;transition:all 0.2s;white-space:nowrap;opacity:0.35;pointer-events:none;
   width:auto}
@@ -1133,7 +1197,7 @@ nav {
 
 .err-ext{display:none;padding:12px 16px;margin:0 0 12px;
   background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.25);
-  border-radius:9px;font-size:13px;color:var(--red)}
+  border-radius:var(--radius-sm);font-size:13px;color:var(--red)}
 .err-ext.show{display:block}
 /* resultado parser */
 .ov-top{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;overflow:hidden}
@@ -1144,8 +1208,8 @@ nav {
 .p-score-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:8px}
 .p-score-lbl{font-size:10px;color:var(--muted);font-family:var(--ff);letter-spacing:0.6px;text-transform:uppercase;flex:1;min-width:0}
 .p-score-val{font-family:var(--ff);font-size:clamp(24px,7vw,36px);font-weight:800;letter-spacing:-2px;line-height:1;flex-shrink:0}
-.p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
-.p-bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
+.p-bar-bg{height:8px;background:rgba(255,255,255,0.06);border-radius:var(--radius-xs);overflow:hidden}
+.p-bar-fill{height:100%;border-radius:var(--radius-xs);transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
 .p-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
 .p-stat{padding:12px 14px;background:var(--surface)}
 .p-sl{font-size:10px;font-family:var(--ff);letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
@@ -1154,13 +1218,13 @@ nav {
 .sources{padding:14px 16px;border-bottom:1px solid var(--border)}
 .src-ttl{font-family:var(--ff);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
 .src-list{display:flex;flex-direction:column;gap:7px}
-.src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:9px;font-size:13px}
+.src-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px}
 .src-bank{flex:1;font-weight:500}
 .src-txns{font-size:11px;color:var(--muted2)}
 .src-val{font-family:var(--ff);font-size:13px;font-weight:700;color:var(--green)}
 .src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .p-alerts{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
-.pal{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.4;word-break:break-word;overflow:hidden}
+.pal{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:var(--radius-sm);font-size:12px;line-height:1.4;word-break:break-word;overflow:hidden}
 .pal-ico{font-size:15px;flex-shrink:0;margin-top:1px}
 .pal strong{font-weight:600;display:block;margin-bottom:1px}
 .p-red{background:rgba(240,79,96,0.08);border:1px solid rgba(240,79,96,0.2)}
@@ -1176,12 +1240,12 @@ nav {
 .p-txn-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .p-txn-ttl{font-family:var(--ff);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
 .p-flt{display:flex;gap:5px}
-.pfb{font-size:11px;font-family:var(--ff);font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
+.pfb{font-size:11px;font-family:var(--ff);font-weight:600;padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s}
 .pfb.on{background:rgba(240,79,96,0.12);border-color:rgba(240,79,96,0.3);color:var(--red)}
 .p-txn-list{display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto}
 .p-txn-list::-webkit-scrollbar{width:3px}
-.p-txn-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.pti{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;background:var(--surface2);border:1px solid transparent;font-size:12px}
+.p-txn-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:var(--radius-xs)}
+.pti{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid transparent;font-size:12px}
 .pti.s{border-color:rgba(240,79,96,0.25);background:rgba(240,79,96,0.06)}
 .pti.a{border-color:rgba(245,166,35,0.2);background:rgba(245,166,35,0.05)}
 .pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -1191,7 +1255,7 @@ nav {
 .ptt{font-size:10px;color:var(--muted2)}
 .ptv{font-family:var(--ff);font-size:12px;font-weight:700;white-space:nowrap}
 .ptv.p{color:var(--green)}.ptv.n{color:var(--muted2)}
-.ptf{font-size:9px;font-family:var(--ff);font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ptf{font-size:9px;font-family:var(--ff);font-weight:700;padding:2px 6px;border-radius:var(--radius-xs);white-space:nowrap}
 .ptf.r{background:rgba(240,79,96,0.15);color:var(--red)}
 .ptf.y{background:rgba(245,166,35,0.15);color:var(--yellow)}
 .ptbank{font-size:9px;color:var(--muted);white-space:nowrap}
@@ -1199,8 +1263,8 @@ nav {
 .p-dbg-ttl{font-family:var(--ff);font-size:11px;color:var(--muted);font-weight:600}
 .p-dbg-bd{display:none;padding:14px 22px;border-top:1px solid var(--border)}
 .p-dbg-bd.open{display:block}
-pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
-.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:var(--ff);font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
+pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;line-height:1.7}
+.btn-nova{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-md);color:var(--muted);font-family:var(--ff);font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-nova:hover{color:var(--text);border-color:var(--muted)}
 @media(min-width:600px){.p-stats{grid-template-columns:repeat(3,1fr)}}
 
@@ -1258,7 +1322,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 14px;
   background: var(--green);
   border: none;
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   color: #000;
   font-family:var(--ff);
   font-size: 14px;
@@ -1275,7 +1339,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 12px;
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   color: var(--muted);
   font-family:var(--ff);
   font-size: 13px;
@@ -1295,7 +1359,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .res-section .p-stats .p-stat {
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius:var(--radius-md);
 }
 
 /* Alertas dentro da seção — remover padding/border do wrapper */
@@ -1308,7 +1372,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 /* Fatores de risco — card mais polido */
 .res-fator-card {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   padding: 14px 16px;
   margin-bottom: 8px;
   background: var(--surface2);
@@ -1321,7 +1385,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   left: 0; top: 0; bottom: 0;
   width: 3px;
   background: var(--risk-moderado);
-  border-radius: 3px 0 0 3px;
+  border-radius:var(--radius-xs) 0 0 3px;
 }
 .res-fator-card--aviso::before { background: var(--yellow); }
 .res-fator-card--ok::before    { background: var(--accent); }
@@ -1334,7 +1398,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 }
 .res-fator-peso {
   width: 28px; height: 28px;
-  border-radius: 8px;
+  border-radius:var(--radius-sm);
   background: rgba(249,115,22,0.1);
   border: 1px solid rgba(249,115,22,0.25);
   display: flex; align-items: center; justify-content: center;
@@ -1368,9 +1432,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .res-fator-nao-risco {
   margin-top: 8px; margin-left: 38px;
   padding: 8px 12px;
-  background: rgba(16,185,129,0.06);
-  border: 1px solid rgba(16,185,129,0.18);
-  border-radius: 8px;
+  background: rgba(74,222,128,0.06);
+  border: 1px solid rgba(74,222,128,0.18);
+  border-radius:var(--radius-sm);
   font-size: 11px; color: var(--accent);
   line-height: 1.5;
 }
@@ -1381,7 +1445,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   gap: 12px;
   align-items: flex-start;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   font-size: 13px;
   line-height: 1.45;
   margin-bottom: 8px;
@@ -1390,7 +1454,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .res-alert:last-child { margin-bottom: 0; }
 .res-alert--red    { background: rgba(240,79,96,0.07);  border-color: rgba(240,79,96,0.2); }
 .res-alert--yellow { background: rgba(245,166,35,0.07); border-color: rgba(245,166,35,0.2); }
-.res-alert--green  { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.18); }
+.res-alert--green  { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.18); }
 .res-alert--blue   { background: rgba(77,159,255,0.06); border-color: rgba(77,159,255,0.18); }
 .res-alert-icon { font-size: 18px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
 .res-alert-title { font-weight: 600; color: var(--text); margin-bottom: 3px; }
@@ -1403,13 +1467,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 11px 14px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius:var(--radius-md);
   font-size: 13px;
 }
 
 /* Bank tabs dentro da seção */
 .res-section .bank-tabs {
-  border-radius: 10px;
+  border-radius:var(--radius-md);
   overflow: hidden;
   border-bottom: none;
   margin-bottom: 10px;
@@ -1427,7 +1491,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .res-section .p-txn-list { max-height: 380px; }
 .res-section .pti {
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius:var(--radius-md);
   font-size: 12px;
 }
 
@@ -1445,19 +1509,19 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   letter-spacing: 0.5px;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius:var(--radius-sm);
   white-space: nowrap;
   flex-shrink: 0;
 }
 .res-badge--critico  { background: rgba(255,77,79,0.12);   color: var(--risk-critico);  border: 1px solid rgba(255,77,79,0.25); }
 .res-badge--moderado { background: rgba(249,115,22,0.12); color: var(--risk-moderado); border: 1px solid rgba(249,115,22,0.25); }
 .res-badge--atencao  { background: rgba(245,166,35,0.12); color: #f5a623;  border: 1px solid rgba(245,166,35,0.25); }
-.res-badge--ok       { background: rgba(124,255,79,0.1);  color: var(--accent);  border: 1px solid rgba(124,255,79,0.2); }
+.res-badge--ok       { background: rgba(74,222,128,0.1);  color: var(--accent);  border: 1px solid rgba(74,222,128,0.2); }
 
 /* ── Pilar 1: sinais de manifestação (plano de saúde / informe de rendimentos) ── */
 .mnf-card {
-  background: linear-gradient(180deg, rgba(124,255,79,0.06), rgba(124,255,79,0.02));
-  border: 1px solid rgba(124,255,79,0.22);
+  background: linear-gradient(180deg, rgba(74,222,128,0.06), rgba(74,222,128,0.02));
+  border: 1px solid rgba(74,222,128,0.22);
   border-radius: var(--radius-card);
   padding: 16px;
   margin-bottom: 12px;
@@ -1466,15 +1530,15 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .mnf-icon { font-size:22px; line-height:1; flex-shrink:0; }
 .mnf-title { font-family:var(--ff); font-size:15px; font-weight:700; color:var(--text); }
 .mnf-badge-conf {
-  font-size:10px; font-weight:700; padding:3px 9px; border-radius:20px; margin-left:auto;
+  font-size:10px; font-weight:700; padding:3px 9px; border-radius:var(--radius-lg); margin-left:auto;
 }
 .mnf-badge-conf.baixa  { background:rgba(245,166,35,0.12); color:#f5a623; border:1px solid rgba(245,166,35,0.25); }
 .mnf-badge-conf.media  { background:rgba(77,159,255,0.12); color:#4d9fff; border:1px solid rgba(77,159,255,0.25); }
-.mnf-badge-conf.alta   { background:rgba(124,255,79,0.12); color:var(--green); border:1px solid rgba(124,255,79,0.25); }
+.mnf-badge-conf.alta   { background:rgba(74,222,128,0.12); color:var(--green); border:1px solid rgba(74,222,128,0.25); }
 .mnf-evid { font-size:12px; color:var(--muted2); line-height:1.6; margin-bottom:6px; }
-.mnf-next { font-size:13px; color:var(--text2); line-height:1.6; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin:10px 0 12px; }
+.mnf-next { font-size:13px; color:var(--text2); line-height:1.6; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 12px; margin:10px 0 12px; }
 .mnf-cta {
-  width:100%; padding:11px; background:var(--green); border:none; border-radius:10px;
+  width:100%; padding:11px; background:var(--green); border:none; border-radius:var(--radius-md);
   font-family:var(--ff); font-size:13px; font-weight:700; color:#000; cursor:pointer; transition:opacity .2s;
 }
 .mnf-cta:hover { opacity:.9; }
@@ -1484,13 +1548,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .mnf-guided-opts { display:flex; flex-direction:column; gap:8px; }
 .mnf-guided-btn {
   width:100%; text-align:left; padding:10px 12px; background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; font-family:var(--ff); font-size:13px; color:var(--text2); cursor:pointer; transition:border-color .15s;
+  border-radius:var(--radius-md); font-family:var(--ff); font-size:13px; color:var(--text2); cursor:pointer; transition:border-color .15s;
 }
 .mnf-guided-btn:hover { border-color:var(--border2); }
 .mnf-result { display:none; margin-top:10px; }
 .mnf-result.open { display:block; }
-.mnf-result-tag { font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; display:inline-block; margin-bottom:8px; }
-.mnf-result-tag.resolvido { background:rgba(124,255,79,0.12); color:var(--green); }
+.mnf-result-tag { font-size:11px; font-weight:700; padding:3px 9px; border-radius:var(--radius-lg); display:inline-block; margin-bottom:8px; }
+.mnf-result-tag.resolvido { background:rgba(74,222,128,0.12); color:var(--green); }
 .mnf-result-tag.pendente  { background:rgba(245,166,35,0.12); color:#f5a623; }
 .mnf-maturidade { font-size:11px; color:var(--muted); margin-top:2px; }
 
@@ -1507,7 +1571,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   letter-spacing: 0.3px;
   margin-left: auto;
   padding: 2px 6px;
-  border-radius: 5px;
+  border-radius:var(--radius-sm);
   background: rgba(255,255,255,0.04);
   transition: color 0.15s;
   white-space: nowrap;
@@ -1538,7 +1602,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   font-family:var(--ff);
   font-weight: 600;
   padding: 5px 11px;
-  border-radius: 8px;
+  border-radius:var(--radius-sm);
   cursor: pointer;
   border: 1px solid var(--border);
   background: transparent;
@@ -1563,7 +1627,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   align-items: center;
   justify-content: center;
   min-width: 16px; height: 16px;
-  border-radius: 8px;
+  border-radius:var(--radius-sm);
   font-size: 10px;
   font-weight: 700;
   padding: 0 4px;
@@ -1722,7 +1786,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   gap: clamp(40px,5vw,72px);
   align-items: flex-start;
   position: relative;
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 .split-left {
@@ -1776,7 +1840,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 16px 28px;
   background: var(--green);
   border: none;
-  border-radius: 14px;
+  border-radius:var(--radius-lg);
   color: #000;
   font-family:var(--ff);
   font-size: 15px;
@@ -1792,7 +1856,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 13px 24px;
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius:var(--radius-md);
   color: var(--text);
   font-family:var(--ff);
   font-size: 15px;
@@ -1828,10 +1892,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 32px 80px rgba(0,0,0,0.45),
-    0 8px 24px rgba(0,0,0,0.25);
+  box-shadow: var(--shadow-floating), 0 0 0 1px rgba(255,255,255,0.04) inset;
   position: relative;
 }
 
@@ -1842,7 +1903,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   top: -60px; left: -60px; right: -60px; bottom: -60px;
   background: radial-gradient(ellipse 500px 400px at 50% 30%, rgba(59,130,246,0.08) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
+  z-index: var(--z-behind);
 }
 
 .dash-header {
@@ -1895,18 +1956,18 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   font-size: 11px;
   font-weight: 700;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius:var(--radius-sm);
   letter-spacing: 0.3px;
 }
 .dash-bar-bg {
   height: 6px;
   background: rgba(255,255,255,0.06);
-  border-radius: 3px;
+  border-radius:var(--radius-xs);
   overflow: hidden;
 }
 .dash-bar-fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius:var(--radius-xs);
   transition: width 1.8s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -1947,7 +2008,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   align-items: flex-start;
   gap: 9px;
   padding: 10px 12px;
-  border-radius: 9px;
+  border-radius:var(--radius-sm);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -1985,7 +2046,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   background: rgba(59,130,246,0.08);
   border: 1px solid rgba(59,130,246,0.18);
   padding: 3px 8px;
-  border-radius: 5px;
+  border-radius:var(--radius-sm);
   font-family:var(--ff);
 }
 @keyframes slideIn {
@@ -2015,7 +2076,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   align-items: center;
   background: none;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius:var(--radius-sm);
   cursor: pointer;
   padding: 6px;
   transition: all 0.2s;
@@ -2026,7 +2087,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   width: 16px;
   height: 1.5px;
   background: var(--muted2);
-  border-radius: 2px;
+  border-radius:var(--radius-xs);
   transition: all 0.25s;
 }
 .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
@@ -2038,7 +2099,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 99;
+  z-index: var(--z-sticky);
 }
 .nav-drawer.open { display: block; }
 .nav-drawer-bg {
@@ -2064,7 +2125,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 13px 16px;
   background: none;
   border: none;
-  border-radius: 10px;
+  border-radius:var(--radius-md);
   color: var(--text2);
   font-family:var(--ff);
   font-size: 15px;
@@ -2253,11 +2314,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <nav>
   <div class="logo" onclick="showPage('home')">
     <svg class="logo-svg" viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="rgba(14,165,233,0.15)" stroke="#7CFF4F" stroke-width="1.5"/>
+      <path d="M40 3 L77 16 L77 50 Q77 74 40 87 Q3 74 3 50 L3 16 Z" fill="rgba(14,165,233,0.15)" stroke="#4ADE80" stroke-width="1.5"/>
       <path d="M40 11 L69 22 L69 50 Q69 68 40 77 Q11 68 11 50 L11 22 Z" fill="#0f1720"/>
-      <rect x="23" y="43" width="9" height="21" rx="2.5" fill="#7CFF4F" opacity="0.38"/>
-      <rect x="36" y="33" width="9" height="31" rx="2.5" fill="#7CFF4F" opacity="0.7"/>
-      <rect x="49" y="23" width="9" height="41" rx="2.5" fill="#7CFF4F"/>
+      <rect x="23" y="43" width="9" height="21" rx="2.5" fill="#4ADE80" opacity="0.38"/>
+      <rect x="36" y="33" width="9" height="31" rx="2.5" fill="#4ADE80" opacity="0.7"/>
+      <rect x="49" y="23" width="9" height="41" rx="2.5" fill="#4ADE80"/>
     </svg>
     <div class="logo-wordmark">
       <span class="logo-top">Guardião</span>
@@ -2284,13 +2345,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <div class="nav-drawer" id="navDrawer" style="display:none">
   <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
   <div class="nav-drawer-panel">
-    <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()">🏠 Início</button>
-    <button class="nav-drawer-link" id="drawerPlanos" onclick="showPage('planos');closeDrawer()">💎 Planos</button>
-    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()">🛡️ Institucional</button>
-    <a class="nav-drawer-link" href="/blog" style="text-decoration:none">📝 Blog</a>
+    <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()"><i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Início</button>
+    <button class="nav-drawer-link" id="drawerPlanos" onclick="showPage('planos');closeDrawer()"><i data-lucide="gem" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Planos</button>
+    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Institucional</button>
+    <a class="nav-drawer-link" href="/blog" style="text-decoration:none"><i data-lucide="book" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Blog</a>
     <div class="nav-drawer-divider"></div>
-    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()">📄 Análise de Extrato</button>
-    <button class="nav-drawer-link" id="drawerHistorico" onclick="showPage('historico');closeDrawer()" style="display:none">📊 Histórico de Análises</button>
+    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Análise de Extrato</button>
+    <button class="nav-drawer-link" id="drawerHistorico" onclick="showPage('historico');closeDrawer()" style="display:none"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Histórico de Análises</button>
     <div class="nav-drawer-divider"></div>
     <div class="nav-drawer-auth" id="drawerAuthArea">
       <button class="nav-btn-login" style="width:100%;text-align:center;padding:12px" onclick="openLogin();closeDrawer()">Entrar</button>
@@ -2306,19 +2367,19 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- ESQUERDA: copy + CTA -->
     <div class="split-left">
-      <div class="hero-tag" id="heroTagDesktop">🛡️ Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
+      <div class="hero-tag" id="heroTagDesktop"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
       <h1 id="heroH1Desktop">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
       <p id="heroSubDesktop">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
       <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
-        <span class="badge">🔒 Processamento 100% local</span>
-        <span class="badge">📊 16 verificações automáticas</span>
-        <span class="badge">✅ Grátis para começar</span>
+        <span class="badge"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local</span>
+        <span class="badge"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações automáticas</span>
+        <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
       </div>
       <div class="split-cta">
         <button class="split-cta-primary" onclick="showPage('extrato')">
           Analisar meu extrato →
         </button>
-        <div class="split-cta-sec">🔒 Dados processados localmente · Nenhum arquivo enviado a servidores</div>
+        <div class="split-cta-sec"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados processados localmente · Nenhum arquivo enviado a servidores</div>
       </div>
 
       <!-- Mini métricas -->
@@ -2341,12 +2402,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="margin-top:36px;display:flex;flex-direction:column;gap:8px">
         <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">// cruzamentos realizados</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📊 Pix × renda declarada</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">💸 Espécie × e-Financeira</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🔄 Padrões recorrentes</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">📈 Anomalia temporal</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🏢 Atividade comercial</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted2)">🔁 Circularidade financeira</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Pix × renda declarada</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="banknote" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Espécie × e-Financeira</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="refresh-cw" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Padrões recorrentes</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Anomalia temporal</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="building" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Atividade comercial</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Circularidade financeira</div>
         </div>
       </div>
     </div>
@@ -2360,31 +2421,31 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           // exemplos de sinais que o motor identifica
         </div>
         <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;min-height:220px;overflow:hidden">
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:8px;flex-shrink:0">
-            <span style="font-size:13px;flex-shrink:0">🚨</span>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
               <div style="font-size:11px;font-weight:600;color:#f87171;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Incompatibilidade de renda</div>
               <div style="font-size:10px;color:var(--muted2);margin-top:1px">+162% acima do declarado</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.18);border-radius:8px;flex-shrink:0">
-            <span style="font-size:13px;flex-shrink:0">⚠️</span>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
               <div style="font-size:11px;font-weight:600;color:#fbbf24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Pix recorrentes sem origem</div>
               <div style="font-size:10px;color:var(--muted2);margin-top:1px">R$ 32.880 em 4 meses</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:8px;flex-shrink:0">
-            <span style="font-size:13px;flex-shrink:0">🚨</span>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
               <div style="font-size:11px;font-weight:600;color:#f87171;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Atividade comercial não declarada</div>
               <div style="font-size:10px;color:var(--muted2);margin-top:1px">7 recebimentos mensais</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(124,255,79,0.07);border:1px solid rgba(124,255,79,0.18);border-radius:8px;flex-shrink:0">
-            <span style="font-size:13px;flex-shrink:0">✅</span>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
-              <div style="font-size:11px;font-weight:600;color:#34d399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Score de coerência fiscal</div>
+              <div style="font-size:11px;font-weight:600;color:#34d399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Indicador de compatibilidade fiscal</div>
               <div style="font-size:10px;color:var(--muted2);margin-top:1px">23/100 — perfil compatível</div>
             </div>
           </div>
@@ -2393,7 +2454,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="sim-wrap">
         <div class="tabs">
           <button class="tab active" id="tabQ" onclick="switchSimTab('perguntas')">
-            📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
+            <i data-lucide="clipboard-list" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span>
           </button>
         </div>
         <div id="simPerguntas" style="display:grid">
@@ -2411,7 +2472,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                 <div class="upgrade-label">// ativar monitoramento real</div>
                 <div class="upgrade-cards">
                   <button class="upgrade-card" onclick="openCheckout('avulso')">
-                    <div class="uc-icon uc-icon-avulso">📄</div>
+                    <div class="uc-icon uc-icon-avulso"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
                     <div class="uc-info">
                       <div class="uc-name">Análise Avulsa</div>
                       <div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div>
@@ -2422,7 +2483,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
                     </div>
                   </button>
                   <button class="upgrade-card featured" onclick="openCheckout('pro')">
-                    <div class="uc-icon uc-icon-pro">🛡️</div>
+                    <div class="uc-icon uc-icon-pro"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
                     <div class="uc-info">
                       <div class="best-tag">MELHOR CUSTO</div>
                       <div class="uc-name">Plano Pro</div>
@@ -2450,23 +2511,23 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
 
   <div style="border-top:1px solid rgba(255,255,255,0.06);padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap" id="socialProofMobile">
-    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">🔒 Dados 100% locais</span>
-    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">📊 16 verificações</span>
-    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">✅ Grátis para começar</span>
+    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados 100% locais</span>
+    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações</span>
+    <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
   </div>
   <div class="sim-wrap" id="quizWrap">
     <div class="tabs">
-      <button class="tab active">📋 Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span></button>
+      <button class="tab active"><i data-lucide="clipboard-list" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Simulador rápido <span class="tbadge tbadge-green">GRÁTIS</span></button>
     </div>
 
 <div class="hero" style="contain:layout">
-    <div class="hero-tag" id="heroTagMobile">🛡️ Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
+    <div class="hero-tag" id="heroTagMobile"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
     <h1 id="heroH1Mobile">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
     <p id="heroSubMobile">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
     <div class="hero-badges">
-      <span class="badge">🔒 Processamento 100% local</span>
-      <span class="badge">📊 16 verificações automáticas</span>
-      <span class="badge">✅ Grátis para começar</span>
+      <span class="badge"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local</span>
+      <span class="badge"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações automáticas</span>
+      <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
     </div>
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
@@ -2499,12 +2560,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div class="upgrade-label">// ativar monitoramento real</div>
           <div class="upgrade-cards">
             <button class="upgrade-card" onclick="openCheckout('avulso')">
-              <div class="uc-icon uc-icon-avulso">📄</div>
+              <div class="uc-icon uc-icon-avulso"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
               <div class="uc-info"><div class="uc-name">Análise Avulsa</div><div class="uc-desc">1 análise completa por extrato bancário + relatório PDF</div></div>
               <div class="uc-price"><div class="uc-value" id="splitAvulsoPrice2">R$19,90</div><div class="uc-period">uso único</div></div>
             </button>
             <button class="upgrade-card featured" onclick="openCheckout('pro')">
-              <div class="uc-icon uc-icon-pro">🛡️</div>
+              <div class="uc-icon uc-icon-pro"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
               <div class="uc-info"><div class="best-tag">MELHOR CUSTO</div><div class="uc-name">Plano Pro</div><div class="uc-desc">Análises ilimitadas + múltiplos extratos + histórico</div></div>
               <div class="uc-price"><div class="uc-value" id="splitProPrice2">R$29,90</div><div class="uc-period">/mês</div></div>
             </button>
@@ -2520,7 +2581,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <!-- [INLINE-UPLOAD] Bloco de upload inline — aparece após resultado do quiz (mobile)     -->
     <!-- visibility:hidden reserva espaço e evita CLS, igual ao padrão do mResultPanel        -->
     <div id="inlineUploadBlock" style="visibility:hidden;margin-top:4px;padding:0 4px 8px">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;box-sizing:border-box">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-sizing:border-box">
 
         <!-- Cabeçalho -->
         <div style="margin-bottom:12px">
@@ -2529,8 +2590,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
 
         <!-- Aviso de privacidade -->
-        <div style="display:flex;align-items:center;gap:6px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.15);border-radius:8px;padding:7px 10px;margin-bottom:12px">
-          <span style="font-size:12px">🔒</span>
+        <div style="display:flex;align-items:center;gap:6px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.15);border-radius:var(--radius-sm);padding:7px 10px;margin-bottom:12px">
+          <span style="font-size:12px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <span style="font-size:11px;color:var(--accent);font-weight:600">Processado 100% no seu dispositivo · nenhum dado sai daqui</span>
         </div>
 
@@ -2553,22 +2614,22 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <div id="inlineGuiaContent" style="margin-bottom:12px"></div>
 
         <!-- Drop zone inline — delega para o input real da página extrato -->
-        <div style="border:1.5px dashed rgba(255,255,255,0.15);border-radius:10px;padding:14px 12px;text-align:center;cursor:pointer;position:relative;margin-bottom:10px;transition:border-color 0.2s"
+        <div style="border:1.5px dashed rgba(255,255,255,0.15);border-radius:var(--radius-md);padding:14px 12px;text-align:center;cursor:pointer;position:relative;margin-bottom:10px;transition:border-color 0.2s"
              onclick="inlineUploadClick()"
              id="inlineDz"
              ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
              ondragleave="this.style.borderColor='rgba(255,255,255,0.15)'"
              ondrop="inlineDropHandle(event)">
-          <div style="font-size:20px;margin-bottom:4px">📂</div>
+          <div style="font-size:20px;margin-bottom:4px"><i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">Toque para selecionar o arquivo</div>
           <div style="font-size:11px;color:var(--muted2)">CSV · OFX · PDF · até 5 extratos</div>
         </div>
 
         <!-- Botão ir para análise (fallback / desktop) -->
-        <button onclick="inlineGoToExtrato()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:12px;color:#000;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;transition:all 0.2s">
+        <button onclick="inlineGoToExtrato()" style="width:100%;padding:13px;background:var(--green);border:none;border-radius:var(--radius-md);color:#000;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;transition:all 0.2s">
           Analisar meu extrato →
         </button>
-        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">⚡ Análise em menos de 2 min · sem envio de dados</div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px"><i data-lucide="zap" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Análise em menos de 2 min · sem envio de dados</div>
 
       </div>
     </div><!-- /inlineUploadBlock -->
@@ -2582,33 +2643,33 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <h2 style="font-family:var(--ff);font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1.25;margin:0">Sinais que a Receita Federal já consegue ver</h2>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:10px">
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:12px;padding:14px 16px">
-        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:var(--radius-md);padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Pix recorrentes incompatíveis com a renda declarada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Recebimentos mensais via Pix muito acima do que consta no IR levantam alerta automático no e-Financeira.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:12px;padding:14px 16px">
-        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:var(--radius-md);padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Entradas sem origem identificada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Depósitos ou créditos sem descrição clara podem ser interpretados como renda não declarada.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:12px;padding:14px 16px">
-        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:var(--radius-md);padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Possível atividade comercial não declarada</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Padrões recorrentes de recebimento de múltiplos pagadores sugerem prestação de serviços sem nota.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:12px;padding:14px 16px">
-        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:var(--radius-md);padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Volume financeiro acima do perfil declarado</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Movimentação total anual muito superior à renda do IR é um dos principais gatilhos de malha fina.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:12px;padding:14px 16px">
-        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:var(--radius-md);padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Movimentação incompatível com rendimentos</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Picos atípicos em determinados meses — como uma rescisão não declarada — aparecem no cruzamento automático da Receita.</div></div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:12px;padding:14px 16px">
-        <span style="font-size:18px;flex-shrink:0">⚠️</span>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--risk-atencao);border-radius:var(--radius-md);padding:14px 16px">
+        <span style="font-size:18px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div><div style="font-size:14px;font-weight:600;color:var(--text)">Receitas sem documentação aparente</div><div style="font-size:12px;color:var(--muted2);margin-top:3px">Créditos repetidos sem CNPJ remetente identificável são sinalizados como possível renda informal.</div></div>
       </div>
     </div>
     <div style="text-align:center;margin-top:24px">
-      <button onclick="showPage('extrato')" style="display:inline-flex;align-items:center;gap:8px;background:var(--green);border:none;border-radius:12px;color:#fff;font-family:var(--ff);font-size:14px;font-weight:700;padding:14px 28px;cursor:pointer;letter-spacing:-0.2px">
+      <button onclick="showPage('extrato')" style="display:inline-flex;align-items:center;gap:8px;background:var(--green);border:none;border-radius:var(--radius-md);color:#fff;font-family:var(--ff);font-size:14px;font-weight:700;padding:14px 28px;cursor:pointer;letter-spacing:-0.2px">
         Verificar meu extrato agora →
       </button>
       <div style="font-size:11px;color:var(--muted);margin-top:10px">Sem substituir seu contador · Ferramenta educacional</div>
@@ -2622,7 +2683,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <h2 style="font-family:var(--ff);font-size:clamp(18px,5vw,24px);font-weight:800;color:var(--text);letter-spacing:-0.5px;margin:0">Veja o que o relatório entrega</h2>
       <div style="font-size:11px;color:var(--muted);margin-top:8px">Dados fictícios, apenas para representar o formato do relatório</div>
     </div>
-    <div style="position:relative;border-radius:var(--radius-card);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+    <div style="position:relative;border-radius:var(--radius-card);overflow:hidden;box-shadow:var(--shadow-floating)">
       <!-- Card mock -->
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:20px">
         <!-- Score bar -->
@@ -2630,7 +2691,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <div>
             <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:4px">Índice de Atenção Fiscal</div>
             <div style="font-size:36px;font-weight:800;color:var(--risk-elevado);letter-spacing:-2px;font-family:var(--ff)">68/100</div>
-            <div style="font-size:13px;font-weight:600;color:var(--risk-elevado);margin-top:2px">⚠️ Risco Elevado</div>
+            <div style="font-size:13px;font-weight:600;color:var(--risk-elevado);margin-top:2px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Risco Elevado</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Composição do risco</div>
@@ -2644,15 +2705,15 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
         <!-- Stats row -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
             <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">R$ 128k</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px">movimentados</div>
           </div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
             <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">1.216</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px">entradas analisadas</div>
           </div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;text-align:center">
             <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.5px">67</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px">pontos de atenção</div>
           </div>
@@ -2660,20 +2721,20 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <!-- Alerts blurred -->
         <div style="position:relative">
           <div style="display:flex;flex-direction:column;gap:8px;filter:blur(3px);pointer-events:none;user-select:none">
-            <div style="display:flex;gap:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(255,77,79,0.2);border-radius:10px;padding:12px">
-              <span style="font-size:16px">🚨</span>
+            <div style="display:flex;gap:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(255,77,79,0.2);border-radius:var(--radius-md);padding:12px">
+              <span style="font-size:16px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <div><div style="font-size:13px;font-weight:600;color:var(--text)">Pix recorrentes de múltiplos remetentes</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">23 recebimentos mensais compatíveis com prestação de serviços</div></div>
             </div>
-            <div style="display:flex;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:12px">
-              <span style="font-size:16px">⚠️</span>
+            <div style="display:flex;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius-md);padding:12px">
+              <span style="font-size:16px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <div><div style="font-size:13px;font-weight:600;color:var(--text)">Volume acima do perfil declarado</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">Movimentação 3,2× superior à renda declarada no período</div></div>
             </div>
           </div>
           <!-- Unlock overlay -->
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(to bottom,transparent,rgba(17,24,39,0.95));border-radius:10px;padding:16px;text-align:center">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(to bottom,transparent,rgba(17,24,39,0.95));border-radius:var(--radius-md);padding:16px;text-align:center">
             <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Desbloqueie o relatório completo</div>
             <div style="font-size:11px;color:var(--muted2);margin-bottom:14px">Veja todos os alertas, fatores e recomendações da sua análise</div>
-            <button onclick="showPage('extrato')" style="background:var(--green);border:none;border-radius:10px;color:#fff;font-family:var(--ff);font-size:13px;font-weight:700;padding:10px 22px;cursor:pointer">Analisar meu extrato →</button>
+            <button onclick="showPage('extrato')" style="background:var(--green);border:none;border-radius:var(--radius-md);color:#fff;font-family:var(--ff);font-size:13px;font-weight:700;padding:10px 22px;cursor:pointer">Analisar meu extrato →</button>
           </div>
         </div>
       </div>
@@ -2695,7 +2756,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid var(--border)">
-        🔒 100% privado · Nenhum dado enviado a servidores · Baseado nos critérios públicos do e-Financeira
+        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 100% privado · Nenhum dado enviado a servidores · Baseado nos critérios públicos do e-Financeira
       </div>
     </div>
   </div>
@@ -2709,7 +2770,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:20px">
       <h2 style="font-family:var(--ff);font-size:clamp(18px,4vw,24px);font-weight:800;color:var(--text);margin:0;letter-spacing:-0.5px;line-height:1.2">Analise seu extrato <em style="font-style:normal;color:var(--accent)">agora</em></h2>
       <div style="display:flex;align-items:center;gap:6px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.18);border-radius:var(--radius-card);padding:5px 12px;white-space:nowrap">
-        <span style="font-size:12px">🔒</span>
+        <span style="font-size:12px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <span style="font-size:11px;font-weight:600;color:var(--accent)">100% no seu dispositivo · LGPD</span>
       </div>
     </div>
@@ -2727,9 +2788,9 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
       <div class="ext-card-body">
         <!-- tabs login/cadastro -->
-        <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:16px">
-          <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
-          <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:6px;border:none;font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
+        <div style="display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin-bottom:16px">
+          <button id="extTabCad" onclick="extSwitchTab('cad')" style="flex:1;padding:7px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Criar conta</button>
+          <button id="extTabLog" onclick="extSwitchTab('log')" style="flex:1;padding:7px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Já tenho conta</button>
         </div>
         <!-- cadastro pane -->
         <form id="extCadPane" autocomplete="on" onsubmit="return false">
@@ -2755,7 +2816,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           </div>
         </form>
         <div id="extAuthErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
-        <label id="termosCheck" style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:10px;padding:10px 12px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:8px">
+        <label id="termosCheck" style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:10px;padding:10px 12px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:var(--radius-sm)">
           <input type="checkbox" id="termosAceite" style="margin-top:3px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
           <span style="font-size:11px;color:var(--muted2);line-height:1.6">Li e concordo com os <a href="/termos-de-uso" target="_blank" style="color:var(--green)">Termos de Uso</a> e a <a href="/privacidade" target="_blank" style="color:var(--green)">Política de Privacidade</a>, incluindo o processamento dos meus dados conforme descrito.</span>
         </label>
@@ -2763,7 +2824,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <span id="extAuthBtnTxt">Criar conta e continuar →</span>
         </button>
         <div class="security-note" style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
-          🔒 Seus dados ficam 100% no seu dispositivo
+          <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Seus dados ficam 100% no seu dispositivo
         </div>
       </div>
     </div>
@@ -2772,8 +2833,8 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <!-- GUIA: Como exportar seu extrato -->
     <div id="guiaExtrato" style="margin-bottom:20px;">
       <!-- Header clicável — accordion -->
-      <button onclick="toggleGuia()" id="guiaToggleBtn" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.10);border-radius:10px;padding:10px 14px;cursor:pointer;margin-bottom:0;font-family:var(--ff);">
-        <span style="font-size:12px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;">📥 Como baixar seu extrato</span>
+      <button onclick="toggleGuia()" id="guiaToggleBtn" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.10);border-radius:var(--radius-md);padding:10px 14px;cursor:pointer;margin-bottom:0;font-family:var(--ff);">
+        <span style="font-size:12px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;"><i data-lucide="download" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Como baixar seu extrato</span>
         <span id="guiaChevron" style="font-size:14px;color:var(--muted);transition:transform 0.2s;">▼</span>
       </button>
 
@@ -2806,7 +2867,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
       <!-- Conteúdo das abas -->
       <div id="guia-nubank" class="guia-content" style="display:block;">
-        <div style="background:rgba(130,80,255,0.05);border:1px solid rgba(130,80,255,0.15);border-radius:12px;padding:14px 16px;">
+        <div style="background:rgba(130,80,255,0.05);border:1px solid rgba(130,80,255,0.15);border-radius:var(--radius-md);padding:14px 16px;">
           <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:10px;letter-spacing:0.5px;">NUBANK · Exportar CSV</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -2830,7 +2891,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:13px;color:var(--text2);line-height:1.5;">Escolha <strong>CSV</strong> e salve o arquivo</span>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(124,255,79,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(74,222,128,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <span style="font-size:13px;color:var(--accent);line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
             </div>
           </div>
@@ -2838,7 +2899,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
 
       <div id="guia-inter" class="guia-content" style="display:none;">
-        <div style="background:rgba(255,100,0,0.05);border:1px solid rgba(255,100,0,0.15);border-radius:12px;padding:14px 16px;">
+        <div style="background:rgba(255,100,0,0.05);border:1px solid rgba(255,100,0,0.15);border-radius:var(--radius-md);padding:14px 16px;">
           <div style="font-size:11px;font-weight:700;color:#fb923c;margin-bottom:10px;letter-spacing:0.5px;">INTER · Exportar CSV</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -2862,7 +2923,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:13px;color:var(--text2);line-height:1.5;">Salve o arquivo e suba ele abaixo</span>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(124,255,79,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(74,222,128,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <span style="font-size:13px;color:var(--accent);line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
             </div>
           </div>
@@ -2870,7 +2931,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
 
       <div id="guia-bb" class="guia-content" style="display:none;">
-        <div style="background:rgba(0,100,220,0.05);border:1px solid rgba(0,100,220,0.15);border-radius:12px;padding:14px 16px;">
+        <div style="background:rgba(0,100,220,0.05);border:1px solid rgba(0,100,220,0.15);border-radius:var(--radius-md);padding:14px 16px;">
           <div style="font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:10px;letter-spacing:0.5px;">BANCO DO BRASIL · Exportar OFX</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -2894,7 +2955,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:13px;color:var(--text2);line-height:1.5;">O arquivo vai para seus <strong>Downloads</strong> — suba ele abaixo</span>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(124,255,79,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(74,222,128,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <span style="font-size:13px;color:var(--accent);line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
             </div>
           </div>
@@ -2902,7 +2963,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
 
       <div id="guia-itau" class="guia-content" style="display:none;">
-        <div style="background:rgba(230,150,0,0.05);border:1px solid rgba(230,150,0,0.15);border-radius:12px;padding:14px 16px;">
+        <div style="background:rgba(230,150,0,0.05);border:1px solid rgba(230,150,0,0.15);border-radius:var(--radius-md);padding:14px 16px;">
           <div style="font-size:11px;font-weight:700;color:#fbbf24;margin-bottom:10px;letter-spacing:0.5px;">ITAÚ · Exportar OFX</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -2926,7 +2987,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:13px;color:var(--text2);line-height:1.5;">Salve o arquivo e suba ele abaixo</span>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(124,255,79,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(74,222,128,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <span style="font-size:13px;color:var(--accent);line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
             </div>
           </div>
@@ -2934,7 +2995,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
 
       <div id="guia-bradesco" class="guia-content" style="display:none;">
-        <div style="background:rgba(220,30,30,0.05);border:1px solid rgba(220,30,30,0.15);border-radius:12px;padding:14px 16px;">
+        <div style="background:rgba(220,30,30,0.05);border:1px solid rgba(220,30,30,0.15);border-radius:var(--radius-md);padding:14px 16px;">
           <div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:10px;letter-spacing:0.5px;">BRADESCO · Exportar OFX</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -2958,7 +3019,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <span style="font-size:13px;color:var(--text2);line-height:1.5;">Salve o arquivo e suba ele abaixo</span>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(124,255,79,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">✓</span>
+              <span style="min-width:22px;height:22px;border-radius:50%;background:rgba(74,222,128,0.15);color:var(--accent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
               <span style="font-size:13px;color:var(--accent);line-height:1.5;font-weight:600;">Arquivo salvo! Suba ele abaixo.</span>
             </div>
           </div>
@@ -3087,12 +3148,12 @@ function guiaTab(banco) {
              baixado ainda (timing problem, não instruction problem). Esse bloco
              separa a expectativa do clique, sem tocar em nenhum elemento que o
              restante do fluxo (eOnSel, eRunAll, actBar) já depende. -->
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px">
           <div style="font-family:var(--ff);font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px">Antes de continuar, separe seu extrato</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px">O Guardião compara sua movimentação com os critérios que a Receita já usa. Pra isso funcionar bem, vale ter o arquivo do extrato já baixado antes de abrir o seletor.</div>
           <div style="display:flex;flex-direction:column;gap:6px">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)">✓</span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)">✓</span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
           </div>
         </div>
 
@@ -3106,8 +3167,8 @@ function guiaTab(banco) {
             <input type="file" id="efi" aria-label="Selecionar extratos bancários"
                    accept=".csv,.ofx,.pdf,.txt,.qfx,text/csv,text/plain,application/pdf,application/x-ofx,application/vnd.ofx" multiple
                    onchange="eOnSel(event)"
-                   style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2">
-            <span class="dz-ico" id="dzIco" style="font-size:20px">📂</span>
+                   style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:var(--z-dropdown)">
+            <span class="dz-ico" id="dzIco" style="font-size:20px"><i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div class="dz-ttl" id="dzTtl" style="font-size:12px;margin:3px 0 1px">Ou arraste os arquivos aqui</div>
             <div class="dz-sub" style="font-size:11px">até 5 extratos · bancos diferentes</div>
           </div>
@@ -3128,25 +3189,25 @@ function guiaTab(banco) {
           <div style="font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:5px">Qual é a sua principal fonte de renda?</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px" id="perfilBtns">
             <button onclick="selecionarPerfil('clt',this)"
-              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
-              🏢<br>CLT / Servidor
+              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
+              <i data-lucide="building" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i><br>CLT / Servidor
             </button>
             <button onclick="selecionarPerfil('mei',this)"
-              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
-              🧾<br>MEI / Autônomo
+              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
+              <i data-lucide="receipt" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i><br>MEI / Autônomo
             </button>
             <button onclick="selecionarPerfil('investidor',this)"
-              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
-              📈<br>Investidor / Aposent.
+              style="padding:8px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--ff);font-size:11px;font-weight:600;color:var(--muted2);transition:all 0.15s;text-align:center;line-height:1.4">
+              <i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i><br>Investidor / Aposent.
             </button>
           </div>
 
           <!-- Renda + botão em linha única -->
           <div style="display:flex;align-items:center;gap:8px">
             <div style="position:relative;flex:1;min-width:0">
-              <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none">🎯 R$</span>
+              <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted2);pointer-events:none"><i data-lucide="target" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> R$</span>
               <input id="rendaDeclaradaInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Renda declarada (opcional)"
-                style="width:100%;padding:8px 8px 8px 40px;border:1px solid rgba(0,217,110,0.3);border-radius:8px;background:var(--bg2);color:var(--text);font-size:12px;font-family:var(--ff);box-sizing:border-box"
+                style="width:100%;padding:8px 8px 8px 40px;border:1px solid rgba(0,217,110,0.3);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);font-size:12px;font-family:var(--ff);box-sizing:border-box"
                 title="Informe sua renda mensal declarada no IR para ativar o índice de compatibilidade financeira">
             </div>
             <button class="btn-go" id="btnGo" onclick="eRunAll()" style="flex-shrink:0;white-space:nowrap">Analisar →</button>
@@ -3179,7 +3240,7 @@ function guiaTab(banco) {
           <div id="previewReal" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
             <!-- Score e nível — VISÍVEL -->
-            <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-bottom:8px">
+            <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px">
     <div style="font-size:10px;font-family:var(--ff);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <div id="pvEmoji" style="font-size:32px;flex-shrink:0"></div>
@@ -3192,8 +3253,8 @@ function guiaTab(banco) {
         <div style="font-size:10px;color:var(--muted)">índice de atenção</div>
       </div>
     </div>
-    <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden">
-      <div id="pvBarFill" style="height:100%;border-radius:6px;width:0%;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div>
+    <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);overflow:hidden">
+      <div id="pvBarFill" style="height:100%;border-radius:var(--radius-sm);width:0%;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div>
     </div>
             </div>
 
@@ -3204,23 +3265,23 @@ function guiaTab(banco) {
             <div id="pvAlerts" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
 
             <!-- Restante bloqueado — compacto, valor claro -->
-            <div style="background:var(--surface2);border:1px solid rgba(124,255,79,0.2);border-radius:12px;padding:14px;margin-top:6px">
-              <div id="paywallDynamicBadge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px">
-                🔒 Análise completa bloqueada
+            <div style="background:var(--surface2);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-md);padding:14px;margin-top:6px">
+              <div id="paywallDynamicBadge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);padding:4px 10px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px">
+                <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Análise completa bloqueada
               </div>
               <div id="paywallDynamicSub" style="font-size:12px;color:var(--muted2);line-height:1.5;margin-bottom:10px;text-align:center">
                 Veja cada fator de risco com os valores exatos do seu extrato.
               </div>
-              <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:6px;white-space:normal;line-height:1.4;padding:14px;background:var(--green);border:none;border-radius:10px;color:#000;font-family:var(--ff);font-size:13px;font-weight:800;cursor:pointer;box-shadow:var(--glow-green)">🛡️ <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
-              <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--muted2);font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer">📄 Análise avulsa — <span id="paywallAvulsoPrice">R$19,90</span></button>
-              <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6">🔒 Nenhum dado enviado · Processamento local · Cancele quando quiser</div>
+              <button class="btn-unlock-pro" onclick="openCheckout('pro')" style="width:100%;margin-bottom:6px;white-space:normal;line-height:1.4;padding:14px;background:var(--green);border:none;border-radius:var(--radius-md);color:#000;font-family:var(--ff);font-size:13px;font-weight:800;cursor:pointer;box-shadow:var(--glow-green)"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> <span id="paywallProText">Acessar Pro — R$29,90/mês</span></button>
+              <button class="btn-unlock-avulso" onclick="openCheckout('avulso')" style="width:100%;white-space:normal;line-height:1.4;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-md);color:var(--muted2);font-family:var(--ff);font-size:12px;font-weight:600;cursor:pointer"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Análise avulsa — <span id="paywallAvulsoPrice">R$19,90</span></button>
+              <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Nenhum dado enviado · Processamento local · Cancele quando quiser</div>
             </div>
 
           </div>
 
           <!-- Estado inicial (antes de analisar) -->
           <div id="previewPlaceholder" style="text-align:center;padding:32px 20px;color:var(--muted)">
-            <div style="font-size:32px;margin-bottom:12px">📂</div>
+            <div style="font-size:32px;margin-bottom:12px"><i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
             <div style="font-family:var(--ff);font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">Faça upload do extrato acima</div>
             <div style="font-size:12px;line-height:1.6">O resultado aparecerá aqui após a análise.<br>Seus dados ficam 100% no seu dispositivo.</div>
           </div>
@@ -3229,19 +3290,22 @@ function guiaTab(banco) {
         <!-- resultado real (visível após pagamento) -->
         <div id="realResultBlock" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
-          <!-- ── SEÇÃO 1: Score Hero ── -->
-          <div class="res-section res-section--hero">
-            <div id="pContextoBlock"></div>
-          </div>
-
-          <!-- ── SEÇÃO 1.5 (Pilar 1): O que o extrato já revela ── -->
-          <div class="res-section" id="pManifestacoesSection" style="display:none">
+          <!-- ── SEÇÃO 1: O que o extrato já revela (Pilar 1 — manifestações) ──
+               Reordenado (DEC-018/019): motor causal é o cérebro da experiência
+               (DEC-015 / Livro I Cap. 7.8) — manifestações vêm antes do score. -->
+          <div class="res-section res-section--hero" id="pManifestacoesSection" style="display:none">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap">
               <div class="res-section-label" style="margin-bottom:0">O que seu extrato já revela</div>
               <div class="mnf-maturidade" id="pMaturidadeBadge"></div>
             </div>
             <div id="pCategoriasList" style="margin-bottom:14px"></div>
             <div id="pManifestacoesList"></div>
+          </div>
+
+          <!-- ── SEÇÃO 1.5: Índice de atenção (score F1-F8) — indicador complementar,
+               nunca a conclusão principal (DEC-015). Estilo neutro, não-hero. ── -->
+          <div class="res-section">
+            <div id="pContextoBlock"></div>
           </div>
 
           <!-- ── SEÇÃO 2: Métricas resumo ── -->
@@ -3272,32 +3336,32 @@ function guiaTab(banco) {
               <div class="res-section-label" style="margin-bottom:0">Transações</div>
               <div class="p-flt">
                 <button class="pfb on" id="pfAll" onclick="eFilt('all')">Todas</button>
-                <button class="pfb" id="pfRisk" onclick="eFilt('risk')">⚠ Risco</button>
+                <button class="pfb" id="pfRisk" onclick="eFilt('risk')"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Risco</button>
               </div>
             </div>
             <!-- Filtros por categoria -->
             <div class="res-cat-filters" id="resCatFilters">
               <button class="res-cat-btn on" id="rcAll" onclick="eCatFilt('all')">Todas <span class="res-cat-count" id="rcAllCount"></span></button>
               <button class="res-cat-btn" id="rcPix" onclick="eCatFilt('pix')" style="display:none">Pix <span class="res-cat-count" id="rcPixCount"></span></button>
-              <button class="res-cat-btn on-red" id="rcSusp" onclick="eCatFilt('susp')" style="display:none">⚠ Suspeitas <span class="res-cat-count" id="rcSuspCount"></span></button>
+              <button class="res-cat-btn on-red" id="rcSusp" onclick="eCatFilt('susp')" style="display:none"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Suspeitas <span class="res-cat-count" id="rcSuspCount"></span></button>
               <button class="res-cat-btn" id="rcEspecie" onclick="eCatFilt('especie')" style="display:none">Espécie <span class="res-cat-count" id="rcEspecieCount"></span></button>
               <button class="res-cat-btn" id="rcSaida" onclick="eCatFilt('saida')">Saídas <span class="res-cat-count" id="rcSaidaCount"></span></button>
             </div>
-            <div class="bank-tabs" id="bankTabs" style="border-radius:10px;overflow:hidden;margin-bottom:10px"></div>
+            <div class="bank-tabs" id="bankTabs" style="border-radius:var(--radius-md);overflow:hidden;margin-bottom:10px"></div>
             <div class="p-txn-list" id="pTxnList"></div>
           </div>
 
           <!-- ── SEÇÃO 7: Ações ── -->
           <div class="res-section res-section--actions">
             <button onclick="gerarRelatorioPDF()" id="btnExportPDF" class="res-btn-primary">
-              📄 Exportar relatório em PDF
+              <i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Exportar relatório em PDF
             </button>
             <button class="res-btn-secondary" onclick="eResetAll()">← Nova análise</button>
           </div>
 
           <!-- Debug (oculto) -->
           <div class="p-dbg-hd" onclick="eToggleDbg()" id="pDbgHd" style="display:none">
-            <span class="p-dbg-ttl">🔧 Debug — dados do parser</span>
+            <span class="p-dbg-ttl"><i data-lucide="wrench" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Debug — dados do parser</span>
             <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
           </div>
           <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
@@ -3327,30 +3391,30 @@ function guiaTab(banco) {
 
       <!-- Grid 4 benefícios -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">🔍</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+          <div style="font-size:18px;margin-bottom:6px"><i data-lucide="search" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Movimentações incompatíveis</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Detecta quando entradas não batem com o declarado</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">⚠️</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+          <div style="font-size:18px;margin-bottom:6px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sinais de malha fina</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Movimentação mensal incompatível com perfil declarado</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">📊</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+          <div style="font-size:18px;margin-bottom:6px"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Score com causa</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Não só o número — você vê por que o risco aumentou</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:18px;margin-bottom:6px">📄</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px">
+          <div style="font-size:18px;margin-bottom:6px"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Relatório PDF</div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Exportação completa para revisar com seu contador</div>
         </div>
       </div>
 
       <!-- O que a engine detecta -->
-      <div style="margin-bottom:24px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="margin-bottom:24px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px">
         <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;font-family:var(--ff)">// 16 verificações automáticas</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
           <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Pix × renda declarada</div>
@@ -3365,12 +3429,12 @@ function guiaTab(banco) {
 
       <!-- LGPD detalhado + Metodologia -->
       <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">📋 Metodologia</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)"><i data-lucide="clipboard-list" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Metodologia</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)">🔒 Privacidade e LGPD</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Privacidade e LGPD</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.7"><strong style="color:var(--text)">Seus dados financeiros nunca saem do seu dispositivo.</strong> O processamento dos extratos bancários é realizado 100% localmente no seu navegador. Não armazenamos, transmitimos ou compartilhamos nenhuma informação bancária. Dados de autenticação (e-mail), métricas agregadas da análise (score, totais financeiros arredondados) e dados de pagamento são tratados de forma segura pelos serviços Supabase e Mercado Pago, em conformidade com a <strong style="color:var(--text)">LGPD — Lei 13.709/2018</strong>. <a href="/privacidade" style="color:var(--green);text-decoration:underline">Política de Privacidade</a></div>
         </div>
         <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding-bottom:8px">
@@ -3396,7 +3460,7 @@ function guiaTab(banco) {
       <div class="plan-card">
         <div class="plan-header">
           <div>
-            <div class="plan-icon">✦</div>
+            <div class="plan-icon"><i data-lucide="sparkles" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
             <div class="plan-name">Gratuito</div>
             <div class="plan-tagline">Simulação inicial sem compromisso</div>
           </div>
@@ -3406,9 +3470,9 @@ function guiaTab(banco) {
           </div>
         </div>
         <div class="plan-features">
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Simulador de risco fiscal completo</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Termômetro Verde / Atenção / Elevado / Crítico</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Diagnóstico com os critérios do e-Financeira</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Diagnóstico com os critérios do e-Financeira</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Simulação com hipóteses de compatibilidade fiscal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Indicador visual — Verde / Atenção / Elevado / Crítico</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Análise de extrato bancário real</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF exportável</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
@@ -3420,7 +3484,7 @@ function guiaTab(banco) {
       <div class="plan-card">
         <div class="plan-header">
           <div>
-            <div class="plan-icon">📄</div>
+            <div class="plan-icon"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
             <div class="plan-name">Análise Avulsa</div>
             <div class="plan-tagline">Resultado disponível por 30 min · resumo salvo no histórico</div>
           </div>
@@ -3430,11 +3494,12 @@ function guiaTab(banco) {
           </div>
         </div>
         <div class="plan-features">
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Gratuito</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análise completa do extrato bancário real</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score de risco com explicação causal</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Resultado acessível por 30 minutos após a análise</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Suporte a CSV, OFX e PDF (25 bancos)</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Tudo do plano Gratuito</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Análise completa do extrato bancário real</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Hipótese causal com evidências do seu extrato real</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Indicador de compatibilidade fiscal (0–100) como apoio</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Resultado acessível por 30 minutos após a análise</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Suporte a CSV, OFX e PDF (25 bancos)</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Análises ilimitadas</div>
         </div>
         <button class="btn-plan btn-plan-avulso" onclick="openCheckout('avulso')">Verificar meu extrato — <span id="planAvulsoCta">R$19,90</span> →</button>
@@ -3442,10 +3507,10 @@ function guiaTab(banco) {
 
       <!-- Pro -->
       <div class="plan-card featured">
-        <div class="plan-popular" id="planProBadge">⭐ MELHOR CUSTO-BENEFÍCIO</div>
+        <div class="plan-popular" id="planProBadge"><i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO</div>
         <div class="plan-header">
           <div>
-            <div class="plan-icon">🛡️</div>
+            <div class="plan-icon"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
             <div class="plan-name">Pro</div>
             <div class="plan-tagline">Monitoramento fiscal o ano todo</div>
           </div>
@@ -3455,14 +3520,14 @@ function guiaTab(banco) {
           </div>
         </div>
         <div class="plan-features">
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Tudo do plano Avulso</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Análises ilimitadas — até 5 extratos por análise</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Múltiplos extratos por análise (até 5 arquivos)</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Histórico de risco — veja sua evolução fiscal</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Score atualizado a cada nova análise</div>
-          <div class="plan-feat feat-ok"><span class="feat-icon">✅</span> Relatório PDF exportável</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Tudo do plano Avulso</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Análises ilimitadas — até 5 extratos por análise</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Múltiplos extratos por análise (até 5 arquivos)</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Histórico de risco — veja sua evolução fiscal</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Acompanhamento da sua compatibilidade fiscal a cada nova análise</div>
+          <div class="plan-feat feat-ok"><span class="feat-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Relatório PDF exportável</div>
         </div>
-        <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Assinar Pro — R$29,90/mês →</span></button>
+        <button class="btn-plan btn-plan-pro" id="btnPlanPro" onclick="openCheckout('pro')"><span id="btnProText">Continuar com Pro — R$29,90/mês →</span></button>
       </div>
 
     </div>
@@ -3480,22 +3545,22 @@ function guiaTab(banco) {
             </tr>
           </thead>
           <tbody>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Simulador de risco (quiz)</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análise de extrato bancário real</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Cruzamento Pix × renda declarada</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Detecção de atividade comercial oculta</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Anomalia temporal (picos suspeitos)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Score de coerência fiscal (0–100)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Relatório PDF completo</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análises ilimitadas</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
-            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Múltiplos extratos por análise</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)">✅</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Simulador de risco (quiz)</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análise de extrato bancário real</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Cruzamento Pix × renda declarada</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Detecção de atividade comercial oculta</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Anomalia temporal (picos suspeitos)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Indicador de compatibilidade fiscal (0–100)</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Relatório PDF completo</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:10px 12px;color:var(--muted2)">Análises ilimitadas</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 12px;color:var(--muted2)">Múltiplos extratos por análise</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--muted)">—</td><td style="text-align:center;color:var(--green)"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- Bloco de urgência -->
-      <div style="margin-top:28px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:18px 20px;text-align:center">
-        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--risk-text-red);margin-bottom:8px">⚠️ Se existe uma inconsistência, você precisa saber antes da Receita.</div>
+      <div style="margin-top:28px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:var(--radius-md);padding:18px 20px;text-align:center">
+        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--risk-text-red);margin-bottom:8px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Se existe uma inconsistência, você precisa saber antes da Receita.</div>
         <div style="font-size:13px;color:var(--muted2);line-height:1.65">Após notificação da Receita Federal, multas e juros se aplicam automaticamente — e a retificação não elimina a penalidade. A análise preventiva custa menos de R$35.</div>
       </div>
     </div>
@@ -3532,7 +3597,7 @@ function guiaTab(banco) {
       <h2 style="font-family:var(--ff);font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Por que isso existe</h2>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O e-Financeira determina que instituições financeiras reportem movimentações relevantes de pessoas físicas. Movimentações nesse perfil podem ser cruzadas com os dados da sua declaração de IR.</p>
       <p style="font-size:15px;color:var(--muted2);line-height:1.75;margin:0 0 14px">O problema: a maioria das pessoas só descobre a inconsistência quando recebe a notificação de malha fina — depois que a declaração foi entregue. Nesse ponto, a margem de manobra é muito menor.</p>
-      <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:18px 20px;margin-top:20px">
+      <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius-md);padding:18px 20px;margin-top:20px">
         <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">A lógica do Guardião Fiscal</div>
         <p style="font-size:14px;color:var(--muted2);line-height:1.65;margin:0">Cruzar seus extratos com os critérios do e-Financeira <em>antes</em> de entregar a declaração. Se houver inconsistência, você descobre com tempo para corrigir ou reunir documentação.</p>
       </div>
@@ -3542,18 +3607,18 @@ function guiaTab(banco) {
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
       <h2 style="font-family:var(--ff);font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">Como funciona</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
-          <div style="font-size:22px;margin-bottom:8px">🔒</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px">
+          <div style="font-size:22px;margin-bottom:8px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Processamento local</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.6">Seus extratos são lidos diretamente no seu navegador. Nenhum arquivo é enviado a servidores.</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
-          <div style="font-size:22px;margin-bottom:8px">📊</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px">
+          <div style="font-size:22px;margin-bottom:8px"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Engine de risco v3</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.6">Score de 0 a 100 com 6 fatores ponderados: compatibilidade, consumo, espécie, concentração, anomalia temporal e perfil.</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">
-          <div style="font-size:22px;margin-bottom:8px">🏦</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px">
+          <div style="font-size:22px;margin-bottom:8px"><i data-lucide="landmark" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div>
           <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">25 bancos suportados</div>
           <div style="font-size:13px;color:var(--muted2);line-height:1.6">Importação de extratos em CSV, OFX e PDF — incluindo Nubank, Inter, Bradesco, Itaú, BB e outros.</div>
         </div>
@@ -3565,9 +3630,9 @@ function guiaTab(banco) {
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
       <h2 style="font-family:var(--ff);font-size:18px;font-weight:700;color:var(--text);margin:0 0 6px">Exemplo real de análise</h2>
       <p style="font-size:13px;color:var(--muted);margin:0 0 20px">Veja o tipo de inconsistência que o motor detecta automaticamente no seu extrato.</p>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px">
         <div style="background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
-          <span style="font-size:16px">🚨</span>
+          <span style="font-size:16px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div>
             <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--risk-text-red)">Incompatibilidade de renda detectada</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Critério e-Financeira — peso alto no score</div>
@@ -3592,9 +3657,9 @@ function guiaTab(banco) {
         </div>
       </div>
 
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px">
         <div style="background:rgba(245,158,11,0.08);border-bottom:1px solid rgba(245,158,11,0.15);padding:14px 18px;display:flex;align-items:center;gap:10px">
-          <span style="font-size:16px">⚠️</span>
+          <span style="font-size:16px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div>
             <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--risk-text-yellow)">Padrão comercial recorrente detectado</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Possível atividade sem nota fiscal</div>
@@ -3610,26 +3675,26 @@ function guiaTab(banco) {
 
     <!-- Seção 4: LGPD e Segurança -->
     <div style="border-top:1px solid var(--border);padding-top:36px;margin-bottom:40px">
-      <h2 style="font-family:var(--ff);font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px">🔒 Segurança e privacidade</h2>
+      <h2 style="font-family:var(--ff);font-size:18px;font-weight:700;color:var(--text);margin:0 0 14px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Segurança e privacidade</h2>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
         <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Processamento 100% local</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Seu extrato é lido diretamente no seu navegador. Nenhum arquivo é enviado a servidores externos.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não armazenamos dados bancários</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Transações, saldos e movimentações nunca são salvos em nenhum banco de dados nosso.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não compartilhamos com terceiros</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Suas informações fiscais não são vendidas, compartilhadas ou acessadas por ninguém além de você.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Direito à explicação das decisões automatizadas garantido. Você pode contestar qualquer resultado.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="color:var(--green);font-size:16px;flex-shrink:0">✅</span>
+          <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
           <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Não acessamos a Receita Federal</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">O Guardião Fiscal não tem acesso à sua declaração nem ao sistema da Receita. A análise é baseada exclusivamente no seu extrato.</div></div>
         </div>
       </div>
@@ -3643,8 +3708,8 @@ function guiaTab(banco) {
     </div>
 
     <!-- Seção 6: O que não somos -->
-    <div style="background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.12);border-radius:14px;padding:22px 24px;margin-bottom:40px">
-      <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px">⚠️ Importante entender</div>
+    <div style="background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.12);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:40px">
+      <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Importante entender</div>
       <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0 0 10px">O Guardião Fiscal é uma ferramenta de diagnóstico educacional e preventivo. <strong style="color:var(--muted2);font-weight:600">Não substitui um contador</strong> e não tem acesso à sua declaração na Receita Federal.</p>
       <p style="font-size:14px;color:var(--muted2);line-height:1.7;margin:0">O score gerado indica <em>áreas de atenção potencial</em> com base nos critérios conhecidos do e-Financeira. Para situações específicas — herança, venda de imóvel, empréstimo familiar — a orientação de um contador é indispensável.</p>
     </div>
@@ -3652,9 +3717,9 @@ function guiaTab(banco) {
     <!-- CTA final -->
     <div style="text-align:center;padding-top:8px">
       <button onclick="showPage('extrato')" class="btn-cta-institucional">Analisar meu extrato →</button>
-        ⚠️ Verificar meu extrato agora →
+        <i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Verificar meu extrato agora →
       </button>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">🔒 Processamento local · Nenhum dado enviado · Grátis para começar</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento local · Nenhum dado enviado · Grátis para começar</div>
     </div>
 
   </div>
@@ -3662,7 +3727,7 @@ function guiaTab(banco) {
 <!-- ===== CHECKOUT MODAL ===== -->
 <div class="overlay" id="checkoutOverlay" onclick="closeCheckout(event)">
   <div class="modal" id="checkoutModal">
-    <button class="modal-close" onclick="closeCheckoutDirect()" aria-label="Fechar">✕</button>
+    <button class="modal-close" onclick="closeCheckoutDirect()" aria-label="Fechar"><i data-lucide="x" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></button>
 
     <!-- STEPPER -->
     <div id="checkoutStepper" style="display:flex;align-items:center;gap:6px;margin-bottom:24px">
@@ -3712,10 +3777,10 @@ function guiaTab(banco) {
       <button class="btn-pay" onclick="goToPay()">Continuar para pagamento →</button>
 
       <div class="divider">já tem conta?</div>
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:10px;font-family:var(--ff);font-size:13px;font-weight:600" onclick="openLoginFromCheckout()">
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:12px;border-radius:var(--radius-md);font-family:var(--ff);font-size:13px;font-weight:600" onclick="openLoginFromCheckout()">
         Entrar com e-mail e senha
       </button>
-      <div class="security-note" style="margin-top:14px">🔒 Seus dados são criptografados · Sem spam</div>
+      <div class="security-note" style="margin-top:14px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Seus dados são criptografados · Sem spam</div>
     </div>
 
     <!-- STEP 2: Pagamento — MP Bricks embutido -->
@@ -3724,41 +3789,41 @@ function guiaTab(banco) {
       <div class="modal-sub" id="checkoutSub">Pague com cartão direto aqui — sem sair do site.</div>
 
       <!-- Tabs: Cartão | Pix/Boleto -->
-      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin:12px 0 16px">
-        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">💳 Cartão</button>
-        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">🟢 Pix / Boleto</button>
+      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius-md);padding:4px;margin:12px 0 16px">
+        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s"><i data-lucide="credit-card" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Cartão</button>
+        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s"><span style="color:var(--risk-baixo)" aria-hidden="true">●</span> Pix / Boleto</button>
       </div>
 
       <!-- Cartão: MP Brick -->
       <div id="payPaneCartao">
         <div id="mpBrickContainer" style="min-height:320px"></div>
-        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin:10px 0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin:10px 0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:10px"></div>
       </div>
 
       <!-- Pix / Boleto: redirect -->
       <div id="payPaneOutros" style="display:none">
-        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:22px 20px;text-align:center">
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:22px 20px;text-align:center">
           <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
-            🟢 <strong style="color:var(--text)">Pix</strong> — aprovação imediata · qualquer banco<br>
-            📄 <strong style="color:var(--text)">Boleto</strong> — vence em 1 dia útil · qualquer banco<br>
+            <span style="color:var(--risk-baixo)" aria-hidden="true">●</span> <strong style="color:var(--text)">Pix</strong> — aprovação imediata · qualquer banco<br>
+            <i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> <strong style="color:var(--text)">Boleto</strong> — vence em 1 dia útil · qualquer banco<br>
             <span style="font-size:11px;color:var(--muted)">Não é necessário ter conta no Mercado Pago</span>
           </div>
-          <div id="mpPayErrOutros" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px"></div>
+          <div id="mpPayErrOutros" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:10px"></div>
           <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
             <span id="btnMpTxt">Gerar Pix ou Boleto →</span>
           </button>
-          <div style="font-size:11px;color:var(--muted);margin-top:10px">⚠️ Você será redirecionado para gerar o código de pagamento</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Você será redirecionado para gerar o código de pagamento</div>
         </div>
       </div>
 
-      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:10px;font-family:var(--ff);font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
-      <div class="security-note" style="margin-top:12px">🔒 Pagamento processado diretamente pelo Mercado Pago · PCI DSS</div>
+      <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:var(--radius-md);font-family:var(--ff);font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
+      <div class="security-note" style="margin-top:12px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Pagamento processado diretamente pelo Mercado Pago · PCI DSS</div>
     </div>
 
     <!-- STEP 3: Sucesso -->
     <div class="modal-step" id="stepSuccess">
       <div class="success-block">
-        <span class="success-icon">🎉</span>
+        <span class="success-icon"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <div class="success-title">Tudo pronto!</div>
         <div class="success-sub" id="successMsg"></div>
         <button class="btn-pay" onclick="closeCheckoutDirect()">Acessar minha área →</button>
@@ -3772,12 +3837,12 @@ function guiaTab(banco) {
 <!-- ===== LOGIN MODAL ===== -->
 <div class="overlay" id="loginOverlay" onclick="closeLogin(event)">
   <div class="modal" id="loginModal">
-    <button class="modal-close" onclick="closeLoginDirect()" aria-label="Fechar">✕</button>
+    <button class="modal-close" onclick="closeLoginDirect()" aria-label="Fechar"><i data-lucide="x" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></button>
 
     <!-- tabs -->
-    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px">
-      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
-      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
+    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius-md);padding:4px;margin-bottom:24px">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s">Entrar</button>
+      <button id="tabCadastroBtn" onclick="switchAuthTab('cadastro')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s">Criar conta</button>
     </div>
 
     <!-- LOGIN -->
@@ -3819,11 +3884,11 @@ function guiaTab(banco) {
         <div id="cadSenhaMeter"></div>
       </div>
       <div id="cadErr" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;text-align:center"></div>
-      <div id="cadOk" style="display:none;color:var(--accent);font-size:13px;margin-bottom:10px;text-align:center;padding:10px;background:rgba(16,185,129,0.08);border-radius:8px"></div>
+      <div id="cadOk" style="display:none;color:var(--accent);font-size:13px;margin-bottom:10px;text-align:center;padding:10px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm)"></div>
       <button class="btn-pay" onclick="doCadastro()">
         <span id="cadBtnTxt">Criar conta →</span>
       </button>
-      <div class="security-note" style="margin-top:10px;text-align:center">🔒 Gratuito — sem cobrança</div>
+      <div class="security-note" style="margin-top:10px;text-align:center"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Gratuito — sem cobrança</div>
     </form>
   </div>
 </div>
@@ -3891,11 +3956,34 @@ function _loadJsPDF() {
   });
 }
 </script>
+<!-- Lucide Icons — biblioteca oficial de ícones do Guardião Fiscal (Livro II, Cap. 21.3) -->
+<script src="https://unpkg.com/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
+<script>
+/* Renderiza todo <i data-lucide="..."> presente no DOM. Chamado no load inicial
+   e, via MutationObserver, sempre que o app.js reescreve innerHTML dinamicamente
+   (Workspace, Resultado, alertas, etc.) — sem precisar instrumentar cada render. */
+function gfRenderIcons(){ if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons(); }
+document.addEventListener('DOMContentLoaded', gfRenderIcons);
+window.addEventListener('load', gfRenderIcons);
+(function(){
+  var scheduled = false;
+  function schedule(){
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(function(){ scheduled = false; gfRenderIcons(); });
+  }
+  var obs = new MutationObserver(schedule);
+  document.addEventListener('DOMContentLoaded', function(){
+    obs.observe(document.body, { childList: true, subtree: true });
+    schedule();
+  });
+})();
+</script>
 <script src="/app.js" defer></script>
 
 <!-- ── Banner de cookies ── -->
 <style>
-#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(0);transition:transform 0.3s ease;will-change:transform}
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:var(--z-toast);background:var(--surface);border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-family:var(--ff);transform:translateY(0);transition:transform 0.3s ease;will-change:transform}
 html.banner-hidden #cookieBanner{display:none!important}
 html:not(.banner-hidden) #btnWhatsapp{bottom:92px}
 html:not(.banner-hidden) #btnFeedback{bottom:152px}
@@ -3903,7 +3991,7 @@ html:not(.banner-hidden) #btnFeedback{bottom:152px}
 #legalFooter{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
 #cookieBanner p{font-size:12px;color:var(--muted2);margin:0;flex:1;min-width:180px;line-height:1.5}
 #cookieBanner a{color:var(--green)}
-.ck-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
+.ck-btn{padding:8px 18px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
 .ck-accept{background:var(--green);color:#000;box-shadow:var(--glow-green)}
 .ck-reject{background:transparent;border:1px solid var(--border2)!important;color:var(--muted);font-size:11px}
 #legalFooter{text-align:center;padding:20px 16px 90px;font-size:11px;color:var(--muted);font-family:var(--ff);border-top:1px solid var(--border);margin-top:0;contain:layout}
@@ -3911,7 +3999,7 @@ html:not(.banner-hidden) #btnFeedback{bottom:152px}
 #legalFooter a:hover{color:var(--muted2)}
 </style>
 
-<div id="cookieBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:9999;transform:translateY(0)">
+<div id="cookieBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:var(--z-toast);transform:translateY(0)">
   <p>Usamos cookies de análise e marketing para melhorar sua experiência. Ao continuar navegando, você concorda com o uso de cookies.
   <a href="/politica-cookies.html" target="_blank">Saiba mais</a></p>
   <button class="ck-btn ck-reject" onclick="ckReject()">Recusar marketing</button>
@@ -3977,26 +4065,26 @@ function ckReject() {
 <style>
 /* Botão WhatsApp fixo */
 #btnWhatsapp {
-  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  position: fixed; bottom: 24px; right: 24px; z-index: var(--z-fab);
   width: 52px; height: 52px; border-radius: 50%;
   background: #25d366; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+  box-shadow: var(--shadow-whatsapp);
   transition: transform 0.2s, box-shadow 0.2s;
   will-change: transform; contain: layout style;
 }
-#btnWhatsapp:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
+#btnWhatsapp:hover { transform: scale(1.08); box-shadow: var(--shadow-whatsapp-hover); }
 #btnWhatsapp svg { width: 28px; height: 28px; fill: #fff; }
 
 /* Botão Feedback fixo */
 #btnFeedback {
-  position: fixed; bottom: 84px; right: 24px; z-index: 999;
+  position: fixed; bottom: 84px; right: 24px; z-index: var(--z-fab);
   background: var(--surface2); border: 1px solid var(--border2);
   border-radius: var(--radius-card); padding: 7px 14px;
   color: var(--muted2); font-family:var(--ff);
   font-size: 12px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: var(--shadow-card);
   transition: all 0.2s; white-space: nowrap;
   will-change: transform; contain: layout style;
 }
@@ -4004,7 +4092,7 @@ function ckReject() {
 
 /* Modal feedback */
 #feedbackOverlay {
-  display: none; position: fixed; inset: 0; z-index: 1000;
+  display: none; position: fixed; inset: 0; z-index: var(--z-modal);
   background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
   padding: 16px;
 }
@@ -4032,7 +4120,7 @@ function ckReject() {
 #feedbackText {
   width: 100%; min-height: 100px; padding: 12px 14px;
   background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 12px; color: var(--text); font-family:var(--ff);
+  border-radius:var(--radius-md); color: var(--text); font-family:var(--ff);
   font-size: 13px; line-height: 1.6; resize: vertical; outline: none;
   box-sizing: border-box;
 }
@@ -4043,13 +4131,13 @@ function ckReject() {
 }
 #btnFeedbackSend {
   flex: 1; padding: 12px; background: var(--blue); border: none;
-  border-radius: 10px; color: #fff; font-family:var(--ff);
+  border-radius:var(--radius-md); color: #fff; font-family:var(--ff);
   font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
 }
 #btnFeedbackSend:hover { opacity: 0.9; }
 #btnFeedbackCancel {
   padding: 12px 18px; background: none; border: 1px solid var(--border2);
-  border-radius: 10px; color: var(--muted2); font-family:var(--ff);
+  border-radius:var(--radius-md); color: var(--muted2); font-family:var(--ff);
   font-size: 14px; cursor: pointer; transition: all 0.15s;
 }
 #btnFeedbackCancel:hover { color: var(--text2); border-color: var(--border); }
@@ -4065,7 +4153,7 @@ function ckReject() {
 </a>
 
 <!-- Botão Feedback -->
-<button id="btnFeedback" onclick="openFeedback()">💬 Feedback</button>
+<button id="btnFeedback" onclick="openFeedback()"><i data-lucide="message-circle" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Feedback</button>
 
 <!-- Modal Feedback -->
 <div id="feedbackOverlay" onclick="closeFeedbackOutside(event)">
@@ -4073,10 +4161,10 @@ function ckReject() {
     <h3>Nos diga o que achou</h3>
     <p>Sua opinião ajuda a melhorar o produto. Anônimo ou não — fica à vontade.</p>
     <div id="feedbackType">
-      <button class="fb-type-btn active" onclick="setFbType(this,'sugestão')">💡 Sugestão</button>
-      <button class="fb-type-btn" onclick="setFbType(this,'bug')">🐛 Bug</button>
-      <button class="fb-type-btn" onclick="setFbType(this,'elogio')">⭐ Elogio</button>
-      <button class="fb-type-btn" onclick="setFbType(this,'dúvida')">❓ Dúvida</button>
+      <button class="fb-type-btn active" onclick="setFbType(this,'sugestão')"><i data-lucide="lightbulb" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Sugestão</button>
+      <button class="fb-type-btn" onclick="setFbType(this,'bug')"><i data-lucide="bug" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Bug</button>
+      <button class="fb-type-btn" onclick="setFbType(this,'elogio')"><i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Elogio</button>
+      <button class="fb-type-btn" onclick="setFbType(this,'dúvida')"><i data-lucide="circle-help" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dúvida</button>
     </div>
     <textarea id="feedbackText" placeholder="Descreva aqui..."></textarea>
     <div id="feedbackActions">
@@ -4146,10 +4234,10 @@ async function sendFeedback() {
         fatores: { pagina: window.location.href, email: _currentUser?.email || null },
       });
     }
-    msg.textContent = '✓ Enviado! Obrigado pelo feedback.';
+    msg.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Enviado! Obrigado pelo feedback.';
     msg.style.color = '#34d399';
     msg.style.display = 'block';
-    btn.textContent = 'Enviado ✓';
+    btn.textContent = 'Enviado <i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     setTimeout(() => closeFeedback(), 1800);
   } catch(e) {
     msg.textContent = 'Erro ao enviar. Tente novamente.';
