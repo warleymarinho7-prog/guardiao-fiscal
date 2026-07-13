@@ -833,6 +833,77 @@ nav {
 
 .ext-card-body { padding:16px; }
 
+/* [V3.2] Bloco "Como funciona" — inline, compacto, 3 passos. Decisão de
+   produto (jul/2026): painel lateral em split-layout foi descartado por ser
+   mudança estrutural desproporcional pra conteúdo de apoio, e competiria
+   visualmente com os cards de banco e a área de upload. Horizontal no
+   desktop (3 colunas), empilhado no mobile (1 coluna). */
+.ext-how-it-works {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (min-width: 640px) {
+  .ext-how-it-works { grid-template-columns: repeat(3, 1fr); }
+}
+.ext-hiw-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+.ext-hiw-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,217,110,0.1);
+  border: 1px solid rgba(0,217,110,0.22);
+  color: var(--accent);
+  font-family: var(--ff);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ext-hiw-text {
+  font-size: var(--font-size-2xs);
+  color: var(--muted2);
+  line-height: 1.35;
+}
+.ext-hiw-text strong { color: var(--text2); font-weight: var(--font-weight-semibold); }
+
+/* [V3.2] Cards de banco selecionáveis (extStep2) — antes o upload era um
+   drop-zone genérico sem indicar de onde vem o arquivo. As cores por banco
+   batem com BANK_GUIDES (app.js), então o card selecionado usa a mesma
+   identidade visual do guia que aparece abaixo dele. */
+.ext-bank-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 6px;
+  font-family: var(--ff);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted2);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  text-align: center;
+}
+.ext-bank-card:hover { border-color: var(--border2); color: var(--text2); }
+.ext-bank-card.selected { color: var(--text); font-weight: var(--font-weight-bold); }
+.ext-bank-card.selected[data-banco="nubank"]   { background: rgba(130,80,255,0.1);  border-color: rgba(130,80,255,0.5); }
+.ext-bank-card.selected[data-banco="inter"]    { background: rgba(255,100,0,0.08);  border-color: rgba(255,100,0,0.4); }
+.ext-bank-card.selected[data-banco="bb"]       { background: rgba(0,100,220,0.08);  border-color: rgba(0,100,220,0.4); }
+.ext-bank-card.selected[data-banco="itau"]     { background: rgba(230,150,0,0.08);  border-color: rgba(230,150,0,0.4); }
+.ext-bank-card.selected[data-banco="bradesco"] { background: rgba(220,30,30,0.08);  border-color: rgba(220,30,30,0.4); }
+.ext-bank-card.selected[data-banco="outro"]    { background: var(--surface2); border-color: var(--border2); }
+
 /* [FIX-CLS] extStep3: conteúdo renderizado antes de display:block — sem shift */
 #extStep3 { contain: layout; }
 
@@ -3072,6 +3143,23 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <span style="font-size:11px;font-weight:600;color:var(--accent)">100% no seu dispositivo · LGPD</span>
       </div>
     </div>
+
+    <!-- [V3.2] Como funciona — 3 passos, inline, horizontal no desktop / empilhado no mobile -->
+    <div class="ext-how-it-works">
+      <div class="ext-hiw-step">
+        <span class="ext-hiw-num">1</span>
+        <span class="ext-hiw-text"><strong>Selecione seu banco</strong><br>Veja onde exportar o extrato</span>
+      </div>
+      <div class="ext-hiw-step">
+        <span class="ext-hiw-num">2</span>
+        <span class="ext-hiw-text"><strong>Baixe o extrato</strong><br>Seguindo o guia do seu banco</span>
+      </div>
+      <div class="ext-hiw-step">
+        <span class="ext-hiw-num">3</span>
+        <span class="ext-hiw-text"><strong>Envie o arquivo</strong><br>Para análise no seu dispositivo</span>
+      </div>
+    </div>
+
       <!-- extrato flow v3 — multi-extrato -->
   <div id="simExtrato" style="display:block;">
 
@@ -3446,12 +3534,28 @@ function guiaTab(banco) {
              baixado ainda (timing problem, não instruction problem). Esse bloco
              separa a expectativa do clique, sem tocar em nenhum elemento que o
              restante do fluxo (eOnSel, eRunAll, actBar) já depende. -->
+        <!-- [V3.2] Cards de banco — antes o bloco de preparação era genérico
+             (2 bullets fixos, iguais pra qualquer banco). Reaproveita
+             BANK_GUIDES/renderBankGuide() (já existentes, usados no painel
+             vivo do hero) para dar instrução específica do banco escolhido,
+             em vez de instrução genérica — mesma lógica, novo lugar. -->
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px">
-          <div style="font-family:var(--ff);font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px">Antes de continuar, separe seu extrato</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px">O Guardião compara sua movimentação com os critérios que a Receita já usa. Pra isso funcionar bem, vale ter o arquivo do extrato já baixado antes de abrir o seletor.</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
+          <div style="font-family:var(--ff);font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px">Antes de continuar, separe seu extrato</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px">Selecione seu banco para ver exatamente onde exportar o arquivo.</div>
+          <div id="extBankCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:2px">
+            <button class="ext-bank-card" data-banco="nubank" onclick="selecionarBancoExtrato('nubank')">Nubank</button>
+            <button class="ext-bank-card" data-banco="inter" onclick="selecionarBancoExtrato('inter')">Inter</button>
+            <button class="ext-bank-card" data-banco="bb" onclick="selecionarBancoExtrato('bb')">Banco do Brasil</button>
+            <button class="ext-bank-card" data-banco="itau" onclick="selecionarBancoExtrato('itau')">Itaú</button>
+            <button class="ext-bank-card" data-banco="bradesco" onclick="selecionarBancoExtrato('bradesco')">Bradesco</button>
+            <button class="ext-bank-card" data-banco="outro" onclick="selecionarBancoExtrato('outro')">Outro banco</button>
+          </div>
+          <div id="extBankGuideContent" style="margin-top:10px"></div>
+          <div id="extBankGuideGenerico" style="margin-top:10px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
+            </div>
           </div>
         </div>
 
