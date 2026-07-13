@@ -878,6 +878,65 @@ nav {
 }
 .ext-hiw-text strong { color: var(--text2); font-weight: var(--font-weight-semibold); }
 
+/* [V3.2] Stepper horizontal — 3 estágios (Enviar → Processando → Concluído).
+   Controlado por setExtStepperStage() em app.js, chamado nos pontos onde o
+   fluxo já transiciona de estado (início/fim de eRunAll, falhas, reset) —
+   não introduz uma máquina de estados nova, só visualiza a existente. */
+.ext-stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.ext-stepper-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ext-stepper-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--ff);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.ext-stepper-label {
+  font-family: var(--ff);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.ext-stepper-item.active .ext-stepper-circle {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+.ext-stepper-item.active .ext-stepper-label { color: var(--text); font-weight: var(--font-weight-semibold); }
+.ext-stepper-item.done .ext-stepper-circle {
+  background: rgba(0,217,110,0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ext-stepper-item.done .ext-stepper-label { color: var(--text2); }
+.ext-stepper-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+  margin: 0 8px;
+  min-width: 12px;
+}
+
 /* [V3.2] Cards de banco selecionáveis (extStep2) — antes o upload era um
    drop-zone genérico sem indicar de onde vem o arquivo. As cores por banco
    batem com BANK_GUIDES (app.js), então o card selecionado usa a mesma
@@ -3141,6 +3200,25 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div style="display:flex;align-items:center;gap:6px;background:rgba(0,217,110,0.06);border:1px solid rgba(0,217,110,0.18);border-radius:var(--radius-card);padding:5px 12px;white-space:nowrap">
         <span style="font-size:12px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
         <span style="font-size:11px;font-weight:600;color:var(--accent)">100% no seu dispositivo · LGPD</span>
+      </div>
+    </div>
+
+    <!-- [V3.2] Stepper horizontal — estado inicial: estágio 1 ativo. Atualizado via
+         setExtStepperStage() em app.js (não requer JS pra renderizar o estado inicial). -->
+    <div class="ext-stepper" id="extStepper">
+      <div class="ext-stepper-item active">
+        <span class="ext-stepper-circle">1</span>
+        <span class="ext-stepper-label">Enviar arquivo</span>
+      </div>
+      <div class="ext-stepper-line"></div>
+      <div class="ext-stepper-item">
+        <span class="ext-stepper-circle">2</span>
+        <span class="ext-stepper-label">Processando</span>
+      </div>
+      <div class="ext-stepper-line"></div>
+      <div class="ext-stepper-item">
+        <span class="ext-stepper-circle">3</span>
+        <span class="ext-stepper-label">Concluído</span>
       </div>
     </div>
 
