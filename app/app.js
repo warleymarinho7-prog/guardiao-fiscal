@@ -166,13 +166,13 @@ const PRO_FREE_MODE = false;
 // EXCLUSIVAMENTE o Contrato do Resultado (montarModeloDeResultado/validarContrato),
 // em vez de ler _eConsolidated/_eSources diretamente. Começa em false — ativar
 // manualmente para comparar lado a lado com o renderer legado antes de virar padrão.
-let USE_CAUSAL_RESULT_RENDERER = true;
+let USE_CAUSAL_RESULT_RENDERER = false;
 // [Fatia 2A] Feature flag separada da anterior: aquela controla a FONTE DOS DADOS
 // (contrato vs. objeto bruto do motor); esta controla a COMPOSIÇÃO VISUAL (cards
 // com resumo/expansão + cadeia causal + Detalhes técnicos recolhido, aprovado no
 // mockup de jul/2026). V2 pressupõe o contrato como fonte — só tem efeito quando
 // USE_CAUSAL_RESULT_RENDERER também está true.
-let USE_CAUSAL_RESULT_V2 = true;
+let USE_CAUSAL_RESULT_V2 = false;
 
 function showProFreeBanner() {
   showPage('planos');
@@ -385,13 +385,20 @@ async function initMpBrick() {
         onSubmit: async (cardData) => { clearTimeout(brickTimeout); await processCardPayment(cardData); },
         onError: (err) => {
           clearTimeout(brickTimeout);
-          const cause = err?.cause?.[0]?.description || err?.message || JSON.stringify(err);
+          // [FIX 2026-07] O fallback antigo caía em JSON.stringify(err) — literalmente um objeto
+          // JS serializado aparecendo na tela do usuário. Trocado por mensagem fixa amigável;
+          // o objeto original continua indo pro console para debug.
+          console.error('[Guardião] erro no formulário de pagamento (Mercado Pago Brick):', err);
+          const causaConhecida = err?.cause?.[0]?.description;
+          const cause = (causaConhecida && /[.!?]$/.test(causaConhecida.trim()) && causaConhecida.length < 140)
+            ? causaConhecida
+            : 'Não foi possível carregar o formulário de pagamento. Verifique os dados ou tente Pix/Boleto.';
           showBrickFallback(container, cause);
         },
       },
     });
   } catch (e) {
-    showBrickFallback(container, e?.message || String(e));
+    showBrickFallback(container, eSafeErrorMsg(e, 'Não foi possível carregar o formulário de pagamento. Tente novamente ou use Pix/Boleto.'));
   }
 }
 
@@ -507,7 +514,7 @@ async function startAvulsoCheckoutPro() {
     }
   } catch(e) {
     if (newWin && !newWin.closed) { try { newWin.close(); } catch(_) {} }
-    if (errEl) { errEl.textContent = e.message || 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'; errEl.style.display = 'block'; }
+    if (errEl) { errEl.textContent = eSafeErrorMsg(e, 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'); errEl.style.display = 'block'; }
     if (btn) btn.textContent = 'Pagar R$19,90 →';
     document.getElementById('btnAvulsoPay').disabled = false;
   }
@@ -573,7 +580,7 @@ async function startProSubscription() {
     }
   } catch(e) {
     if (newWin && !newWin.closed) { try { newWin.close(); } catch(_) {} }
-    if (errEl) { errEl.textContent = e.message || 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'; errEl.style.display = 'block'; }
+    if (errEl) { errEl.textContent = eSafeErrorMsg(e, 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'); errEl.style.display = 'block'; }
     if (btn) btn.textContent = 'Continuar com Pro — R$29,90/mês →';
     document.getElementById('btnProSubscribe').disabled = false;
   }
@@ -616,7 +623,7 @@ async function processCardPayment(cardData) {
     }
   } catch (e) {
     if (errEl) {
-      errEl.textContent = e.message || 'Erro ao processar pagamento. Tente novamente.';
+      errEl.textContent = eSafeErrorMsg(e, 'Erro ao processar pagamento. Tente novamente.');
       errEl.style.display = 'block';
     }
   }
@@ -728,7 +735,7 @@ async function goToMercadoPago() {
 
   } catch (e) {
     if (newWin) newWin.close();
-    if (errEl) { errEl.textContent = e.message || 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'; errEl.style.display = 'block'; }
+    if (errEl) { errEl.textContent = eSafeErrorMsg(e, 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'); errEl.style.display = 'block'; }
     if (btn) btn.textContent = 'Ir para o pagamento →';
     document.getElementById('btnMpPay').disabled = false;
   }
@@ -1274,7 +1281,13 @@ function traduzErro(msg) {
   if (msg.includes('Email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
   if (msg.includes('already registered')) return 'Este e-mail já está cadastrado. Tente entrar.';
   if (msg.includes('Password should')) return 'Senha muito fraca — use letras, números e símbolos.';
-  return msg;
+  if (msg.includes('rate limit') || msg.includes('Too many')) return 'Muitas tentativas em pouco tempo. Aguarde um instante e tente novamente.';
+  // [FIX 2026-07] Antes o fallback devolvia a mensagem bruta do Supabase (ex.: "AuthApiError:
+  // invalid claim: missing sub claim", erros de rede, códigos internos) direto pro usuário.
+  // Agora qualquer erro não reconhecido cai numa mensagem genérica; o texto técnico vai só
+  // pro console, para debug, nunca pra tela.
+  console.error('[Guardião] erro de autenticação não mapeado:', msg);
+  return 'Não foi possível concluir. Tente novamente em alguns instantes.';
 }
 
 function checkPasswordStrength(senha) {
@@ -1833,6 +1846,24 @@ document.addEventListener('DOMContentLoaded', function() {
 const fmtBRL=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2}).format(isNaN(v)?0:v);
 const fmtDate=d=>d?d.toLocaleDateString('pt-BR'):'—';
 
+// [FIX 2026-07] Vários catch(e) na tela de pagamento mostravam "e.message || fallback amigável" —
+// como e.message quase sempre existe (erros de rede, timeouts do Edge Function, respostas não-2xx
+// do Mercado Pago), o usuário via texto técnico ("Failed to fetch", "functions/v1/... non-2xx
+// status code", etc.) em vez da mensagem pensada para ele. Esta função inverte a prioridade:
+// mostra a mensagem amigável sempre, e manda o detalhe técnico só pro console.
+function eSafeErrorMsg(e, fallback) {
+  console.error('[Guardião] erro:', e);
+  const raw = (e && e.message ? String(e.message) : '').trim();
+  if (!raw) return fallback;
+  // Heurística: texto técnico cru geralmente cita nomes de função/URL/status HTTP, vem em
+  // inglês, ou tem cara de stack/JSON — isso nunca vai pro usuário. Mensagens que já foram
+  // escritas por nós em português, com pontuação de frase, podem passar (ex.: "Sessão
+  // expirada. Faça login novamente.").
+  const pareceTecnica = /fetch|network ?error|functions\/v\d|non-2xx|typeerror|referenceerror|undefined is not|null is not|json\.?parse|unexpected token|cors|\bxhr\b|\bpromise\b|stack trace|at \w+\.(js|ts):\d+|^erro \d{3}$/i.test(raw);
+  const semCaraDeFrase = /^[a-z]/.test(raw) && !/[.!?]$/.test(raw);
+  if (pareceTecnica || semCaraDeFrase || raw.length > 140) return fallback;
+  return raw;
+}
 function eParseBRL(s){
   if(!s)return 0;
   s=String(s).trim().replace(/\s/g,'');
@@ -1862,7 +1893,12 @@ function eDetectFormat(c,fn){
   if(ext==='ofx'||ext==='qfx'||h.includes('<OFX')||h.includes('OFXHEADER')){format='ofx';bankInfo=eDetectBankReal(c,'ofx',fn);return{format,bank:bankInfo.label,conta:bankInfo.conta,banco:bankInfo.banco};}
   if(l.includes('"date"')&&l.includes('"title"')&&l.includes('"amount"')){format='nubank_cartao';bankInfo=eDetectBankReal(c,'nubank_cartao',fn);return{format,bank:bankInfo.label||'Nubank (cartão)',conta:bankInfo.conta,banco:bankInfo.banco};}
   if(l.includes('banco inter')||l.includes('extrato conta corrente')||(l.includes('histórico')&&l.includes('descrição')&&l.includes(';'))){format='inter';bankInfo=eDetectBankReal(c,'inter',fn);return{format,bank:bankInfo.label,conta:bankInfo.conta,banco:bankInfo.banco};}
-  const isNubankConta=(((l.includes('lançamento')||l.includes('lancamento'))&&l.includes('valor'))||(l.includes('data')&&l.includes('valor')&&l.includes('identificador'))||(l.includes('data')&&l.includes('descrição')&&l.includes('valor')&&!l.includes(';'))||(l.includes('data')&&l.includes('description')&&l.includes('amount')&&l.includes('identifier')))&&!l.includes('"date"')&&!l.includes('"title"');
+  // [FIX 2026-07] A condição "lançamento"+"valor" colidia com CSVs de outros bancos (ex.: Itaú,
+  // que usa "data;lançamento;ag./origem;valor (r$);saldo (r$)") por serem termos genéricos em
+  // português. O formato real do Nubank conta usa vírgula, não ponto-e-vírgula — adicionado
+  // "!l.includes(';')" para alinhar essa condição com as demais e evitar o falso positivo
+  // (que resultava em 0 transações parseadas, silenciosamente, por usar separador errado).
+  const isNubankConta=(((l.includes('lançamento')||l.includes('lancamento'))&&l.includes('valor')&&!l.includes(';'))||(l.includes('data')&&l.includes('valor')&&l.includes('identificador'))||(l.includes('data')&&l.includes('descrição')&&l.includes('valor')&&!l.includes(';'))||(l.includes('data')&&l.includes('description')&&l.includes('amount')&&l.includes('identifier')))&&!l.includes('"date"')&&!l.includes('"title"');
   if(isNubankConta){format='nubank_conta';bankInfo=eDetectBankReal(c,'nubank_conta',fn);return{format,bank:bankInfo.label||'Nubank (conta)',conta:bankInfo.conta,banco:bankInfo.banco};}
   if(l.includes('data;histórico')||l.includes('data;historico')){format='bb';bankInfo=eDetectBankReal(c,'bb',fn);return{format,bank:bankInfo.label||'Banco do Brasil',conta:bankInfo.conta,banco:bankInfo.banco};}
   bankInfo=eDetectBankReal(c,'generic',fn);
@@ -1908,14 +1944,18 @@ function eSplitCSV(line,sep=','){const r=[];let cur='',q=false;for(let i=0;i<lin
 function eDetectSep(l){const s={',':0,';':0,'\t':0};for(const c of l)if(s[c]!==undefined)s[c]++;return Object.keys(s).reduce((a,b)=>s[a]>s[b]?a:b);}
 function eParseNubankCartao(lines){return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<3)return null;const date=eParseDate(c[0]),desc=(c[1]||'').trim(),value=eParseBRL(c[2]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
 function eParseNubankConta(lines){if(lines.length<2)return[];const hdr=eSplitCSV(lines[0]).map(c=>c.toLowerCase().replace(/['"]/g,'').trim());const iDate=hdr.findIndex(h=>h.includes('data')||h==='date');const iDesc=hdr.findIndex(h=>h.includes('descri')||h.includes('description')||h.includes('histórico')||h.includes('historico'));const iVal=hdr.findIndex(h=>h==='valor'||h==='value'||h==='amount'||h.includes('valor'));const iId=hdr.findIndex(h=>h.includes('identif'));return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l);if(c.length<2)return null;const date=eParseDate(c[iDate>=0?iDate:0]);const desc=(iDesc>=0?c[iDesc]:(iId>=0?c[iId]:c[1]||'')).replace(/['"]/g,'').trim();const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-1]);return date&&desc?{date,desc,value}:null;}).filter(Boolean);}
-function eParseInter(lines){let s=0;for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i;break;}}const sep=eDetectSep(lines[s]||lines[0]||'');const hdr=lines[s].split(sep).map(x=>x.replace(/['"]/g,'').trim().toLowerCase());const iDt=hdr.findIndex(h=>h.includes('data'));const iHist=hdr.findIndex(h=>h.includes('hist'));const iDesc=hdr.findIndex(h=>h.includes('descri'));const iVal=hdr.findIndex(h=>h==='valor'||h.includes('valor'));return lines.slice(s+1).filter(l=>l.trim()).map(l=>{const c=l.split(sep).map(x=>x.replace(/['"]/g,'').trim());if(c.length<3)return null;const date=eParseDate(c[iDt>=0?iDt:0]);const hist=iHist>=0?c[iHist]:'';const desc=iDesc>=0?c[iDesc]:c[1]||'';const label=[hist,desc].filter(Boolean).join(' — ').trim();const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-2]||c[c.length-1]);if(!date||!label)return null;let senderName=null;const mInter=desc.match(/Cp\s*:\d+-(.+)/i);if(mInter)senderName=mInter[1].trim().toUpperCase();return{date,desc:label,value,senderName};}).filter(Boolean);}
-function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break;}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'',cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
+// [FIX 2026-07] "SALDO ANTERIOR"/"SALDO"/"Total"/"Saldo do dia"/"Saldo atual" são linhas de
+// saldo, não transações — padrão comum em extrato brasileiro (Inter, Itaú, Bradesco, BB e
+// outros). Antes esse filtro só existia dentro de eParseGeneric(); extratos que caem no parser
+// Inter (formato mais comum entre os usuários reais) não eram filtrados, e linhas de saldo
+// viravam transações fantasma (inclusive com valor não-zero em "Saldo atual"), inflando totais.
+// Movido para escopo de módulo para ser reaproveitado por eParseInter e eParseBB também.
+function _linhaDeSaldo(d){const n=normalizeDesc(d||'');return n==='saldo anterior'||n==='saldo'||n.startsWith('total')||n==='saldo atual'||n==='saldo do dia';}
+function eParseInter(lines){let s=0;for(let i=0;i<lines.length;i++){const l=lines[i].toLowerCase();if(l.includes('data')&&(l.includes('histórico')||l.includes('historico'))){s=i;break;}}const sep=eDetectSep(lines[s]||lines[0]||'');const hdr=lines[s].split(sep).map(x=>x.replace(/['"]/g,'').trim().toLowerCase());const iDt=hdr.findIndex(h=>h.includes('data'));const iHist=hdr.findIndex(h=>h.includes('hist'));const iDesc=hdr.findIndex(h=>h.includes('descri'));const iVal=hdr.findIndex(h=>h==='valor'||h.includes('valor'));return lines.slice(s+1).filter(l=>l.trim()).map(l=>{const c=l.split(sep).map(x=>x.replace(/['"]/g,'').trim());if(c.length<3)return null;const date=eParseDate(c[iDt>=0?iDt:0]);const hist=iHist>=0?c[iHist]:'';const desc=iDesc>=0?c[iDesc]:c[1]||'';const label=[hist,desc].filter(Boolean).join(' — ').trim();if(_linhaDeSaldo(label))return null;const value=iVal>=0?eParseBRL(c[iVal]):eParseBRL(c[c.length-2]||c[c.length-1]);if(!date||!label)return null;let senderName=null;const mInter=desc.match(/Cp\s*:\d+-(.+)/i);if(mInter)senderName=mInter[1].trim().toUpperCase();return{date,desc:label,value,senderName};}).filter(Boolean);}
+function eParseBB(lines){let s=0;for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('data')&&lines[i].includes(';')){s=i+1;break;}}return lines.slice(s).filter(l=>l.trim()).map(l=>{const c=l.split(';').map(x=>x.replace(/"/g,'').trim());if(c.length<4)return null;const date=eParseDate(c[0]),desc=c[1]||'';if(_linhaDeSaldo(desc))return null;const cr=eParseBRL(c[3]),db=eParseBRL(c[4]||'');return date?{date,desc,value:cr>0?cr:-Math.abs(db)}:null;}).filter(Boolean);}
 function eParseOFX(content){const txns=[];const re=/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi;let m;while((m=re.exec(content))!==null){const b=m[1],date=eParseDate(eGetTag(b,'DTPOSTED')),value=parseFloat(eGetTag(b,'TRNAMT')||'0'),desc=(eGetTag(b,'MEMO')||eGetTag(b,'NAME')||'Sem descrição').trim();if(date)txns.push({date,desc,value});}if(txns.length>0)return txns;const lines=content.split('\n');let cur={};for(const line of lines){const t=line.trim();if(t==='<STMTTRN>'){cur={};continue;}if(t==='</STMTTRN>'){if(cur.date&&cur.value!==undefined)txns.push({...cur});cur={};continue;}const mm=t.match(/^<([A-Z]+)>(.+)$/);if(mm){const[,tg,v]=mm;if(tg==='DTPOSTED')cur.date=eParseDate(v);if(tg==='TRNAMT')cur.value=parseFloat(v)||0;if((tg==='MEMO'||tg==='NAME')&&!cur.desc)cur.desc=v.trim();}}return txns;}
 function eGetTag(str,name){const r=new RegExp(`<${name}>([^<]+)`,'i');const m=str.match(r);return m?m[1].trim():null;}
 function eParseGeneric(lines){if(lines.length<2)return[];const sep=eDetectSep(lines[0]);const hdr=eSplitCSV(lines[0],sep).map(c=>c.toLowerCase().replace(/"/g,'').trim());const ci=h=>{for(const n of h){const i=hdr.findIndex(x=>x.includes(n));if(i>=0)return i;}return -1;};const iDt=ci(['data','date','dt lançamento','dt mov']);const iDsc=ci(['descrição','descricao','histórico','historico','memo','title','nome','name']);const iVl=ci(['valor','value','amount','vlr']);const iCr=ci(['crédito','credito','créd']);const iDb=ci(['débito','debito','déb']);
-// [FIX] "SALDO ANTERIOR"/"SALDO"/"Total" são linhas de saldo, não transações — padrão comum em extrato
-// brasileiro (Itaú, Bradesco e outros). Sem esse filtro, viravam transações fantasma de valor zero.
-const _linhaDeSaldo=d=>{const n=normalizeDesc(d||'');return n==='saldo anterior'||n==='saldo'||n.startsWith('total')||n==='saldo atual'||n==='saldo do dia';};
 return lines.slice(1).filter(l=>l.trim()).map(l=>{const c=eSplitCSV(l,sep);if(c.length<2)return null;const date=iDt>=0?eParseDate(c[iDt]):eParseDate(c[0]);const desc=iDsc>=0?c[iDsc].replace(/"/g,'').trim():c[1]?.trim()||'';if(_linhaDeSaldo(desc))return null;let value=0;if(iVl>=0)value=eParseBRL(c[iVl]);else if(iCr>=0&&iDb>=0){const cr=eParseBRL(c[iCr]||''),db=eParseBRL(c[iDb]||'');value=cr>0?cr:-Math.abs(db);}else for(let j=c.length-1;j>=0;j--){const v=eParseBRL(c[j]);if(!isNaN(v)&&v!==0){value=v;break;}}return desc?{date,desc,value}:null;}).filter(Boolean);}
 
 async function eParsePDF(buffer){
@@ -2986,8 +3026,11 @@ function eAddFile(file){
         _trackUpload('file_ready', { format: 'pdf' });
       }catch(err){
         entry.status='err';
-        eShowErr(`"${sanitize(file.name)}": ${err.message}`);
-        _trackUpload('file_rejected', { reason: 'pdf_error', error: err.message.slice(0,40) });
+        // [FIX 2026-07] err.message aqui podia vir de libs externas (ex.: falha ao carregar o
+        // pdf.js do CDN) com texto técnico em inglês. eSafeErrorMsg filtra isso; o detalhe
+        // continua indo pro console para debug.
+        eShowErr(`"${sanitize(file.name)}": ${eSafeErrorMsg(err, 'não foi possível processar este arquivo.')}`);
+        _trackUpload('file_rejected', { reason: 'pdf_error', error: (err.message||'').slice(0,40) });
       }
       eRenderFileList();eUpdateActionBar();
     };
@@ -3108,7 +3151,7 @@ async function eRunAll(){
           try{text=await eParsePDF(f.content);}
           catch(pdfErr){
             if(pdfErr.message==='PDF_ESCANEADO'){eShowErr(`"${f.name}" parece ser um PDF escaneado (imagem). O Guardião precisa de texto digital. Exporte o extrato em PDF digital pelo app do banco, ou use o formato CSV ou OFX.`);}
-            else{eShowErr(`Erro ao abrir "${f.name}": ${pdfErr.message}`);}
+            else{eShowErr(`Erro ao abrir "${f.name}": ${eSafeErrorMsg(pdfErr, 'não foi possível ler este arquivo.')}`);}
             continue;
           }
           txns=eParsePDFText(text);
@@ -3128,7 +3171,7 @@ async function eRunAll(){
         }
         if(txns.length===0){eShowErr(`Nenhuma transação encontrada em "${f.name}". Verifique se o arquivo está completo e no formato correto.`);continue;}
         parsed.push({txns,banco:f.detected.banco||f.detected.bank,conta:f.detected.conta||null,label:f.detected.bank,formato:f.detected.format});
-      }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${e.message}`;eShowErr(msg);}
+      }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${eSafeErrorMsg(e, 'não foi possível processar este arquivo.')}`;eShowErr(msg);}
     }
     if(parsed.length===0){
       eSetProgress(0,'Erro — nenhum extrato processado');
@@ -4430,7 +4473,7 @@ async function gerarRelatorioPDF() {
     doc.save('guardiao-fiscal-'+now.toISOString().slice(0,10)+'.pdf');
   } catch(err) {
     console.error('[GuardiaoFiscal] Erro ao gerar PDF:', err);
-    alert('Erro ao gerar o PDF: ' + err.message);
+    alert('Não foi possível gerar o PDF agora. Tente novamente em alguns instantes.');
   } finally {
     if (btn) { btn.innerHTML = '<i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Exportar relatório em PDF'; btn.style.opacity = '1'; btn.disabled = false; }
   }
