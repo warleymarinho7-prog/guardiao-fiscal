@@ -4035,7 +4035,12 @@ function _loadJsPDF() {
 }
 </script>
 <!-- Lucide Icons — biblioteca oficial de ícones do Guardião Fiscal (Livro II, Cap. 21.3) -->
-<script src="https://unpkg.com/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
+<!-- [FIX 2026-07] Era unpkg.com — bloqueado pelo CSP em produção (script-src não inclui
+     unpkg.com), fazendo TODOS os ícones lucide do site falharem silenciosamente (o
+     navegador bloqueia o script antes dele rodar; sem erro visível pro usuário, só no
+     console). Trocado para cdn.jsdelivr.net, que já está na lista de domínios
+     permitidos do CSP (vercel.json) — mesmo pacote npm, mesmo path, mirror oficial. -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
 <script>
 /* Renderiza todo <i data-lucide="..."> presente no DOM. Chamado no load inicial
    e, via MutationObserver, sempre que o app.js reescreve innerHTML dinamicamente
