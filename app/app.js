@@ -132,6 +132,28 @@ function renderBankGuide(banco, containerId) {
   </div>`;
 }
 
+// [V3.2] Cards de banco em extStep2 (upload). "outro" não tem guia específico
+// em BANK_GUIDES — mostra o bloco genérico (formato/período) em vez de nada.
+// Só afeta apresentação: não muda qual parser roda (isso continua decidido
+// por eDetectFormat() a partir do conteúdo real do arquivo, não da escolha aqui).
+function selecionarBancoExtrato(banco) {
+  document.querySelectorAll('#extBankCards .ext-bank-card').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.banco === banco);
+  });
+  const guiaEl = document.getElementById('extBankGuideContent');
+  const genericoEl = document.getElementById('extBankGuideGenerico');
+  if (banco === 'outro' || !BANK_GUIDES[banco]) {
+    if (guiaEl) guiaEl.innerHTML = '';
+    if (genericoEl) genericoEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
+    </div>`;
+  } else {
+    if (genericoEl) genericoEl.innerHTML = '';
+    renderBankGuide(banco, 'extBankGuideContent');
+  }
+}
+
 // ===== CHECKOUT =====
 const plans = {
   avulso: {
@@ -3196,12 +3218,31 @@ function _trackUpload(event, props) {
   } catch(e) { /* silencioso */ }
 }
 
+// [V3.2] Stepper horizontal da página de Análise de Extrato — reflete o
+// estado real já controlado por eRunAll/eConsolidate (não é state novo,
+// só uma representação visual de transições que já existiam). 3 estágios:
+// 1 Enviar arquivo (padrão) → 2 Processando (durante eRunAll) → 3 Concluído
+// (após consolidação). "Criar conta" fica fora do stepper visual por ser
+// condicional/raro (só aparece para quem tenta analisar deslogado) — incluir
+// como estágio fixo mentiria sobre o fluxo pra quem já está logado.
+function setExtStepperStage(stage) {
+  const el = document.getElementById('extStepper');
+  if (!el) return;
+  el.querySelectorAll('.ext-stepper-item').forEach((item, i) => {
+    const n = i + 1;
+    item.classList.remove('done', 'active');
+    if (n < stage) item.classList.add('done');
+    else if (n === stage) item.classList.add('active');
+  });
+}
+
 async function eRunAll(){
   // [FIX-RACE] Proteção contra duplo clique
   if(_analysisRunning)return;
   const ready=eFiles.filter(f=>f.status==='ok');
   if(ready.length===0)return;
   _analysisRunning=true;
+  setExtStepperStage(2);
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   try{
@@ -3249,6 +3290,7 @@ async function eRunAll(){
       eSetProgress(0,'Erro — nenhum extrato processado');
       document.getElementById('btnGo').classList.add('on');
       _trackUpload('analysis_failed', { reason: 'no_parsed_files' });
+      setExtStepperStage(1);
       return;
     }
     eFiles.forEach(f=>{f.content=null;});
@@ -3269,6 +3311,7 @@ async function eRunAll(){
       eSetProgress(0,'Erro — nenhum extrato processado');
       document.getElementById('btnGo').classList.add('on');
       _trackUpload('analysis_failed', { reason: 'no_results' });
+      setExtStepperStage(1);
       return;
     }
     eSetProgress(95,'Consolidando...');
@@ -3278,10 +3321,12 @@ async function eRunAll(){
       eShowErr('Não foi possível consolidar os extratos. Verifique se o arquivo está no formato correto (CSV, OFX ou PDF).');
       document.getElementById('btnGo').classList.add('on');
       _trackUpload('analysis_failed', { reason: 'consolidation_failed' });
+      setExtStepperStage(1);
       return;
     }
     eAllTxns=consolidated.all;
     eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
+    setExtStepperStage(3);
     document.getElementById('extStep2').style.opacity='0.6';
     document.getElementById('extStep2').style.pointerEvents='none';
     document.getElementById('s2num').innerHTML='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
@@ -4241,6 +4286,7 @@ function eResetAll(){
   document.getElementById('limitBar').style.display='none';
   document.getElementById('actBar').style.display='none';
   document.getElementById('extStep3').style.display='none';
+  setExtStepperStage(1);
   document.getElementById('pFillExt').style.width='0%';
   document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
