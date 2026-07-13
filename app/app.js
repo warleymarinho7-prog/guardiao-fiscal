@@ -1809,9 +1809,33 @@ function openQuiz() {
   window._stopDetectionFeed = () => {};
 })();
 
+// [V3.1] Painel vivo do hero (Home, desktop): diagrama causal animado que se
+// transforma no simulador já existente — camada de apresentação por cima do
+// conteúdo existente (#liveDetectDemo + #simPerguntas), que continuam intocados
+// por baixo. Dispensa em 3 casos: timer (~7.5s, dá tempo da animação de 4 passos
+// terminar), clique em qualquer ponto do painel, ou clique no CTA interno.
+// Respeita prefers-reduced-motion (pula direto pro simulador, sem animação).
+function heroFlowSkip(event) {
+  if (event) event.stopPropagation();
+  const el = document.getElementById('heroFlowIntro');
+  if (!el || el.dataset.dismissed === '1') return;
+  el.dataset.dismissed = '1';
+  el.classList.add('hfi-hide');
+  setTimeout(() => { el.style.display = 'none'; }, 500);
+}
+function initHeroFlowIntro() {
+  const el = document.getElementById('heroFlowIntro');
+  if (!el) return; // não existe no mobile — só o hero desktop tem esse painel
+  const reduzMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduzMovimento) { heroFlowSkip(); return; }
+  el.addEventListener('click', () => heroFlowSkip());
+  setTimeout(() => heroFlowSkip(), 7500);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
+  initHeroFlowIntro();
   setTimeout(() => {
     const bar = document.getElementById('mockBar');
     if (bar) bar.style.width = '38%';
