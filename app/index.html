@@ -225,6 +225,10 @@ body { overflow-x: hidden; }
 
   /* ---------- Typography (Cap. 3, Cap. 22.4/22.5) ---------- */
   --ff: 'Inter', 'Inter-fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* [Design V4] DM Mono já era carregada (fonts.googleapis.com) mas só usada
+     hard-coded em <pre>. Formalizando como token — par deliberado Inter
+     (narrativa) / DM Mono (dado técnico, labels, números de fluxo). */
+  --ff-mono: 'DM Mono', 'SF Mono', monospace;
   --font-family-primary: var(--ff);
   /* [V3.1] Faltava um degrau abaixo de --font-size-xs (12px) — 11px é, na
      prática, o tamanho mais usado no site inteiro (123 ocorrências em estilos
@@ -492,42 +496,38 @@ nav {
    (segurança, fundamento, tempo, compromisso) em vez de prova social — decisão
    de produto (jul/2026): sem números públicos fortes ainda, competência e
    redução de risco pesam mais que prova social fraca. */
+/* [Design V4] Eram 4 cards com fundo+borda+raio — exatamente o padrão
+   "tudo é card, tudo tem o mesmo peso" apontado na crítica visual. Mantém o
+   mesmo conteúdo (responde às 4 objeções pré-clique) mas sem superfície
+   própria — só ícone+texto em linha, menor que o corpo do texto. */
 .hero-badges-detailed {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 .hero-badge-detailed {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 13px;
+  align-items: baseline;
+  gap: 8px;
 }
 .hero-badge-detailed .hbd-icon {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  background: rgba(0,217,110,0.08);
-  border: 1px solid rgba(0,217,110,0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
+  display: none;
 }
 .hero-badge-detailed .hbd-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--text);
-  line-height: 1.3;
-  margin-bottom: 2px;
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted2);
+  flex-shrink: 0;
+}
+.hero-badge-detailed .hbd-title::before {
+  content: '·';
+  margin-right: 8px;
+  color: var(--green);
 }
 .hero-badge-detailed .hbd-desc {
-  font-size: var(--font-size-2xs);
-  color: var(--muted2);
+  font-size: 11px;
+  color: var(--muted);
   line-height: 1.4;
 }
 @media (max-width: 640px) {
@@ -2045,29 +2045,65 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   position: relative;
   z-index: var(--z-base);
 }
+/* [Design V4] A "espinha" — elemento de assinatura visual recorrente (Hero,
+   Resultado, candidata a PDF/Upload). Sutil de propósito: percebida depois de
+   alguns segundos, não decoração imediata. Cor herda do contexto da página —
+   aqui verde (neutro), no Resultado herda a cor do estado de atenção. */
+.split-home::before {
+  content: '';
+  position: absolute;
+  left: clamp(20px,2.5vw,32px);
+  top: clamp(72px,8vw,96px);
+  bottom: clamp(72px,8vw,96px);
+  width: 1px;
+  background: linear-gradient(180deg, rgba(74,222,128,0.35) 0%, rgba(74,222,128,0.06) 45%, transparent 70%);
+}
 
 .split-left {
-  flex: 1;
+  flex: 1.3;
   min-width: 0;
   padding-top: 16px;
-  max-width: 540px;
+  padding-left: 32px;
+  max-width: 600px;
 }
-
+/* [Design V4] Hero-tag trocou de badge com ícone/borda pro par ponto+mono já
+   usado no "// exemplos de sinais" do liveDetectDemo — reaproveita um
+   vocabulário que já existia em vez de introduzir um terceiro estilo de tag. */
 .split-left .hero-tag {
   display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 28px;
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  padding: 0;
 }
+.split-left .hero-tag::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+.split-left .hero-tag i { display: none; }
 
 .split-left h1 {
   font-family:var(--ff);
-  font-size: clamp(32px, 3.5vw, 52px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -2px;
+  font-size: clamp(32px, 3.2vw, 48px);
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: -1.2px;
   margin-bottom: 20px;
   color: var(--text);
+  max-width: 560px;
 }
-.split-left h1 em { font-style: normal; color: var(--green); }
+.split-left h1 em { font-style: normal; color: var(--muted2); font-weight: 500; }
 
 .split-left p {
   font-size: 17px;
@@ -2097,7 +2133,10 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 16px 28px;
   background: var(--green);
   border: none;
-  border-radius:var(--radius-lg);
+  /* [Design V4] Canto cortado discreto — refinamento pediu "menor, passa
+     sensação de linguagem própria, não de experimento". 3px no canto
+     superior-esquerdo em vez do --radius-lg uniforme. */
+  border-radius: 3px var(--radius-lg) var(--radius-lg) var(--radius-lg);
   color: #000;
   font-family:var(--ff);
   font-size: 15px;
@@ -2125,19 +2164,23 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .split-cta-quiz:hover { background: var(--surface2); border-color: var(--green); color: var(--green); }
 
 .split-cta-sec {
-  font-size: 12px;
+  font-family: var(--ff-mono);
+  font-size: 11px;
   color: var(--muted);
-  text-align: center;
+  text-align: left;
+  letter-spacing: 0.2px;
 }
 
 /* Dashboard mockup — lado direito */
 .split-right {
   flex: 1;
   min-width: 0;
-  max-width: 540px;
+  max-width: 460px;
   position: relative;
   min-height: 600px;
   contain: layout;
+  border-left: 1px solid var(--border);
+  padding-left: 40px;
 }
 .split-right .sim-wrap {
   max-width: 100%;
@@ -2155,14 +2198,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   position: absolute;
   inset: 0;
   z-index: 5;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-lg);
+  background: var(--bg);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 32px 28px;
+  padding: 0;
   cursor: pointer;
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
@@ -2172,13 +2213,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   pointer-events: none;
 }
 .hfi-eyebrow {
-  font-family: var(--ff);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 1.5px;
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
   color: var(--muted);
   text-transform: uppercase;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   opacity: 0;
   animation: hfiFadeIn 0.5s ease forwards;
   animation-delay: 0.1s;
@@ -2188,66 +2229,65 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 }
 .hfi-step {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 16px;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(6px);
   animation: hfiStepIn 0.5s ease forwards;
+  padding-bottom: 20px;
 }
 .hfi-icon {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background: rgba(0,217,110,0.08);
-  border: 1px solid rgba(0,217,110,0.2);
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 16px;
+  font-family: var(--ff-mono);
+  font-size: 12px;
+  color: var(--green);
+  background: none;
+  border: none;
+  border-radius: 0;
+  display: block;
 }
+.hfi-icon i { display: none; }
 .hfi-label {
   font-family: var(--ff);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text);
 }
 .hfi-line {
-  width: 2px;
+  width: 1px;
   height: 0;
-  margin-left: 21px;
-  background: linear-gradient(to bottom, var(--accent), rgba(0,217,110,0.15));
+  margin-left: 7px;
+  background: var(--border2);
   animation: hfiLineIn 0.6s ease forwards;
 }
 .hfi-cta {
-  margin-top: 28px;
+  margin-top: 20px;
   opacity: 0;
   background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-family: var(--ff);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
+  border: none;
+  color: var(--muted2);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  font-weight: 400;
+  padding: 0;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: color 0.2s;
   animation: hfiFadeIn 0.5s ease forwards;
 }
 .hero-flow-intro:hover .hfi-cta {
-  border-color: var(--accent);
   color: var(--accent);
 }
 @keyframes hfiFadeIn { to { opacity: 1; } }
 @keyframes hfiStepIn { to { opacity: 1; transform: translateY(0); } }
-@keyframes hfiLineIn { to { height: 22px; } }
+@keyframes hfiLineIn { to { height: 20px; } }
 @media (prefers-reduced-motion: reduce) {
   .hfi-eyebrow, .hfi-step, .hfi-cta { animation: none; opacity: 1; transform: none; }
-  .hfi-line { animation: none; height: 22px; }
+  .hfi-line { animation: none; height: 20px; }
 }
 
 .dash-mockup {
@@ -2773,62 +2813,58 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <!-- Mini métricas -->
       <div style="display:flex;gap:32px;margin-top:48px;padding-top:32px;border-top:1px solid var(--border)">
         <div>
-          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">16</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px">verificações fiscais</div>
+          <div style="font-family:var(--ff-mono);font-size:22px;font-weight:400;color:var(--text)">16</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">verificações fiscais</div>
         </div>
         <div>
-          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px">bancos suportados</div>
+          <div style="font-family:var(--ff-mono);font-size:22px;font-weight:400;color:var(--text)">25</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">bancos suportados</div>
         </div>
         <div>
-          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px">local no dispositivo</div>
-        </div>
-      </div>
-
-      <!-- O que cruzamos -->
-      <div style="margin-top:36px;display:flex;flex-direction:column;gap:8px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">// cruzamentos realizados</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Pix × renda declarada</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="banknote" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Espécie × e-Financeira</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="refresh-cw" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Padrões recorrentes</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Anomalia temporal</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="building" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Atividade comercial</div>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Circularidade financeira</div>
+          <div style="font-family:var(--ff-mono);font-size:22px;font-weight:400;color:var(--text)">100%</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">local no dispositivo</div>
         </div>
       </div>
     </div>
 
     <!-- DIREITA: quiz desktop -->
     <div class="split-right">
-      <!-- [V3.1] Painel vivo — diagrama causal animado, cobre o conteúdo abaixo
-           por ~7s ou até clique/hover, depois revela liveDetectDemo+simulador
-           (intocados). Ver initHeroFlowIntro() em app.js. -->
+      <!-- [V3.1/Design V4] Painel vivo — diagrama causal animado, cobre o
+           conteúdo abaixo por ~7s ou até clique/hover, depois revela
+           liveDetectDemo+simulador (intocados). Ver initHeroFlowIntro() em
+           app.js — a lógica de dispensa/timer não mudou, só a apresentação. -->
       <div class="hero-flow-intro" id="heroFlowIntro">
-        <div class="hfi-eyebrow">// como o guardião analisa</div>
+        <div class="hfi-eyebrow">Como o guardião analisa</div>
         <div class="hfi-steps">
           <div class="hfi-step" style="animation-delay:0.3s">
-            <span class="hfi-icon"><i data-lucide="file-text" style="width:20px;height:20px" aria-hidden="true"></i></span>
-            <span class="hfi-label">Extrato importado</span>
+            <span class="hfi-icon">01</span>
+            <div>
+              <div class="hfi-label">Extrato importado</div>
+            </div>
           </div>
           <div class="hfi-line" style="animation-delay:0.9s"></div>
           <div class="hfi-step" style="animation-delay:1.9s">
-            <span class="hfi-icon"><i data-lucide="search" style="width:20px;height:20px" aria-hidden="true"></i></span>
-            <span class="hfi-label">Sinais encontrados</span>
+            <span class="hfi-icon">02</span>
+            <div>
+              <div class="hfi-label">Sinais identificados</div>
+            </div>
           </div>
           <div class="hfi-line" style="animation-delay:2.5s"></div>
           <div class="hfi-step" style="animation-delay:3.5s">
-            <span class="hfi-icon"><i data-lucide="brain" style="width:20px;height:20px" aria-hidden="true"></i></span>
-            <span class="hfi-label">Mecanismo provável</span>
+            <span class="hfi-icon">03</span>
+            <div>
+              <div class="hfi-label">Mecanismo provável</div>
+            </div>
           </div>
           <div class="hfi-line" style="animation-delay:4.1s"></div>
           <div class="hfi-step" style="animation-delay:5.1s">
-            <span class="hfi-icon"><i data-lucide="clipboard-check" style="width:20px;height:20px" aria-hidden="true"></i></span>
-            <span class="hfi-label">Diagnóstico preventivo</span>
+            <span class="hfi-icon">04</span>
+            <div>
+              <div class="hfi-label">Diagnóstico preventivo</div>
+            </div>
           </div>
         </div>
-        <button class="hfi-cta" style="animation-delay:5.6s" onclick="heroFlowSkip(event)">Começar análise agora →</button>
+        <button class="hfi-cta" style="animation-delay:5.6s" onclick="heroFlowSkip(event)">começar análise agora →</button>
       </div>
       <!-- Demo de detecções ao vivo — aparece antes do quiz -->
       <div id="liveDetectDemo" style="margin-bottom:16px">
