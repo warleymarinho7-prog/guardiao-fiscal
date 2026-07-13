@@ -166,13 +166,13 @@ const PRO_FREE_MODE = false;
 // EXCLUSIVAMENTE o Contrato do Resultado (montarModeloDeResultado/validarContrato),
 // em vez de ler _eConsolidated/_eSources diretamente. Começa em false — ativar
 // manualmente para comparar lado a lado com o renderer legado antes de virar padrão.
-let USE_CAUSAL_RESULT_RENDERER = false;
+let USE_CAUSAL_RESULT_RENDERER = true;
 // [Fatia 2A] Feature flag separada da anterior: aquela controla a FONTE DOS DADOS
 // (contrato vs. objeto bruto do motor); esta controla a COMPOSIÇÃO VISUAL (cards
 // com resumo/expansão + cadeia causal + Detalhes técnicos recolhido, aprovado no
 // mockup de jul/2026). V2 pressupõe o contrato como fonte — só tem efeito quando
 // USE_CAUSAL_RESULT_RENDERER também está true.
-let USE_CAUSAL_RESULT_V2 = false;
+let USE_CAUSAL_RESULT_V2 = true;
 
 function showProFreeBanner() {
   showPage('planos');
