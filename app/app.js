@@ -4,12 +4,17 @@
 // ═══════════════════════════════
 const HERO_CONFIG = {
   tag: '<i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD',
-  h1:  'A Receita já analisou<br>sua movimentação.<br><em>Você já analisou a sua?</em>',
+  h1:  'Seu extrato revela o que<br>sua declaração <em>ainda não explica</em>',
   sub: 'Descubra em poucos minutos se seu extrato bancário possui sinais que costumam gerar inconsistências no Imposto de Renda — antes que virem problema.',
 };
 
 // [FIX-CLS #2] HERO_CONFIG NÃO sobrescreve h1 via DOMContentLoaded.
 // Conteúdo já está correto no HTML estático — listener removido para eliminar CLS.
+// [Microcopy, jul/2026] h1 acima alinhado ao texto real do HTML (antes dizia
+// "A Receita já analisou sua movimentação" — linguagem de certeza excessiva
+// sinalizada pela auditoria; a Receita cruza informações, não "já analisou"
+// cada movimentação individual). Mantido em sync mesmo estando com o listener
+// desativado, para não virar uma armadilha se for reativado no futuro.
 
 // ===== NAVIGATION =====
 function _applyPage(id) {
@@ -157,6 +162,17 @@ function _initPrices() {
 
 // ===== PRO FREE MODE =====
 const PRO_FREE_MODE = false;
+// [DEC-018-B] Feature flag: quando true, o renderer do resultado passa a consumir
+// EXCLUSIVAMENTE o Contrato do Resultado (montarModeloDeResultado/validarContrato),
+// em vez de ler _eConsolidated/_eSources diretamente. Começa em false — ativar
+// manualmente para comparar lado a lado com o renderer legado antes de virar padrão.
+let USE_CAUSAL_RESULT_RENDERER = false;
+// [Fatia 2A] Feature flag separada da anterior: aquela controla a FONTE DOS DADOS
+// (contrato vs. objeto bruto do motor); esta controla a COMPOSIÇÃO VISUAL (cards
+// com resumo/expansão + cadeia causal + Detalhes técnicos recolhido, aprovado no
+// mockup de jul/2026). V2 pressupõe o contrato como fonte — só tem efeito quando
+// USE_CAUSAL_RESULT_RENDERER também está true.
+let USE_CAUSAL_RESULT_V2 = false;
 
 function showProFreeBanner() {
   showPage('planos');
@@ -916,13 +932,24 @@ function sanitize(str) {
 }
 
 function sanitizeFileContent(text) {
+  // Nota (PATCH-P0-03): o escape de CSV injection (=+-@) foi retirado daqui.
+  // Ele corrompia descrições reais de transações que começam com esses caracteres
+  // (ex.: "-PAGAMENTO CARTÃO"), afetando data, valor e classificação por palavra-chave
+  // ANTES do parsing. Esse escape só faz sentido no momento de EXPORTAR um CSV para
+  // ser aberto em planilha (Excel/Sheets) — ver escapeCSVFormulaInjection() abaixo,
+  // que deve ser chamada apenas na geração do arquivo exportado, nunca na ingestão.
   return text
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<[^>]{0,200}>/g, '')
     .replace(/javascript:/gi, '')
     .replace(/data:text\/html/gi, '')
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    .replace(/(^|[\n,\t])([=+\-@])/g, '$1\'$2');
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+}
+
+// Reservada para uso futuro em exportação de CSV (planilha). NÃO chamar na ingestão.
+function escapeCSVFormulaInjection(value) {
+  const s = String(value ?? '');
+  return s.replace(/(^|[\n,\t])([=+\-@])/g, '$1\'$2');
 }
 
 const MAX_TEXT_CHARS = 2_000_000;
@@ -1916,6 +1943,47 @@ async function eParsePDF(buffer){
   }finally{if(pdf)await pdf.destroy();}
 }
 
+function eInferirAnoBaseDocumento(text){
+  const header=text.substring(0,4000);
+  let m;
+  // 1) Período explícito "DD/MM/YYYY a/até DD/MM/YYYY" -> usa o ano de INÍCIO do período
+  if((m=header.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})\s*(?:a|até|ate|-)\s*(\d{2})[\/\-](\d{2})[\/\-](\d{4})/i))){
+    return {ano:+m[3],origem:'periodo_explicito'};
+  }
+  // 2) "Período/Referência: MM/YYYY"
+  if((m=header.match(/(?:per[ií]odo|refer[eê]ncia|compet[eê]ncia)[^\d]{0,20}(\d{2})[\/\-](\d{4})/i))){
+    return {ano:+m[2],origem:'periodo_mes_ano'};
+  }
+  // 3) Qualquer data completa DD/MM/YYYY isolada no cabeçalho (ex.: "Emitido em 15/07/2025")
+  if((m=header.match(/\d{2}[\/\-]\d{2}[\/\-](\d{4})/))){
+    return {ano:+m[1],origem:'data_isolada_cabecalho'};
+  }
+  // 4) Fallback: ano atual (documento sem nenhuma referência de data legível)
+  return {ano:new Date().getFullYear(),origem:'fallback_ano_atual'};
+}
+function eAtribuirAnoPorSequencia(entradas,anoBase){
+  // entradas: [{month, ...resto}] na ordem em que aparecem no documento.
+  // Corrige viradas de ano (dez->jan ou jan->dez) que o ano-base sozinho não resolveria.
+  if(entradas.length===0)return[];
+  // Direção é decidida só por saltos PEQUENOS de mês (<6): saltos grandes são a própria
+  // virada de ano que queremos detectar, não uma pista confiável de direção cronológica.
+  let votosAsc=0,votosDesc=0;
+  for(let i=1;i<entradas.length;i++){
+    const diff=entradas[i].month-entradas[i-1].month;
+    if(diff===0||Math.abs(diff)>=6)continue;
+    if(diff>0)votosAsc++;else votosDesc++;
+  }
+  const direcao=votosDesc>votosAsc?-1:1; // empate ou sem votos -> assume ordem cronológica crescente (mais comum em extratos)
+  let ano=anoBase,mesAnterior=null;
+  return entradas.map(e=>{
+    if(mesAnterior!==null){
+      if(direcao>=0&&e.month<mesAnterior&&(mesAnterior-e.month)>=6)ano++;
+      else if(direcao<0&&e.month>mesAnterior&&(e.month-mesAnterior)>=6)ano--;
+    }
+    mesAnterior=e.month;
+    return{...e,year:ano};
+  });
+}
 function eParsePDFText(text){
   const lines=text.split('\n').filter(l=>l.trim());
   const u=text.substring(0,2000).toUpperCase();
@@ -1924,9 +1992,27 @@ function eParsePDFText(text){
   const isItau=u.includes('ITAÚ')||u.includes('ITAU UNIBANCO');
   const isBradesco=u.includes('BRADESCO');
   const isBB=u.includes('BANCO DO BRASIL')||u.includes('BANCOBRASIL');
-  if(isNubank){const txns=[];const reNu=/(\d{2}\s+\w{3})\s+(.+?)\s+R?\$?\s*([\-\+]?\d[\d.,]+)\s*$/;const months={jan:1,fev:2,mar:3,abr:4,mai:5,jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};for(const line of lines){const m=line.match(reNu);if(!m)continue;const parts=m[1].trim().split(/\s+/);const day=parseInt(parts[0]),monStr=(parts[1]||'').toLowerCase().substring(0,3);const mon=months[monStr];if(!day||!mon)continue;const year=new Date().getFullYear();const date=new Date(year,mon-1,day);if(isNaN(date.getTime()))continue;const value=eParseBRL(m[3].replace(/\s/g,''));if(m[2].trim()&&value!==0)txns.push({date,desc:m[2].trim(),value:-Math.abs(value)});}if(txns.length>0)return txns;}
+  if(isNubank){
+    const brutos=[];const reNu=/(\d{2}\s+\w{3})\s+(.+?)\s+R?\$?\s*([\-\+]?\d[\d.,]+)\s*$/;const months={jan:1,fev:2,mar:3,abr:4,mai:5,jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
+    for(const line of lines){const m=line.match(reNu);if(!m)continue;const parts=m[1].trim().split(/\s+/);const day=parseInt(parts[0]),monStr=(parts[1]||'').toLowerCase().substring(0,3);const mon=months[monStr];if(!day||!mon)continue;const value=eParseBRL(m[3].replace(/\s/g,''));const desc=m[2].trim();if(!desc||value===0)continue;brutos.push({day,month:mon,desc,value});}
+    if(brutos.length>0){
+      const{ano:anoBase}=eInferirAnoBaseDocumento(text);
+      const comAno=eAtribuirAnoPorSequencia(brutos,anoBase);
+      const txns=comAno.map(e=>{const date=new Date(e.year,e.month-1,e.day);if(isNaN(date.getTime()))return null;return{date,desc:e.desc,value:-Math.abs(e.value)};}).filter(Boolean);
+      if(txns.length>0)return txns;
+    }
+  }
   if(isInter){const txns=[];const reInter=/(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*$/;for(const line of lines){const m=line.match(reInter);if(!m)continue;const date=eParseDate(m[1]);const value=eParseBRL(m[3]);if(date&&m[2].trim()&&value!==0)txns.push({date,desc:m[2].trim(),value});}if(txns.length>0)return txns;}
-  if(isItau){const txns=[];const reItau=/(\d{2}\/\d{2})\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*(?:[\d.,]+)?\s*$/;const year=new Date().getFullYear();for(const line of lines){const skip=/saldo|total|data|histórico|extrato|itaú/i;if(skip.test(line))continue;const m=line.match(reItau);if(!m)continue;const date=eParseDate(m[1]+'/'+year);const value=eParseBRL(m[3]);if(date&&m[2].trim()&&value!==0)txns.push({date,desc:m[2].trim(),value});}if(txns.length>0)return txns;}
+  if(isItau){
+    const brutos=[];const reItau=/(\d{2})\/(\d{2})\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*(?:[\d.,]+)?\s*$/;const skip=/saldo|total|data|histórico|extrato|itaú/i;
+    for(const line of lines){if(skip.test(line))continue;const m=line.match(reItau);if(!m)continue;const day=parseInt(m[1]),month=parseInt(m[2]);if(!day||!month||month<1||month>12)continue;const value=eParseBRL(m[4]);const desc=m[3].trim();if(!desc||value===0)continue;brutos.push({day,month,desc,value});}
+    if(brutos.length>0){
+      const{ano:anoBase}=eInferirAnoBaseDocumento(text);
+      const comAno=eAtribuirAnoPorSequencia(brutos,anoBase);
+      const txns=comAno.map(e=>{const date=new Date(e.year,e.month-1,e.day);if(isNaN(date.getTime()))return null;return{date,desc:e.desc,value:e.value};}).filter(Boolean);
+      if(txns.length>0)return txns;
+    }
+  }
   if(isBradesco){const txns=[];const reBrad=/(\d{2}\/\d{2}\/\d{4})\s+\d*\s+(.+?)\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*$/;for(const line of lines){const skip=/saldo|total|data|histórico|extrato|bradesco/i;if(skip.test(line))continue;const m=line.match(reBrad);if(!m)continue;const date=eParseDate(m[1]);const value=eParseBRL(m[3]);if(date&&m[2].trim()&&value!==0)txns.push({date,desc:m[2].trim(),value});}if(txns.length>0)return txns;}
   if(isBB){const txns=[];const reBB=/(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+\d*\s+([\-\+]?\d[\d.,]+(?:,\d{2})?)\s*$/;for(const line of lines){const skip=/saldo|total|data|histórico|extrato|banco do brasil/i;if(skip.test(line))continue;const m=line.match(reBB);if(!m)continue;const date=eParseDate(m[1]);const value=eParseBRL(m[3]);if(date&&m[2].trim()&&value!==0)txns.push({date,desc:m[2].trim(),value});}if(txns.length>0)return txns;}
   const skip=/saldo anterior|saldo final|data\s+descri|período|agência|conta\s*:|cliente|extrato|banco\s+/i;
@@ -2411,7 +2497,7 @@ function montarModeloDeResultado(c, sources){
 
   const n = manifestacoesBrutas.length;
   const resumoExecutivo = n > 0
-    ? 'Foram identificad' + (n > 1 ? 'as ' + n + ' manifestações que merecem' : 'a 1 manifestação que merece') + ' conferência antes da declaração.'
+    ? (n > 1 ? 'Foram identificadas ' + n + ' manifestações que merecem' : 'Foi identificada 1 manifestação que merece') + ' conferência antes da declaração.'
     : 'Não foram identificadas manifestações de risco nas categorias monitoradas até o momento.';
 
   const metadados = {
@@ -2460,6 +2546,40 @@ function validarContrato(modelo){
   });
 
   return { valido: erros.length === 0, erros };
+}
+
+// ==================== ADAPTADOR DE PERSISTÊNCIA LEGADO ====================
+// A tabela `analyses` do Supabase ainda não tem colunas para o Contrato do
+// Resultado (manifestações/hipóteses/limitações) — é uma decisão de schema em
+// aberto, pendente de aprovação explícita, não um bug. Esta função isola os
+// campos que a tabela JÁ suporta hoje, para que o resto do app não precise
+// saber como o histórico é persistido. Recebe o Contrato (`modeloResultado`)
+// como parâmetro mesmo sem usá-lo ainda nos campos retornados — é o ponto de
+// extensão pronto para quando `contract_version`/`result_state`/`result_payload`
+// forem adicionados à tabela (aí só esta função muda, nada mais no app).
+function montarRegistroAnaliseLegado(modeloResultado, bruto, sources) {
+  const score = bruto.score || 0;
+  const nivel = score >= 71 ? 'critico' : score >= 46 ? 'elevado' : score >= 21 ? 'atencao' : 'baixo';
+  return {
+    score,
+    nivel_risco: nivel,
+    nivel_label: score <= 20 ? 'Baixo risco' : score <= 45 ? 'Atenção' : score <= 70 ? 'Risco elevado' : 'Risco crítico',
+    perfil_usuario: (typeof window !== 'undefined' && window._perfilUsuario) || null,
+    renda_declarada: (typeof window !== 'undefined' && window._rendaDeclaradaMensal) || null,
+    total_creditos: Math.round(bruto.totalCredits || 0),
+    total_debitos: Math.round(bruto.totalDebits || 0),
+    total_txns: bruto.totalTxns || 0,
+    pix_total: Math.round(bruto.pixTotal || 0),
+    especie_total: Math.round(bruto.especieTotal || 0),
+    indice_consumo: Math.round((bruto.indiceConsumo || 0) * 100),
+    pix_pct: bruto.totalCredits > 0 ? Math.round(bruto.pixTotal / bruto.totalCredits * 100) : 0,
+    num_alertas: (bruto.alerts || []).length,
+    num_fontes: (sources || []).length,
+    versao_engine: bruto.versaoEngine || 'v8.0',
+    created_at: new Date().toISOString(),
+    fatores: JSON.stringify((sources || []).flatMap(r => (r.fatores || []).filter(f => f.peso > 0)).sort((a, b) => b.peso - a.peso).slice(0, 6).map(f => ({ motivo: f.motivo || '', peso: f.peso || 0, fatorKey: f.fatorKey || '', quandoNaoERisco: f.quandoNaoERisco || '', confianca: Math.round((f.confianca || 0) * 100) }))),
+    alertas: JSON.stringify((bruto.alerts || []).map(a => ({ type: a.type || '', icon: a.icon || '', title: a.title || '', text: a.text || '' }))),
+  };
 }
 
 function analiseTemporal(monthly){
@@ -3058,7 +3178,21 @@ async function eRunAll(){
     const msg=nArquivos>nContas?`${nArquivos} arquivo(s) → ${nContas} conta(s) identificada(s)`:`${nContas} extrato(s) analisado(s)`;
     document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
     _eConsolidated=consolidated;_eSources=results;
-    if(_currentUser&&sb){(async()=>{try{const _nivel=consolidated.score>=71?'critico':consolidated.score>=46?'elevado':consolidated.score>=21?'atencao':'baixo';const _payload={user_id:_currentUser.id,score:consolidated.score,nivel_risco:_nivel,nivel_label:consolidated.score<=20?'Baixo risco':consolidated.score<=45?'Atenção':consolidated.score<=70?'Risco elevado':'Risco crítico',perfil_usuario:window._perfilUsuario||null,renda_declarada:window._rendaDeclaradaMensal||null,total_creditos:Math.round(consolidated.totalCredits||0),total_debitos:Math.round(consolidated.totalDebits||0),total_txns:consolidated.totalTxns||0,pix_total:Math.round(consolidated.pixTotal||0),especie_total:Math.round(consolidated.especieTotal||0),indice_consumo:Math.round((consolidated.indiceConsumo||0)*100),pix_pct:consolidated.totalCredits>0?Math.round(consolidated.pixTotal/consolidated.totalCredits*100):0,num_alertas:(consolidated.alerts||[]).length,num_fontes:results.length,versao_engine:'v8.0',created_at:new Date().toISOString(),fatores:JSON.stringify((results||[]).flatMap(r=>(r.fatores||[]).filter(f=>f.peso>0)).sort((a,b)=>b.peso-a.peso).slice(0,6).map(f=>({motivo:f.motivo||'',peso:f.peso||0,fatorKey:f.fatorKey||'',quandoNaoERisco:f.quandoNaoERisco||'',confianca:Math.round((f.confianca||0)*100)}))),alertas:JSON.stringify((consolidated.alerts||[]).map(a=>({type:a.type||'',icon:a.icon||'',title:a.title||'',text:a.text||''})))};await sb.from('analyses').insert(_payload);}catch(e){}})();}
+    // [DEC-018-C] Contrato construído aqui, de forma síncrona, logo após a
+    // consolidação — ANTES do paywall. É o único ponto de construção do estado
+    // inicial: a prévia gratuita (eRenderPreview → montarPreviewDoResultado) e o
+    // resultado completo (eUnlockResult) devem consumir este MESMO objeto, não
+    // reconstruções independentes — é isso que garante que as duas telas nunca
+    // divirjam sobre o que foi encontrado (decisão de produto, jul/2026).
+    window._modeloResultado = montarModeloDeResultado(consolidated, results);
+    const _validacaoInicial = validarContrato(window._modeloResultado);
+    if (!_validacaoInicial.valido) console.warn('[DEC-018] Contrato do Resultado inválido:', _validacaoInicial.erros);
+    if(_currentUser&&sb){(async()=>{try{
+      // Reaproveita o contrato já construído acima — não recria. Ainda não grava
+      // `result_payload` (schema pendente de aprovação), só alimenta o adaptador legado.
+      const _payload={user_id:_currentUser.id,...montarRegistroAnaliseLegado(window._modeloResultado,consolidated,results)};
+      await sb.from('analyses').insert(_payload);
+    }catch(e){}})();}
     // [FIX-CLS] Popula conteúdo com s3 ainda oculto, depois mostra e scrolla num único frame
     eRenderPreview(consolidated,results);
     _trackUpload('analysis_completed', {
@@ -3144,8 +3278,117 @@ function eRenderPreview(c,sources){
   const _safeAlerts=Array.isArray(c.alerts)?c.alerts:[];
   const alertsVisiveis=_safeAlerts.slice(0,2);
   document.getElementById('pvAlerts').innerHTML=alertsVisiveis.map(a=>{const cls=a.type==='red'?'p-red':a.type==='yellow'?'p-yel':a.type==='green'?'p-grn':'p-blu';const showText=a.type!=='green';return`<div class="pal ${cls}"><span class="pal-ico">${a.icon}</span><div><strong>${sanitize(a.title||'')}</strong>${showText?'<br><span style="font-size:12px;opacity:0.85">'+sanitize(a.text||'')+'</span>':''}</div></div>`;}).join('');
+
+  // [Fatia 2A] Prévia causal — decisão de produto (jul/2026): a prévia gratuita usa
+  // a MESMA gramática causal do resultado completo. Não substitui o bloco legado
+  // acima (continua populado, intacto); apenas esconde e troca o que é exibido
+  // quando a flag está ativa. Consome window._modeloResultado — o MESMO contrato
+  // que o resultado completo vai usar, nunca uma releitura de `c`.
+  const previewCausalEl = document.getElementById('previewCausal');
+  const pvScoreBlockEl = document.getElementById('pvScoreBlock');
+  const pvMetricsEl = document.getElementById('pvMetrics');
+  const pvAlertsEl = document.getElementById('pvAlerts');
+  if (USE_CAUSAL_RESULT_V2 && window._modeloResultado) {
+    if (pvScoreBlockEl) pvScoreBlockEl.style.display = 'none';
+    if (pvMetricsEl) pvMetricsEl.style.display = 'none';
+    if (pvAlertsEl) pvAlertsEl.style.display = 'none';
+    if (previewCausalEl) { previewCausalEl.style.display = 'block'; renderPreviewCausal(montarPreviewDoResultado(window._modeloResultado), c); }
+    _renderIndiceSecundarioPreview(c);
+    const badge=document.getElementById('paywallDynamicBadge');
+    const sub=document.getElementById('paywallDynamicSub');
+    if (badge) { badge.innerHTML='<i data-lucide="file-search" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Diagnóstico parcial'; badge.style.color='var(--text2)'; badge.style.borderColor='var(--border)'; }
+    if (sub) sub.textContent = 'Continue a investigação para ver o restante do diagnóstico.';
+  } else {
+    if (pvScoreBlockEl) pvScoreBlockEl.style.display = '';
+    if (pvMetricsEl) pvMetricsEl.style.display = '';
+    if (pvAlertsEl) pvAlertsEl.style.display = '';
+    if (previewCausalEl) previewCausalEl.style.display = 'none';
+    const indiceSecEl = document.getElementById('previewIndiceSecundario');
+    if (indiceSecEl) { indiceSecEl.style.display = 'none'; indiceSecEl.innerHTML = ''; }
+  }
 }
 
+// [Fatia 2E] Itens que o diagnóstico completo inclui — usado no bloco "conteúdo
+// bloqueado" da prévia. Fixo e genérico de propósito (não descreve o conteúdo
+// real das manifestações ocultas — "não renderize o conteúdo completo escondido
+// no DOM", nem mesmo resumido por categoria).
+const ITENS_DIAGNOSTICO_COMPLETO = [
+  'Mecanismos prováveis de cada manifestação',
+  'Evidências encontradas no extrato',
+  'Documentos a conferir',
+  'Limitações específicas de cada ponto',
+  'Próximas verificações recomendadas',
+  'Relatório completo em PDF',
+];
+
+// Pura/testável: decide o texto e a lista do bloco "conteúdo bloqueado" a partir
+// só da contagem de manifestações restantes — nunca do conteúdo delas.
+function _prepararConteudoBloqueadoPreview(restantes) {
+  if (restantes <= 0) return null;
+  return {
+    titulo: restantes === 1 ? 'Mais 1 manifestação identificada' : 'Outras ' + restantes + ' manifestações identificadas',
+    itens: ITENS_DIAGNOSTICO_COMPLETO,
+  };
+}
+
+function renderPreviewCausal(preview, c) {
+  const el = document.getElementById('previewCausal');
+  if (!el || !preview) return;
+  if (preview.totalManifestacoes === 0) {
+    el.innerHTML = `<div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Análise concluída</div><div style="font-size:13px;color:var(--muted2);line-height:1.6">${sanitize(preview.resumoExecutivo || '')}</div>`;
+    return;
+  }
+  const m = preview.manifestacaoRevelada;
+  const meta = MNF_META[m.categoria] || { icon: '<i data-lucide="search" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>', tituloEngajador: m.label };
+  const evidHtml = (m.evidencias || []).map(function(e){ return '<div class="mnf-evid">' + (e.ok ? '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>' : '▸') + ' ' + sanitize(e.texto) + '</div>'; }).join('');
+  const chainHtml = _cadeiaCausalHtml(_estadoCadeiaCausal(
+    { estadoMecanismo: 'provavel', resolvido: null },
+    { evidencias: m.evidencias || [] }
+  ));
+  const restantes = preview.totalManifestacoes - 1;
+  const bloqueado = _prepararConteudoBloqueadoPreview(restantes);
+  const bloqueadoHtml = bloqueado ? `
+    <div style="padding-top:12px;border-top:1px dashed var(--border2);margin-top:4px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em;color:var(--muted)" aria-hidden="true"></i>
+        <span style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.6px">${sanitize(bloqueado.titulo)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:6px">O diagnóstico completo inclui:</div>
+      <ul style="margin:0 0 4px;padding-left:0;list-style:none;font-size:12px;color:var(--muted2);line-height:1.9">
+        ${bloqueado.itens.map(i => '<li><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em;color:var(--green)" aria-hidden="true"></i> ' + sanitize(i) + '</li>').join('')}
+      </ul>
+    </div>` : '';
+  el.innerHTML = `
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Análise concluída</div>
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.4">${sanitize(preview.resumoExecutivo)}</div>
+    <div class="mnf-card2 open">
+      <div class="mnf-card2-head" style="cursor:default">
+        <span class="mnf-icon">${meta.icon}</span>
+        <div class="mnf-card2-title-wrap"><div class="mnf-card2-title">${sanitize(meta.tituloEngajador)}</div></div>
+        ${_mnfConfBadge(m.confianca)}
+      </div>
+      <div class="mnf-card2-body" style="display:block">
+        ${evidHtml}
+        <div class="mnf-chain open">${chainHtml}</div>
+        ${preview.limitacaoRevelada ? '<div class="mnf-next"><strong>O que ainda não foi confirmado</strong><br>' + sanitize(preview.limitacaoRevelada) + '</div>' : ''}
+        ${preview.proximoPassoInicial ? '<div class="mnf-next"><strong>Próxima verificação</strong><br>' + sanitize(preview.proximoPassoInicial) + '</div>' : ''}
+      </div>
+    </div>
+    ${bloqueadoHtml}
+  `;
+}
+
+// [Fatia 2E] Índice secundário — renderizado num container PRÓPRIO, fora e
+// depois do bloco de CTA (ver #previewIndiceSecundario no HTML), pra nunca
+// separar a manifestação gratuita do botão de desbloqueio.
+function _renderIndiceSecundarioPreview(c) {
+  const el = document.getElementById('previewIndiceSecundario');
+  if (!el) return;
+  if (!c || typeof c.score !== 'number') { el.style.display = 'none'; el.innerHTML = ''; return; }
+  const nivelTexto = c.score<=20?'baixo':c.score<=45?'moderado':c.score<=70?'elevado':'crítico';
+  el.style.display = 'block';
+  el.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center">Índice interno de atenção: ' + nivelTexto + '</div>';
+}
 // [FIX] _verifyPlanBeforeUnlock estava sendo chamada mas nunca definida
 async function _verifyPlanBeforeUnlock() {
   if (!_currentUser || !sb) return false;
@@ -3180,17 +3423,414 @@ function _mnfConfBadge(confianca) {
   return `<span class="mnf-badge-conf ${sanitize(confianca)}">${label}</span>`;
 }
 
+function _seedManifestacoesState(c) {
+  const manifestacoes = Array.isArray(c.manifestacoes) ? c.manifestacoes : [];
+  _eManifestacoesState = {};
+  manifestacoes.forEach(m => { _eManifestacoesState[m.categoria] = m; });
+  return manifestacoes;
+}
+
+// [Fatia 2B] Aplica os efeitos de composição da V2 (Detalhes técnicos
+// aberto/fechado + posição dos alertas) — chamada pelos DOIS renderers de
+// manifestação (legado e causal), porque o wrapper de Detalhes técnicos existe
+// fisicamente no HTML independente de qual renderer rodou. Sem isso, o bug real
+// encontrado em QA: com V2 desligada, o código só REMOVIA a classe 'open'
+// quando V2 estava ligada — nunca a ADICIONAVA de volta quando desligada — e o
+// HTML estático começa sem 'open', então score/stats/fatores ficavam escondidos
+// atrás de um clique mesmo em modo totalmente legado. Correção: define o estado
+// nos dois sentidos, sempre.
+function _aplicarComposicaoV2() {
+  const tec = document.getElementById('pDetalhesTecnicos');
+  if (tec) {
+    if (USE_CAUSAL_RESULT_V2) tec.classList.remove('open');
+    else tec.classList.add('open'); // legado: sempre visível, nunca atrás de accordion
+  }
+  // [Padronização, jul/2026] Prévia usa "Análise concluída", resultado completo
+  // usa "Diagnóstico completo" — mesma linguagem contínua entre as duas telas.
+  // "O que seu extrato revela" deixa de ser título geral da tela e passa a ser
+  // só o título da subseção de resumo (ver renderResumoELimitacoesContrato).
+  // V2 desligada preserva o texto legado original, sem mudar a interface anterior.
+  const secaoLabel = document.getElementById('pSecaoPrincipalLabel');
+  if (secaoLabel) secaoLabel.textContent = USE_CAUSAL_RESULT_V2 ? 'Diagnóstico completo' : 'O que seu extrato já revela';
+  _aplicarPosicaoAlertasLegados();
+  _aplicarPosicaoExtratosLegados();
+}
+
 function renderManifestacoesPilar1(c) {
   const section = document.getElementById('pManifestacoesSection');
   const list = document.getElementById('pManifestacoesList');
+  _aplicarComposicaoV2(); // roda sempre — Detalhes técnicos/alertas são seções irmãs, não dependem de haver manifestações
   if (!section || !list) return;
   const manifestacoes = Array.isArray(c.manifestacoes) ? c.manifestacoes : [];
   if (manifestacoes.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  _eManifestacoesState = {};
-  manifestacoes.forEach(m => { _eManifestacoesState[m.categoria] = m; });
   list.innerHTML = manifestacoes.map(m => _mnfCardHtml(m)).join('');
   _updateMaturidadeBadge();
+}
+
+// ==================== DEC-018-B — Renderer causal (consome só o Contrato) ====================
+// A partir daqui, tudo lê exclusivamente de `modelo` (o Contrato do Resultado).
+// Nenhuma destas funções toca em `c`/`_eConsolidated` ou `sources`/`_eSources`.
+
+// O contrato separa manifestações, hipóteses, evidências e próximos passos em
+// arrays paralelos (Cap. 6.7/6.10/6.11) — o renderer precisa juntá-los de volta
+// por categoria para montar um card. Essa junção é responsabilidade do RENDERER,
+// não do motor (Cap. 7.10) — por isso vive aqui, não em montarModeloDeResultado().
+function _indexarContratoPorCategoria(modelo) {
+  const idx = {};
+  const manifestacoes = Array.isArray(modelo && modelo.manifestacoes) ? modelo.manifestacoes : [];
+  const evidencias = Array.isArray(modelo && modelo.evidencias) ? modelo.evidencias : [];
+  const proximosPassos = Array.isArray(modelo && modelo.proximosPassos) ? modelo.proximosPassos : [];
+  manifestacoes.forEach(m => { if (m && m.categoria) idx[m.categoria] = { manifestacao: m, evidencias: [], proximoPasso: null }; });
+  evidencias.forEach(e => {
+    const cat = e && e.relacionamentos && e.relacionamentos.manifestacao;
+    if (cat && idx[cat]) idx[cat].evidencias.push(e);
+  });
+  proximosPassos.forEach(p => {
+    if (p && idx[p.categoria]) idx[p.categoria].proximoPasso = p.texto;
+  });
+  return idx;
+}
+
+// ==================== PROJEÇÃO DA PRÉVIA GRATUITA (DEC-018-C) ====================
+// Decisão de produto (jul/2026): a prévia gratuita usa a MESMA gramática causal
+// do resultado completo — observação → manifestação → limitação → próxima
+// verificação. O pagamento desbloqueia PROFUNDIDADE, nunca uma linguagem
+// diferente. Por isso esta função projeta um subconjunto do MESMO contrato que
+// alimenta o resultado completo (montarModeloDeResultado) — nunca lê
+// `_eConsolidated`/`c.alerts` diretamente, e nunca deriva um segundo contrato.
+//
+// O que a prévia revela: contagem total de manifestações, UMA manifestação
+// completa (a primeira — o motor já ordena por relevância), o resumo executivo
+// inteiro (já é curto por natureza — 1 frase), UMA limitação, e o próximo passo
+// da manifestação revelada. Todo o resto (demais manifestações, evidências
+// completas de cada uma, plano de verificação, PDF, histórico) fica de fora
+// desta projeção — não porque foi removido, mas porque nunca entrou aqui.
+//
+// Como o Contrato do Resultado não carrega score (DEC-018 — motor não decide
+// apresentação), esta projeção também não carrega. Score como "indicador
+// secundário" na prévia é decisão do Renderer, lendo c.score diretamente,
+// exatamente como no resultado completo.
+function montarPreviewDoResultado(modelo) {
+  const manifestacoes = Array.isArray(modelo && modelo.manifestacoes) ? modelo.manifestacoes : [];
+  const total = manifestacoes.length;
+  const limitacaoRevelada = (modelo && Array.isArray(modelo.limitacoes) && modelo.limitacoes[0]) || null;
+  if (total === 0) {
+    return {
+      totalManifestacoes: 0,
+      resumoExecutivo: modelo ? modelo.resumoExecutivo : '',
+      manifestacaoRevelada: null,
+      limitacaoRevelada,
+      proximoPassoInicial: null,
+    };
+  }
+  const idx = _indexarContratoPorCategoria(modelo);
+  const revelada = manifestacoes[0];
+  const entry = idx[revelada && revelada.categoria] || { evidencias: [], proximoPasso: null };
+  return {
+    totalManifestacoes: total,
+    resumoExecutivo: modelo.resumoExecutivo,
+    manifestacaoRevelada: {
+      categoria: revelada && revelada.categoria,
+      label: revelada && revelada.label,
+      confianca: revelada && revelada.confianca,
+      evidencias: entry.evidencias,
+    },
+    limitacaoRevelada,
+    proximoPassoInicial: entry.proximoPasso,
+  };
+}
+
+function _mnfCardHtmlFromContrato(entry) {
+  const m = entry.manifestacao;
+  const meta = MNF_META[m.categoria] || { icon: '<i data-lucide="search" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>', tituloEngajador: m.label };
+  const evidHtml = entry.evidencias.map(e => `<div class="mnf-evid">${e.ok ? '▸' : '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>'} ${sanitize(e.texto)}</div>`).join('');
+  return `
+  <div class="mnf-card" id="mnf_${sanitize(m.categoria)}">
+    <div class="mnf-head">
+      <span class="mnf-icon">${meta.icon}</span>
+      <span class="mnf-title">${sanitize(meta.tituloEngajador)}</span>
+      ${_mnfConfBadge(m.confianca)}
+    </div>
+    ${evidHtml}
+    <div class="mnf-next">${sanitize(entry.proximoPasso || '')}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="mnf-cta" style="flex:1;min-width:140px" onclick="abrirVerificacaoGuiada('${sanitize(m.categoria)}')" id="mnfCta_${sanitize(m.categoria)}">Verificar agora →</button>
+      <button class="mnf-cta" style="flex:1;min-width:140px;background:transparent;border:1px solid var(--border);color:var(--text2)" onclick="abrirConfirmacaoDocumental('${sanitize(m.categoria)}')" id="mnfDocToggle_${sanitize(m.categoria)}"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Tenho o documento</button>
+    </div>
+    <div class="mnf-guided" id="mnfGuided_${sanitize(m.categoria)}">
+      <div class="mnf-guided-q">Você já conferiu ${m.categoria === 'plano_saude' ? 'o informe da operadora' : 'o informe da fonte pagadora'} antes de declarar?</div>
+      <div class="mnf-guided-opts">
+        <button class="mnf-guided-btn" onclick="responderVerificacaoGuiada('${sanitize(m.categoria)}','nao_conferiu')">Ainda não conferi</button>
+        <button class="mnf-guided-btn" onclick="responderVerificacaoGuiada('${sanitize(m.categoria)}','conferiu_bate')">Já conferi — o valor bate</button>
+        <button class="mnf-guided-btn" onclick="responderVerificacaoGuiada('${sanitize(m.categoria)}','conferiu_diverge')">Já conferi — o valor diverge</button>
+      </div>
+    </div>
+    <div class="mnf-guided" id="mnfDoc_${sanitize(m.categoria)}">
+      <div class="mnf-guided-q">Informe o valor que consta no documento (informe/comprovante) para confirmarmos com evidência.</div>
+      <div style="display:flex;gap:14px;margin-bottom:8px;font-size:12px;color:var(--text2)">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="mnfPeriodo_${sanitize(m.categoria)}" value="anual" checked style="accent-color:var(--green)"> Total do ano (o que o DMED/informe normalmente traz)</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="mnfPeriodo_${sanitize(m.categoria)}" value="mensal" style="accent-color:var(--green)"> Valor mensal (vou fazer a conta pra você)</label>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" step="0.01" min="0" id="mnfDocInput_${sanitize(m.categoria)}" placeholder="Valor no documento (R$)" style="flex:1;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:var(--ff);font-size:13px">
+        <button class="mnf-cta" style="width:auto;padding:10px 16px" onclick="confirmarDocumentoManifestacao('${sanitize(m.categoria)}')">Confirmar</button>
+      </div>
+    </div>
+    <div class="mnf-result" id="mnfResult_${sanitize(m.categoria)}"></div>
+  </div>`;
+}
+
+// ==================== Fatia 2A — cadeia causal + card com resumo/expansão ====================
+// Decisão de produto aprovada (jul/2026): cada manifestação revela sua própria
+// cadeia causal (observado → manifestação → mecanismo provável → evidência →
+// ação) sob expansão — nunca todas abertas de uma vez. Puro/testável: não toca
+// no DOM, só decide o estado (feito/pendente) de cada elo a partir do contrato.
+function _estadoCadeiaCausal(m, entry) {
+  const evidenciaOk = (entry.evidencias || []).some(function(e){ return e.ok; });
+  return [
+    { label: 'Observado', done: true },
+    { label: 'Manifestação', done: true },
+    { label: 'Mecanismo provável', done: m.estadoMecanismo === 'confirmado' },
+    { label: 'Evidência', done: evidenciaOk },
+    { label: 'Ação', done: m.resolvido === true },
+  ];
+}
+
+function _cadeiaCausalHtml(steps) {
+  return steps.map(function(s, i) {
+    const step = '<span class="mnf-chain-step' + (s.done ? ' done' : '') + '">' + sanitize(s.label) + '</span>';
+    const sep = i < steps.length - 1 ? '<span class="mnf-chain-sep">→</span>' : '';
+    return step + sep;
+  }).join('');
+}
+
+// Card v2: estado colapsado mostra só título + resumo de uma linha; expandido
+// revela evidências, cadeia causal (fechada por padrão, toggle próprio) e as
+// mesmas ações de verificação/documento do card v1 — os IDs internos
+// (mnfGuided_/mnfDoc_/mnfResult_/mnfCta_/mnfDocToggle_) são idênticos ao v1,
+// então os handlers existentes (responderVerificacaoGuiada etc.) funcionam sem mudança.
+function _mnfCardV2Html(entry, expanded) {
+  const m = entry.manifestacao;
+  const meta = MNF_META[m.categoria] || { icon: '<i data-lucide="search" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>', tituloEngajador: m.label };
+  const evidHtml = entry.evidencias.map(function(e){ return '<div class="mnf-evid">' + (e.ok ? '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>' : '▸') + ' ' + sanitize(e.texto) + '</div>'; }).join('');
+  const resumoCurto = (entry.evidencias[0] && entry.evidencias[0].texto) || '';
+  const chainHtml = _cadeiaCausalHtml(_estadoCadeiaCausal(m, entry));
+  const cat = sanitize(m.categoria);
+  return `
+  <div class="mnf-card2${expanded ? ' open' : ''}" id="mnf_${cat}">
+    <div class="mnf-card2-head" onclick="_toggleMnfCard2('${cat}')" role="button" tabindex="0" aria-expanded="${expanded ? 'true' : 'false'}">
+      <span class="mnf-icon">${meta.icon}</span>
+      <div class="mnf-card2-title-wrap">
+        <div class="mnf-card2-title">${sanitize(meta.tituloEngajador)}</div>
+        <div class="mnf-card2-summary">${sanitize(resumoCurto)}</div>
+      </div>
+      ${_mnfConfBadge(m.confianca)}
+      <span class="mnf-card2-chevron">▾</span>
+    </div>
+    <div class="mnf-card2-body">
+      ${evidHtml}
+      <button class="mnf-chain-toggle" onclick="_toggleCadeiaCausal('${cat}')" type="button">
+        <span id="mnfChainLbl_${cat}">Ver cadeia causal</span>
+      </button>
+      <div class="mnf-chain" id="mnfChain_${cat}">${chainHtml}</div>
+      <div class="mnf-next">${sanitize(entry.proximoPasso || '')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="mnf-cta" style="flex:1;min-width:140px" onclick="abrirVerificacaoGuiada('${cat}')" id="mnfCta_${cat}">Verificar agora →</button>
+        <button class="mnf-cta" style="flex:1;min-width:140px;background:transparent;border:1px solid var(--border);color:var(--text2)" onclick="abrirConfirmacaoDocumental('${cat}')" id="mnfDocToggle_${cat}"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Tenho o documento</button>
+      </div>
+      <div class="mnf-guided" id="mnfGuided_${cat}">
+        <div class="mnf-guided-q">Você já conferiu ${m.categoria === 'plano_saude' ? 'o informe da operadora' : 'o informe da fonte pagadora'} antes de declarar?</div>
+        <div class="mnf-guided-opts">
+          <button class="mnf-guided-btn" onclick="responderVerificacaoGuiada('${cat}','nao_conferiu')">Ainda não conferi</button>
+          <button class="mnf-guided-btn" onclick="responderVerificacaoGuiada('${cat}','conferiu_bate')">Já conferi — o valor bate</button>
+          <button class="mnf-guided-btn" onclick="responderVerificacaoGuiada('${cat}','conferiu_diverge')">Já conferi — o valor diverge</button>
+        </div>
+      </div>
+      <div class="mnf-guided" id="mnfDoc_${cat}">
+        <div class="mnf-guided-q">Informe o valor que consta no documento (informe/comprovante) para confirmarmos com evidência.</div>
+        <div style="display:flex;gap:14px;margin-bottom:8px;font-size:12px;color:var(--text2)">
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="mnfPeriodo_${cat}" value="anual" checked style="accent-color:var(--green)"> Total do ano (o que o DMED/informe normalmente traz)</label>
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="radio" name="mnfPeriodo_${cat}" value="mensal" style="accent-color:var(--green)"> Valor mensal (vou fazer a conta pra você)</label>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" step="0.01" min="0" id="mnfDocInput_${cat}" placeholder="Valor no documento (R$)" style="flex:1;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:var(--ff);font-size:13px">
+          <button class="mnf-cta" style="width:auto;padding:10px 16px" onclick="confirmarDocumentoManifestacao('${cat}')">Confirmar</button>
+        </div>
+      </div>
+      <div class="mnf-result" id="mnfResult_${cat}"></div>
+    </div>
+  </div>`;
+}
+
+function _isMobileViewport() {
+  return typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+}
+
+// Regra de accordion aprovada: no mobile, abrir uma manifestação fecha as
+// outras (uma por vez). No desktop, múltiplas podem ficar abertas — só a
+// primeira começa aberta por padrão (decidido em renderResultadoCausal).
+function _toggleMnfCard2(categoria) {
+  const card = document.getElementById('mnf_' + categoria);
+  if (!card) return;
+  const abrindo = !card.classList.contains('open');
+  if (abrindo && _isMobileViewport()) {
+    document.querySelectorAll('.mnf-card2.open').forEach(function(el) {
+      if (el !== card) el.classList.remove('open');
+    });
+  }
+  card.classList.toggle('open', abrindo);
+}
+
+function _toggleCadeiaCausal(categoria) {
+  const chain = document.getElementById('mnfChain_' + categoria);
+  const lbl = document.getElementById('mnfChainLbl_' + categoria);
+  if (!chain) return;
+  const abrindo = !chain.classList.contains('open');
+  chain.classList.toggle('open', abrindo);
+  if (lbl) lbl.textContent = abrindo ? 'Ocultar cadeia causal' : 'Ver cadeia causal';
+}
+
+function _toggleDetalhesTecnicos() {
+  const el = document.getElementById('pDetalhesTecnicos');
+  if (!el) return;
+  const abrindo = !el.classList.contains('open');
+  el.classList.toggle('open', abrindo);
+  const head = el.querySelector('.mnf-tecnicos-head');
+  if (head) head.setAttribute('aria-expanded', abrindo ? 'true' : 'false');
+}
+
+// [Fatia 2B] Regra: "manifestações = unidade principal visível; alertas brutos =
+// detalhe técnico ou evidência interna". Não apaga nem duplica #pAlertSection —
+// apenas MOVE o mesmo nó do DOM. V2 ativa: entra dentro de "Detalhes técnicos"
+// (depois dos fatores F1-F8). V2 desligada: volta pra posição original, logo
+// depois do wrapper de Detalhes técnicos — exatamente onde sempre esteve.
+// Idempotente: seguro chamar em todo render, independente do estado atual.
+// [Decisão de produto, jul/2026 — reavaliação da Fatia 2B] Os alertas legados
+// NÃO são mais movidos para dentro de "Detalhes técnicos" quando V2 está ativa
+// — são REMOVIDOS do fluxo visual do usuário por completo. Não são escondidos
+// "ao alcance de um clique" nem oferecidos como opção: são implementação
+// interna do motor, que já cumpriu seu papel ao originar as manifestações
+// (alerta bruto → insumo interno; manifestação → unidade visível ao usuário).
+// Ficam acessíveis só no painel técnico de depuração (oculto por padrão,
+// nunca faz parte da experiência normal — ver eToggleDbg()).
+function _aplicarPosicaoAlertasLegados() {
+  const alertSection = document.getElementById('pAlertSection');
+  if (!alertSection) return;
+  if (USE_CAUSAL_RESULT_V2) {
+    alertSection.style.display = 'none';
+    _anexarAlertasAoDebug(alertSection);
+  } else {
+    alertSection.style.display = '';
+  }
+}
+
+function _anexarAlertasAoDebug(alertSection) {
+  const dbgPre = document.getElementById('pDbgPre');
+  if (!dbgPre) return;
+  const marcador = '\n\n[ALERTAS INTERNOS DO MOTOR — não exibidos ao usuário em V2]\n';
+  const texto = alertSection.textContent.trim().replace(/\s+/g, ' ');
+  const base = dbgPre.textContent.split(marcador)[0]; // evita acumular a cada re-render
+  dbgPre.textContent = base + (texto ? marcador + texto : '');
+}
+
+// [Fatia 2D] Mesma lógica dos alertas, mas para "Fontes analisadas" — entra como
+// ÚLTIMO item de Detalhes técnicos (depois dos alertas), nunca antes. V2 desligada:
+// volta pra logo depois de #pAlertSection, restaurando a ordem original da página
+// (Detalhes técnicos → Alertas → Extratos analisados → Transações).
+function _aplicarPosicaoExtratosLegados() {
+  const extratosSection = document.getElementById('pExtratosSection');
+  const alertSection = document.getElementById('pAlertSection');
+  const detalhesBody = document.getElementById('pDetalhesTecnicosBody');
+  if (!extratosSection || !alertSection || !detalhesBody) return;
+  if (USE_CAUSAL_RESULT_V2) {
+    if (extratosSection.parentElement !== detalhesBody) detalhesBody.appendChild(extratosSection);
+  } else if (extratosSection.previousElementSibling !== alertSection) {
+    alertSection.insertAdjacentElement('afterend', extratosSection);
+  }
+}
+
+// [Fatia 2C] Consolidação de Limitações + Próximas verificações — pura, testável.
+// Regras: (1) dedupe por texto — se duas manifestações geram o mesmo texto,
+// aparece só uma vez; (2) o próximo passo da manifestação que já começa
+// expandida (índice 0) NÃO entra aqui, porque já está integralmente visível
+// no card — listar de novo seria repetição literal, não consolidação.
+function _prepararSecoesConsolidadas(modelo) {
+  const limitacoes = Array.from(new Set((modelo && modelo.limitacoes || []).filter(Boolean)));
+  const manifestacoes = (modelo && modelo.manifestacoes) || [];
+  const categoriaJaVisivelNoCard = manifestacoes.length > 0 ? manifestacoes[0].categoria : null;
+  const textosVistos = new Set();
+  const proximosPassos = ((modelo && modelo.proximosPassos) || []).filter(function(p) {
+    if (!p || !p.texto) return false;
+    if (p.categoria === categoriaJaVisivelNoCard) return false;
+    if (textosVistos.has(p.texto)) return false;
+    textosVistos.add(p.texto);
+    return true;
+  });
+  return { limitacoes, proximosPassos };
+}
+
+function renderResumoELimitacoesContrato(modelo) {
+  const resumoLabelEl = document.getElementById('pResumoLabel');
+  const resumoEl = document.getElementById('pResumoExecutivo');
+  const limEl = document.getElementById('pLimitacoesContrato');
+  const proxEl = document.getElementById('pProximasVerificacoes');
+  if (resumoEl) resumoEl.textContent = modelo.resumoExecutivo || '';
+  // [Padronização, jul/2026] "O que seu extrato revela" agora é o título da
+  // subseção de resumo, não da tela inteira (ver _aplicarComposicaoV2). Só
+  // aparece quando há resumo de fato — esta função roda exclusivamente no
+  // caminho causal, então não sobra label vazio no modo legado.
+  if (resumoLabelEl) resumoLabelEl.textContent = modelo.resumoExecutivo ? 'O que seu extrato revela' : '';
+  const { limitacoes, proximosPassos } = _prepararSecoesConsolidadas(modelo);
+  if (limEl) {
+    const itens = limitacoes.map(l => `<li>${sanitize(l)}</li>`).join('');
+    // Fallback honesto: sem limitações, seção fica vazia — nunca inventa texto causal.
+    limEl.innerHTML = itens ? `<div class="res-section-label" style="margin-top:14px">O que ainda não foi confirmado</div><ul class="mnf-limitacoes">${itens}</ul>` : '';
+  }
+  if (proxEl) {
+    const itens = proximosPassos.map(p => `<li>${p.label ? `<strong>${sanitize(p.label)}:</strong> ` : ''}${sanitize(p.texto)}</li>`).join('');
+    proxEl.innerHTML = itens ? `<div class="res-section-label" style="margin-top:14px">Próximas verificações</div><ul class="mnf-proximas">${itens}</ul>` : '';
+  }
+}
+
+function renderResultadoCausal(modelo) {
+  const section = document.getElementById('pManifestacoesSection');
+  const list = document.getElementById('pManifestacoesList');
+  if (!section || !list || !modelo) return;
+  renderResumoELimitacoesContrato(modelo);
+  const manifestacoes = modelo.manifestacoes || [];
+  if (manifestacoes.length === 0) {
+    // Seção continua visível para mostrar resumo/limitações mesmo sem manifestações,
+    // diferente do renderer legado que escondia tudo (Cap. 6.12 — honestidade mesmo
+    // quando não há achados).
+    list.innerHTML = '';
+  } else {
+    const idx = _indexarContratoPorCategoria(modelo);
+    list.innerHTML = manifestacoes.map(function(m, i) {
+      const entry = idx[m.categoria];
+      // [Fatia 2A] Primeira manifestação expandida por padrão, demais recolhidas.
+      return USE_CAUSAL_RESULT_V2 ? _mnfCardV2Html(entry, i === 0) : _mnfCardHtmlFromContrato(entry);
+    }).join('');
+  }
+  section.style.display = 'block';
+  _aplicarComposicaoV2();
+  _updateMaturidadeBadge();
+}
+
+// Reconstrói o contrato a partir do estado VIVO de _eManifestacoesState (nunca de um
+// snapshot congelado — Cap. 6.14) e, se a flag estiver ligada, re-renderiza a partir
+// dele. Chamar depois de qualquer mutação em _eManifestacoesState (verificação guiada
+// ou confirmação documental).
+function _atualizarContratoENotificar() {
+  if (!_eConsolidated || !_eSources) return;
+  window._modeloResultado = montarModeloDeResultado(
+    { ..._eConsolidated, manifestacoes: Object.values(_eManifestacoesState) },
+    _eSources
+  );
+  const validacao = validarContrato(window._modeloResultado);
+  if (!validacao.valido) console.warn('[DEC-018] Contrato do Resultado inválido:', validacao.erros);
+  if (USE_CAUSAL_RESULT_RENDERER) renderResultadoCausal(window._modeloResultado);
+  else _updateMaturidadeBadge();
 }
 
 function _mnfCardHtml(m) {
@@ -3254,7 +3894,7 @@ function responderVerificacaoGuiada(categoria, resposta) {
     resultEl.innerHTML = `<span class="mnf-result-tag ${tagClass}">${tagLabel}</span><div class="mnf-next" style="margin-top:0">${sanitize(atualizado.proximaEtapa || '')}</div>`;
     resultEl.classList.add('open');
   }
-  _updateMaturidadeBadge();
+  _atualizarContratoENotificar();
 }
 
 function _updateMaturidadeBadge() {
@@ -3371,7 +4011,7 @@ function confirmarDocumentoManifestacao(categoria) {
   const docToggle = document.getElementById('mnfDocToggle_' + categoria);
   if (cta) cta.style.display = 'none';
   if (docToggle) docToggle.style.display = 'none';
-  _updateMaturidadeBadge();
+  _atualizarContratoENotificar();
 }
 
 async function eUnlockResult(){
@@ -3402,11 +4042,24 @@ async function eUnlockResult(){
   const icConsumo=Math.round((c.indiceConsumo||0)*100);
   const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
   // Manifestações primeiro — é aqui que mora a conclusão principal da análise.
+  // [DEC-018-B] O estado é semeado e o Contrato é montado ANTES de qualquer
+  // renderização, para que o renderer (legado ou causal) sempre leia de uma
+  // fonte já validada — nunca decida sozinho como interpretar o objeto bruto do motor.
+  _seedManifestacoesState(c);
+  window._modeloResultado = montarModeloDeResultado(
+    { ...c, manifestacoes: Object.values(_eManifestacoesState) },
+    sources
+  );
+  const _validacaoContrato = validarContrato(window._modeloResultado);
+  if (!_validacaoContrato.valido) {
+    console.warn('[DEC-018] Contrato do Resultado inválido:', _validacaoContrato.erros);
+  }
   renderCategoriasPilar1(sources);
-  renderManifestacoesPilar1(c);
+  if (USE_CAUSAL_RESULT_RENDERER) renderResultadoCausal(window._modeloResultado);
+  else renderManifestacoesPilar1(c);
   const ctxEl=document.getElementById('pContextoBlock');
   if(ctxEl){
-    ctxEl.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)">Índice de atenção (complementar)</div></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:18px;line-height:1;flex-shrink:0">${emoji}</span><div style="flex:1;min-width:0"><span style="font-family:var(--ff);font-size:20px;font-weight:800;color:${color};letter-spacing:-1px">${c.score}<span style="font-size:0.55em;letter-spacing:-0.5px">/100</span></span><span style="font-size:12px;font-weight:600;color:var(--text2);margin-left:8px">${level}</span><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-top:2px">${levelHumano} Veja abaixo o que o extrato já revela sobre a causa.</div></div></div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:var(--radius-xs);overflow:hidden;margin-bottom:10px"><div id="pBarFill" style="height:100%;border-radius:var(--radius-xs);width:0%;background:${color};transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div></div><div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px"><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${sources.length} extrato(s)</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${c.totalTxns} transações</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${totalMeses} mês(es)</span>${nPontos>0?`<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-card);padding:4px 10px;color:var(--risk-moderado);font-weight:600">${nPontos} ponto(s) de atenção</span>`:`<span style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-card);padding:4px 10px;color:var(--accent);font-weight:600"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> nenhum padrão de risco</span>`}</div>`;
+    ctxEl.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)">Índice interno de atenção</div></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:18px;line-height:1;flex-shrink:0">${emoji}</span><div style="flex:1;min-width:0"><span style="font-family:var(--ff);font-size:20px;font-weight:800;color:${color};letter-spacing:-1px">${c.score}<span style="font-size:0.55em;letter-spacing:-0.5px">/100</span></span><span style="font-size:12px;font-weight:600;color:var(--text2);margin-left:8px">${level}</span><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-top:2px">${levelHumano}</div></div></div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:var(--radius-xs);overflow:hidden;margin-bottom:10px"><div id="pBarFill" style="height:100%;border-radius:var(--radius-xs);width:0%;background:${color};transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div></div><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">O índice resume a intensidade dos sinais encontrados no extrato. Ele não representa uma probabilidade estatística de retenção na malha fina.</div><div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px"><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${sources.length} extrato(s)</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${c.totalTxns} transações</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${totalMeses} mês(es)</span>${nPontos>0?`<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-card);padding:4px 10px;color:var(--risk-moderado);font-weight:600">${nPontos} ponto(s) de atenção</span>`:`<span style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-card);padding:4px 10px;color:var(--accent);font-weight:600"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> nenhum padrão de risco</span>`}</div>`;
     setTimeout(()=>{const b=document.getElementById('pBarFill');if(b)b.style.width=c.score+'%';},200);
   }
   document.getElementById('ovEmoji').textContent='';
@@ -3426,7 +4079,7 @@ async function eUnlockResult(){
     if(fatoresOrdenados.length===0){fatoresEl.innerHTML='';}
     else{
       function _getBadge(peso,tipo){if(tipo==='aviso')return'<span class="res-badge res-badge--atencao"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Atenção</span>';if(peso>=25)return'<span class="res-badge res-badge--critico"><span style="color:var(--risk-critico)" aria-hidden="true">●</span> Crítico</span>';if(peso>=15)return'<span class="res-badge res-badge--moderado"><span style="color:var(--risk-moderado)" aria-hidden="true">●</span> Moderado</span>';if(peso>=5)return'<span class="res-badge res-badge--atencao"><span style="color:var(--risk-atencao)" aria-hidden="true">●</span> Atenção</span>';return'<span class="res-badge res-badge--ok"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Baixo</span>';}
-      let fatoresHtml='<div class="res-section-label">Pontos identificados</div>';
+      let fatoresHtml='<div class="res-section-label">Fatores técnicos (F1–F8)</div>';
       fatoresOrdenados.forEach(function(f,idx){
         const fund=_fundamento[f.fatorKey]||'';
         let evidHtml='';
@@ -3450,15 +4103,6 @@ async function eUnlockResult(){
   const bankTabsEl=document.getElementById('bankTabs');bankTabsEl.innerHTML='';
   ['all',...sources.map(r=>r.bank)].forEach((b,i)=>{const btn=document.createElement('button');btn.className='btab'+(b==='all'?' on':'');btn.textContent=b==='all'?'Todos':b;btn.onclick=()=>eSwitchBank(b);bankTabsEl.appendChild(btn);});
   eActiveBankTab='all';
-  // [DEC-018] Contrato do Resultado — montado em paralelo ao pipeline atual, sem
-  // substituir nada visível ainda. Disponível para inspeção via window._modeloResultado
-  // e window.gModeloDiag(). Serve de base para a próxima etapa (reposicionamento do
-  // score na UI), sem exigir reescrita do render existente agora.
-  window._modeloResultado = montarModeloDeResultado(c, sources);
-  const _validacaoContrato = validarContrato(window._modeloResultado);
-  if (!_validacaoContrato.valido) {
-    console.warn('[DEC-018] Contrato do Resultado inválido:', _validacaoContrato.erros);
-  }
   document.getElementById('pDbgPre').textContent='Motor: v8.0\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nÍndice de atenção: '+c.score+'/100\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\n'+sources.map(function(r){return'['+r.bank+'] '+r.totalTxns+' txns · índice '+r.score+'/100';}).join('\n');
   _eCatFilter='all';eRenderTxns('all');
   setTimeout(_initCatCounts,100);
@@ -3498,27 +4142,88 @@ function eResetAll(){
   eShowErr('');
 }
 
+// ==================== HISTÓRICO — fallback causal/legado (DEC-018-B) ====================
+// A tabela `analyses` ainda não persiste o Contrato do Resultado (result_payload
+// pendente de aprovação de schema — ver montarRegistroAnaliseLegado). Enquanto
+// isso, TODA linha lida do banco é tratada como legada. Este código já está
+// pronto para o dia em que `result_payload` existir: basta (1) aplicar a
+// migração aprovada e (2) incluir 'result_payload' no select() abaixo — nada
+// mais no app precisa mudar.
+//
+// Um contrato inválido ou malformado em `result_payload` NUNCA derruba o
+// Histórico inteiro — cai automaticamente para o formato legado (Cap. 6.15,
+// mesma filosofia de "erro tem contrato próprio, nunca quebra o restante").
+function montarHistoricoLegado(registro) {
+  const fatores = (function(){try{return JSON.parse(registro.fatores||'[]');}catch(e){return[];}})();
+  const alertas = (function(){try{return JSON.parse(registro.alertas||'[]');}catch(e){return[];}})();
+  return {
+    createdAt: registro.created_at,
+    score: registro.score,
+    nivelRisco: registro.nivel_risco,
+    nivelLabel: registro.nivel_label,
+    totalCreditos: registro.total_creditos,
+    totalTxns: registro.total_txns,
+    numFontes: registro.num_fontes,
+    fatores,
+    alertas,
+  };
+}
+
+function montarModeloHistorico(registro) {
+  const legado = montarHistoricoLegado(registro || {});
+  if (registro && registro.result_payload && validarContrato(registro.result_payload).valido) {
+    return { tipo: 'causal', contrato: registro.result_payload, legado };
+  }
+  return { tipo: 'legado', legado };
+}
+
+function _histCardLegadoHtml(a, cardId) {
+  const nivelCor={baixo:C_BAIXO,atencao:C_ATENCAO,elevado:C_MODERADO,critico:C_CRITICO};
+  const cor=nivelCor[a.nivelRisco]||'#888';
+  const data_fmt=new Date(a.createdAt).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  const hora_fmt=new Date(a.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const creditos_fmt=a.totalCreditos?'R$ '+(a.totalCreditos).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
+  let fatoresHtml='';(a.fatores||[]).forEach(function(f){fatoresHtml+='<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06)"><div style="width:26px;height:26px;border-radius:var(--radius-sm);background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--risk-moderado);flex-shrink:0">+'+f.peso+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:2px">'+sanitize(f.motivo||'')+'</div>'+(f.quandoNaoERisco?'<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;background:rgba(0,217,110,0.06);border-radius:var(--radius-sm);line-height:1.4"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>':'')+'</div></div>';});
+  let alertasHtml='';(a.alertas||[]).forEach(function(al){const cls=al.type==='red'?'p-red':al.type==='yellow'?'p-yel':al.type==='green'?'p-grn':'p-blu';alertasHtml+='<div class="pal '+cls+'" style="margin-bottom:6px"><span class="pal-ico">'+sanitize(al.icon||'')+'</span><div><strong>'+sanitize(al.title)+'</strong><br><span style="font-size:11px;opacity:0.85">'+sanitize(al.text)+'</span></div></div>';});
+  return'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:'+cor+';border-radius:var(--radius-xs) 0 0 3px"></div><div style="padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap" data-histid="'+cardId+'" onclick="histToggle(this)"><div><div style="font-size:11px;color:var(--muted2);margin-bottom:4px">'+data_fmt+' · '+hora_fmt+'</div><div style="font-size:18px;font-weight:700;color:'+cor+';margin-bottom:4px">'+a.score+'/100 <span style="font-size:13px;font-weight:600">'+(a.nivelLabel||a.nivelRisco||'')+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px">'+(a.totalTxns?'<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-card);color:var(--muted2)">'+a.totalTxns+' transações</span>':'')+'</div><div style="font-size:10px;color:var(--muted2);margin-top:6px;font-style:italic">Análise realizada na versão anterior do diagnóstico</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0"><div style="text-align:right"><div style="font-size:11px;color:var(--muted2);margin-bottom:2px">Movimentação</div><div style="font-size:15px;font-weight:600;color:var(--text)">'+creditos_fmt+'</div></div><span class="hist-chevron" style="font-size:12px;color:var(--muted)">▼</span></div></div><div id="'+cardId+'" style="display:none;padding:0 16px 14px;border-top:0.5px solid rgba(255,255,255,0.06)">'+(a.fatores.length>0?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Fatores de risco</div>'+fatoresHtml:'')+(a.alertas.length>0?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Alertas</div>'+alertasHtml:'')+'</div></div>';
+}
+
+function _histCardCausalHtml(contrato, legado, cardId) {
+  const nivelCor={baixo:C_BAIXO,atencao:C_ATENCAO,elevado:C_MODERADO,critico:C_CRITICO};
+  const cor=nivelCor[legado.nivelRisco]||'#888';
+  const data_fmt=new Date(legado.createdAt).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  const hora_fmt=new Date(legado.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const idx=_indexarContratoPorCategoria(contrato);
+  const manifestacoesHtml=(contrato.manifestacoes||[]).map(function(m){
+    const entry=idx[m.categoria]||{evidencias:[],proximoPasso:null};
+    const meta=MNF_META[m.categoria];
+    const titulo=(meta&&meta.tituloEngajador)||m.label||m.categoria;
+    const evidHtml=entry.evidencias.map(function(e){return'<div class="mnf-evid">'+(e.ok?'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'▸')+' '+sanitize(e.texto)+'</div>';}).join('');
+    return'<div class="mnf-card" style="margin-bottom:8px"><div class="mnf-head"><span class="mnf-title">'+sanitize(titulo)+'</span>'+_mnfConfBadge(m.confianca)+'</div>'+evidHtml+(entry.proximoPasso?'<div class="mnf-next">'+sanitize(entry.proximoPasso)+'</div>':'')+'</div>';
+  }).join('');
+  return'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:'+cor+';border-radius:var(--radius-xs) 0 0 3px"></div><div style="padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap" data-histid="'+cardId+'" onclick="histToggle(this)"><div><div style="font-size:11px;color:var(--muted2);margin-bottom:4px">'+data_fmt+' · '+hora_fmt+'</div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4">'+sanitize(contrato.resumoExecutivo||'')+'</div><div style="font-size:11px;color:var(--muted2)">Índice de atenção (complementar): '+legado.score+'/100</div></div><span class="hist-chevron" style="font-size:12px;color:var(--muted)">▼</span></div><div id="'+cardId+'" style="display:none;padding:0 16px 14px;border-top:0.5px solid rgba(255,255,255,0.06)">'+manifestacoesHtml+'</div></div>';
+}
+
+function renderHistoricoEntrada(registro, cardId) {
+  const h = montarModeloHistorico(registro);
+  return h.tipo === 'causal'
+    ? _histCardCausalHtml(h.contrato, h.legado, cardId)
+    : _histCardLegadoHtml(h.legado, cardId);
+}
+
 async function eCarregarHistorico(){
   const el=document.getElementById('historicoList');if(!el)return;
   if(!_currentUser||!sb){el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Faça login para ver seu histórico.</div>';return;}
   el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Carregando...</div>';
   try{
-    const{data,error}=await sb.from('analyses').select('id,score,nivel_risco,nivel_label,perfil_usuario,renda_declarada,total_creditos,total_txns,num_alertas,indice_consumo,pix_pct,fatores,alertas,versao_engine,created_at').eq('user_id',_currentUser.id).order('created_at',{ascending:false}).limit(50);
+    // [DEC-018-B] 'result_payload' NÃO está no select ainda — a coluna não existe
+    // no schema atual (migração pendente de aprovação). Quando for aprovada, basta
+    // acrescentar 'result_payload' nesta lista; todo o resto (montarModeloHistorico,
+    // renderHistoricoEntrada) já sabe lidar com os dois formatos.
+    const{data,error}=await sb.from('analyses').select('id,score,nivel_risco,nivel_label,perfil_usuario,renda_declarada,total_creditos,total_txns,num_alertas,num_fontes,indice_consumo,pix_pct,fatores,alertas,versao_engine,created_at').eq('user_id',_currentUser.id).order('created_at',{ascending:false}).limit(50);
     if(error)throw error;
     if(!data||data.length===0){el.innerHTML=`<div style="text-align:center;padding:48px 16px"><div style="font-size:32px;margin-bottom:12px"><i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Nenhuma análise ainda</div><div style="font-size:13px;color:var(--muted2);margin-bottom:20px">Faça sua primeira análise de extrato para começar o histórico.</div><button onclick="showPage('extrato')" style="padding:11px 24px;background:var(--green);border:none;border-radius:var(--radius-md);color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">Analisar extrato →</button></div>`;return;}
-    const nivelCor={baixo:C_BAIXO,atencao:C_ATENCAO,elevado:C_MODERADO,critico:C_CRITICO};
-    el.innerHTML=data.map(function(a,i){
-      const cor=nivelCor[a.nivel_risco]||'#888';
-      const data_fmt=new Date(a.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
-      const hora_fmt=new Date(a.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      const creditos_fmt=a.total_creditos?'R$ '+(a.total_creditos).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
-      const cardId='hist-card-'+i;
-      const fatores=(function(){try{return JSON.parse(a.fatores||'[]');}catch(e){return[];}})();
-      const alertas=(function(){try{return JSON.parse(a.alertas||'[]');}catch(e){return[];}})();
-      let fatoresHtml='';fatores.forEach(function(f){fatoresHtml+='<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06)"><div style="width:26px;height:26px;border-radius:var(--radius-sm);background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--risk-moderado);flex-shrink:0">+'+f.peso+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:2px">'+sanitize(f.motivo||'')+'</div>'+(f.quandoNaoERisco?'<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;background:rgba(0,217,110,0.06);border-radius:var(--radius-sm);line-height:1.4"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>':'')+'</div></div>';});
-      let alertasHtml='';alertas.forEach(function(al){const cls=al.type==='red'?'p-red':al.type==='yellow'?'p-yel':al.type==='green'?'p-grn':'p-blu';alertasHtml+='<div class="pal '+cls+'" style="margin-bottom:6px"><span class="pal-ico">'+sanitize(al.icon||'')+'</span><div><strong>'+sanitize(al.title)+'</strong><br><span style="font-size:11px;opacity:0.85">'+sanitize(al.text)+'</span></div></div>';});
-      return'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:'+cor+';border-radius:var(--radius-xs) 0 0 3px"></div><div style="padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap" data-histid="'+cardId+'" onclick="histToggle(this)"><div><div style="font-size:11px;color:var(--muted2);margin-bottom:4px">'+data_fmt+' · '+hora_fmt+'</div><div style="font-size:18px;font-weight:700;color:'+cor+';margin-bottom:4px">'+a.score+'/100 <span style="font-size:13px;font-weight:600">'+(a.nivel_label||a.nivel_risco||'')+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px">'+(a.total_txns?'<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-card);color:var(--muted2)">'+a.total_txns+' transações</span>':'')+'</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0"><div style="text-align:right"><div style="font-size:11px;color:var(--muted2);margin-bottom:2px">Movimentação</div><div style="font-size:15px;font-weight:600;color:var(--text)">'+creditos_fmt+'</div></div><span class="hist-chevron" style="font-size:12px;color:var(--muted)">▼</span></div></div><div id="'+cardId+'" style="display:none;padding:0 16px 14px;border-top:0.5px solid rgba(255,255,255,0.06)">'+(fatores.length>0?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Fatores de risco</div>'+fatoresHtml:'')+(alertas.length>0?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Alertas</div>'+alertasHtml:'')+'</div></div>';
-    }).join('');
+    el.innerHTML=data.map(function(a,i){ return renderHistoricoEntrada(a,'hist-card-'+i); }).join('');
   }catch(e){el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Erro ao carregar histórico. Tente novamente.</div>';}
 }
 
@@ -3588,10 +4293,39 @@ function eToggleDbg() {
 }
 
 // Exporta relatório em PDF via janela de impressão
+// [DEC-018-B] Próximos passos do PDF: vêm do Contrato (modelo.proximosPassos),
+// personalizados por manifestação. Só cai no texto genérico quando não há
+// nenhuma manifestação identificada (honestidade — Cap. 6.12), nunca como padrão.
+const PROXIMOS_PASSOS_GENERICOS_PDF = [
+  { icon: 'bar-chart-3', text: 'Compare os créditos identificados com o total declarado no IR. Divergências superiores a 20% são as mais frequentemente retidas.' },
+  { icon: 'folder', text: 'Tenha comprovantes de origem disponíveis para todas as entradas relevantes — especialmente transferências, Pix recorrentes e depósitos em espécie.' },
+  { icon: 'briefcase', text: 'Consulte um contador antes da entrega da declaração para validar os pontos de atenção identificados neste relatório.' },
+  { icon: 'refresh-cw', text: 'Se já entregou a declaração, avalie a possibilidade de retificação preventiva. Após notificação, multas e juros se aplicam automaticamente.' },
+];
+function _prepararProximosPassosPDF(modelo) {
+  const passos = (modelo && modelo.proximosPassos) || [];
+  if (passos.length === 0) return PROXIMOS_PASSOS_GENERICOS_PDF;
+  return passos.map(p => ({ icon: 'arrow-right', text: (p.label ? p.label + ' — ' : '') + p.texto }));
+}
+
 async function gerarRelatorioPDF() {
   const c = _eConsolidated;
   const sources = _eSources;
   if (!c || !sources) { alert('Dados da análise não encontrados. Refaça a análise.'); return; }
+  // [DEC-018-B] O PDF não deve reconstruir a história causal sozinho a partir de
+  // `c`/`sources` — ele consome o mesmo Contrato do Resultado que a tela usa.
+  // Se por algum motivo o contrato ainda não foi montado (ex.: PDF acionado antes
+  // do unlock em algum fluxo futuro), reconstrói na hora a partir do estado vivo,
+  // nunca a partir de um snapshot antigo.
+  let modelo = window._modeloResultado;
+  if (!modelo) {
+    modelo = montarModeloDeResultado(
+      { ...c, manifestacoes: Object.values(_eManifestacoesState || {}) },
+      sources
+    );
+  }
+  const _v = validarContrato(modelo);
+  if (!_v.valido) console.warn('[DEC-018] Contrato do Resultado inválido ao gerar PDF:', _v.erros);
   const btn = document.getElementById('btnExportPDF');
   if (btn) { btn.textContent = '⏳ Gerando PDF...'; btn.style.opacity = '0.7'; btn.disabled = true; }
   try {
@@ -3616,7 +4350,50 @@ async function gerarRelatorioPDF() {
     const now=new Date();const dataStr=now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
     txt(dataStr,W-M,20,{size:8,color:C.muted,align:'right'});txt(sources.length+' extrato(s) · '+c.totalTxns+' transações analisadas',W-M,27,{size:8,color:C.muted2,align:'right'});
     doc.setDrawColor(...C.border);doc.setLineWidth(0.3);doc.line(M,36,W-M,36);
-    txt('<i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local — nenhum dado bancário foi enviado a servidores externos',M,42,{size:7.5,color:C.muted,italic:true});Y=56;
+    txt('Processamento 100% local — nenhum dado bancário foi enviado a servidores externos',M,42,{size:7.5,color:C.muted,italic:true});Y=56;
+    // [DEC-018-B] Seção causal — vem do Contrato, não de `c`/`sources`. Posicionada
+    // antes do score, espelhando a hierarquia da tela (DEC-018/019: a conclusão
+    // principal mora nas manifestações, o score é indicador complementar).
+    if (modelo.resumoExecutivo) {
+      checkY(14);
+      Y = section('O que o extrato revela', Y);
+      Y += txt(modelo.resumoExecutivo, M, Y, { size: 9, color: C.text, maxW: CW }) + 4;
+    }
+    if ((modelo.manifestacoes || []).length > 0) {
+      const idxPdf = _indexarContratoPorCategoria(modelo);
+      modelo.manifestacoes.forEach(m => {
+        const entry = idxPdf[m.categoria] || { evidencias: [], proximoPasso: null };
+        const meta = MNF_META[m.categoria];
+        const titulo = (meta && meta.tituloEngajador) || m.label || m.categoria;
+        const confLabel = m.confianca === 'alta' ? 'Confiança alta' : m.confianca === 'media' ? 'Confiança média' : 'Confiança baixa';
+        const evidLines = entry.evidencias.map(e => (e.ok ? '✓ ' : '▸ ') + (e.texto || ''));
+        const proxLine = entry.proximoPasso || '';
+        const evidTextLines = evidLines.length > 0 ? doc.splitTextToSize(evidLines.join('\n'), CW - 12) : [];
+        const proxTextLines = proxLine ? doc.splitTextToSize(proxLine, CW - 16) : [];
+        const bH = 12 + evidTextLines.length * 4 + (proxTextLines.length > 0 ? proxTextLines.length * 3.8 + 5 : 0);
+        checkY(bH + 4);
+        rect(M, Y, CW, bH, C.surface, C.border, 2);
+        const corFaixa = m.resolvido === true ? C.green : m.resolvido === false ? C.orange : C.blue;
+        doc.setFillColor(...corFaixa); doc.roundedRect(M, Y, 2.5, bH, 1, 1, 'F');
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...C.text);
+        doc.text(doc.splitTextToSize(titulo, CW - 60), M + 6, Y + 5.5);
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C.muted);
+        doc.text(confLabel, W - M - 2, Y + 5.5, { align: 'right' });
+        let innerY = Y + 11;
+        if (evidTextLines.length > 0) {
+          doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C.muted);
+          doc.text(evidTextLines, M + 6, innerY);
+          innerY += evidTextLines.length * 4 + 2;
+        }
+        if (proxTextLines.length > 0) {
+          rect(M + 6, innerY - 2, CW - 12, proxTextLines.length * 3.8 + 4, C.card, null, 1);
+          doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...C.text);
+          doc.text(proxTextLines, M + 9, innerY + 2.5);
+        }
+        Y += bH + 3;
+      });
+      Y += 3;
+    }
     const sc=c.score,scTheme=sColor(sc);
     rect(M,Y,CW,38,C.surface,C.border,3);doc.setFillColor(...scTheme.line);doc.roundedRect(M,Y,4,38,1.5,1.5,'F');
     doc.setFontSize(36);doc.setFont('helvetica','bold');doc.setTextColor(...scTheme.line);doc.text(sc+'%',M+12,Y+24);
@@ -3637,9 +4414,18 @@ async function gerarRelatorioPDF() {
     if(todasComerciais.length>0){checkY(16);Y=section('Padrões recorrentes detectados',Y);txt('Recebimentos com frequência e ticket regular — possível atividade comercial não declarada.',M,Y,{size:7.5,color:C.muted,italic:true});Y+=7;todasComerciais.slice(0,8).forEach((r,i)=>{checkY(14);rect(M,Y,CW,12,i%2===0?C.surface:C.bg,C.border,2);const label=r.desc?r.desc.slice(0,38):('Padrão '+(i+1));txt(label,M+4,Y+4.5,{size:8.5,bold:true});txt(r.count+' recebimentos · Ticket médio: '+fmtBRL(Math.round(r.media))+' · Total: '+fmtBRL(r.total),M+4,Y+9,{size:7.5,color:C.muted});rect(W-M-30,Y+2,28,8,C.yellowBg,null,2);txt('Periodicidade regular',W-M-2,Y+6.5,{size:6.5,color:C.yellow,align:'right'});Y+=13;});Y+=4;}
     const txnsRevisao=eAllTxns.filter(t=>t.risk!=='normal').sort((a,b)=>{const o={suspicious:0,attention:1};return(o[a.risk]||2)-(o[b.risk]||2)||b.value-a.value;}).slice(0,25);
     if(txnsRevisao.length>0){checkY(20);Y=section('Movimentações que merecem revisão',Y);txt('Lista das transações com maior relevância fiscal, ordenadas por prioridade de revisão.',M,Y,{size:7.5,color:C.muted,italic:true});Y+=7;rect(M,Y,CW,7,C.card,null,1);const cols=[{label:'Data',x:M+2,w:22},{label:'Descrição',x:M+26,w:82},{label:'Banco',x:M+110,w:28},{label:'Valor',x:M+140,w:30},{label:'Revisão',x:M+172,w:24}];cols.forEach(col=>{doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...C.muted);doc.text(col.label,col.x,Y+4.5);});Y+=8;txnsRevisao.forEach((t,i)=>{checkY(8);const rTheme=t.risk==='suspicious'?{bg:[254,226,226],color:C.red,label:'Prioritária'}:{bg:[254,243,199],color:C.yellow,label:'Moderada'};rect(M,Y,CW,6.5,i%2===0?C.surface:C.bg,null,0);doc.setFillColor(...rTheme.color);doc.rect(M,Y,1.5,6.5,'F');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...C.text);doc.text(fmtDate(t.date),cols[0].x,Y+4.2);const dsc=doc.splitTextToSize(t.desc||'—',cols[1].w)[0];doc.text(dsc,cols[1].x,Y+4.2);doc.setTextColor(...C.muted);doc.text((t.bank||'').slice(0,10),cols[2].x,Y+4.2);if(t.value>=0){doc.setTextColor(...C.green);}else{doc.setTextColor(...C.text);}doc.text(fmtBRL(t.value),cols[3].x,Y+4.2);doc.setTextColor(...rTheme.color);doc.text(rTheme.label,cols[4].x,Y+4.2);Y+=7;});Y+=4;}
+    if ((modelo.limitacoes || []).length > 0) {
+      checkY(14);
+      Y = section('Limitações desta análise', Y);
+      const itens = modelo.limitacoes.map(l => '• ' + l);
+      const limLines = doc.splitTextToSize(itens.join('\n'), CW);
+      checkY(limLines.length * 4 + 4);
+      txt(itens.join('\n'), M, Y, { size: 7.5, color: C.muted, maxW: CW });
+      Y += limLines.length * 4 + 6;
+    }
     checkY(38);Y=section('Próximos passos recomendados',Y);
-    [{icon:'<i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',text:'Compare os créditos identificados com o total declarado no IR. Divergências superiores a 20% são as mais frequentemente retidas.'},{icon:'<i data-lucide="folder" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',text:'Tenha comprovantes de origem disponíveis para todas as entradas relevantes — especialmente transferências, Pix recorrentes e depósitos em espécie.'},{icon:'<i data-lucide="briefcase" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',text:'Consulte um contador antes da entrega da declaração para validar os pontos de atenção identificados neste relatório.'},{icon:'<i data-lucide="refresh-cw" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',text:'Se já entregou a declaração, avalie a possibilidade de retificação preventiva. Após notificação, multas e juros se aplicam automaticamente.'}].forEach((o,i)=>{checkY(14);rect(M,Y,CW,11,i%2===0?C.bg:C.surface,C.border,2);txt(o.icon,M+3,Y+7,{size:9});txt(o.text,M+12,Y+4.5,{size:7.5,color:C.text,maxW:CW-16});Y+=12;});
-    checkY(20);Y+=6;rect(M,Y,CW,16,C.card,C.border,2);txt('<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>  Aviso Legal',M+4,Y+5,{size:8,bold:true,color:C.muted});txt('Este relatório é uma ferramenta de diagnóstico educacional e preventivo. Os resultados são estimativas com base em padrões fiscais conhecidos e não constituem parecer jurídico, contábil ou auditoria fiscal. O Guardião Fiscal não tem acesso à sua declaração de IR nem ao sistema da Receita Federal. Consulte sempre um profissional habilitado para decisões fiscais.',M+4,Y+9.5,{size:7,color:C.muted,maxW:CW-6,italic:true});Y+=18;
+    _prepararProximosPassosPDF(modelo).forEach((o,i)=>{checkY(14);rect(M,Y,CW,11,i%2===0?C.bg:C.surface,C.border,2);txt(o.text,M+6,Y+6.5,{size:7.5,color:C.text,maxW:CW-10});Y+=12;});
+    checkY(20);Y+=6;rect(M,Y,CW,16,C.card,C.border,2);txt('Aviso Legal',M+4,Y+5,{size:8,bold:true,color:C.muted});txt('Este relatório é uma ferramenta de diagnóstico educacional e preventivo. Os resultados são estimativas com base em padrões fiscais conhecidos e não constituem parecer jurídico, contábil ou auditoria fiscal. O Guardião Fiscal não tem acesso à sua declaração de IR nem ao sistema da Receita Federal. Consulte sempre um profissional habilitado para decisões fiscais.',M+4,Y+9.5,{size:7,color:C.muted,maxW:CW-6,italic:true});Y+=18;
     const totalPages=doc.internal.getNumberOfPages();for(let p=1;p<=totalPages;p++){doc.setPage(p);drawFooter(p);}
     doc.save('guardiao-fiscal-'+now.toISOString().slice(0,10)+'.pdf');
   } catch(err) {
@@ -3688,7 +4474,7 @@ window.gFeedbackAbrir=function(){const d=document.getElementById('gFbDetalhes');
 window.gFeedbackCheckChange=function(el){const outroWrap=document.getElementById('gFbOutroWrap');if(!outroWrap)return;const checkboxes=document.querySelectorAll('#gFbDetalhes input[type=checkbox]');const temOutro=Array.from(checkboxes).some(c=>c.value==='outro'&&c.checked);outroWrap.style.display=temOutro?'block':'none';};
 window.gFeedbackSubmit=function(tipo){const r=window._gFeedback.sessao;const payload={tipo,score:r?.score,ts:new Date().toISOString(),motivos:[],texto:''};window._gFeedback.historico.push(payload);if(typeof fbq==='function'&&window.PIXEL_ATIVO)fbq('trackCustom','FeedbackOk',{score:r?.score},{eventID:Date.now().toString()});const det=document.getElementById('gFbDetalhes');const suc=document.getElementById('gFbSucesso');const btnsRow=document.querySelector('#gFeedbackCard > div[style*="flex"]');if(btnsRow)btnsRow.style.display='none';if(det)det.style.display='none';if(suc)suc.style.display='block';gFeedbackPersistir(payload).catch(()=>{});};
 window.gFeedbackEnviar=function(){const checkboxes=document.querySelectorAll('#gFbDetalhes input[type=checkbox]:checked');const motivos=Array.from(checkboxes).map(c=>c.value);const texto=document.getElementById('gFbOutroText')?.value?.trim()||'';if(!motivos.length&&!texto){alert('Selecione ao menos um motivo antes de enviar.');return;}const r=window._gFeedback.sessao;const payload={tipo:'discordo',score:r?.score,motivos,texto:texto.slice(0,500),ts:new Date().toISOString()};window._gFeedback.historico.push(payload);const det=document.getElementById('gFbDetalhes');const suc=document.getElementById('gFbSucesso');const btnsRow=document.querySelector('#gFeedbackCard > div[style*="flex"]');if(btnsRow)btnsRow.style.display='none';if(det)det.style.display='none';if(suc)suc.style.display='block';gFeedbackPersistir(payload).catch(()=>{});};
-async function gFeedbackPersistir(payload){if(typeof supabase==='undefined')return;const userId=(await supabase.auth.getUser())?.data?.user?.id||null;const{error}=await supabase.from('guardiao_feedback').insert([{user_id:userId,tipo:payload.tipo,score:payload.score,motivos:payload.motivos||[],texto:payload.texto||'',fatores:payload.fatores||[],ts:payload.ts}]);if(error){/* silencioso */}}
+async function gFeedbackPersistir(payload){if(!sb)return;const userId=_currentUser?.id||null;const{error}=await sb.from('guardiao_feedback').insert([{user_id:userId,tipo:payload.tipo,score:payload.score,motivos:payload.motivos||[],texto:payload.texto||'',fatores:payload.fatores||[],ts:payload.ts}]);if(error){try{console.error('[gFeedbackPersistir] falha ao gravar feedback:',error);}catch(e){}}}
 window.gFeedbackHistorico=function(){return window._gFeedback.historico;};
 
 // Diagnóstico (dev only)
