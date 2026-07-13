@@ -475,9 +475,17 @@ async function startAvulsoCheckoutPro() {
     });
 
     if (!res.ok) {
-      let errMsg = `Erro ${res.status}`;
-      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
-      throw new Error(errMsg);
+      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
+      // throw new Error() e de lá pra tela, filtrado só pela heurística de
+      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
+      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
+      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
+      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
+      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
+      let detalheBackend = `HTTP ${res.status}`;
+      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
+      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
+      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
     }
 
     const data = await res.json();
@@ -542,9 +550,17 @@ async function startProSubscription() {
     });
 
     if (!res.ok) {
-      let errMsg = `Erro ${res.status}`;
-      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
-      throw new Error(errMsg);
+      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
+      // throw new Error() e de lá pra tela, filtrado só pela heurística de
+      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
+      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
+      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
+      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
+      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
+      let detalheBackend = `HTTP ${res.status}`;
+      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
+      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
+      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
     }
 
     const data = await res.json();
@@ -602,9 +618,17 @@ async function processCardPayment(cardData) {
     });
 
     if (!res.ok) {
-      let errMsg = `Erro ${res.status}`;
-      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
-      throw new Error(errMsg);
+      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
+      // throw new Error() e de lá pra tela, filtrado só pela heurística de
+      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
+      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
+      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
+      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
+      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
+      let detalheBackend = `HTTP ${res.status}`;
+      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
+      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
+      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
     }
 
     const data = await res.json();
@@ -713,9 +737,17 @@ async function goToMercadoPago() {
     }
 
     if (!res.ok) {
-      let errMsg = `Erro ${res.status}`;
-      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
-      throw new Error(errMsg);
+      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
+      // throw new Error() e de lá pra tela, filtrado só pela heurística de
+      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
+      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
+      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
+      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
+      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
+      let detalheBackend = `HTTP ${res.status}`;
+      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
+      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
+      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
     }
 
     const data = await res.json();
