@@ -124,7 +124,7 @@
       "name": "Quais bancos são compatíveis?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "O Guardião Fiscal aceita extratos em CSV dos principais bancos brasileiros (Nubank, Banco Inter, Banco do Brasil) e arquivos OFX compatíveis com qualquer instituição financeira."
+        "text": "O Guardião Fiscal aceita extratos em CSV, OFX e PDF. Nubank, Banco Inter e Banco do Brasil têm suporte dedicado a CSV; Itaú e Bradesco têm suporte a PDF e OFX. Arquivos OFX de qualquer banco costumam funcionar, já que é um formato padronizado. Se o seu banco não estiver nessa lista, exporte em OFX (recomendado) ou CSV — o sistema tenta reconhecer o formato automaticamente."
       }
     }
   ]
@@ -941,27 +941,48 @@ nav {
    drop-zone genérico sem indicar de onde vem o arquivo. As cores por banco
    batem com BANK_GUIDES (app.js), então o card selecionado usa a mesma
    identidade visual do guia que aparece abaixo dele. */
+/* [V3.2/auditoria] Grid dos cards de banco — antes definido inline no HTML
+   (dificultava responsividade). 3 colunas ≥421px, 2 colunas abaixo disso —
+   "Banco do Brasil" não fica espremido em telas estreitas. */
+#extBankCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+@media (max-width: 420px) {
+  #extBankCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .ext-bank-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 9px 6px;
+  padding: 10px 8px;
+  min-height: 44px;
   font-family: var(--ff);
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   color: var(--muted2);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 .ext-bank-card:hover { border-color: var(--border2); color: var(--text2); }
 .ext-bank-card.selected { color: var(--text); font-weight: var(--font-weight-bold); }
+.ext-bank-card .ext-bank-check { display: none; width: 13px; height: 13px; flex-shrink: 0; }
+.ext-bank-card.selected .ext-bank-check { display: inline-flex; }
 .ext-bank-card.selected[data-banco="nubank"]   { background: rgba(130,80,255,0.1);  border-color: rgba(130,80,255,0.5); }
 .ext-bank-card.selected[data-banco="inter"]    { background: rgba(255,100,0,0.08);  border-color: rgba(255,100,0,0.4); }
 .ext-bank-card.selected[data-banco="bb"]       { background: rgba(0,100,220,0.08);  border-color: rgba(0,100,220,0.4); }
 .ext-bank-card.selected[data-banco="itau"]     { background: rgba(230,150,0,0.08);  border-color: rgba(230,150,0,0.4); }
 .ext-bank-card.selected[data-banco="bradesco"] { background: rgba(220,30,30,0.08);  border-color: rgba(220,30,30,0.4); }
 .ext-bank-card.selected[data-banco="outro"]    { background: var(--surface2); border-color: var(--border2); }
+/* [V3.2/auditoria] min-height evita o conteúdo pular quando o guia troca de
+   banco (guias têm números de passos diferentes por banco). */
+#extBankGuideContent, #extBankGuideGenerico { min-height: 130px; }
 
 /* [FIX-CLS] extStep3: conteúdo renderizado antes de display:block — sem shift */
 #extStep3 { contain: layout; }
@@ -3203,37 +3224,43 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
     </div>
 
-    <!-- [V3.2] Stepper horizontal — estado inicial: estágio 1 ativo. Atualizado via
-         setExtStepperStage() em app.js (não requer JS pra renderizar o estado inicial). -->
+    <!-- [V3.2/auditoria] Stepper horizontal — estado inicial: estágio 1 ativo. Atualizado via
+         setExtStepperStage() em app.js (não requer JS pra renderizar o estado inicial).
+         Labels ajustados (Arquivo/Analisando/Resultado) para não duplicar a numeração
+         1-2-3 do bloco "Como funciona" logo abaixo — "Arquivo" engloba escolher banco,
+         baixar e enviar; antes "Enviar arquivo" ficava ativo antes mesmo do usuário
+         escolher o banco, o que não fazia sentido. -->
     <div class="ext-stepper" id="extStepper">
       <div class="ext-stepper-item active">
         <span class="ext-stepper-circle">1</span>
-        <span class="ext-stepper-label">Enviar arquivo</span>
+        <span class="ext-stepper-label">Arquivo</span>
       </div>
       <div class="ext-stepper-line"></div>
       <div class="ext-stepper-item">
         <span class="ext-stepper-circle">2</span>
-        <span class="ext-stepper-label">Processando</span>
+        <span class="ext-stepper-label">Analisando</span>
       </div>
       <div class="ext-stepper-line"></div>
       <div class="ext-stepper-item">
         <span class="ext-stepper-circle">3</span>
-        <span class="ext-stepper-label">Concluído</span>
+        <span class="ext-stepper-label">Resultado</span>
       </div>
     </div>
 
-    <!-- [V3.2] Como funciona — 3 passos, inline, horizontal no desktop / empilhado no mobile -->
+    <!-- [V3.2/auditoria] Como funciona — ícones, sem numeração própria (o stepper
+         acima já é o elemento numerado da página; numerar os dois ao mesmo tempo
+         dava a impressão de duas sequências concorrentes). -->
     <div class="ext-how-it-works">
       <div class="ext-hiw-step">
-        <span class="ext-hiw-num">1</span>
+        <span class="ext-hiw-num"><i data-lucide="landmark" style="width:13px;height:13px" aria-hidden="true"></i></span>
         <span class="ext-hiw-text"><strong>Selecione seu banco</strong><br>Veja onde exportar o extrato</span>
       </div>
       <div class="ext-hiw-step">
-        <span class="ext-hiw-num">2</span>
+        <span class="ext-hiw-num"><i data-lucide="download" style="width:13px;height:13px" aria-hidden="true"></i></span>
         <span class="ext-hiw-text"><strong>Baixe o extrato</strong><br>Seguindo o guia do seu banco</span>
       </div>
       <div class="ext-hiw-step">
-        <span class="ext-hiw-num">3</span>
+        <span class="ext-hiw-num"><i data-lucide="upload" style="width:13px;height:13px" aria-hidden="true"></i></span>
         <span class="ext-hiw-text"><strong>Envie o arquivo</strong><br>Para análise no seu dispositivo</span>
       </div>
     </div>
@@ -3620,20 +3647,21 @@ function guiaTab(banco) {
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px">
           <div style="font-family:var(--ff);font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px">Antes de continuar, separe seu extrato</div>
           <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px">Selecione seu banco para ver exatamente onde exportar o arquivo.</div>
-          <div id="extBankCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:2px">
-            <button class="ext-bank-card" data-banco="nubank" onclick="selecionarBancoExtrato('nubank')">Nubank</button>
-            <button class="ext-bank-card" data-banco="inter" onclick="selecionarBancoExtrato('inter')">Inter</button>
-            <button class="ext-bank-card" data-banco="bb" onclick="selecionarBancoExtrato('bb')">Banco do Brasil</button>
-            <button class="ext-bank-card" data-banco="itau" onclick="selecionarBancoExtrato('itau')">Itaú</button>
-            <button class="ext-bank-card" data-banco="bradesco" onclick="selecionarBancoExtrato('bradesco')">Bradesco</button>
-            <button class="ext-bank-card" data-banco="outro" onclick="selecionarBancoExtrato('outro')">Outro banco</button>
+          <div id="extBankCards">
+            <button class="ext-bank-card" data-banco="nubank" aria-pressed="false" onclick="selecionarBancoExtrato('nubank')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Nubank</button>
+            <button class="ext-bank-card" data-banco="inter" aria-pressed="false" onclick="selecionarBancoExtrato('inter')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Inter</button>
+            <button class="ext-bank-card" data-banco="bb" aria-pressed="false" onclick="selecionarBancoExtrato('bb')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Banco do Brasil</button>
+            <button class="ext-bank-card" data-banco="itau" aria-pressed="false" onclick="selecionarBancoExtrato('itau')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Itaú</button>
+            <button class="ext-bank-card" data-banco="bradesco" aria-pressed="false" onclick="selecionarBancoExtrato('bradesco')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Bradesco</button>
+            <button class="ext-bank-card" data-banco="outro" aria-pressed="false" onclick="selecionarBancoExtrato('outro')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Outro banco</button>
           </div>
           <div id="extBankGuideContent" style="margin-top:10px"></div>
+          <!-- [V3.2/auditoria] Antes vinha pré-preenchido com o texto genérico sem
+               nenhum card marcado como selecionado — parecia não pertencer a nenhuma
+               opção. Agora mostra um convite claro até o usuário escolher; o texto
+               genérico (formato/período) só aparece depois do clique em "Outro banco". -->
           <div id="extBankGuideGenerico" style="margin-top:10px">
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
-              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
-            </div>
+            <div style="font-size:12px;color:var(--muted);text-align:center;padding:12px 8px">Selecione seu banco acima para ver como exportar.</div>
           </div>
         </div>
 
