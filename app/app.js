@@ -116,9 +116,9 @@ const PRICES = {
 const BANK_GUIDES = {
   nubank:   { label:'NUBANK · Exportar CSV',   color:'#a78bfa', bg:'rgba(130,80,255,0.05)', border:'rgba(130,80,255,0.15)', steps:['Abra o <strong>app do Nubank</strong> no celular','Toque em <strong>Extrato</strong> → role até o fim','Toque em <strong>"Exportar para Excel"</strong>','Salve o arquivo e selecione abaixo'] },
   inter:    { label:'INTER · Exportar CSV',    color:'#fb923c', bg:'rgba(255,100,0,0.05)',  border:'rgba(255,100,0,0.2)',   steps:['Abra o <strong>app do Inter</strong> no celular','Vá em <strong>Extrato</strong> → toque no ícone de compartilhar','Selecione <strong>"Exportar CSV"</strong> e salve','Selecione o arquivo abaixo'] },
-  bb:       { label:'BANCO DO BRASIL · Exportar OFX', color:'#60a5fa', bg:'rgba(0,100,220,0.05)', border:'rgba(0,100,220,0.2)', steps:['Acesse o <strong>Internet Banking</strong> do BB pelo computador','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Salvar/Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
-  itau:     { label:'ITAÚ · Exportar OFX',    color:'#fbbf24', bg:'rgba(230,150,0,0.05)', border:'rgba(230,150,0,0.2)',  steps:['Acesse <strong>itau.com.br</strong> ou o app do Itaú','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
-  bradesco: { label:'BRADESCO · Exportar OFX', color:'#f87171', bg:'rgba(220,30,30,0.05)', border:'rgba(220,30,30,0.2)',  steps:['Acesse <strong>bradesco.com.br</strong> pelo computador','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  bb:       { label:'BANCO DO BRASIL · Exportar OFX', color:'#60a5fa', bg:'rgba(0,100,220,0.05)', border:'rgba(0,100,220,0.2)', steps:['Acesse o <strong>Internet Banking</strong> do BB pelo computador','Vá em <strong>Extrato</strong> → selecione de 3 a 12 meses','Clique em <strong>"Salvar/Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  itau:     { label:'ITAÚ · Exportar OFX',    color:'#fbbf24', bg:'rgba(230,150,0,0.05)', border:'rgba(230,150,0,0.2)',  steps:['Acesse <strong>itau.com.br</strong> ou o app do Itaú','Vá em <strong>Extrato</strong> → selecione de 3 a 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  bradesco: { label:'BRADESCO · Exportar OFX', color:'#f87171', bg:'rgba(220,30,30,0.05)', border:'rgba(220,30,30,0.2)',  steps:['Acesse <strong>bradesco.com.br</strong> pelo computador','Vá em <strong>Extrato</strong> → selecione de 3 a 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
 };
 
 function renderBankGuide(banco, containerId) {
@@ -138,15 +138,20 @@ function renderBankGuide(banco, containerId) {
 // por eDetectFormat() a partir do conteúdo real do arquivo, não da escolha aqui).
 function selecionarBancoExtrato(banco) {
   document.querySelectorAll('#extBankCards .ext-bank-card').forEach(btn => {
-    btn.classList.toggle('selected', btn.dataset.banco === banco);
+    const selecionado = btn.dataset.banco === banco;
+    btn.classList.toggle('selected', selecionado);
+    btn.setAttribute('aria-pressed', String(selecionado));
   });
   const guiaEl = document.getElementById('extBankGuideContent');
   const genericoEl = document.getElementById('extBankGuideGenerico');
   if (banco === 'outro' || !BANK_GUIDES[banco]) {
     if (guiaEl) guiaEl.innerHTML = '';
+    // [V3.2/auditoria] Regra de período unificada — antes o texto genérico dizia
+    // "pelo menos 1 mês" enquanto os guias de BB/Itaú/Bradesco diziam "selecione
+    // os últimos 12 meses", parecendo contraditório. Agora usa a mesma faixa.
     if (genericoEl) genericoEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Aceitamos a partir de 1 mês. Para uma análise mais confiável, envie de 3 a 12 meses.</div>
     </div>`;
   } else {
     if (genericoEl) genericoEl.innerHTML = '';
@@ -3009,6 +3014,14 @@ function eConsolidate(results){
   const allRaw=_rv.flatMap(r=>r.classified);
   const allDedup=deduplicateCrossSource(allRaw);
   const allC=applyInternalDetection(allDedup);
+  // [FIX 2026-07 — auditoria] Antes, mesCritico/perfil vinham só do PRIMEIRO
+  // extrato processado (_rv[0]), não do conjunto consolidado — se o usuário
+  // enviasse Nubank+Inter+Itaú, o mês crítico exibido podia ser só do Nubank.
+  // Corrigido reaproveitando aggregateMonthly()/calcProfile() (mesmas funções
+  // puras que cada conta já usa individualmente) sobre allC, que já passou
+  // por dedup cross-source e detecção de movimentação interna.
+  const monthlyConsolidado=aggregateMonthly(allC);
+  const perfilConsolidado=calcProfile(monthlyConsolidado);
   const credits=allC.filter(t=>t.value>0);
   const debits=allC.filter(t=>t.value<0);
   const suspicious=allC.filter(t=>t.risk==='suspicious'&&t.value>0);
@@ -3020,7 +3033,24 @@ function eConsolidate(results){
   const especieTotal=credits.filter(t=>t.cat==='especie').reduce((a,t)=>a+t.value,0);
   const formalTotal=credits.filter(t=>t.cat==='formal').reduce((a,t)=>a+t.value,0);
   const suspTotal=suspicious.reduce((a,t)=>a+t.value,0);
-  const totalMOL=_rv.reduce((a,r)=>a+r.monthsOverLimit,0);
+  // [FIX 2026-07 — auditoria] Antes, totalMOL somava a CONTAGEM de meses de cada
+  // conta individualmente — se Nubank e Inter ultrapassassem o limite no MESMO
+  // mês-calendário, contava como 2 meses em vez de 1. Corrigido: soma o Pix
+  // consolidado por mês-calendário real através de allC (já com movimentação
+  // interna identificada via applyInternalDetection — exclui transferências
+  // entre contas do próprio titular do total que conta pro limite), e só então
+  // conta quantos meses-calendário distintos ultrapassam ENGINE_CONFIG.PIX_LIMIT_PF.
+  const totalMOL=Object.entries(monthlyConsolidado).filter(([k,m])=>{
+    if(k==='unk')return false;
+    const pixNaoInterno=allC.filter(t=>{
+      if(!t.date||!(t.date instanceof Date)||isNaN(t.date))return false;
+      const key=t.date.getFullYear()+'-'+String(t.date.getMonth()+1).padStart(2,'0');
+      if(key!==k)return false;
+      if(t.internalMove==='confirmed'||t.internalMove==='probable')return false;
+      return normalizeDesc(t.desc||'').includes('pix');
+    }).reduce((a,t)=>a+Math.abs(t.value),0);
+    return pixNaoInterno>=ENGINE_CONFIG.PIX_LIMIT_PF;
+  }).length;
   const totalVol=_rv.reduce((a,r)=>a+r.totalCredits,0);
   let score=totalVol>0?_rv.reduce((a,r)=>a+r.score*(r.totalCredits/totalVol),0):_rv.reduce((a,r)=>a+r.score,0)/_rv.length;
   if(_rv.filter(r=>r.score>55).length>=2)score=Math.min(100,score+10);
@@ -3033,15 +3063,27 @@ function eConsolidate(results){
   if(totalMOL>0)alerts.push({type:'red',icon:'<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Pix acima de R$5.000/mês em ${totalMOL} mês(es) — ${fmtBRL(pixTotal)} total`,text:`Movimentações mensais de Pix nesse patamar podem ser objeto de cruzamentos fiscais via sistema e-Financeira.`});
   if(especieTotal>0){const pctEspecie=Math.round(especieTotal/totalCredits*100);alerts.push({type:pctEspecie>=20?'red':'yellow',icon:'<i data-lucide="banknote" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Depósitos em espécie: ${fmtBRL(especieTotal)} (${pctEspecie}% das entradas)`,text:`Depósitos em espécie acima de R$2.000/mês devem ser informados pelo banco à Receita.`});}
   if(todasComerciais.length>0){const totalComercial=todasComerciais.reduce((a,r)=>a+r.total,0);alerts.push({type:'red',icon:'<i data-lucide="store" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${todasComerciais.length} padrão(ões) de atividade comercial recorrente — ${fmtBRL(totalComercial)}`,text:`Recebimentos com frequência e ticket médio regulares indicam possível atividade comercial.`});}
-  if(allC.some(t=>t.flag==='Investimento')){const t=allC.filter(x=>x.flag==='Investimento').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Rendimentos de investimentos: ${fmtBRL(t)}`,text:`CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos tributáveis ou isentos conforme o tipo.`});}
-  if(allC.some(t=>t.flag==='Aluguel')){const t=allC.filter(x=>x.flag==='Aluguel').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Recebimentos de aluguel: ${fmtBRL(t)}`,text:`Devem ser informados mensalmente no carnê-leão e na declaração anual.`});}
+  if(allC.some(t=>t.flag==='Investimento'&&t.value>0)){const t=allC.filter(x=>x.flag==='Investimento'&&x.value>0).reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Movimentações de investimento: ${fmtBRL(t)}`,text:`CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos tributáveis ou isentos conforme o tipo. Este valor soma entradas classificadas como investimento (resgates, rendimentos, dividendos) — não distingue automaticamente principal de rendimento tributável.`});}
+  if(allC.some(t=>t.flag==='Aluguel'&&t.value>0)){const t=allC.filter(x=>x.flag==='Aluguel'&&x.value>0).reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Recebimentos de aluguel: ${fmtBRL(t)}`,text:`Devem ser informados mensalmente no carnê-leão e na declaração anual.`});}
   if(attention.length>0&&suspicious.length===0)alerts.push({type:'yellow',icon:'<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${attention.length} transação(ões) merecem revisão`,text:`Créditos que podem ser questionados. Tenha comprovantes de origem disponíveis.`});
   const internos=allC.filter(t=>t.internalMove==='confirmed'||t.internalMove==='probable');
-  if(internos.length>0){const totalInterno=internos.filter(t=>t.value>0).reduce((a,t)=>a+t.value,0);alerts.push({type:'green',icon:'<i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${internos.length} movimentação(ões) interna(s) — ${fmtBRL(totalInterno)} excluídos do score`,text:`Transferências entre contas do mesmo titular foram identificadas e excluídas do cálculo de risco.`});}
+  // [FIX 2026-07 — auditoria] Texto antigo afirmava "excluídos do score" — isso só
+  // é verdade para movimentação interna identificável DENTRO de cada conta (isso já
+  // acontece em eAnalyzeSingle). Transferências ENTRE bancos diferentes só são
+  // identificáveis aqui, no nível consolidado — depois que o score de cada conta já
+  // foi calculado individualmente. Ver nota em eConsolidate() sobre a limitação
+  // conhecida: o score consolidado é uma média ponderada dos scores por conta, não
+  // um recálculo sobre allC. Corrigir isso de verdade exige rodar o motor de score
+  // (F1-F8) sobre o conjunto consolidado em vez de por conta — mudança maior,
+  // registrada como limitação conhecida, não implementada nesta correção.
+  if(internos.length>0){const totalInterno=internos.filter(t=>t.value>0).reduce((a,t)=>a+t.value,0);alerts.push({type:'green',icon:'<i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${internos.length} movimentação(ões) interna(s) identificada(s) — ${fmtBRL(totalInterno)}`,text:`Transferências entre contas do mesmo titular foram identificadas e excluídas das manifestações e alertas. O índice de atenção pode não refletir totalmente essa exclusão quando a transferência ocorre entre bancos diferentes — cada extrato ainda é pontuado individualmente antes da consolidação.`});}
   if(alerts.length===0)alerts.push({type:'green',icon:'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:'Perfil de créditos dentro do esperado',text:`Nenhum crédito de alto risco encontrado nos ${_rv.length} extrato(s) analisados.`});
   if(todosFatores.length>0){const top3=todosFatores.sort((a,b)=>b.peso-a.peso).slice(0,3);const explicacao=top3.map(f=>`• ${f.motivo}`).join(' ');alerts.push({type:'blue',icon:'<i data-lucide="brain" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Por que o índice de atenção é ${score}/100`,text:`O índice aumentou porque: ${explicacao}.`});}
   alerts.push({type:'blue',icon:'<i data-lucide="lightbulb" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:'Próximo passo',text:`Compare os ${credits.length} créditos (${fmtBRL(totalCredits)}) com o total declarado no IR.`});
-  return{score,totalCredits,totalDebits,pixTotal,especieTotal,formalTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,indiceConsumo:totalCredits>0?totalDebits/totalCredits:0,indiceEspecie:totalCredits>0?especieTotal/totalCredits:0,recorrentes:totalRecorrentes,comercialOculta:todasComerciais.length,alerts,all:allC,fatores:todosFatores,internos,mesCritico:_rv[0]?.mesCritico||null,perfil:_rv[0]?.perfil||{},parserConfidence:_rv.length>0?_rv.reduce((a,r)=>a+(r.parserConfidence||0),0)/_rv.length:0,txnsDescartadas:_rv.reduce((a,r)=>a+(r.txnsDescartadas||0),0),confidence:_rv.length>0?_rv.reduce((a,r)=>a+(r.confidence||0),0)/_rv.length:0,numEvidencias:Math.max(..._rv.map(r=>r.numEvidencias||0)),manifestacoes,indiceMaturidade:calcularIndiceMaturidade(manifestacoes)};
+  const _totalTxnsValidas=_rv.reduce((a,r)=>a+(r.txnsValidas||0),0);
+  const confidenceConsolidada=_totalTxnsValidas>0?_rv.reduce((a,r)=>a+(r.confidence||0)*(r.txnsValidas||0),0)/_totalTxnsValidas:0;
+  const parserConfidenceConsolidada=_totalTxnsValidas>0?_rv.reduce((a,r)=>a+(r.parserConfidence||0)*(r.txnsValidas||0),0)/_totalTxnsValidas:0;
+  return{score,totalCredits,totalDebits,pixTotal,especieTotal,formalTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,indiceConsumo:totalCredits>0?totalDebits/totalCredits:0,indiceEspecie:totalCredits>0?especieTotal/totalCredits:0,recorrentes:totalRecorrentes,comercialOculta:todasComerciais.length,alerts,all:allC,fatores:todosFatores,internos,mesCritico:perfilConsolidado.mesCritico,perfil:perfilConsolidado,parserConfidence:parserConfidenceConsolidada,txnsDescartadas:_rv.reduce((a,r)=>a+(r.txnsDescartadas||0),0),confidence:confidenceConsolidada,numEvidencias:Math.max(..._rv.map(r=>r.numEvidencias||0)),manifestacoes,indiceMaturidade:calcularIndiceMaturidade(manifestacoes)};
 }
 
 
@@ -3253,6 +3295,10 @@ async function eRunAll(){
     const _rawRenda=_rInput?_rInput.value.replace(/\./g,'').replace(',','.').trim():'';
     window._rendaDeclaradaMensal=_rawRenda?Math.max(0,parseFloat(_rawRenda)||0):0;
     const results=[];const parsed=[];
+    // [FIX 2026-07 — auditoria] Rastreia falhas por arquivo para o resumo final
+    // poder dizer "concluído com N de M arquivos" em vez de "Concluído" mesmo
+    // quando um ou mais arquivos foram silenciosamente ignorados.
+    const falhasArquivo=[];
     for(let i=0;i<ready.length;i++){
       const f=ready[i];
       eSetProgress(Math.round((i/ready.length)*60),`Processando ${f.name}...`);
@@ -3265,10 +3311,11 @@ async function eRunAll(){
           catch(pdfErr){
             if(pdfErr.message==='PDF_ESCANEADO'){eShowErr(`"${f.name}" parece ser um PDF escaneado (imagem). O Guardião precisa de texto digital. Exporte o extrato em PDF digital pelo app do banco, ou use o formato CSV ou OFX.`);}
             else{eShowErr(`Erro ao abrir "${f.name}": ${eSafeErrorMsg(pdfErr, 'não foi possível ler este arquivo.')}`);}
+            falhasArquivo.push(f.name);
             continue;
           }
           txns=eParsePDFText(text);
-          if(txns.length===0){const bankHint=f.detected?.banco||f.detected?.bank||'';const dica=bankHint?`Banco detectado: ${bankHint}. Tente exportar o extrato no formato CSV pelo app do banco.`:'Tente exportar o extrato no formato CSV ou OFX pelo app do banco.';eShowErr(`Não foi possível extrair transações de "${f.name}". ${dica}`);continue;}
+          if(txns.length===0){const bankHint=f.detected?.banco||f.detected?.bank||'';const dica=bankHint?`Banco detectado: ${bankHint}. Tente exportar o extrato no formato CSV pelo app do banco.`:'Tente exportar o extrato no formato CSV ou OFX pelo app do banco.';eShowErr(`Não foi possível extrair transações de "${f.name}". ${dica}`);falhasArquivo.push(f.name);continue;}
           const pdfBankInfo=eDetectBankReal(text,'pdf',f.name);
           if(pdfBankInfo.banco)f.detected.banco=pdfBankInfo.banco;
           if(pdfBankInfo.conta)f.detected.conta=pdfBankInfo.conta;
@@ -3282,9 +3329,9 @@ async function eRunAll(){
           else if(fmt==='ofx')txns=eParseOFX(f.content);
           else txns=eParseGeneric(lines);
         }
-        if(txns.length===0){eShowErr(`Nenhuma transação encontrada em "${f.name}". Verifique se o arquivo está completo e no formato correto.`);continue;}
+        if(txns.length===0){eShowErr(`Nenhuma transação encontrada em "${f.name}". Verifique se o arquivo está completo e no formato correto.`);falhasArquivo.push(f.name);continue;}
         parsed.push({txns,banco:f.detected.banco||f.detected.bank,conta:f.detected.conta||null,label:f.detected.bank,formato:f.detected.format});
-      }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${eSafeErrorMsg(e, 'não foi possível processar este arquivo.')}`;eShowErr(msg);}
+      }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${eSafeErrorMsg(e, 'não foi possível processar este arquivo.')}`;eShowErr(msg);falhasArquivo.push(f.name);}
     }
     if(parsed.length===0){
       eSetProgress(0,'Erro — nenhum extrato processado');
@@ -3336,7 +3383,11 @@ async function eRunAll(){
     document.getElementById('s3num').classList.remove('locked');
     const nContas=results.length;const nArquivos=parsed.length;
     const msg=nArquivos>nContas?`${nArquivos} arquivo(s) → ${nContas} conta(s) identificada(s)`:`${nContas} extrato(s) analisado(s)`;
-    document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
+    // [FIX 2026-07 — auditoria] Antes dizia "análise concluída" mesmo quando um ou
+    // mais arquivos foram ignorados (parse falhou, sem transações, etc.) — o
+    // usuário não tinha como saber que nem tudo que enviou entrou na análise.
+    const statusFinal=falhasArquivo.length>0?`concluída com ressalvas — ${falhasArquivo.length} de ${ready.length} arquivo(s) não pôde(puderam) ser processado(s)`:'concluída';
+    document.getElementById('s3sub').textContent=`${msg} — análise ${statusFinal}`;
     _eConsolidated=consolidated;_eSources=results;
     // [DEC-018-C] Contrato construído aqui, de forma síncrona, logo após a
     // consolidação — ANTES do paywall. É o único ponto de construção do estado
