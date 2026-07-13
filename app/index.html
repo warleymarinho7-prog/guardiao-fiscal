@@ -24,7 +24,7 @@
 </script>
 <!-- Guardião Fiscal v19.0.0 | 2026-06-12 -->
 <title>Guardião Fiscal — Descubra seu risco de cair na malha fina</title>
-<meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR — antes que a Receita Federal identifique. Gratuito e 100% privado.">
+<meta name="description" content="Analise seu extrato bancário e descubra se sua movimentação financeira está compatível com sua declaração de IR. Extrato processado localmente, nunca enviado a servidores. Gratuito para a primeira análise.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://oguardiaofiscal.com.br/">
 
@@ -33,7 +33,7 @@
 <meta property="og:url" content="https://oguardiaofiscal.com.br/">
 <meta property="og:site_name" content="Guardião Fiscal">
 <meta property="og:title" content="Guardião Fiscal — Descubra seu risco de cair na malha fina">
-<meta property="og:description" content="Seu extrato revela o que sua declaração ainda não explica. Descubra sinais de divergência antes da Receita Federal. Análise preventiva de risco fiscal para pessoa física — gratuito e 100% privado.">
+<meta property="og:description" content="Seu extrato revela o que sua declaração ainda não explica. A Receita pode cruzar informações sobre sua movimentação — você já conferiu a sua? Análise preventiva de risco fiscal para pessoa física, com processamento 100% local.">
 <meta property="og:image" content="https://oguardiaofiscal.com.br/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -52,7 +52,7 @@
   "@type": "SoftwareApplication",
   "name": "Guardião Fiscal",
   "url": "https://oguardiaofiscal.com.br",
-  "description": "Ferramenta de análise preventiva de risco fiscal para pessoa física. Identifica incompatibilidades entre movimentação bancária e declaração de Imposto de Renda antes que a Receita Federal atue.",
+  "description": "Ferramenta de análise preventiva de risco fiscal para pessoa física. Identifica incompatibilidades entre movimentação bancária e declaração de Imposto de Renda com base nos mesmos critérios públicos usados pelo e-Financeira.",
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Web",
   "inLanguage": "pt-BR",
@@ -108,7 +108,7 @@
       "name": "Como saber se vou cair na malha fina?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A principal forma de identificar o risco antes da Receita Federal é analisar se sua movimentação bancária é compatível com a renda declarada. O Guardião Fiscal faz essa análise automaticamente a partir do seu extrato bancário. O processamento do extrato ocorre localmente no navegador — o arquivo nunca é enviado a servidores."
+        "text": "Um dos sinais mais comuns é a incompatibilidade entre a movimentação bancária e a renda declarada, mas a malha fina também considera despesas médicas, dependentes, bens e outras informações que o extrato sozinho não mostra. O Guardião Fiscal analisa os sinais visíveis no seu extrato automaticamente. O processamento ocorre localmente no navegador — o arquivo nunca é enviado a servidores."
       }
     },
     {
@@ -1537,6 +1537,41 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .mnf-badge-conf.alta   { background:rgba(74,222,128,0.12); color:var(--green); border:1px solid rgba(74,222,128,0.25); }
 .mnf-evid { font-size:12px; color:var(--muted2); line-height:1.6; margin-bottom:6px; }
 .mnf-next { font-size:13px; color:var(--text2); line-height:1.6; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 12px; margin:10px 0 12px; }
+.mnf-limitacoes { margin:6px 0 0; padding-left:18px; font-size:12px; color:var(--muted2); line-height:1.7; }
+.mnf-limitacoes li { margin-bottom:4px; }
+.mnf-proximas { margin:6px 0 0; padding-left:18px; font-size:12px; color:var(--text2); line-height:1.7; }
+.mnf-proximas li { margin-bottom:4px; }
+
+/* ── Fatia 2A: Detalhes técnicos (accordion) ── */
+.mnf-tecnicos { border:1px solid var(--border); border-radius:var(--radius-md); margin-bottom:12px; overflow:hidden; }
+.mnf-tecnicos-head { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; cursor:pointer; background:var(--surface2); }
+.mnf-tecnicos-head .lbl { font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
+.mnf-tecnicos-chevron { font-size:11px; color:var(--muted); transition:transform .2s; }
+.mnf-tecnicos.open .mnf-tecnicos-chevron { transform:rotate(180deg); }
+.mnf-tecnicos-body { display:none; padding:14px; }
+.mnf-tecnicos.open .mnf-tecnicos-body { display:block; }
+
+/* ── Fatia 2A: card de manifestação v2 (resumo curto / expansão / cadeia causal) ── */
+.mnf-card2 { background: linear-gradient(180deg, rgba(74,222,128,0.06), rgba(74,222,128,0.02)); border: 1px solid rgba(74,222,128,0.22); border-radius: var(--radius-card); padding: 14px 16px; margin-bottom: 12px; }
+.mnf-card2-head { display:flex; align-items:center; gap:10px; cursor:pointer; }
+.mnf-card2-title-wrap { flex:1; min-width:0; }
+.mnf-card2-title { font-family:var(--ff); font-size:14px; font-weight:700; color:var(--text); }
+.mnf-card2-summary { font-size:12px; color:var(--muted2); margin-top:3px; line-height:1.4; }
+.mnf-card2-chevron { font-size:12px; color:var(--muted); transition:transform .2s; flex-shrink:0; }
+.mnf-card2.open .mnf-card2-chevron { transform:rotate(180deg); }
+.mnf-card2-body { display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border2); }
+.mnf-card2.open .mnf-card2-body { display:block; }
+.mnf-chain-toggle { font-size:12px; color:var(--accent); background:none; border:none; cursor:pointer; padding:6px 0; display:flex; align-items:center; gap:4px; font-family:var(--ff); }
+/* [UI-POLISH-01 — jul/2026] Em viewports estreitos (~375px), a cadeia causal
+   quebra em 2 linhas (5 elos não cabem numa só). Validado visualmente: sem
+   overflow, sem corte, ordem causal continua legível — não é defeito funcional,
+   é densidade. Decisão explícita: não ajustar agora (evita variação de
+   linguagem entre mobile/desktop nesta etapa). Revisar como polish posterior. */
+.mnf-chain { display:none; flex-wrap:wrap; align-items:center; gap:4px; margin:8px 0 4px; }
+.mnf-chain.open { display:flex; }
+.mnf-chain-step { font-size:10.5px; padding:4px 8px; border-radius:var(--radius-sm); background:var(--surface2); border:1px solid var(--border); color:var(--muted2); }
+.mnf-chain-step.done { background:rgba(74,222,128,0.1); border-color:rgba(74,222,128,0.25); color:var(--green); }
+.mnf-chain-sep { font-size:11px; color:var(--muted); flex-shrink:0; }
 .mnf-cta {
   width:100%; padding:11px; background:var(--green); border:none; border-radius:var(--radius-md);
   font-family:var(--ff); font-size:13px; font-weight:700; color:#000; cursor:pointer; transition:opacity .2s;
@@ -2640,7 +2675,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div style="padding:0 16px 40px;max-width:720px;margin:0 auto;contain:layout">
     <div style="text-align:center;margin-bottom:24px">
       <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1.8px;color:var(--green);text-transform:uppercase;margin-bottom:10px">O que o Guardião encontra</div>
-      <h2 style="font-family:var(--ff);font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1.25;margin:0">Sinais que a Receita Federal já consegue ver</h2>
+      <h2 style="font-family:var(--ff);font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1.25;margin:0">Sinais que o e-Financeira consegue cruzar</h2>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:10px">
       <div style="display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid rgba(255,77,79,0.2);border-left:3px solid var(--red);border-radius:var(--radius-md);padding:14px 16px">
@@ -2756,7 +2791,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid var(--border)">
-        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 100% privado · Nenhum dado enviado a servidores · Baseado nos critérios públicos do e-Financeira
+        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Extrato processado no seu dispositivo · Nenhum arquivo enviado a servidores · Baseado nos critérios públicos do e-Financeira
       </div>
     </div>
   </div>
@@ -3239,6 +3274,11 @@ function guiaTab(banco) {
           <!-- ── PRÉVIA REAL (preenchida pelo JS após análise) ── -->
           <div id="previewReal" style="display:none;overflow:hidden;width:100%;box-sizing:border-box">
 
+            <!-- Fatia 2A: prévia causal (mesma gramática do resultado completo) —
+                 oculto por padrão, exibido só quando USE_CAUSAL_RESULT_V2 está ativa.
+                 Não substitui os blocos legados abaixo; eles apenas ficam ocultos. -->
+            <div id="previewCausal" style="display:none;margin-bottom:8px"></div>
+
             <!-- Score e nível — VISÍVEL -->
             <div id="pvScoreBlock" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px">
     <div style="font-size:10px;font-family:var(--ff);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">// resultado da análise</div>
@@ -3277,6 +3317,11 @@ function guiaTab(banco) {
               <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Nenhum dado enviado · Processamento local · Cancele quando quiser</div>
             </div>
 
+            <!-- [Fatia 2E] Índice secundário — vem DEPOIS do CTA de propósito: no
+                 mobile, o índice não deve separar a manifestação gratuita do botão
+                 de desbloqueio. Populado só quando USE_CAUSAL_RESULT_V2 está ativa. -->
+            <div id="previewIndiceSecundario" style="display:none;margin-top:10px"></div>
+
           </div>
 
           <!-- Estado inicial (antes de analisar) -->
@@ -3295,37 +3340,62 @@ function guiaTab(banco) {
                (DEC-015 / Livro I Cap. 7.8) — manifestações vêm antes do score. -->
           <div class="res-section res-section--hero" id="pManifestacoesSection" style="display:none">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap">
-              <div class="res-section-label" style="margin-bottom:0">O que seu extrato já revela</div>
+              <div class="res-section-label" style="margin-bottom:0" id="pSecaoPrincipalLabel">O que seu extrato já revela</div>
               <div class="mnf-maturidade" id="pMaturidadeBadge"></div>
             </div>
+            <div class="res-section-label" style="font-size:11px;color:var(--muted);margin-bottom:4px" id="pResumoLabel"></div>
+            <div id="pResumoExecutivo" style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px"></div>
             <div id="pCategoriasList" style="margin-bottom:14px"></div>
             <div id="pManifestacoesList"></div>
+            <div id="pLimitacoesContrato"></div>
+            <div id="pProximasVerificacoes"></div>
           </div>
 
-          <!-- ── SEÇÃO 1.5: Índice de atenção (score F1-F8) — indicador complementar,
-               nunca a conclusão principal (DEC-015). Estilo neutro, não-hero. ── -->
-          <div class="res-section">
-            <div id="pContextoBlock"></div>
+          <!-- ── SEÇÃO 1.5-3: Detalhes técnicos (score, métricas, fatores F1-F8) —
+               recolhido por padrão quando USE_CAUSAL_RESULT_V2 está ativa (Fatia 2A):
+               são secundários em relação às manifestações, não removidos. Os IDs
+               internos (pContextoBlock/pStatsGrid/pFatoresList) continuam os mesmos;
+               só a moldura ao redor mudou. ── -->
+          <div class="mnf-tecnicos" id="pDetalhesTecnicos">
+            <div class="mnf-tecnicos-head" onclick="_toggleDetalhesTecnicos()" role="button" tabindex="0" aria-expanded="false">
+              <span class="lbl">Detalhes técnicos</span>
+              <span class="mnf-tecnicos-chevron" id="pDetalhesTecnicosChevron">▾</span>
+            </div>
+            <div class="mnf-tecnicos-body" id="pDetalhesTecnicosBody">
+              <!-- ── SEÇÃO 1.5: Índice de atenção (score F1-F8) — indicador complementar,
+                   nunca a conclusão principal (DEC-015). Estilo neutro, não-hero. ── -->
+              <div class="res-section" style="border:none;padding-top:0">
+                <div id="pContextoBlock"></div>
+              </div>
+
+              <!-- ── SEÇÃO 2: Métricas resumo ── -->
+              <div class="res-section">
+                <div class="res-section-label">Estatísticas agregadas</div>
+                <div class="p-stats" id="pStatsGrid"></div>
+              </div>
+
+              <!-- ── SEÇÃO 3: Fatores de risco ── -->
+              <div class="res-section">
+                <div id="pFatoresList"></div>
+              </div>
+            </div>
           </div>
 
-          <!-- ── SEÇÃO 2: Métricas resumo ── -->
-          <div class="res-section">
-            <div class="res-section-label">Resumo da movimentação</div>
-            <div class="p-stats" id="pStatsGrid"></div>
-          </div>
-
-          <!-- ── SEÇÃO 3: Fatores de risco ── -->
-          <div class="res-section">
-            <div id="pFatoresList"></div>
-          </div>
-
-          <!-- ── SEÇÃO 4: Alertas ── -->
-          <div class="res-section">
+          <!-- ── SEÇÃO 4: Alertas — [Decisão de produto, jul/2026] Alertas legados
+               são implementação interna do motor (já cumpriram seu papel ao originar
+               as manifestações). Quando USE_CAUSAL_RESULT_V2 está ativa, esta seção
+               é OCULTADA por completo (não movida, não oferecida como opção) via
+               _aplicarPosicaoAlertasLegados() — um resumo técnico vai só para o
+               painel de debug (eToggleDbg(), oculto por padrão). Flag desligada:
+               permanece exatamente aqui, visível, como sempre esteve. ── -->
+          <div class="res-section" id="pAlertSection">
             <div class="p-alerts" id="pAlertList" style="overflow:hidden;word-break:break-word;padding:0;border:none"></div>
           </div>
 
-          <!-- ── SEÇÃO 5: Extratos analisados ── -->
-          <div class="res-section">
+          <!-- ── SEÇÃO 5: Extratos analisados — [Fatia 2D] Movida (não duplicada) para
+               dentro de "Detalhes técnicos" quando USE_CAUSAL_RESULT_V2 está ativa,
+               como último item ("Fontes analisadas"). V2 desligada: permanece aqui. ── -->
+          <div class="res-section" id="pExtratosSection">
             <div class="res-section-label">Extratos analisados</div>
             <div class="src-list" id="srcList"></div>
           </div>
@@ -3451,8 +3521,8 @@ function guiaTab(banco) {
 
 <div class="page" id="page-planos">
   <div class="plans-page">
-    <div class="page-title">Veja o que a Receita vê — antes dela.</div>
-    <div class="page-sub">Escolha como quer verificar sua situação — antes que a Receita identifique.</div>
+    <div class="page-title">Confira sua movimentação antes de declarar.</div>
+    <div class="page-sub">Escolha como quer verificar sua situação.</div>
 
     <div class="plans-grid">
 
@@ -3589,7 +3659,7 @@ function guiaTab(banco) {
     <div style="margin-bottom:48px">
       <div style="font-size:11px;font-family:var(--ff);font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Sobre o projeto</div>
       <h1 style="font-family:var(--ff);font-size:clamp(26px,5vw,40px);font-weight:800;color:var(--text);letter-spacing:-1.5px;line-height:1.15;margin:0 0 16px">O que é o<br><em style="font-style:normal;color:var(--accent)">Guardião Fiscal</em></h1>
-      <p style="font-size:16px;color:var(--muted2);line-height:1.7;margin:0;max-width:560px">Uma ferramenta independente que ajuda contribuintes a identificar inconsistências entre movimentação bancária e declaração de IR — antes que a Receita Federal identifique.</p>
+      <p style="font-size:16px;color:var(--muted2);line-height:1.7;margin:0;max-width:560px">Uma ferramenta independente que ajuda contribuintes a identificar inconsistências entre movimentação bancária e declaração de IR antes da entrega.</p>
     </div>
 
     <!-- Seção 1: Por que isso existe -->
