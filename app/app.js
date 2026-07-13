@@ -162,17 +162,17 @@ function _initPrices() {
 
 // ===== PRO FREE MODE =====
 const PRO_FREE_MODE = false;
-// [DEC-018-B] Feature flag: quando true, o renderer do resultado passa a consumir
-// EXCLUSIVAMENTE o Contrato do Resultado (montarModeloDeResultado/validarContrato),
-// em vez de ler _eConsolidated/_eSources diretamente. Começa em false — ativar
-// manualmente para comparar lado a lado com o renderer legado antes de virar padrão.
-let USE_CAUSAL_RESULT_RENDERER = false;
+// [FIX 2026-07] Ativadas para HOMOLOGAÇÃO (não é ativação em produção — esta cópia do
+// arquivo é para teste em ambiente separado, antes de qualquer deploy real). Ver
+// docs/decisions para o plano de rollout: homologação → validação com dados reais →
+// produção gradual. Reverter para false é só trocar de volta estas duas linhas.
+let USE_CAUSAL_RESULT_RENDERER = true;
 // [Fatia 2A] Feature flag separada da anterior: aquela controla a FONTE DOS DADOS
 // (contrato vs. objeto bruto do motor); esta controla a COMPOSIÇÃO VISUAL (cards
 // com resumo/expansão + cadeia causal + Detalhes técnicos recolhido, aprovado no
 // mockup de jul/2026). V2 pressupõe o contrato como fonte — só tem efeito quando
 // USE_CAUSAL_RESULT_RENDERER também está true.
-let USE_CAUSAL_RESULT_V2 = false;
+let USE_CAUSAL_RESULT_V2 = true;
 
 function showProFreeBanner() {
   showPage('planos');
@@ -193,7 +193,7 @@ function initProFreeMode() {
     const ucPro = document.getElementById('ucProText');
     if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
     const popular = document.getElementById('planProBadge');
-    if (popular) popular.textContent = '<i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO';
+    if (popular) popular.innerHTML = '<i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO';
     return;
   }
   const plansWrap = document.querySelector('#page-planos .plans-page');
@@ -1199,7 +1199,7 @@ async function doCadastro() {
   const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome } } });
   btn.textContent = 'Criar conta →';
   if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
-  ok.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
+  ok.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
   ok.style.display = 'block';
   setTimeout(() => closeLoginDirect(), 2000);
 }
@@ -1257,7 +1257,7 @@ async function extStep1Done() {
       autoSkipExtStep1(email);
     } else {
       err.style.color = 'var(--accent)';
-      err.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Confirme seu e-mail e volte para continuar.';
+      err.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Confirme seu e-mail e volte para continuar.';
       err.style.display = 'block';
     }
   } else {
@@ -1866,9 +1866,14 @@ function eSafeErrorMsg(e, fallback) {
 }
 function eParseBRL(s){
   if(!s)return 0;
-  s=String(s).trim().replace(/\s/g,'');
+  // [FIX 2026-07] Achado na varredura de bugs: valores com prefixo de moeda (ex.: "R$ 1.234,56",
+  // formato que alguns exports de CSV/PDF incluem na própria coluna de valor) batiam na regex
+  // de validação, falhavam, e caíam no fallback "parsed||0" — a transação virava R$0,00
+  // silenciosamente, sem erro nem log, subtraindo dado real do cálculo sem ninguém perceber.
+  // Removendo qualquer caractere que não seja dígito, vírgula, ponto ou sinal antes de validar.
+  s=String(s).trim().replace(/\s/g,'').replace(/[^\d,.\-+]/g,'');
   const neg=s.startsWith('-');
-  const abs=s.replace(/^-/,'');
+  const abs=s.replace(/^[-+]/,'');
   let parsed;
   if(/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(abs))parsed=parseFloat(abs.replace(/\./g,'').replace(',','.'));
   else parsed=parseFloat(abs.replace(',','.'));
@@ -1877,11 +1882,18 @@ function eParseBRL(s){
 function eParseDate(s){
   if(!s)return null;
   s=s.trim().replace(/['"]/g,'');
-  let m;
-  if((m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/)))return new Date(+m[3],+m[2]-1,+m[1]);
-  if((m=s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
-  if((m=s.match(/^(\d{4})(\d{2})(\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
-  if((m=s.match(/^(\d{2})[\/\-](\d{2})$/)))return new Date(new Date().getFullYear(),+m[2]-1,+m[1]);
+  let m,d;
+  // [FIX 2026-07] Achado na varredura de bugs: (1) dia/mês sem zero à esquerda (ex. "1/1/2025")
+  // não batia a regex \d{2} e a transação inteira era descartada; agora aceita \d{1,2}.
+  // (2) datas de calendário inválidas (ex. "31/02/2025") não eram rejeitadas — new Date()
+  // "rola" automaticamente pro mês seguinte (vira 03/03/2025) sem avisar, mascarando dado
+  // corrompido como se fosse uma data real. Agora valida que a data construída bate com os
+  // números originais; se não bater, retorna null em vez de silenciosamente deslocar a data.
+  const valida=(y,mo,da)=>{const dt=new Date(y,mo-1,da);return(dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===da)?dt:null;};
+  if((m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/)))return valida(+m[3],+m[2],+m[1]);
+  if((m=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/)))return valida(+m[1],+m[2],+m[3]);
+  if((m=s.match(/^(\d{4})(\d{2})(\d{2})/)))return valida(+m[1],+m[2],+m[3]);
+  if((m=s.match(/^(\d{1,2})[\/\-](\d{1,2})$/)))return valida(new Date().getFullYear(),+m[2],+m[1]);
   return null;
 }
 function eDetectFormat(c,fn){
@@ -3081,11 +3093,15 @@ function eRenderFileList(){
   if(eFiles.length>0){
     lb.style.display='flex';
     document.getElementById('limitTxt').textContent=`${eFiles.length} de ${MAX_FILES}`;
-    document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    // [FIX 2026-07] Era .textContent — a tag <i data-lucide="..."> virava texto literal na
+    // tela em vez de virar ícone, porque textContent não cria elemento DOM (só texto), e o
+    // MutationObserver do lucide (gfRenderIcons, em index.html) só substitui elementos <i>
+    // reais. innerHTML resolve, e o observer pega a troca automaticamente.
+    document.getElementById('dzIco').innerHTML=eFiles.length>=MAX_FILES?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
     document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
     document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':''}</div>`).join('');
-  }else{lb.style.display='none';document.getElementById('dzIco').textContent='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
+  }else{lb.style.display='none';document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
 
 function eUpdateActionBar(){
@@ -3212,7 +3228,7 @@ async function eRunAll(){
     eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
     document.getElementById('extStep2').style.opacity='0.6';
     document.getElementById('extStep2').style.pointerEvents='none';
-    document.getElementById('s2num').textContent='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    document.getElementById('s2num').innerHTML='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     document.getElementById('s2num').style.background='var(--green)';
     document.getElementById('s2num').style.color='#000';
     const s3=document.getElementById('extStep3');
@@ -3292,7 +3308,10 @@ function eRenderPreview(c,sources){
   else if(c.score<=45){emoji='<span style="color:var(--risk-atencao)" aria-hidden="true">●</span>';level='ATENÇÃO';color='#f5a623';}
   else if(c.score<=70){emoji='<span style="color:var(--risk-moderado)" aria-hidden="true">●</span>';level='RISCO ELEVADO';color=C_ELEVADO;}
   else{emoji='<span style="color:var(--risk-critico)" aria-hidden="true">●</span>';level='RISCO CRÍTICO';color=C_CRITICO;}
-  document.getElementById('pvEmoji').textContent=emoji;
+  // [FIX 2026-07] Era .textContent — "emoji" é HTML (<span style="color:var(--risk-...)">●</span>),
+  // não texto puro. Mesma classe de bug do dzIco: textContent não cria elemento, então a tag
+  // aparecia literal na tela em vez de virar a bolinha colorida de risco.
+  document.getElementById('pvEmoji').innerHTML=emoji;
   document.getElementById('pvLevel').textContent=level;
   document.getElementById('pvLevel').style.color=color;
   document.getElementById('pvScore').textContent=c.score+'/100';
@@ -4167,7 +4186,7 @@ function eResetAll(){
   document.getElementById('actBar').style.display='none';
   document.getElementById('extStep3').style.display='none';
   document.getElementById('pFillExt').style.width='0%';
-  document.getElementById('dzIco').textContent='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+  document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
   document.getElementById('paywallBlock').style.display='block';
   const _tinhaAcesso=document.getElementById('realResultBlock').style.display!=='none';
