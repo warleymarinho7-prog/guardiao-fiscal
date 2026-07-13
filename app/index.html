@@ -4049,11 +4049,26 @@ function gfRenderIcons(){ if (window.lucide && typeof lucide.createIcons === 'fu
 document.addEventListener('DOMContentLoaded', gfRenderIcons);
 window.addEventListener('load', gfRenderIcons);
 (function(){
-  var scheduled = false;
+  // [FIX 2026-07] Era 1 chamada de lucide.createIcons() por ANIMATION FRAME durante
+  // rajadas de innerHTML (ex.: montagem do resultado causal, que escreve várias seções
+  // em sequência) — cada chamada varre o documento inteiro, gerando vários
+  // "[Violation] requestAnimationFrame handler took Xms" seguidos no console (não
+  // quebra nada, mas é trabalho repetido à toa). Trocado por debounce: espera as
+  // mutações pararem por DEBOUNCE_MS antes de renderizar, com um teto de MAX_WAIT_MS
+  // para garantir que os ícones não demorem demais a aparecer mesmo em fluxo contínuo.
+  var DEBOUNCE_MS = 120;
+  var MAX_WAIT_MS = 400;
+  var timer = null;
+  var maxWaitTimer = null;
+  function run(){
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (maxWaitTimer) { clearTimeout(maxWaitTimer); maxWaitTimer = null; }
+    gfRenderIcons();
+  }
   function schedule(){
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(function(){ scheduled = false; gfRenderIcons(); });
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(run, DEBOUNCE_MS);
+    if (!maxWaitTimer) maxWaitTimer = setTimeout(run, MAX_WAIT_MS);
   }
   var obs = new MutationObserver(schedule);
   document.addEventListener('DOMContentLoaded', function(){
