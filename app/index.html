@@ -463,6 +463,53 @@ nav {
   gap: 5px;
 }
 
+/* [V3.1] Badges detalhados do hero — substituem os badges de linha única por
+   cards com ícone+título+descrição, focados em responder objeções pré-clique
+   (segurança, fundamento, tempo, compromisso) em vez de prova social — decisão
+   de produto (jul/2026): sem números públicos fortes ainda, competência e
+   redução de risco pesam mais que prova social fraca. */
+.hero-badges-detailed {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.hero-badge-detailed {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 13px;
+}
+.hero-badge-detailed .hbd-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: rgba(0,217,110,0.08);
+  border: 1px solid rgba(0,217,110,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+.hero-badge-detailed .hbd-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.hero-badge-detailed .hbd-desc {
+  font-size: 11px;
+  color: var(--muted2);
+  line-height: 1.4;
+}
+@media (max-width: 640px) {
+  .hero-badges-detailed { grid-template-columns: 1fr; }
+}
+
 /* ===== SIMULADOR ===== */
 .sim-wrap {
   max-width: 540px;
@@ -1922,6 +1969,112 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 0 0 48px;
 }
 
+/* [V3.1] Painel vivo do hero — abre como diagrama causal animado (5-8s) e se
+   transforma no simulador já existente, sem trocar de página. Decisão de
+   produto (jul/2026): responde "por que usar" (mecanismo causal) antes de
+   "como usar" (simulador), sem descartar o simulador — só adia sua entrada.
+   É uma camada de apresentação por cima do conteúdo existente (position:
+   absolute cobrindo split-right), não uma mudança de arquitetura: o
+   liveDetectDemo/simPerguntas por baixo continuam intocados. */
+.hero-flow-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+  cursor: pointer;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.hero-flow-intro.hfi-hide {
+  opacity: 0;
+  transform: scale(0.98);
+  pointer-events: none;
+}
+.hfi-eyebrow {
+  font-family: var(--ff);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: hfiFadeIn 0.5s ease forwards;
+  animation-delay: 0.1s;
+}
+.hfi-steps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 300px;
+}
+.hfi-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: hfiStepIn 0.5s ease forwards;
+}
+.hfi-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: rgba(0,217,110,0.08);
+  border: 1px solid rgba(0,217,110,0.2);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hfi-label {
+  font-family: var(--ff);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+.hfi-line {
+  width: 2px;
+  height: 0;
+  margin-left: 21px;
+  background: linear-gradient(to bottom, var(--accent), rgba(0,217,110,0.15));
+  animation: hfiLineIn 0.6s ease forwards;
+}
+.hfi-cta {
+  margin-top: 28px;
+  opacity: 0;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: var(--ff);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  animation: hfiFadeIn 0.5s ease forwards;
+}
+.hero-flow-intro:hover .hfi-cta {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+@keyframes hfiFadeIn { to { opacity: 1; } }
+@keyframes hfiStepIn { to { opacity: 1; transform: translateY(0); } }
+@keyframes hfiLineIn { to { height: 22px; } }
+@media (prefers-reduced-motion: reduce) {
+  .hfi-eyebrow, .hfi-step, .hfi-cta { animation: none; opacity: 1; transform: none; }
+  .hfi-line { animation: none; height: 22px; }
+}
+
 .dash-mockup {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -2405,10 +2558,35 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <div class="hero-tag" id="heroTagDesktop"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
       <h1 id="heroH1Desktop">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
       <p id="heroSubDesktop">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
-      <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
-        <span class="badge"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local</span>
-        <span class="badge"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações automáticas</span>
-        <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
+      <div class="hero-badges-detailed" style="margin-bottom:32px">
+        <div class="hero-badge-detailed">
+          <span class="hbd-icon"><i data-lucide="lock" style="width:15px;height:15px" aria-hidden="true"></i></span>
+          <div>
+            <div class="hbd-title">Processamento local</div>
+            <div class="hbd-desc">Seu extrato não precisa sair do seu dispositivo.</div>
+          </div>
+        </div>
+        <div class="hero-badge-detailed">
+          <span class="hbd-icon"><i data-lucide="bar-chart-3" style="width:15px;height:15px" aria-hidden="true"></i></span>
+          <div>
+            <div class="hbd-title">Baseado na e-Financeira</div>
+            <div class="hbd-desc">Construído sobre os sinais que compõem sua movimentação.</div>
+          </div>
+        </div>
+        <div class="hero-badge-detailed">
+          <span class="hbd-icon"><i data-lucide="zap" style="width:15px;height:15px" aria-hidden="true"></i></span>
+          <div>
+            <div class="hbd-title">Resultado em minutos</div>
+            <div class="hbd-desc">Sem instalação e sem configuração complexa.</div>
+          </div>
+        </div>
+        <div class="hero-badge-detailed">
+          <span class="hbd-icon"><i data-lucide="circle-check" style="width:15px;height:15px" aria-hidden="true"></i></span>
+          <div>
+            <div class="hbd-title">Sem cadastro para começar</div>
+            <div class="hbd-desc">Veja a prévia antes de decidir desbloquear.</div>
+          </div>
+        </div>
       </div>
       <div class="split-cta">
         <button class="split-cta-primary" onclick="showPage('extrato')">
@@ -2449,6 +2627,34 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 
     <!-- DIREITA: quiz desktop -->
     <div class="split-right">
+      <!-- [V3.1] Painel vivo — diagrama causal animado, cobre o conteúdo abaixo
+           por ~7s ou até clique/hover, depois revela liveDetectDemo+simulador
+           (intocados). Ver initHeroFlowIntro() em app.js. -->
+      <div class="hero-flow-intro" id="heroFlowIntro">
+        <div class="hfi-eyebrow">// como o guardião analisa</div>
+        <div class="hfi-steps">
+          <div class="hfi-step" style="animation-delay:0.3s">
+            <span class="hfi-icon"><i data-lucide="file-text" style="width:20px;height:20px" aria-hidden="true"></i></span>
+            <span class="hfi-label">Extrato importado</span>
+          </div>
+          <div class="hfi-line" style="animation-delay:0.9s"></div>
+          <div class="hfi-step" style="animation-delay:1.9s">
+            <span class="hfi-icon"><i data-lucide="search" style="width:20px;height:20px" aria-hidden="true"></i></span>
+            <span class="hfi-label">Sinais encontrados</span>
+          </div>
+          <div class="hfi-line" style="animation-delay:2.5s"></div>
+          <div class="hfi-step" style="animation-delay:3.5s">
+            <span class="hfi-icon"><i data-lucide="brain" style="width:20px;height:20px" aria-hidden="true"></i></span>
+            <span class="hfi-label">Mecanismo provável</span>
+          </div>
+          <div class="hfi-line" style="animation-delay:4.1s"></div>
+          <div class="hfi-step" style="animation-delay:5.1s">
+            <span class="hfi-icon"><i data-lucide="clipboard-check" style="width:20px;height:20px" aria-hidden="true"></i></span>
+            <span class="hfi-label">Diagnóstico preventivo</span>
+          </div>
+        </div>
+        <button class="hfi-cta" style="animation-delay:5.6s" onclick="heroFlowSkip(event)">Começar análise agora →</button>
+      </div>
       <!-- Demo de detecções ao vivo — aparece antes do quiz -->
       <div id="liveDetectDemo" style="margin-bottom:16px">
         <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
@@ -2567,10 +2773,35 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="hero-tag" id="heroTagMobile"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
     <h1 id="heroH1Mobile">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
     <p id="heroSubMobile">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
-    <div class="hero-badges">
-      <span class="badge"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local</span>
-      <span class="badge"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações automáticas</span>
-      <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
+    <div class="hero-badges-detailed">
+      <div class="hero-badge-detailed">
+        <span class="hbd-icon"><i data-lucide="lock" style="width:15px;height:15px" aria-hidden="true"></i></span>
+        <div>
+          <div class="hbd-title">Processamento local</div>
+          <div class="hbd-desc">Seu extrato não precisa sair do seu dispositivo.</div>
+        </div>
+      </div>
+      <div class="hero-badge-detailed">
+        <span class="hbd-icon"><i data-lucide="bar-chart-3" style="width:15px;height:15px" aria-hidden="true"></i></span>
+        <div>
+          <div class="hbd-title">Baseado na e-Financeira</div>
+          <div class="hbd-desc">Construído sobre os sinais que compõem sua movimentação.</div>
+        </div>
+      </div>
+      <div class="hero-badge-detailed">
+        <span class="hbd-icon"><i data-lucide="zap" style="width:15px;height:15px" aria-hidden="true"></i></span>
+        <div>
+          <div class="hbd-title">Resultado em minutos</div>
+          <div class="hbd-desc">Sem instalação e sem configuração complexa.</div>
+        </div>
+      </div>
+      <div class="hero-badge-detailed">
+        <span class="hbd-icon"><i data-lucide="circle-check" style="width:15px;height:15px" aria-hidden="true"></i></span>
+        <div>
+          <div class="hbd-title">Sem cadastro para começar</div>
+          <div class="hbd-desc">Veja a prévia antes de decidir desbloquear.</div>
+        </div>
+      </div>
     </div>
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
