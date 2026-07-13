@@ -2503,6 +2503,14 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <div class="result-box">
               <div class="result-hero" id="resultHero"></div>
               <div class="alerts" id="resultAlerts"></div>
+              <!-- [FIX 2026-07] Container que faltava — referenciado por revealResult() em app.js
+                   (busca por 'desktopInlineUpload') mas nunca existiu aqui, então o painel de
+                   upload inline pós-simulador nunca aparecia no desktop (o botão do CTA caía
+                   no fallback de navegar para a página de Análise via showPage('extrato')).
+                   Reaproveita 100% da lógica já funcional do equivalente mobile
+                   (inlineUploadBlock): renderBankGuide(), inlineUploadClick(), inlineDropHandle(),
+                   inlineGoToExtrato() — nenhuma função nova, só o container que o JS já esperava. -->
+              <div id="desktopInlineUpload" style="display:none;margin-top:16px"></div>
               <div class="result-upgrade">
                 <div class="upgrade-label">// ativar monitoramento real</div>
                 <div class="upgrade-cards">
