@@ -29,13 +29,10 @@ function _applyPage(id) {
     window.scrollTo(0, 0);
     // Nav desktop
     document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-    // [FIX 2026-07 — auditoria] Era por índice de array (querySelectorAll(...)[3]) —
-    // quebrava quando "Histórico" está visível (usuário logado), porque desloca a
-    // posição de "Institucional" no array. Trocado por atributo data-page explícito,
-    // resistente a itens condicionais aparecendo/sumindo do menu.
-    document.querySelectorAll('.nav-link[data-page]').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.page === id);
-    });
+    if (id === 'home') document.querySelectorAll('.nav-link')[0]?.classList.add('active');
+    if (id === 'extrato') document.querySelectorAll('.nav-link')[1]?.classList.add('active');
+    if (id === 'planos') document.querySelectorAll('.nav-link')[2]?.classList.add('active');
+    if (id === 'institucional') document.querySelectorAll('.nav-link')[3]?.classList.add('active');
     // Nav drawer mobile
     document.querySelectorAll('.nav-drawer-link').forEach(b => b.classList.remove('active'));
     if (id === 'home') document.getElementById('drawerHome')?.classList.add('active');
@@ -119,9 +116,9 @@ const PRICES = {
 const BANK_GUIDES = {
   nubank:   { label:'NUBANK · Exportar CSV',   color:'#a78bfa', bg:'rgba(130,80,255,0.05)', border:'rgba(130,80,255,0.15)', steps:['Abra o <strong>app do Nubank</strong> no celular','Toque em <strong>Extrato</strong> → role até o fim','Toque em <strong>"Exportar para Excel"</strong>','Salve o arquivo e selecione abaixo'] },
   inter:    { label:'INTER · Exportar CSV',    color:'#fb923c', bg:'rgba(255,100,0,0.05)',  border:'rgba(255,100,0,0.2)',   steps:['Abra o <strong>app do Inter</strong> no celular','Vá em <strong>Extrato</strong> → toque no ícone de compartilhar','Selecione <strong>"Exportar CSV"</strong> e salve','Selecione o arquivo abaixo'] },
-  bb:       { label:'BANCO DO BRASIL · Exportar OFX', color:'#60a5fa', bg:'rgba(0,100,220,0.05)', border:'rgba(0,100,220,0.2)', steps:['Acesse o <strong>Internet Banking</strong> do BB pelo computador','Vá em <strong>Extrato</strong> → selecione de 3 a 12 meses','Clique em <strong>"Salvar/Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
-  itau:     { label:'ITAÚ · Exportar OFX',    color:'#fbbf24', bg:'rgba(230,150,0,0.05)', border:'rgba(230,150,0,0.2)',  steps:['Acesse <strong>itau.com.br</strong> ou o app do Itaú','Vá em <strong>Extrato</strong> → selecione de 3 a 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
-  bradesco: { label:'BRADESCO · Exportar OFX', color:'#f87171', bg:'rgba(220,30,30,0.05)', border:'rgba(220,30,30,0.2)',  steps:['Acesse <strong>bradesco.com.br</strong> pelo computador','Vá em <strong>Extrato</strong> → selecione de 3 a 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  bb:       { label:'BANCO DO BRASIL · Exportar OFX', color:'#60a5fa', bg:'rgba(0,100,220,0.05)', border:'rgba(0,100,220,0.2)', steps:['Acesse o <strong>Internet Banking</strong> do BB pelo computador','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Salvar/Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  itau:     { label:'ITAÚ · Exportar OFX',    color:'#fbbf24', bg:'rgba(230,150,0,0.05)', border:'rgba(230,150,0,0.2)',  steps:['Acesse <strong>itau.com.br</strong> ou o app do Itaú','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
+  bradesco: { label:'BRADESCO · Exportar OFX', color:'#f87171', bg:'rgba(220,30,30,0.05)', border:'rgba(220,30,30,0.2)',  steps:['Acesse <strong>bradesco.com.br</strong> pelo computador','Vá em <strong>Extrato</strong> → selecione os últimos 12 meses','Clique em <strong>"Exportar"</strong> → escolha <strong>OFX</strong>','Selecione o arquivo abaixo'] },
 };
 
 function renderBankGuide(banco, containerId) {
@@ -133,33 +130,6 @@ function renderBankGuide(banco, containerId) {
     <div style="font-size:10px;font-weight:700;color:${g.color};letter-spacing:0.5px;margin-bottom:2px">${g.label}</div>
     ${g.steps.map((s,i)=>`<div style="display:flex;gap:8px;align-items:flex-start"><span style="min-width:20px;height:20px;border-radius:50%;background:${g.bg.replace('0.05','0.15')};color:${g.color};font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</span><span style="font-size:12px;color:var(--text2);line-height:1.5">${s}</span></div>`).join('')}
   </div>`;
-}
-
-// [V3.2] Cards de banco em extStep2 (upload). "outro" não tem guia específico
-// em BANK_GUIDES — mostra o bloco genérico (formato/período) em vez de nada.
-// Só afeta apresentação: não muda qual parser roda (isso continua decidido
-// por eDetectFormat() a partir do conteúdo real do arquivo, não da escolha aqui).
-function selecionarBancoExtrato(banco) {
-  document.querySelectorAll('#extBankCards .ext-bank-card').forEach(btn => {
-    const selecionado = btn.dataset.banco === banco;
-    btn.classList.toggle('selected', selecionado);
-    btn.setAttribute('aria-pressed', String(selecionado));
-  });
-  const guiaEl = document.getElementById('extBankGuideContent');
-  const genericoEl = document.getElementById('extBankGuideGenerico');
-  if (banco === 'outro' || !BANK_GUIDES[banco]) {
-    if (guiaEl) guiaEl.innerHTML = '';
-    // [V3.2/auditoria] Regra de período unificada — antes o texto genérico dizia
-    // "pelo menos 1 mês" enquanto os guias de BB/Itaú/Bradesco diziam "selecione
-    // os últimos 12 meses", parecendo contraditório. Agora usa a mesma faixa.
-    if (genericoEl) genericoEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Aceitamos a partir de 1 mês. Para uma análise mais confiável, envie de 3 a 12 meses.</div>
-    </div>`;
-  } else {
-    if (genericoEl) genericoEl.innerHTML = '';
-    renderBankGuide(banco, 'extBankGuideContent');
-  }
 }
 
 // ===== CHECKOUT =====
@@ -192,17 +162,17 @@ function _initPrices() {
 
 // ===== PRO FREE MODE =====
 const PRO_FREE_MODE = false;
-// [FIX 2026-07] Ativadas para HOMOLOGAÇÃO (não é ativação em produção — esta cópia do
-// arquivo é para teste em ambiente separado, antes de qualquer deploy real). Ver
-// docs/decisions para o plano de rollout: homologação → validação com dados reais →
-// produção gradual. Reverter para false é só trocar de volta estas duas linhas.
-let USE_CAUSAL_RESULT_RENDERER = true;
+// [DEC-018-B] Feature flag: quando true, o renderer do resultado passa a consumir
+// EXCLUSIVAMENTE o Contrato do Resultado (montarModeloDeResultado/validarContrato),
+// em vez de ler _eConsolidated/_eSources diretamente. Começa em false — ativar
+// manualmente para comparar lado a lado com o renderer legado antes de virar padrão.
+let USE_CAUSAL_RESULT_RENDERER = false;
 // [Fatia 2A] Feature flag separada da anterior: aquela controla a FONTE DOS DADOS
 // (contrato vs. objeto bruto do motor); esta controla a COMPOSIÇÃO VISUAL (cards
 // com resumo/expansão + cadeia causal + Detalhes técnicos recolhido, aprovado no
 // mockup de jul/2026). V2 pressupõe o contrato como fonte — só tem efeito quando
 // USE_CAUSAL_RESULT_RENDERER também está true.
-let USE_CAUSAL_RESULT_V2 = true;
+let USE_CAUSAL_RESULT_V2 = false;
 
 function showProFreeBanner() {
   showPage('planos');
@@ -223,7 +193,7 @@ function initProFreeMode() {
     const ucPro = document.getElementById('ucProText');
     if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
     const popular = document.getElementById('planProBadge');
-    if (popular) popular.innerHTML = '<i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO';
+    if (popular) popular.textContent = '<i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO';
     return;
   }
   const plansWrap = document.querySelector('#page-planos .plans-page');
@@ -281,7 +251,7 @@ async function openCheckout(plan) {
   const _os = document.getElementById('orderSummary');
   if (_os) {
     _os.innerHTML = `
-    <div class="os-icon">${p.icon||''}</div>
+    <div class="os-icon">${sanitize(p.icon||'')}</div>
     <div class="os-info">
       <div class="os-name">${sanitize(p.name||'')}</div>
       <div class="os-desc">${sanitize(p.desc||'')}</div>
@@ -505,17 +475,9 @@ async function startAvulsoCheckoutPro() {
     });
 
     if (!res.ok) {
-      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
-      // throw new Error() e de lá pra tela, filtrado só pela heurística de
-      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
-      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
-      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
-      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
-      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
-      let detalheBackend = `HTTP ${res.status}`;
-      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
-      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
-      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
     }
 
     const data = await res.json();
@@ -580,17 +542,9 @@ async function startProSubscription() {
     });
 
     if (!res.ok) {
-      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
-      // throw new Error() e de lá pra tela, filtrado só pela heurística de
-      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
-      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
-      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
-      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
-      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
-      let detalheBackend = `HTTP ${res.status}`;
-      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
-      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
-      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
     }
 
     const data = await res.json();
@@ -648,17 +602,9 @@ async function processCardPayment(cardData) {
     });
 
     if (!res.ok) {
-      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
-      // throw new Error() e de lá pra tela, filtrado só pela heurística de
-      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
-      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
-      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
-      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
-      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
-      let detalheBackend = `HTTP ${res.status}`;
-      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
-      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
-      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
     }
 
     const data = await res.json();
@@ -767,17 +713,9 @@ async function goToMercadoPago() {
     }
 
     if (!res.ok) {
-      // [FIX 2026-07] Antes, j.error (mensagem que o BACKEND manda) ia direto pro
-      // throw new Error() e de lá pra tela, filtrado só pela heurística de
-      // eSafeErrorMsg — que não tem como saber com certeza se aquele texto é
-      // técnico (erro cru da API do Mercado Pago, do Supabase, etc.) ou uma
-      // mensagem pensada para o usuário. Agora o detalhe completo do backend vai
-      // pro console (nunca se perde, dá pra debugar), e o usuário sempre recebe
-      // uma mensagem genérica seguramente amigável — decidida aqui, não por heurística.
-      let detalheBackend = `HTTP ${res.status}`;
-      try { const j = await res.json(); detalheBackend = j.error || detalheBackend; } catch(_) {}
-      console.error('[Guardião] erro do backend de pagamento:', detalheBackend);
-      throw new Error('Não foi possível concluir o pagamento agora. Tente novamente em alguns instantes.');
+      let errMsg = `Erro ${res.status}`;
+      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
+      throw new Error(errMsg);
     }
 
     const data = await res.json();
@@ -1261,7 +1199,7 @@ async function doCadastro() {
   const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome } } });
   btn.textContent = 'Criar conta →';
   if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
-  ok.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
+  ok.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
   ok.style.display = 'block';
   setTimeout(() => closeLoginDirect(), 2000);
 }
@@ -1319,7 +1257,7 @@ async function extStep1Done() {
       autoSkipExtStep1(email);
     } else {
       err.style.color = 'var(--accent)';
-      err.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Confirme seu e-mail e volte para continuar.';
+      err.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Confirme seu e-mail e volte para continuar.';
       err.style.display = 'block';
     }
   } else {
@@ -1839,33 +1777,9 @@ function openQuiz() {
   window._stopDetectionFeed = () => {};
 })();
 
-// [V3.1] Painel vivo do hero (Home, desktop): diagrama causal animado que se
-// transforma no simulador já existente — camada de apresentação por cima do
-// conteúdo existente (#liveDetectDemo + #simPerguntas), que continuam intocados
-// por baixo. Dispensa em 3 casos: timer (~7.5s, dá tempo da animação de 4 passos
-// terminar), clique em qualquer ponto do painel, ou clique no CTA interno.
-// Respeita prefers-reduced-motion (pula direto pro simulador, sem animação).
-function heroFlowSkip(event) {
-  if (event) event.stopPropagation();
-  const el = document.getElementById('heroFlowIntro');
-  if (!el || el.dataset.dismissed === '1') return;
-  el.dataset.dismissed = '1';
-  el.classList.add('hfi-hide');
-  setTimeout(() => { el.style.display = 'none'; }, 500);
-}
-function initHeroFlowIntro() {
-  const el = document.getElementById('heroFlowIntro');
-  if (!el) return; // não existe no mobile — só o hero desktop tem esse painel
-  const reduzMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduzMovimento) { heroFlowSkip(); return; }
-  el.addEventListener('click', () => heroFlowSkip());
-  setTimeout(() => heroFlowSkip(), 7500);
-}
-
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
   initProFreeMode();
-  initHeroFlowIntro();
   setTimeout(() => {
     const bar = document.getElementById('mockBar');
     if (bar) bar.style.width = '38%';
@@ -1952,14 +1866,9 @@ function eSafeErrorMsg(e, fallback) {
 }
 function eParseBRL(s){
   if(!s)return 0;
-  // [FIX 2026-07] Achado na varredura de bugs: valores com prefixo de moeda (ex.: "R$ 1.234,56",
-  // formato que alguns exports de CSV/PDF incluem na própria coluna de valor) batiam na regex
-  // de validação, falhavam, e caíam no fallback "parsed||0" — a transação virava R$0,00
-  // silenciosamente, sem erro nem log, subtraindo dado real do cálculo sem ninguém perceber.
-  // Removendo qualquer caractere que não seja dígito, vírgula, ponto ou sinal antes de validar.
-  s=String(s).trim().replace(/\s/g,'').replace(/[^\d,.\-+]/g,'');
+  s=String(s).trim().replace(/\s/g,'');
   const neg=s.startsWith('-');
-  const abs=s.replace(/^[-+]/,'');
+  const abs=s.replace(/^-/,'');
   let parsed;
   if(/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(abs))parsed=parseFloat(abs.replace(/\./g,'').replace(',','.'));
   else parsed=parseFloat(abs.replace(',','.'));
@@ -1968,18 +1877,11 @@ function eParseBRL(s){
 function eParseDate(s){
   if(!s)return null;
   s=s.trim().replace(/['"]/g,'');
-  let m,d;
-  // [FIX 2026-07] Achado na varredura de bugs: (1) dia/mês sem zero à esquerda (ex. "1/1/2025")
-  // não batia a regex \d{2} e a transação inteira era descartada; agora aceita \d{1,2}.
-  // (2) datas de calendário inválidas (ex. "31/02/2025") não eram rejeitadas — new Date()
-  // "rola" automaticamente pro mês seguinte (vira 03/03/2025) sem avisar, mascarando dado
-  // corrompido como se fosse uma data real. Agora valida que a data construída bate com os
-  // números originais; se não bater, retorna null em vez de silenciosamente deslocar a data.
-  const valida=(y,mo,da)=>{const dt=new Date(y,mo-1,da);return(dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===da)?dt:null;};
-  if((m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/)))return valida(+m[3],+m[2],+m[1]);
-  if((m=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/)))return valida(+m[1],+m[2],+m[3]);
-  if((m=s.match(/^(\d{4})(\d{2})(\d{2})/)))return valida(+m[1],+m[2],+m[3]);
-  if((m=s.match(/^(\d{1,2})[\/\-](\d{1,2})$/)))return valida(new Date().getFullYear(),+m[2],+m[1]);
+  let m;
+  if((m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/)))return new Date(+m[3],+m[2]-1,+m[1]);
+  if((m=s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
+  if((m=s.match(/^(\d{4})(\d{2})(\d{2})/)))return new Date(+m[1],+m[2]-1,+m[3]);
+  if((m=s.match(/^(\d{2})[\/\-](\d{2})$/)))return new Date(new Date().getFullYear(),+m[2]-1,+m[1]);
   return null;
 }
 function eDetectFormat(c,fn){
@@ -2915,7 +2817,7 @@ function eAnalyzeSingle(txns,bank,rendaDeclarada,perfilUsuario){
   const _nMesesF2=Math.max(1,Object.keys(monthly).filter(k=>k!=='unk').length);
   const _pesoF2base=Math.min(15,monthsOverLimit*5);
   const f2=(_padraoSazonal&&_rendaCobre)?0:_rendaCobre?Math.min(2,_pesoF2base):_pesoF2base;
-  if(f2>0){_fator(f2,`Foram encontrados sinais que merecem conferência: Pix consolidado acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)} em ${monthsOverLimit} mês(es)${_rendaCobre?' (parcialmente coberto pela renda declarada)':''}`,'O Guardião identifica esse volume porque lê seu extrato diretamente. A e-Financeira exige que bancos informem à Receita totais mensais agregados de movimentação quando alcançam os limites de obrigatoriedade — não o detalhamento por modalidade (Pix, TED, etc.) que aparece aqui.','Não se caracteriza como risco quando o volume de Pix for compatível com a renda declarada ou com atividade profissional documentada (MEI, autônomo com notas).',monthsOverLimit>=3?0.95:0.75,['pix_limit_'+monthsOverLimit],'F2_pix_limite',1.0);fatores[fatores.length-1].evidencias=[{ok:true,texto:`${monthsOverLimit} mês(es) com Pix acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)}`},{ok:_pixMediaMensal>0,texto:`Média mensal de Pix: ${fmtBRL(_pixMediaMensal)}`},{ok:_rendaCobre,texto:_rendaCobre?'Renda declarada cobre o volume de Pix':'Renda declarada não cobre o volume detectado'}];}
+  if(f2>0){_fator(f2,`Foram encontrados sinais que merecem conferência: Pix consolidado acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)} em ${monthsOverLimit} mês(es)${_rendaCobre?' (parcialmente coberto pela renda declarada)':''}`,'Bancos são obrigados por lei a reportar à Receita toda movimentação mensal de Pix acima de R$5.000.','Não se caracteriza como risco quando o volume de Pix for compatível com a renda declarada ou com atividade profissional documentada (MEI, autônomo com notas).',monthsOverLimit>=3?0.95:0.75,['pix_limit_'+monthsOverLimit],'F2_pix_limite',1.0);fatores[fatores.length-1].evidencias=[{ok:true,texto:`${monthsOverLimit} mês(es) com Pix acima de ${fmtBRL(ENGINE_CONFIG.PIX_LIMIT_PF)}`},{ok:_pixMediaMensal>0,texto:`Média mensal de Pix: ${fmtBRL(_pixMediaMensal)}`},{ok:_rendaCobre,texto:_rendaCobre?'Renda declarada cobre o volume de Pix':'Renda declarada não cobre o volume detectado'}];}
   if(_padraoSazonal&&fatores.length>0){const _f2saz=[...fatores].reverse().find(f=>f.ids&&f.ids.some(id=>id.startsWith('pix_limit')));if(_f2saz){const _reducaoF2Sazonal=_padraoSazonalForte?0.30:0.55;const _pesoF2orig=_f2saz.peso;const _pesoF2pos=Math.round(_pesoF2orig*_reducaoF2Sazonal);const _deltaF2=_pesoF2orig-_pesoF2pos;_f2saz.peso=_pesoF2pos;score=Math.max(0,score-_deltaF2);_f2saz.motivo=(_f2saz.motivo||'').replace(' [sazonalidade detectada — peso reduzido]','')+' [sazonalidade detectada — peso reduzido]';}}
 
   // F2b
@@ -3017,14 +2919,6 @@ function eConsolidate(results){
   const allRaw=_rv.flatMap(r=>r.classified);
   const allDedup=deduplicateCrossSource(allRaw);
   const allC=applyInternalDetection(allDedup);
-  // [FIX 2026-07 — auditoria] Antes, mesCritico/perfil vinham só do PRIMEIRO
-  // extrato processado (_rv[0]), não do conjunto consolidado — se o usuário
-  // enviasse Nubank+Inter+Itaú, o mês crítico exibido podia ser só do Nubank.
-  // Corrigido reaproveitando aggregateMonthly()/calcProfile() (mesmas funções
-  // puras que cada conta já usa individualmente) sobre allC, que já passou
-  // por dedup cross-source e detecção de movimentação interna.
-  const monthlyConsolidado=aggregateMonthly(allC);
-  const perfilConsolidado=calcProfile(monthlyConsolidado);
   const credits=allC.filter(t=>t.value>0);
   const debits=allC.filter(t=>t.value<0);
   const suspicious=allC.filter(t=>t.risk==='suspicious'&&t.value>0);
@@ -3036,24 +2930,7 @@ function eConsolidate(results){
   const especieTotal=credits.filter(t=>t.cat==='especie').reduce((a,t)=>a+t.value,0);
   const formalTotal=credits.filter(t=>t.cat==='formal').reduce((a,t)=>a+t.value,0);
   const suspTotal=suspicious.reduce((a,t)=>a+t.value,0);
-  // [FIX 2026-07 — auditoria] Antes, totalMOL somava a CONTAGEM de meses de cada
-  // conta individualmente — se Nubank e Inter ultrapassassem o limite no MESMO
-  // mês-calendário, contava como 2 meses em vez de 1. Corrigido: soma o Pix
-  // consolidado por mês-calendário real através de allC (já com movimentação
-  // interna identificada via applyInternalDetection — exclui transferências
-  // entre contas do próprio titular do total que conta pro limite), e só então
-  // conta quantos meses-calendário distintos ultrapassam ENGINE_CONFIG.PIX_LIMIT_PF.
-  const totalMOL=Object.entries(monthlyConsolidado).filter(([k,m])=>{
-    if(k==='unk')return false;
-    const pixNaoInterno=allC.filter(t=>{
-      if(!t.date||!(t.date instanceof Date)||isNaN(t.date))return false;
-      const key=t.date.getFullYear()+'-'+String(t.date.getMonth()+1).padStart(2,'0');
-      if(key!==k)return false;
-      if(t.internalMove==='confirmed'||t.internalMove==='probable')return false;
-      return normalizeDesc(t.desc||'').includes('pix');
-    }).reduce((a,t)=>a+Math.abs(t.value),0);
-    return pixNaoInterno>=ENGINE_CONFIG.PIX_LIMIT_PF;
-  }).length;
+  const totalMOL=_rv.reduce((a,r)=>a+r.monthsOverLimit,0);
   const totalVol=_rv.reduce((a,r)=>a+r.totalCredits,0);
   let score=totalVol>0?_rv.reduce((a,r)=>a+r.score*(r.totalCredits/totalVol),0):_rv.reduce((a,r)=>a+r.score,0)/_rv.length;
   if(_rv.filter(r=>r.score>55).length>=2)score=Math.min(100,score+10);
@@ -3063,30 +2940,18 @@ function eConsolidate(results){
   const totalRecorrentes=_rv.reduce((a,r)=>a+r.recorrentes.length,0);
   const alerts=[];
   if(suspicious.length>0)alerts.push({type:'red',icon:'<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${suspicious.length} crédito(s) de alto risco — ${fmtBRL(suspTotal)}`,text:`Representam ${Math.round(suspTotal/totalCredits*100)}% das entradas totais sem justificativa fiscal clara.`});
-  if(totalMOL>0)alerts.push({type:'red',icon:'<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Pix acima de R$5.000/mês em ${totalMOL} mês(es) — ${fmtBRL(pixTotal)} total`,text:`Instituições financeiras informam totais mensais agregados à Receita via e-Financeira quando os valores alcançam o limite de obrigatoriedade. O Guardião identifica esse volume porque lê seu extrato diretamente — a Receita não recebe o detalhamento por Pix especificamente.`});
+  if(totalMOL>0)alerts.push({type:'red',icon:'<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Pix acima de R$5.000/mês em ${totalMOL} mês(es) — ${fmtBRL(pixTotal)} total`,text:`Movimentações mensais de Pix nesse patamar podem ser objeto de cruzamentos fiscais via sistema e-Financeira.`});
   if(especieTotal>0){const pctEspecie=Math.round(especieTotal/totalCredits*100);alerts.push({type:pctEspecie>=20?'red':'yellow',icon:'<i data-lucide="banknote" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Depósitos em espécie: ${fmtBRL(especieTotal)} (${pctEspecie}% das entradas)`,text:`Depósitos em espécie acima de R$2.000/mês devem ser informados pelo banco à Receita.`});}
   if(todasComerciais.length>0){const totalComercial=todasComerciais.reduce((a,r)=>a+r.total,0);alerts.push({type:'red',icon:'<i data-lucide="store" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${todasComerciais.length} padrão(ões) de atividade comercial recorrente — ${fmtBRL(totalComercial)}`,text:`Recebimentos com frequência e ticket médio regulares indicam possível atividade comercial.`});}
-  if(allC.some(t=>t.flag==='Investimento'&&t.value>0)){const t=allC.filter(x=>x.flag==='Investimento'&&x.value>0).reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Movimentações de investimento: ${fmtBRL(t)}`,text:`CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos tributáveis ou isentos conforme o tipo. Este valor soma entradas classificadas como investimento (resgates, rendimentos, dividendos) — não distingue automaticamente principal de rendimento tributável.`});}
-  if(allC.some(t=>t.flag==='Aluguel'&&t.value>0)){const t=allC.filter(x=>x.flag==='Aluguel'&&x.value>0).reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Recebimentos de aluguel: ${fmtBRL(t)}`,text:`Devem ser informados mensalmente no carnê-leão e na declaração anual.`});}
+  if(allC.some(t=>t.flag==='Investimento')){const t=allC.filter(x=>x.flag==='Investimento').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Rendimentos de investimentos: ${fmtBRL(t)}`,text:`CDB, fundos, cripto e dividendos precisam ser declarados como rendimentos tributáveis ou isentos conforme o tipo.`});}
+  if(allC.some(t=>t.flag==='Aluguel')){const t=allC.filter(x=>x.flag==='Aluguel').reduce((a,x)=>a+x.value,0);alerts.push({type:'yellow',icon:'<i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Recebimentos de aluguel: ${fmtBRL(t)}`,text:`Devem ser informados mensalmente no carnê-leão e na declaração anual.`});}
   if(attention.length>0&&suspicious.length===0)alerts.push({type:'yellow',icon:'<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${attention.length} transação(ões) merecem revisão`,text:`Créditos que podem ser questionados. Tenha comprovantes de origem disponíveis.`});
   const internos=allC.filter(t=>t.internalMove==='confirmed'||t.internalMove==='probable');
-  // [FIX 2026-07 — auditoria] Texto antigo afirmava "excluídos do score" — isso só
-  // é verdade para movimentação interna identificável DENTRO de cada conta (isso já
-  // acontece em eAnalyzeSingle). Transferências ENTRE bancos diferentes só são
-  // identificáveis aqui, no nível consolidado — depois que o score de cada conta já
-  // foi calculado individualmente. Ver nota em eConsolidate() sobre a limitação
-  // conhecida: o score consolidado é uma média ponderada dos scores por conta, não
-  // um recálculo sobre allC. Corrigir isso de verdade exige rodar o motor de score
-  // (F1-F8) sobre o conjunto consolidado em vez de por conta — mudança maior,
-  // registrada como limitação conhecida, não implementada nesta correção.
-  if(internos.length>0){const totalInterno=internos.filter(t=>t.value>0).reduce((a,t)=>a+t.value,0);alerts.push({type:'green',icon:'<i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${internos.length} movimentação(ões) interna(s) identificada(s) — ${fmtBRL(totalInterno)}`,text:`Transferências entre contas do mesmo titular foram identificadas e excluídas das manifestações e alertas. O índice de atenção pode não refletir totalmente essa exclusão quando a transferência ocorre entre bancos diferentes — cada extrato ainda é pontuado individualmente antes da consolidação.`});}
+  if(internos.length>0){const totalInterno=internos.filter(t=>t.value>0).reduce((a,t)=>a+t.value,0);alerts.push({type:'green',icon:'<i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`${internos.length} movimentação(ões) interna(s) — ${fmtBRL(totalInterno)} excluídos do score`,text:`Transferências entre contas do mesmo titular foram identificadas e excluídas do cálculo de risco.`});}
   if(alerts.length===0)alerts.push({type:'green',icon:'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:'Perfil de créditos dentro do esperado',text:`Nenhum crédito de alto risco encontrado nos ${_rv.length} extrato(s) analisados.`});
   if(todosFatores.length>0){const top3=todosFatores.sort((a,b)=>b.peso-a.peso).slice(0,3);const explicacao=top3.map(f=>`• ${f.motivo}`).join(' ');alerts.push({type:'blue',icon:'<i data-lucide="brain" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:`Por que o índice de atenção é ${score}/100`,text:`O índice aumentou porque: ${explicacao}.`});}
   alerts.push({type:'blue',icon:'<i data-lucide="lightbulb" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>',title:'Próximo passo',text:`Compare os ${credits.length} créditos (${fmtBRL(totalCredits)}) com o total declarado no IR.`});
-  const _totalTxnsValidas=_rv.reduce((a,r)=>a+(r.txnsValidas||0),0);
-  const confidenceConsolidada=_totalTxnsValidas>0?_rv.reduce((a,r)=>a+(r.confidence||0)*(r.txnsValidas||0),0)/_totalTxnsValidas:0;
-  const parserConfidenceConsolidada=_totalTxnsValidas>0?_rv.reduce((a,r)=>a+(r.parserConfidence||0)*(r.txnsValidas||0),0)/_totalTxnsValidas:0;
-  return{score,totalCredits,totalDebits,pixTotal,especieTotal,formalTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,indiceConsumo:totalCredits>0?totalDebits/totalCredits:0,indiceEspecie:totalCredits>0?especieTotal/totalCredits:0,recorrentes:totalRecorrentes,comercialOculta:todasComerciais.length,alerts,all:allC,fatores:todosFatores,internos,mesCritico:perfilConsolidado.mesCritico,perfil:perfilConsolidado,parserConfidence:parserConfidenceConsolidada,txnsDescartadas:_rv.reduce((a,r)=>a+(r.txnsDescartadas||0),0),confidence:confidenceConsolidada,numEvidencias:Math.max(..._rv.map(r=>r.numEvidencias||0)),manifestacoes,indiceMaturidade:calcularIndiceMaturidade(manifestacoes)};
+  return{score,totalCredits,totalDebits,pixTotal,especieTotal,formalTotal,suspCount:suspicious.length,attCount:attention.length,creditCount:credits.length,totalTxns:allC.length,indiceConsumo:totalCredits>0?totalDebits/totalCredits:0,indiceEspecie:totalCredits>0?especieTotal/totalCredits:0,recorrentes:totalRecorrentes,comercialOculta:todasComerciais.length,alerts,all:allC,fatores:todosFatores,internos,mesCritico:_rv[0]?.mesCritico||null,perfil:_rv[0]?.perfil||{},parserConfidence:_rv.length>0?_rv.reduce((a,r)=>a+(r.parserConfidence||0),0)/_rv.length:0,txnsDescartadas:_rv.reduce((a,r)=>a+(r.txnsDescartadas||0),0),confidence:_rv.length>0?_rv.reduce((a,r)=>a+(r.confidence||0),0)/_rv.length:0,numEvidencias:Math.max(..._rv.map(r=>r.numEvidencias||0)),manifestacoes,indiceMaturidade:calcularIndiceMaturidade(manifestacoes)};
 }
 
 
@@ -3216,15 +3081,11 @@ function eRenderFileList(){
   if(eFiles.length>0){
     lb.style.display='flex';
     document.getElementById('limitTxt').textContent=`${eFiles.length} de ${MAX_FILES}`;
-    // [FIX 2026-07] Era .textContent — a tag <i data-lucide="..."> virava texto literal na
-    // tela em vez de virar ícone, porque textContent não cria elemento DOM (só texto), e o
-    // MutationObserver do lucide (gfRenderIcons, em index.html) só substitui elementos <i>
-    // reais. innerHTML resolve, e o observer pega a troca automaticamente.
-    document.getElementById('dzIco').innerHTML=eFiles.length>=MAX_FILES?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
     document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
     document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':''}</div>`).join('');
-  }else{lb.style.display='none';document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
+  }else{lb.style.display='none';document.getElementById('dzIco').textContent='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
 
 function eUpdateActionBar(){
@@ -3263,31 +3124,12 @@ function _trackUpload(event, props) {
   } catch(e) { /* silencioso */ }
 }
 
-// [V3.2] Stepper horizontal da página de Análise de Extrato — reflete o
-// estado real já controlado por eRunAll/eConsolidate (não é state novo,
-// só uma representação visual de transições que já existiam). 3 estágios:
-// 1 Enviar arquivo (padrão) → 2 Processando (durante eRunAll) → 3 Concluído
-// (após consolidação). "Criar conta" fica fora do stepper visual por ser
-// condicional/raro (só aparece para quem tenta analisar deslogado) — incluir
-// como estágio fixo mentiria sobre o fluxo pra quem já está logado.
-function setExtStepperStage(stage) {
-  const el = document.getElementById('extStepper');
-  if (!el) return;
-  el.querySelectorAll('.ext-stepper-item').forEach((item, i) => {
-    const n = i + 1;
-    item.classList.remove('done', 'active');
-    if (n < stage) item.classList.add('done');
-    else if (n === stage) item.classList.add('active');
-  });
-}
-
 async function eRunAll(){
   // [FIX-RACE] Proteção contra duplo clique
   if(_analysisRunning)return;
   const ready=eFiles.filter(f=>f.status==='ok');
   if(ready.length===0)return;
   _analysisRunning=true;
-  setExtStepperStage(2);
   document.getElementById('btnGo').classList.remove('on');
   eShowErr('');
   try{
@@ -3298,10 +3140,6 @@ async function eRunAll(){
     const _rawRenda=_rInput?_rInput.value.replace(/\./g,'').replace(',','.').trim():'';
     window._rendaDeclaradaMensal=_rawRenda?Math.max(0,parseFloat(_rawRenda)||0):0;
     const results=[];const parsed=[];
-    // [FIX 2026-07 — auditoria] Rastreia falhas por arquivo para o resumo final
-    // poder dizer "concluído com N de M arquivos" em vez de "Concluído" mesmo
-    // quando um ou mais arquivos foram silenciosamente ignorados.
-    const falhasArquivo=[];
     for(let i=0;i<ready.length;i++){
       const f=ready[i];
       eSetProgress(Math.round((i/ready.length)*60),`Processando ${f.name}...`);
@@ -3314,11 +3152,10 @@ async function eRunAll(){
           catch(pdfErr){
             if(pdfErr.message==='PDF_ESCANEADO'){eShowErr(`"${f.name}" parece ser um PDF escaneado (imagem). O Guardião precisa de texto digital. Exporte o extrato em PDF digital pelo app do banco, ou use o formato CSV ou OFX.`);}
             else{eShowErr(`Erro ao abrir "${f.name}": ${eSafeErrorMsg(pdfErr, 'não foi possível ler este arquivo.')}`);}
-            falhasArquivo.push(f.name);
             continue;
           }
           txns=eParsePDFText(text);
-          if(txns.length===0){const bankHint=f.detected?.banco||f.detected?.bank||'';const dica=bankHint?`Banco detectado: ${bankHint}. Tente exportar o extrato no formato CSV pelo app do banco.`:'Tente exportar o extrato no formato CSV ou OFX pelo app do banco.';eShowErr(`Não foi possível extrair transações de "${f.name}". ${dica}`);falhasArquivo.push(f.name);continue;}
+          if(txns.length===0){const bankHint=f.detected?.banco||f.detected?.bank||'';const dica=bankHint?`Banco detectado: ${bankHint}. Tente exportar o extrato no formato CSV pelo app do banco.`:'Tente exportar o extrato no formato CSV ou OFX pelo app do banco.';eShowErr(`Não foi possível extrair transações de "${f.name}". ${dica}`);continue;}
           const pdfBankInfo=eDetectBankReal(text,'pdf',f.name);
           if(pdfBankInfo.banco)f.detected.banco=pdfBankInfo.banco;
           if(pdfBankInfo.conta)f.detected.conta=pdfBankInfo.conta;
@@ -3332,15 +3169,14 @@ async function eRunAll(){
           else if(fmt==='ofx')txns=eParseOFX(f.content);
           else txns=eParseGeneric(lines);
         }
-        if(txns.length===0){eShowErr(`Nenhuma transação encontrada em "${f.name}". Verifique se o arquivo está completo e no formato correto.`);falhasArquivo.push(f.name);continue;}
+        if(txns.length===0){eShowErr(`Nenhuma transação encontrada em "${f.name}". Verifique se o arquivo está completo e no formato correto.`);continue;}
         parsed.push({txns,banco:f.detected.banco||f.detected.bank,conta:f.detected.conta||null,label:f.detected.bank,formato:f.detected.format});
-      }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${eSafeErrorMsg(e, 'não foi possível processar este arquivo.')}`;eShowErr(msg);falhasArquivo.push(f.name);}
+      }catch(e){const msg=`Erro em "${f.name}" (${f.detected?.format||'?'}): ${eSafeErrorMsg(e, 'não foi possível processar este arquivo.')}`;eShowErr(msg);}
     }
     if(parsed.length===0){
       eSetProgress(0,'Erro — nenhum extrato processado');
       document.getElementById('btnGo').classList.add('on');
       _trackUpload('analysis_failed', { reason: 'no_parsed_files' });
-      setExtStepperStage(1);
       return;
     }
     eFiles.forEach(f=>{f.content=null;});
@@ -3361,7 +3197,6 @@ async function eRunAll(){
       eSetProgress(0,'Erro — nenhum extrato processado');
       document.getElementById('btnGo').classList.add('on');
       _trackUpload('analysis_failed', { reason: 'no_results' });
-      setExtStepperStage(1);
       return;
     }
     eSetProgress(95,'Consolidando...');
@@ -3371,26 +3206,20 @@ async function eRunAll(){
       eShowErr('Não foi possível consolidar os extratos. Verifique se o arquivo está no formato correto (CSV, OFX ou PDF).');
       document.getElementById('btnGo').classList.add('on');
       _trackUpload('analysis_failed', { reason: 'consolidation_failed' });
-      setExtStepperStage(1);
       return;
     }
     eAllTxns=consolidated.all;
     eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
-    setExtStepperStage(3);
     document.getElementById('extStep2').style.opacity='0.6';
     document.getElementById('extStep2').style.pointerEvents='none';
-    document.getElementById('s2num').innerHTML='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    document.getElementById('s2num').textContent='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     document.getElementById('s2num').style.background='var(--green)';
     document.getElementById('s2num').style.color='#000';
     const s3=document.getElementById('extStep3');
     document.getElementById('s3num').classList.remove('locked');
     const nContas=results.length;const nArquivos=parsed.length;
     const msg=nArquivos>nContas?`${nArquivos} arquivo(s) → ${nContas} conta(s) identificada(s)`:`${nContas} extrato(s) analisado(s)`;
-    // [FIX 2026-07 — auditoria] Antes dizia "análise concluída" mesmo quando um ou
-    // mais arquivos foram ignorados (parse falhou, sem transações, etc.) — o
-    // usuário não tinha como saber que nem tudo que enviou entrou na análise.
-    const statusFinal=falhasArquivo.length>0?`concluída com ressalvas — ${falhasArquivo.length} de ${ready.length} arquivo(s) não pôde(puderam) ser processado(s)`:'concluída';
-    document.getElementById('s3sub').textContent=`${msg} — análise ${statusFinal}`;
+    document.getElementById('s3sub').textContent=`${msg} — análise concluída`;
     _eConsolidated=consolidated;_eSources=results;
     // [DEC-018-C] Contrato construído aqui, de forma síncrona, logo após a
     // consolidação — ANTES do paywall. É o único ponto de construção do estado
@@ -3463,10 +3292,7 @@ function eRenderPreview(c,sources){
   else if(c.score<=45){emoji='<span style="color:var(--risk-atencao)" aria-hidden="true">●</span>';level='ATENÇÃO';color='#f5a623';}
   else if(c.score<=70){emoji='<span style="color:var(--risk-moderado)" aria-hidden="true">●</span>';level='RISCO ELEVADO';color=C_ELEVADO;}
   else{emoji='<span style="color:var(--risk-critico)" aria-hidden="true">●</span>';level='RISCO CRÍTICO';color=C_CRITICO;}
-  // [FIX 2026-07] Era .textContent — "emoji" é HTML (<span style="color:var(--risk-...)">●</span>),
-  // não texto puro. Mesma classe de bug do dzIco: textContent não cria elemento, então a tag
-  // aparecia literal na tela em vez de virar a bolinha colorida de risco.
-  document.getElementById('pvEmoji').innerHTML=emoji;
+  document.getElementById('pvEmoji').textContent=emoji;
   document.getElementById('pvLevel').textContent=level;
   document.getElementById('pvLevel').style.color=color;
   document.getElementById('pvScore').textContent=c.score+'/100';
@@ -4231,6 +4057,177 @@ function confirmarDocumentoManifestacao(categoria) {
   _atualizarContratoENotificar();
 }
 
+// ==================== ViewModel/Renderer — Índice Complementar F1-F8 (Fase 1) ====================
+// [DEC-015] O índice F1-F8 é indicador COMPLEMENTAR, nunca o veredito principal
+// (esse papel é das manifestações — ver renderResultadoCausal/renderManifestacoesPilar1).
+// Esta seção existia, até jul/2026, emaranhada dentro de eUnlockResult: cálculo e
+// DOM juntos, na mesma função de ~100 linhas. Separação:
+//   montarViewModelIndiceComplementar(c, sources) — PURA. Não toca DOM. Só lê `c`/`sources`.
+//   renderIndiceComplementar(viewModel)           — só lê o ViewModel. Nunca lê `c`.
+// Os campos do ViewModel são orientados à TELA (classificacao.rotulo, estatisticas[],
+// fatores[], alertas.riscos/positivos) — não reproduzem nomes internos do motor
+// (c.suspCount, c.pixTotal etc.) para que o renderer nunca precise conhecer a forma
+// bruta do motor, e reordenar a UI não exija tocar aqui.
+const _FUNDAMENTO_FATOR = {
+  'F1_omissao_renda': 'A Receita cruza créditos bancários com a renda declarada via e-Financeira.',
+  'F2_pix_limite': 'Bancos reportam à Receita movimentações Pix acima de R$5.000/mês automaticamente.',
+  'F3_especie': 'Depósitos em espécie acima de R$2.000/mês são reportados ao Fisco pelos bancos.',
+  'F4_comercial_oculta': 'Recebimentos recorrentes sem nota fiscal ou CNPJ são gatilho de fiscalização.',
+  'F5_anomalia_temporal': 'Variação brusca entre meses é detectada no cruzamento anual da declaração.',
+  'F7_compatibilidade': 'Incompatibilidade entre movimentação e renda declarada acima de 20% é gatilho automático.',
+  'F8_conta_auxiliar': 'Contas secundárias são consolidadas pela e-Financeira com a conta principal do CPF.',
+};
+
+function _classificacaoIndice(score) {
+  if (score <= 20) return { nivel: 'baixo', rotulo: 'dentro do padrão', rotuloHumano: 'Sua movimentação está dentro do padrão esperado.', cor: '#4ADE80' };
+  if (score <= 45) return { nivel: 'atencao', rotulo: 'atenção', rotuloHumano: 'Encontramos pontos que merecem uma revisão.', cor: '#f5a623' };
+  if (score <= 70) return { nivel: 'elevado', rotulo: 'elevado', rotuloHumano: 'Sua movimentação apresenta padrões que chamam atenção.', cor: C_MODERADO };
+  return { nivel: 'critico', rotulo: 'crítico', rotuloHumano: 'Sua movimentação tem inconsistências relevantes que precisam de atenção.', cor: C_CRITICO };
+}
+
+function _badgeFator(peso, tipo) {
+  if (tipo === 'aviso') return { tipo: 'aviso', label: 'Atenção' };
+  if (peso >= 25) return { tipo: 'critico', label: 'Crítico' };
+  if (peso >= 15) return { tipo: 'moderado', label: 'Moderado' };
+  if (peso >= 5) return { tipo: 'atencao', label: 'Atenção' };
+  return { tipo: 'ok', label: 'Baixo' };
+}
+
+// Pura/testável: dado o motor consolidado (`c`) e as fontes (`sources`), devolve
+// só dados — nenhum acesso a `document`, nenhuma string HTML pronta (exceto o
+// `icon` dos alertas, que já vem como markup confiável do motor, igual sempre foi).
+function montarViewModelIndiceComplementar(c, sources) {
+  const src = Array.isArray(sources) ? sources : [];
+  const classificacao = _classificacaoIndice(c.score);
+  const totalMeses = src.reduce((acc, r) => acc + (r.months || 0), 0);
+  const nPontos = src.flatMap(r => r.fatores || []).filter(f => f.peso > 0).length;
+  const pixPct = c.totalCredits > 0 ? Math.round(c.pixTotal / c.totalCredits * 100) : 0;
+
+  const estatisticas = [
+    { label: 'Movimentação total', valor: fmtBRL(c.totalCredits), nota: `${c.creditCount} entradas · ${totalMeses} mês(es)`, cor: 'green' },
+    { label: 'Transações de atenção', valor: `${c.suspCount} de ${c.creditCount}`, nota: c.suspCount > 0 ? 'requerem verificação' : 'perfil dentro do esperado', cor: c.suspCount > 0 ? 'red' : 'green' },
+    { label: 'Recebimentos via Pix', valor: `${pixPct}%`, nota: `das entradas · ${fmtBRL(c.pixTotal)}`, cor: pixPct >= 50 ? 'red' : pixPct >= 30 ? 'yellow' : 'neutral' },
+  ];
+
+  const fatores = src
+    .flatMap(r => r.fatores || [])
+    .filter(f => f.peso > 0 || f.tipo === 'aviso')
+    .sort((a, b) => b.peso - a.peso)
+    .slice(0, 6)
+    .map((f, idx) => ({
+      id: 'rfdetail_' + idx,
+      peso: f.peso,
+      titulo: (f.motivo || '').split('.')[0],
+      badge: _badgeFator(f.peso, f.tipo),
+      fundamento: _FUNDAMENTO_FATOR[f.fatorKey] || '',
+      evidencias: (f.evidencias || []).map(e => ({ ok: !!e.ok, texto: e.texto })),
+      quandoNaoERisco: f.quandoNaoERisco || '',
+    }));
+
+  const alertasBrutos = Array.isArray(c.alerts) ? c.alerts : [];
+  const riscos = alertasBrutos
+    .filter(a => a.type !== 'green')
+    .map(a => ({
+      tipo: a.type === 'red' ? 'critico' : a.type === 'yellow' ? 'atencao' : 'info',
+      icon: a.icon,
+      titulo: a.title || '',
+      texto: a.text || '',
+      badge: a.type === 'red' ? 'Crítico' : a.type === 'yellow' ? 'Atenção' : null,
+    }));
+  const positivos = alertasBrutos
+    .filter(a => a.type === 'green')
+    .map(a => ({ icon: a.icon, titulo: a.title || '' }));
+
+  return {
+    score: c.score,
+    classificacao,
+    resumo: { extratos: src.length, transacoes: c.totalTxns, meses: totalMeses, pontosAtencao: nPontos },
+    estatisticas,
+    fatores,
+    alertas: { riscos, positivos },
+    avisos: { extratoMuitoCurto: !!c.extratoMuitoCurto },
+  };
+}
+
+const _RISK_DOT_VAR = { baixo: '--risk-baixo', atencao: '--risk-atencao', elevado: '--risk-moderado', critico: '--risk-critico' };
+const _COR_ESTAT = { green: 'var(--green)', red: 'var(--red)', yellow: 'var(--yellow)', neutral: 'var(--text)' };
+const _BADGE_META = {
+  aviso: { cssClass: 'res-badge--atencao', icon: '<i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>' },
+  critico: { cssClass: 'res-badge--critico', icon: '<span style="color:var(--risk-critico)" aria-hidden="true">●</span>' },
+  moderado: { cssClass: 'res-badge--moderado', icon: '<span style="color:var(--risk-moderado)" aria-hidden="true">●</span>' },
+  atencao: { cssClass: 'res-badge--atencao', icon: '<span style="color:var(--risk-atencao)" aria-hidden="true">●</span>' },
+  ok: { cssClass: 'res-badge--ok', icon: '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>' },
+};
+
+function _badgeHtml(badge) {
+  const meta = _BADGE_META[badge.tipo] || _BADGE_META.ok;
+  return `<span class="res-badge ${meta.cssClass}">${meta.icon} ${sanitize(badge.label)}</span>`;
+}
+
+function _estatCardHtml(item) {
+  return `<div class="p-stat"><div class="p-sl">${sanitize(item.label)}</div><div class="p-sv" style="color:${_COR_ESTAT[item.cor] || 'var(--text)'}">${item.valor}</div><div class="p-sn">${sanitize(item.nota)}</div></div>`;
+}
+
+function _fatorCardHtml(f) {
+  const cardClass = f.badge.tipo === 'aviso' ? 'res-fator-card res-fator-card--aviso' : 'res-fator-card';
+  const evidHtml = f.evidencias.map(e => `<div class="res-fator-ev"><span style="color:${e.ok ? 'var(--red)' : 'var(--accent)'};font-weight:700;flex-shrink:0;margin-top:1px">${e.ok ? '▸' : '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>'}</span><span>${sanitize(e.texto)}</span></div>`).join('');
+  const hasDetails = !!(f.fundamento || evidHtml || f.quandoNaoERisco);
+  let html = `<div class="${cardClass}" onclick="_toggleFator('${f.id}')" role="button" aria-expanded="false"><div class="res-fator-header" style="align-items:flex-start"><div class="res-fator-peso">+${f.peso}</div><div class="res-fator-titulo" style="padding-top:3px">${sanitize(f.titulo)}</div>${_badgeHtml(f.badge)}${hasDetails ? `<span class="res-fator-toggle" id="${f.id}_tog">ver ▾</span>` : ''}</div>`;
+  if (hasDetails) {
+    html += `<div class="res-fator-details" id="${f.id}">${f.fundamento ? `<div class="res-fator-fundamento" style="margin-left:0">${sanitize(f.fundamento)}</div>` : ''}${evidHtml ? `<div class="res-fator-evidencias" style="margin-left:0">${evidHtml}</div>` : ''}${f.quandoNaoERisco ? `<div class="res-fator-nao-risco" style="margin-left:0;margin-top:8px"><strong>Pode não ser risco</strong> — ${sanitize(f.quandoNaoERisco)}</div>` : ''}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function _alertaRiscoHtml(a) {
+  const cls = a.tipo === 'critico' ? 'res-alert--red' : a.tipo === 'atencao' ? 'res-alert--yellow' : 'res-alert--blue';
+  const badge = a.badge ? `<span class="res-badge ${a.tipo === 'critico' ? 'res-badge--critico' : 'res-badge--atencao'}" style="margin-left:auto;flex-shrink:0">${sanitize(a.badge)}</span>` : '';
+  return `<div class="res-alert ${cls}" style="align-items:center"><span class="res-alert-icon" style="flex-shrink:0">${a.icon || ''}</span><div style="flex:1;min-width:0"><div class="res-alert-title">${sanitize(a.titulo)}</div><div class="res-alert-text">${sanitize(a.texto)}</div></div>${badge}</div>`;
+}
+
+function _alertaPositivoHtml(a) {
+  return `<div class="res-alert res-alert--green" style="align-items:center"><span class="res-alert-icon" style="flex-shrink:0">${a.icon || ''}</span><div style="flex:1;min-width:0"><div class="res-alert-title">${sanitize(a.titulo)}</div></div><span class="res-badge res-badge--ok" style="margin-left:auto;flex-shrink:0">OK</span></div>`;
+}
+
+// Só lê o ViewModel — nunca `_eConsolidated`/`c`/`sources`. Espelha a separação
+// já aplicada ao renderer causal (Cap. 7.10): montagem de dado é responsabilidade
+// de quem constrói o ViewModel, não de quem escreve no DOM.
+function renderIndiceComplementar(vm) {
+  if (!vm) return;
+  const dotVar = _RISK_DOT_VAR[vm.classificacao.nivel] || '--risk-baixo';
+  const ctxEl = document.getElementById('pContextoBlock');
+  if (ctxEl) {
+    ctxEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)">Índice interno de atenção</div></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:18px;line-height:1;flex-shrink:0"><span style="color:var(${dotVar})" aria-hidden="true">●</span></span><div style="flex:1;min-width:0"><span style="font-family:var(--ff);font-size:20px;font-weight:800;color:${vm.classificacao.cor};letter-spacing:-1px">${vm.score}<span style="font-size:0.55em;letter-spacing:-0.5px">/100</span></span><span style="font-size:12px;font-weight:600;color:var(--text2);margin-left:8px">${vm.classificacao.rotulo}</span><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-top:2px">${vm.classificacao.rotuloHumano}</div></div></div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:var(--radius-xs);overflow:hidden;margin-bottom:10px"><div id="pBarFill" style="height:100%;border-radius:var(--radius-xs);width:0%;background:${vm.classificacao.cor};transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div></div><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">O índice resume a intensidade dos sinais encontrados no extrato. Ele não representa uma probabilidade estatística de retenção na malha fina.</div><div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px"><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${vm.resumo.extratos} extrato(s)</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${vm.resumo.transacoes} transações</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${vm.resumo.meses} mês(es)</span>${vm.resumo.pontosAtencao > 0 ? `<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-card);padding:4px 10px;color:var(--risk-moderado);font-weight:600">${vm.resumo.pontosAtencao} ponto(s) de atenção</span>` : `<span style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-card);padding:4px 10px;color:var(--accent);font-weight:600"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> nenhum padrão de risco</span>`}</div>`;
+    setTimeout(() => { const b = document.getElementById('pBarFill'); if (b) b.style.width = vm.score + '%'; }, 200);
+  }
+
+  const statsEl = document.getElementById('pStatsGrid');
+  if (statsEl) statsEl.innerHTML = vm.estatisticas.map(_estatCardHtml).join('');
+
+  const fatoresEl = document.getElementById('pFatoresList');
+  if (fatoresEl) {
+    fatoresEl.innerHTML = vm.fatores.length === 0
+      ? ''
+      : '<div class="res-section-label">Fatores técnicos (F1–F8)</div>' + vm.fatores.map(_fatorCardHtml).join('');
+  }
+
+  let alertHtml = '';
+  if (vm.alertas.riscos.length > 0) {
+    alertHtml += '<div class="res-section-label">Alertas</div>' + vm.alertas.riscos.map(_alertaRiscoHtml).join('');
+  }
+  if (vm.alertas.positivos.length > 0) {
+    if (vm.alertas.riscos.length === 0) alertHtml += '<div class="res-section-label">Destaques positivos</div>';
+    alertHtml += vm.alertas.positivos.map(_alertaPositivoHtml).join('');
+  }
+  const alertListEl = document.getElementById('pAlertList');
+  if (alertListEl) alertListEl.innerHTML = alertHtml;
+
+  if (vm.avisos.extratoMuitoCurto && alertListEl) {
+    alertListEl.insertAdjacentHTML('beforebegin', '<div class="res-alert res-alert--yellow" style="margin-bottom:8px"><span class="res-alert-icon"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span><div><div class="res-alert-title">Extrato com menos de 3 meses</div><div class="res-alert-text">Para maior precisão, importe pelo menos 3 meses de extrato.</div></div></div>');
+  }
+}
+
 async function eUnlockResult(){
   const allowed=await _verifyPlanBeforeUnlock();
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
@@ -4245,19 +4242,10 @@ async function eUnlockResult(){
   if(!c||!sources)return;
   // [DEC-018/019] Nível qualitativo do índice de atenção (F1-F8) — permanece como
   // indicador COMPLEMENTAR (DEC-015), nunca como veredito principal da análise.
-  // A conclusão principal vive nas manifestações (renderManifestacoesPilar1), que
-  // agora são renderizadas e posicionadas antes deste bloco.
-  let emoji,level,color,levelHumano;
-  if(c.score<=20){emoji='<span style="color:var(--risk-baixo)" aria-hidden="true">●</span>';level='dentro do padrão';color='#4ADE80';levelHumano='Sua movimentação está dentro do padrão esperado.';}
-  else if(c.score<=45){emoji='<span style="color:var(--risk-atencao)" aria-hidden="true">●</span>';level='atenção';color='#f5a623';levelHumano='Encontramos pontos que merecem uma revisão.';}
-  else if(c.score<=70){emoji='<span style="color:var(--risk-moderado)" aria-hidden="true">●</span>';level='elevado';color=C_MODERADO;levelHumano='Sua movimentação apresenta padrões que chamam atenção.';}
-  else{emoji='<span style="color:var(--risk-critico)" aria-hidden="true">●</span>';level='crítico';color=C_CRITICO;levelHumano='Sua movimentação tem inconsistências relevantes que precisam de atenção.';}
-  const totalMeses=sources.reduce((acc,r)=>acc+(r.months||0),0);
-  const mediaCreditos=totalMeses>0?c.totalCredits/totalMeses:c.totalCredits;
-  const todosFatoresCtx=(sources||[]).flatMap(r=>r.fatores||[]).filter(f=>f.peso>0);
-  const nPontos=todosFatoresCtx.length;
-  const icConsumo=Math.round((c.indiceConsumo||0)*100);
-  const pixPct=c.totalCredits>0?Math.round(c.pixTotal/c.totalCredits*100):0;
+  // [Fase 1 — ViewModel/Renderer] Cálculo e DOM deste bloco vivem agora em
+  // montarViewModelIndiceComplementar()/renderIndiceComplementar() — eUnlockResult
+  // só coordena a chamada, não decide mais nada sobre nível/cor/estatísticas/fatores/alertas.
+  const _viewModelIndice = montarViewModelIndiceComplementar(c, sources);
   // Manifestações primeiro — é aqui que mora a conclusão principal da análise.
   // [DEC-018-B] O estado é semeado e o Contrato é montado ANTES de qualquer
   // renderização, para que o renderer (legado ou causal) sempre leia de uma
@@ -4274,49 +4262,8 @@ async function eUnlockResult(){
   renderCategoriasPilar1(sources);
   if (USE_CAUSAL_RESULT_RENDERER) renderResultadoCausal(window._modeloResultado);
   else renderManifestacoesPilar1(c);
-  const ctxEl=document.getElementById('pContextoBlock');
-  if(ctxEl){
-    ctxEl.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)">Índice interno de atenção</div></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="font-size:18px;line-height:1;flex-shrink:0">${emoji}</span><div style="flex:1;min-width:0"><span style="font-family:var(--ff);font-size:20px;font-weight:800;color:${color};letter-spacing:-1px">${c.score}<span style="font-size:0.55em;letter-spacing:-0.5px">/100</span></span><span style="font-size:12px;font-weight:600;color:var(--text2);margin-left:8px">${level}</span><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-top:2px">${levelHumano}</div></div></div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:var(--radius-xs);overflow:hidden;margin-bottom:10px"><div id="pBarFill" style="height:100%;border-radius:var(--radius-xs);width:0%;background:${color};transition:width 1.2s cubic-bezier(0.4,0,0.2,1)"></div></div><div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">O índice resume a intensidade dos sinais encontrados no extrato. Ele não representa uma probabilidade estatística de retenção na malha fina.</div><div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px"><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${sources.length} extrato(s)</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${c.totalTxns} transações</span><span style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:4px 10px;color:var(--muted2)">${totalMeses} mês(es)</span>${nPontos>0?`<span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:var(--radius-card);padding:4px 10px;color:var(--risk-moderado);font-weight:600">${nPontos} ponto(s) de atenção</span>`:`<span style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-card);padding:4px 10px;color:var(--accent);font-weight:600"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> nenhum padrão de risco</span>`}</div>`;
-    setTimeout(()=>{const b=document.getElementById('pBarFill');if(b)b.style.width=c.score+'%';},200);
-  }
-  document.getElementById('ovEmoji').textContent='';
-  document.getElementById('ovLevel').textContent='';
-  document.getElementById('ovSub').textContent='';
-  document.getElementById('pScoreVal').textContent='';
-  document.getElementById('pStatsGrid').innerHTML=`
-    <div class="p-stat"><div class="p-sl">Movimentação total</div><div class="p-sv" style="color:var(--green)">${fmtBRL(c.totalCredits)}</div><div class="p-sn">${c.creditCount} entradas · ${totalMeses} mês(es)</div></div>
-    <div class="p-stat"><div class="p-sl">Transações de atenção</div><div class="p-sv" style="color:${c.suspCount>0?'var(--red)':'var(--green)'}">${c.suspCount} <span style="font-size:12px;font-weight:400">de ${c.creditCount}</span></div><div class="p-sn">${c.suspCount>0?'requerem verificação':'perfil dentro do esperado'}</div></div>
-    <div class="p-stat"><div class="p-sl">Recebimentos via Pix</div><div class="p-sv" style="color:${pixPct>=50?'var(--red)':pixPct>=30?'var(--yellow)':'var(--text)'}">${pixPct}%</div><div class="p-sn">das entradas · ${fmtBRL(c.pixTotal)}</div></div>`;
+  renderIndiceComplementar(_viewModelIndice);
   document.getElementById('srcList').innerHTML=sources.map((r,i)=>`<div class="src-item"><div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div><span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span><span class="src-val">${fmtBRL(r.totalCredits)}</span><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:var(--radius-xs);background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?C_MODERADO:'var(--red)'}">${sanitize(String(r.score))}/100</span></div>`).join('');
-  const _fundamento={'F1_omissao_renda':'A Receita cruza créditos bancários com a renda declarada via e-Financeira, que recebe totais mensais agregados dos bancos.','F2_pix_limite':'A e-Financeira exige que bancos informem totais mensais agregados à Receita quando alcançam o limite — o Guardião identifica esse volume por Pix porque lê seu extrato diretamente, não porque a Receita recebe esse detalhamento por modalidade.','F3_especie':'Depósitos em espécie acima de determinados valores mensais podem ser reportados ao Fisco pelos bancos, por mecanismos distintos da e-Financeira.','F4_comercial_oculta':'Recebimentos recorrentes sem nota fiscal ou CNPJ costumam chamar atenção em fiscalizações.','F5_anomalia_temporal':'Variação brusca entre meses pode aparecer em cruzamentos posteriores da declaração.','F7_compatibilidade':'Incompatibilidade relevante entre movimentação e renda declarada é um dos sinais que costuma merecer conferência — o Guardião não conhece o critério interno exato de seleção da Receita.','F8_conta_auxiliar':'Contas secundárias tendem a ser consolidadas pela e-Financeira com a conta principal do CPF.'};
-  const todosFatores=(sources||[]).flatMap(r=>r.fatores||[]).filter(f=>f.peso>0||f.tipo==='aviso');
-  const fatoresOrdenados=todosFatores.sort((a,b)=>b.peso-a.peso).slice(0,6);
-  const fatoresEl=document.getElementById('pFatoresList');
-  if(fatoresEl){
-    if(fatoresOrdenados.length===0){fatoresEl.innerHTML='';}
-    else{
-      function _getBadge(peso,tipo){if(tipo==='aviso')return'<span class="res-badge res-badge--atencao"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Atenção</span>';if(peso>=25)return'<span class="res-badge res-badge--critico"><span style="color:var(--risk-critico)" aria-hidden="true">●</span> Crítico</span>';if(peso>=15)return'<span class="res-badge res-badge--moderado"><span style="color:var(--risk-moderado)" aria-hidden="true">●</span> Moderado</span>';if(peso>=5)return'<span class="res-badge res-badge--atencao"><span style="color:var(--risk-atencao)" aria-hidden="true">●</span> Atenção</span>';return'<span class="res-badge res-badge--ok"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Baixo</span>';}
-      let fatoresHtml='<div class="res-section-label">Fatores técnicos (F1–F8)</div>';
-      fatoresOrdenados.forEach(function(f,idx){
-        const fund=_fundamento[f.fatorKey]||'';
-        let evidHtml='';
-        (f.evidencias||[]).forEach(function(e){evidHtml+='<div class="res-fator-ev"><span style="color:'+(e.ok?'var(--red)':'var(--accent)')+';font-weight:700;flex-shrink:0;margin-top:1px">'+(e.ok?'▸':'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>')+'</span><span>'+sanitize(e.texto)+'</span></div>';});
-        const cardClass=f.tipo==='aviso'?'res-fator-card res-fator-card--aviso':'res-fator-card';
-        const detailId='rfdetail_'+idx;const hasDetails=!!(fund||evidHtml||f.quandoNaoERisco);
-        fatoresHtml+='<div class="'+cardClass+'" onclick="_toggleFator(\''+detailId+'\')" role="button" aria-expanded="false"><div class="res-fator-header" style="align-items:flex-start"><div class="res-fator-peso">+'+f.peso+'</div><div class="res-fator-titulo" style="padding-top:3px">'+sanitize((f.motivo||'').split('.')[0])+'</div>'+_getBadge(f.peso,f.tipo)+(hasDetails?'<span class="res-fator-toggle" id="'+detailId+'_tog">ver ▾</span>':'')+'</div>';
-        if(hasDetails){fatoresHtml+='<div class="res-fator-details" id="'+detailId+'">'+(fund?'<div class="res-fator-fundamento" style="margin-left:0">'+sanitize(fund)+'</div>':'')+(evidHtml?'<div class="res-fator-evidencias" style="margin-left:0">'+evidHtml+'</div>':'')+(f.quandoNaoERisco?'<div class="res-fator-nao-risco" style="margin-left:0;margin-top:8px"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>':'')+'</div>';}
-        fatoresHtml+='</div>';
-      });
-      fatoresEl.innerHTML=fatoresHtml;
-    }
-  }
-  const alertasVisiveis=(c.alerts||[]).filter(function(a){return a.type!=='green';});
-  const alertasPositivos=(c.alerts||[]).filter(function(a){return a.type==='green';});
-  let alertHtml='';
-  if(alertasVisiveis.length>0){alertHtml+='<div class="res-section-label">Alertas</div>';alertasVisiveis.forEach(function(a){const cls=a.type==='red'?'res-alert--red':a.type==='yellow'?'res-alert--yellow':'res-alert--blue';const badge=a.type==='red'?'<span class="res-badge res-badge--critico" style="margin-left:auto;flex-shrink:0">Crítico</span>':a.type==='yellow'?'<span class="res-badge res-badge--atencao" style="margin-left:auto;flex-shrink:0">Atenção</span>':'';alertHtml+='<div class="res-alert '+cls+'" style="align-items:center"><span class="res-alert-icon" style="flex-shrink:0">'+a.icon+'</span><div style="flex:1;min-width:0"><div class="res-alert-title">'+sanitize(a.title||'')+'</div><div class="res-alert-text">'+sanitize(a.text||'')+'</div></div>'+badge+'</div>';});}
-  if(alertasPositivos.length>0){if(alertasVisiveis.length===0)alertHtml+='<div class="res-section-label">Destaques positivos</div>';alertasPositivos.forEach(function(a){alertHtml+='<div class="res-alert res-alert--green" style="align-items:center"><span class="res-alert-icon" style="flex-shrink:0">'+a.icon+'</span><div style="flex:1;min-width:0"><div class="res-alert-title">'+sanitize(a.title||'')+'</div></div><span class="res-badge res-badge--ok" style="margin-left:auto;flex-shrink:0">OK</span></div>';});}
-  document.getElementById('pAlertList').innerHTML=alertHtml;
-  if(c.extratoMuitoCurto){const avisoEl=document.createElement('div');avisoEl.className='res-alert res-alert--yellow';avisoEl.style.marginBottom='8px';avisoEl.innerHTML='<span class="res-alert-icon"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span><div><div class="res-alert-title">Extrato com menos de 3 meses</div><div class="res-alert-text">Para maior precisão, importe pelo menos 3 meses de extrato.</div></div>';const alertList=document.getElementById('pAlertList');if(alertList)alertList.parentNode.insertBefore(avisoEl,alertList);}
   const bankTabsEl=document.getElementById('bankTabs');bankTabsEl.innerHTML='';
   ['all',...sources.map(r=>r.bank)].forEach((b,i)=>{const btn=document.createElement('button');btn.className='btab'+(b==='all'?' on':'');btn.textContent=b==='all'?'Todos':b;btn.onclick=()=>eSwitchBank(b);bankTabsEl.appendChild(btn);});
   eActiveBankTab='all';
@@ -4340,9 +4287,8 @@ function eResetAll(){
   document.getElementById('limitBar').style.display='none';
   document.getElementById('actBar').style.display='none';
   document.getElementById('extStep3').style.display='none';
-  setExtStepperStage(1);
   document.getElementById('pFillExt').style.width='0%';
-  document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+  document.getElementById('dzIco').textContent='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
   document.getElementById('paywallBlock').style.display='block';
   const _tinhaAcesso=document.getElementById('realResultBlock').style.display!=='none';
@@ -4402,7 +4348,7 @@ function _histCardLegadoHtml(a, cardId) {
   const hora_fmt=new Date(a.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   const creditos_fmt=a.totalCreditos?'R$ '+(a.totalCreditos).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
   let fatoresHtml='';(a.fatores||[]).forEach(function(f){fatoresHtml+='<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.06)"><div style="width:26px;height:26px;border-radius:var(--radius-sm);background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--risk-moderado);flex-shrink:0">+'+f.peso+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:2px">'+sanitize(f.motivo||'')+'</div>'+(f.quandoNaoERisco?'<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;background:rgba(0,217,110,0.06);border-radius:var(--radius-sm);line-height:1.4"><strong>Pode não ser risco</strong> — '+sanitize(f.quandoNaoERisco)+'</div>':'')+'</div></div>';});
-  let alertasHtml='';(a.alertas||[]).forEach(function(al){const cls=al.type==='red'?'p-red':al.type==='yellow'?'p-yel':al.type==='green'?'p-grn':'p-blu';alertasHtml+='<div class="pal '+cls+'" style="margin-bottom:6px"><span class="pal-ico">'+(al.icon||'')+'</span><div><strong>'+sanitize(al.title)+'</strong><br><span style="font-size:11px;opacity:0.85">'+sanitize(al.text)+'</span></div></div>';});
+  let alertasHtml='';(a.alertas||[]).forEach(function(al){const cls=al.type==='red'?'p-red':al.type==='yellow'?'p-yel':al.type==='green'?'p-grn':'p-blu';alertasHtml+='<div class="pal '+cls+'" style="margin-bottom:6px"><span class="pal-ico">'+sanitize(al.icon||'')+'</span><div><strong>'+sanitize(al.title)+'</strong><br><span style="font-size:11px;opacity:0.85">'+sanitize(al.text)+'</span></div></div>';});
   return'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:'+cor+';border-radius:var(--radius-xs) 0 0 3px"></div><div style="padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap" data-histid="'+cardId+'" onclick="histToggle(this)"><div><div style="font-size:11px;color:var(--muted2);margin-bottom:4px">'+data_fmt+' · '+hora_fmt+'</div><div style="font-size:18px;font-weight:700;color:'+cor+';margin-bottom:4px">'+a.score+'/100 <span style="font-size:13px;font-weight:600">'+(a.nivelLabel||a.nivelRisco||'')+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px">'+(a.totalTxns?'<span style="font-size:11px;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-card);color:var(--muted2)">'+a.totalTxns+' transações</span>':'')+'</div><div style="font-size:10px;color:var(--muted2);margin-top:6px;font-style:italic">Análise realizada na versão anterior do diagnóstico</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0"><div style="text-align:right"><div style="font-size:11px;color:var(--muted2);margin-bottom:2px">Movimentação</div><div style="font-size:15px;font-weight:600;color:var(--text)">'+creditos_fmt+'</div></div><span class="hist-chevron" style="font-size:12px;color:var(--muted)">▼</span></div></div><div id="'+cardId+'" style="display:none;padding:0 16px 14px;border-top:0.5px solid rgba(255,255,255,0.06)">'+(a.fatores.length>0?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Fatores de risco</div>'+fatoresHtml:'')+(a.alertas.length>0?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:12px 0 8px">Alertas</div>'+alertasHtml:'')+'</div></div>';
 }
 
