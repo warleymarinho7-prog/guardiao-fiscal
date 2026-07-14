@@ -17,7 +17,7 @@ const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 
 function carregarAppNoContexto() {
-  const html = fs.readFileSync(path.join(__dirname, 'index__11_.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'app', 'index.html'), 'utf8');
   const dom = new JSDOM(html, { url: 'https://example.test/', runScripts: 'outside-only' });
   const { window } = dom;
   // Stubs mínimos que o app.js espera do ambiente real do browser e que não
@@ -25,9 +25,9 @@ function carregarAppNoContexto() {
   window.fbq = function () {};
   window.clarity = function () {};
   window.requestAnimationFrame = function (cb) { return setTimeout(cb, 0); };
-  const src = fs.readFileSync(path.join(__dirname, 'app__11_.js'), 'utf8');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'app', 'app.js'), 'utf8');
   const context = vm.createContext(window);
-  vm.runInContext(src, context, { filename: 'app__11_.js' });
+  vm.runInContext(src, context, { filename: 'app.js' });
   return window;
 }
 
@@ -53,7 +53,7 @@ function mockSources(overrides) {
 
 test('montarViewModelIndiceComplementar é pura — não acessa document/window', () => {
   const win = carregarAppNoContexto();
-  const srcOriginal = fs.readFileSync(path.join(__dirname, 'app__11_.js'), 'utf8');
+  const srcOriginal = fs.readFileSync(path.join(__dirname, '..', 'app', 'app.js'), 'utf8');
   const corpo = srcOriginal.slice(
     srcOriginal.indexOf('function montarViewModelIndiceComplementar'),
     srcOriginal.indexOf('const _RISK_DOT_VAR')
@@ -63,7 +63,7 @@ test('montarViewModelIndiceComplementar é pura — não acessa document/window'
 });
 
 test('renderIndiceComplementar não lê `c` (parâmetro do motor bruto) — só o ViewModel', () => {
-  const srcOriginal = fs.readFileSync(path.join(__dirname, 'app__11_.js'), 'utf8');
+  const srcOriginal = fs.readFileSync(path.join(__dirname, '..', 'app', 'app.js'), 'utf8');
   const inicio = srcOriginal.indexOf('function renderIndiceComplementar');
   const corpo = srcOriginal.slice(inicio, srcOriginal.indexOf('\n}', inicio) + 2);
   // A única variável de entrada deve ser `vm` — nunca `c.` ou `sources.`
@@ -215,7 +215,7 @@ test('renderIndiceComplementar — popula o DOM a partir do ViewModel (integraç
 });
 
 test('IDs mortos (ovEmoji/ovLevel/ovSub/pScoreVal/pCausasTop) não existem mais no app.js', () => {
-  const src = fs.readFileSync(path.join(__dirname, 'app__11_.js'), 'utf8');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'app', 'app.js'), 'utf8');
   for (const id of ['ovEmoji', 'ovLevel', 'ovSub', 'pScoreVal', 'pCausasTop']) {
     assert.ok(!src.includes(id), `${id} não deveria mais existir em app.js`);
   }
