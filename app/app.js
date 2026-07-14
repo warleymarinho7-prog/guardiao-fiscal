@@ -166,7 +166,10 @@ const PRO_FREE_MODE = false;
 // EXCLUSIVAMENTE o Contrato do Resultado (montarModeloDeResultado/validarContrato),
 // em vez de ler _eConsolidated/_eSources diretamente. Começa em false — ativar
 // manualmente para comparar lado a lado com o renderer legado antes de virar padrão.
-let USE_CAUSAL_RESULT_RENDERER = false;
+// [Homologação — jul/2026] Ativada: valida a troca de fonte de dados (motor bruto
+// → Contrato) mantendo a composição visual legada. V2 permanece false até esta
+// etapa se mostrar estável nos cenários fixos de homologação.
+let USE_CAUSAL_RESULT_RENDERER = true;
 // [Fatia 2A] Feature flag separada da anterior: aquela controla a FONTE DOS DADOS
 // (contrato vs. objeto bruto do motor); esta controla a COMPOSIÇÃO VISUAL (cards
 // com resumo/expansão + cadeia causal + Detalhes técnicos recolhido, aprovado no
@@ -4228,6 +4231,150 @@ function renderIndiceComplementar(vm) {
   }
 }
 
+// ==================== ViewModel/Renderer — Extratos e Abas de Banco (Fase 2a) ====================
+// [Fase 2] Continuação da separação ViewModel/Renderer iniciada na Fase 1
+// (índice complementar). Este bloco cobre os dois itens de menor risco e maior
+// ganho estrutural: a lista de "Extratos analisados" e as abas de banco.
+// `estado` (completo/curto/muito_curto) é dado no ViewModel para uso futuro —
+// hoje nenhuma parte visível do produto usa esse campo; não inventei UI nova
+// pra ele, só carreguei o dado (Cap. 6.12 — nunca menos honesto que o motor).
+function _nivelExtratoPorScore(score) {
+  if (score <= 20) return 'baixo';
+  if (score <= 45) return 'atencao';
+  if (score <= 70) return 'elevado';
+  return 'critico';
+}
+
+const _COR_NIVEL_EXTRATO = {
+  baixo: { bg: 'rgba(0,217,110,0.1)', cor: 'var(--green)' },
+  atencao: { bg: 'rgba(245,166,35,0.1)', cor: 'var(--yellow)' },
+  elevado: { bg: 'rgba(249,115,22,0.1)', cor: C_MODERADO },
+  critico: { bg: 'rgba(240,79,96,0.1)', cor: 'var(--red)' },
+};
+
+// Pura/testável: não toca DOM. `estado` deriva das flags que o motor já
+// calcula por fonte (extratoMuitoCurto/extratoCurto) — não é lógica nova.
+function montarViewModelExtratos(sources) {
+  const src = Array.isArray(sources) ? sources : [];
+  return src.map(r => ({
+    banco: r.bank,
+    meses: r.months,
+    transacoes: r.totalTxns,
+    totalCreditosFormatado: fmtBRL(r.totalCredits),
+    indiceAtencao: { valor: r.score, nivel: _nivelExtratoPorScore(r.score) },
+    estado: r.extratoMuitoCurto ? 'muito_curto' : r.extratoCurto ? 'curto' : 'completo',
+  }));
+}
+
+// Pura/testável: não toca DOM. Sempre inclui 'all' como primeira aba — mesmo
+// comportamento do bloco original (['all', ...sources.map(r=>r.bank)]).
+function montarViewModelAbasBanco(sources) {
+  const src = Array.isArray(sources) ? sources : [];
+  return [{ id: 'all', label: 'Todos' }, ...src.map(r => ({ id: r.bank, label: r.bank }))];
+}
+
+function _extratoItemHtml(ex, i) {
+  const corDot = SRC_COLORS[i % SRC_COLORS.length];
+  const { bg, cor } = _COR_NIVEL_EXTRATO[ex.indiceAtencao.nivel] || _COR_NIVEL_EXTRATO.baixo;
+  return `<div class="src-item"><div class="src-dot" style="background:${corDot}"></div><span class="src-bank">${sanitize(ex.banco)}</span><span class="src-txns">${sanitize(String(ex.transacoes))} transações · ${sanitize(String(ex.meses))} mês(es)</span><span class="src-val">${ex.totalCreditosFormatado}</span><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:var(--radius-xs);background:${bg};color:${cor}">${sanitize(String(ex.indiceAtencao.valor))}/100</span></div>`;
+}
+
+// Só lê o ViewModel — nunca `sources`/`c`.
+function renderExtratos(viewModelExtratos) {
+  const el = document.getElementById('srcList');
+  if (!el) return;
+  el.innerHTML = (viewModelExtratos || []).map(_extratoItemHtml).join('');
+}
+
+// Só lê o ViewModel — nunca `sources`/`c`. Não decide qual aba fica ativa
+// (isso é estado de navegação, coordenado por eUnlockResult/eSwitchBank), só
+// desenha 'all' como selecionada por padrão — mesmo comportamento de sempre.
+function renderAbasBanco(viewModelAbas) {
+  const el = document.getElementById('bankTabs');
+  if (!el) return;
+  el.innerHTML = '';
+  (viewModelAbas || []).forEach(aba => {
+    const btn = document.createElement('button');
+    btn.className = 'btab' + (aba.id === 'all' ? ' on' : '');
+    btn.textContent = aba.label;
+    btn.onclick = () => eSwitchBank(aba.id);
+    el.appendChild(btn);
+  });
+}
+
+// ==================== ViewModel/Renderer — Painel de Debug (Fase 2b) ====================
+// [Fase 2b] Painel dev-only (nunca faz parte da experiência normal — ver
+// eToggleDbg()). `ativo` é decidido por QUEM CHAMA (eUnlockResult), nunca
+// pela própria função pura — montarViewModelDebug() não deve tocar
+// window.location, senão deixa de ser testável isoladamente.
+// Conteúdo do texto, quando ativo, é byte-a-byte igual ao que já existia.
+function montarViewModelDebug(c, sources, modelo, ativo) {
+  if (!ativo) return { ativo: false, texto: '' };
+  const src = Array.isArray(sources) ? sources : [];
+  const texto = 'Motor: v8.0\nExtratos: ' + src.length + '\nTotal txns: ' + (c.totalTxns || 0) + '\nÍndice de atenção: ' + (c.score || 0) + '/100\nÍndice consumo: ' + Math.round((c.indiceConsumo || 0) * 100) + '%\n' +
+    src.map(function (r) { return '[' + r.bank + '] ' + r.totalTxns + ' txns · índice ' + r.score + '/100'; }).join('\n');
+  // `modelo` (Contrato do Resultado) é aceito na assinatura para manter o
+  // mesmo padrão dos outros ViewModels desta tela, mas ainda não é usado no
+  // texto — enriquecer o debug com dados do contrato (id/versão/estado) é
+  // uma decisão de produto separada, não tomada aqui para não mudar o
+  // conteúdo hoje existente sem combinar antes.
+  return { ativo: true, texto };
+}
+
+// Só lê o ViewModel — nunca `c`, `sources` ou `_eConsolidated`. Em produção
+// (ativo:false) simplesmente não preenche o painel.
+function renderDebug(viewModelDebug) {
+  const pre = document.getElementById('pDbgPre');
+  if (!pre) return;
+  pre.textContent = (viewModelDebug && viewModelDebug.ativo) ? viewModelDebug.texto : '';
+}
+
+// ==================== ViewModel/Renderer — Ponte Índice×Manifestação (Fase 2c) ====================
+// [Homologação USE_CAUSAL_RESULT_RENDERER, jul/2026] Achado: quando o índice
+// complementar (F1-F8) está em qualquer nível acima de "baixo" mas o Contrato
+// causal não tem nenhuma manifestação (sinal insuficiente pra sustentar uma
+// hipótese específica — ver CLASSIFICADOR_MANIFESTACAO), a tela pode parecer
+// contraditória: "índice em atenção/crítico" + "nenhuma manifestação". Isso
+// NÃO é bug do motor — DEC-015 já garante que o Contrato nunca inventa
+// manifestação só pra justificar o score. É uma lacuna de COMUNICAÇÃO entre
+// dois blocos que, por DEC-018, são deliberadamente independentes (renderer
+// nunca mistura fonte do índice com fonte do Contrato). A ponte só existe na
+// coordenação — nunca no Contrato, que continua sem saber o que é "score"
+// (Cap. 6.5).
+//
+// [Revisão pós-homologação] Mesmo TEXTO para qualquer nível acima de "baixo"
+// — a conclusão técnica é a mesma (sinal estatístico sem sustentação causal
+// específica), então não há texto causalmente diferente por faixa. O que
+// varia é só a ênfase visual (crítico) para não tratar "atenção" com o mesmo
+// peso de "crítico", nem soar como mensagem de erro em nenhum dos dois.
+function montarViewModelPonteIndiceManifestacao(nivelIndice, totalManifestacoes) {
+  const nivelAlto = nivelIndice === 'atencao' || nivelIndice === 'elevado' || nivelIndice === 'critico';
+  const mostrar = nivelAlto && totalManifestacoes === 0;
+  return {
+    mostrar,
+    enfase: nivelIndice === 'critico' ? 'forte' : 'neutra',
+    texto: mostrar
+      ? 'O índice encontrou sinais de atenção, mas não uma manifestação causal específica. Há padrões estatísticos que merecem conferência, porém os dados disponíveis não sustentam uma hipótese fiscal individualizada.'
+      : '',
+  };
+}
+
+// Só lê o ViewModel — nunca `c`/`modelo`/nível bruto. Não decide nada sobre
+// QUANDO mostrar (isso já veio pronto no ViewModel); só escreve, ou não escreve.
+function renderPonteIndiceManifestacao(vmPonte) {
+  const list = document.getElementById('pManifestacoesList');
+  if (!list || !vmPonte || !vmPonte.mostrar) return;
+  // Ênfase visual varia por nível (âmbar no crítico, azul neutro nos demais),
+  // mas nunca vermelho — não deve soar como erro, mesmo no nível mais alto.
+  const classe = vmPonte.enfase === 'forte' ? 'res-alert--yellow' : 'res-alert--blue';
+  // [Revisão mobile] flex:1;min-width:0 no wrapper de texto — mesmo padrão já
+  // usado em _alertaRiscoHtml/_alertaPositivoHtml. Sem isso, o min-width
+  // padrão (auto) de um item flex pode empurrar o card pra fora da tela em
+  // telas estreitas quando o texto é longo (e este texto tem duas frases,
+  // mais longo que a maioria dos outros alertas).
+  list.innerHTML += `<div class="res-alert ${classe}" style="align-items:flex-start"><span class="res-alert-icon" style="flex-shrink:0"><i data-lucide="info" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span><div style="flex:1;min-width:0"><div class="res-alert-title">Sinais de atenção sem manifestação causal específica</div><div class="res-alert-text">${sanitize(vmPonte.texto)}</div></div></div>`;
+}
+
 async function eUnlockResult(){
   const allowed=await _verifyPlanBeforeUnlock();
   if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
@@ -4263,11 +4410,18 @@ async function eUnlockResult(){
   if (USE_CAUSAL_RESULT_RENDERER) renderResultadoCausal(window._modeloResultado);
   else renderManifestacoesPilar1(c);
   renderIndiceComplementar(_viewModelIndice);
-  document.getElementById('srcList').innerHTML=sources.map((r,i)=>`<div class="src-item"><div class="src-dot" style="background:${SRC_COLORS[i%SRC_COLORS.length]}"></div><span class="src-bank">${sanitize(r.bank)}</span><span class="src-txns">${sanitize(String(r.totalTxns))} transações · ${sanitize(String(r.months))} mês(es)</span><span class="src-val">${fmtBRL(r.totalCredits)}</span><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:var(--radius-xs);background:${r.score<=20?'rgba(0,217,110,0.1)':r.score<=45?'rgba(245,166,35,0.1)':r.score<=70?'rgba(249,115,22,0.1)':'rgba(240,79,96,0.1)'};color:${r.score<=20?'var(--green)':r.score<=45?'var(--yellow)':r.score<=70?C_MODERADO:'var(--red)'}">${sanitize(String(r.score))}/100</span></div>`).join('');
-  const bankTabsEl=document.getElementById('bankTabs');bankTabsEl.innerHTML='';
-  ['all',...sources.map(r=>r.bank)].forEach((b,i)=>{const btn=document.createElement('button');btn.className='btab'+(b==='all'?' on':'');btn.textContent=b==='all'?'Todos':b;btn.onclick=()=>eSwitchBank(b);bankTabsEl.appendChild(btn);});
+  // [Homologação jul/2026] Só se aplica ao caminho causal: o legado ESCONDE a
+  // seção inteira quando não há manifestações (não fica visualmente vazia),
+  // então não tem a mesma lacuna de comunicação a resolver.
+  if (USE_CAUSAL_RESULT_RENDERER) {
+    const _totalManifestacoes = (window._modeloResultado.manifestacoes || []).length;
+    renderPonteIndiceManifestacao(montarViewModelPonteIndiceManifestacao(_viewModelIndice.classificacao.nivel, _totalManifestacoes));
+  }
+  renderExtratos(montarViewModelExtratos(sources));
+  renderAbasBanco(montarViewModelAbasBanco(sources));
   eActiveBankTab='all';
-  document.getElementById('pDbgPre').textContent='Motor: v8.0\nExtratos: '+sources.length+'\nTotal txns: '+c.totalTxns+'\nÍndice de atenção: '+c.score+'/100\nÍndice consumo: '+Math.round((c.indiceConsumo||0)*100)+'%\n'+sources.map(function(r){return'['+r.bank+'] '+r.totalTxns+' txns · índice '+r.score+'/100';}).join('\n');
+  const _debugAtivo = (typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+  renderDebug(montarViewModelDebug(c, sources, window._modeloResultado, _debugAtivo));
   _eCatFilter='all';eRenderTxns('all');
   setTimeout(_initCatCounts,100);
   setTimeout(()=>{if(!document.getElementById('gFeedbackCard')&&typeof gRenderFeedbackCard==='function'){const target=document.getElementById('pAlertList')?.parentElement||document.getElementById('realResultBlock');if(target)gRenderFeedbackCard(target,c);}},300);
@@ -4454,6 +4608,18 @@ function eToggleDbg() {
   const open = bd.style.display === 'none' || !bd.style.display;
   bd.style.display  = open ? 'block' : 'none';
   if (tog) tog.textContent = open ? '▲ fechar' : '▼ ver';
+}
+
+// [Homologação DEC-018-B] O cabeçalho do painel de debug (#pDbgHd) fica
+// display:none fixo no HTML — nunca aparece, em nenhum ambiente. Isso é
+// intencional: só faz sentido revelar o botão em desenvolvimento, nunca em
+// produção (não vira funcionalidade visível para o usuário final).
+const DEBUG_ATIVO = (typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+if (DEBUG_ATIVO && typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', function () {
+    const hd = document.getElementById('pDbgHd');
+    if (hd) hd.style.removeProperty('display');
+  });
 }
 
 // Exporta relatório em PDF via janela de impressão
