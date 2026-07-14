@@ -52,14 +52,14 @@
   "@type": "SoftwareApplication",
   "name": "Guardião Fiscal",
   "url": "https://oguardiaofiscal.com.br",
-  "description": "Ferramenta de análise preventiva de compatibilidade financeira para pessoa física. Analisa o extrato bancário do usuário e identifica padrões que costumam gerar divergência quando comparados a informações públicas sobre a e-Financeira e critérios observáveis de compatibilidade.",
+  "description": "Ferramenta de análise preventiva de risco fiscal para pessoa física. Identifica incompatibilidades entre movimentação bancária e declaração de Imposto de Renda com base nos mesmos critérios públicos usados pelo e-Financeira.",
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Web",
   "inLanguage": "pt-BR",
   "offers": [
     {
       "@type": "Offer",
-      "name": "Simulação Gratuita",
+      "name": "Análise Gratuita",
       "price": "0",
       "priceCurrency": "BRL"
     },
@@ -124,7 +124,7 @@
       "name": "Quais bancos são compatíveis?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "O Guardião Fiscal aceita extratos em CSV, OFX e PDF. Nubank, Banco Inter e Banco do Brasil têm suporte dedicado a CSV; Itaú e Bradesco têm suporte a PDF e OFX. Arquivos OFX de qualquer banco costumam funcionar, já que é um formato padronizado. Se o seu banco não estiver nessa lista, exporte em OFX (recomendado) ou CSV — o sistema tenta reconhecer o formato automaticamente."
+        "text": "O Guardião Fiscal aceita extratos em CSV dos principais bancos brasileiros (Nubank, Banco Inter, Banco do Brasil) e arquivos OFX compatíveis com qualquer instituição financeira."
       }
     }
   ]
@@ -225,16 +225,7 @@ body { overflow-x: hidden; }
 
   /* ---------- Typography (Cap. 3, Cap. 22.4/22.5) ---------- */
   --ff: 'Inter', 'Inter-fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  /* [Design V4] DM Mono já era carregada (fonts.googleapis.com) mas só usada
-     hard-coded em <pre>. Formalizando como token — par deliberado Inter
-     (narrativa) / DM Mono (dado técnico, labels, números de fluxo). */
-  --ff-mono: 'DM Mono', 'SF Mono', monospace;
   --font-family-primary: var(--ff);
-  /* [V3.1] Faltava um degrau abaixo de --font-size-xs (12px) — 11px é, na
-     prática, o tamanho mais usado no site inteiro (123 ocorrências em estilos
-     soltos) para microtexto/legendas, mas não existia como token formal.
-     Adicionado para fechar a hierarquia Título→Subtítulo→Explicação→Microtexto. */
-  --font-size-2xs: 11px;
   --font-size-xs: 12px; --font-size-sm: 14px; --font-size-md: 16px; --font-size-lg: 18px;
   --font-size-h4: 20px; --font-size-h3: 24px; --font-size-h2: 32px; --font-size-h1: 40px;
   --font-size-display: 56px;
@@ -364,35 +355,16 @@ nav {
   background: none;
   border: none;
   color: var(--muted);
-  font-family: var(--ff);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-family:var(--ff);
+  font-size: 14px;
+  font-weight: 500;
   padding: 8px 16px;
-  border-radius: var(--radius-md);
+  border-radius:var(--radius-md);
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
-  position: relative;
+  transition: all 0.2s;
 }
 .nav-link:hover { color: var(--text2); background: rgba(255,255,255,0.05); }
-/* [V3.1] Estado ativo antes só mudava a cor (fraco demais pra diferenciar de
-   hover). Agora soma peso de fonte + um traço inferior que cresce a partir do
-   centro — reaproveita a mesma linguagem do ponto verde "ao vivo" já usado no
-   liveDetectDemo, em vez de inventar um novo indicador visual. */
-.nav-link.active {
-  color: var(--text);
-  font-weight: var(--font-weight-semibold);
-}
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 2px;
-  width: 16px;
-  height: 2px;
-  background: var(--green);
-  border-radius: 2px;
-  transform: translateX(-50%);
-}
+.nav-link.active { color: var(--text); }
 
 .nav-btn-login {
   background: rgba(59,130,246,0.08);
@@ -489,49 +461,6 @@ nav {
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-/* [V3.1] Badges detalhados do hero — substituem os badges de linha única por
-   cards com ícone+título+descrição, focados em responder objeções pré-clique
-   (segurança, fundamento, tempo, compromisso) em vez de prova social — decisão
-   de produto (jul/2026): sem números públicos fortes ainda, competência e
-   redução de risco pesam mais que prova social fraca. */
-/* [Design V4] Eram 4 cards com fundo+borda+raio — exatamente o padrão
-   "tudo é card, tudo tem o mesmo peso" apontado na crítica visual. Mantém o
-   mesmo conteúdo (responde às 4 objeções pré-clique) mas sem superfície
-   própria — só ícone+texto em linha, menor que o corpo do texto. */
-.hero-badges-detailed {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.hero-badge-detailed {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-.hero-badge-detailed .hbd-icon {
-  display: none;
-}
-.hero-badge-detailed .hbd-title {
-  font-family: var(--ff-mono);
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--muted2);
-  flex-shrink: 0;
-}
-.hero-badge-detailed .hbd-title::before {
-  content: '·';
-  margin-right: 8px;
-  color: var(--green);
-}
-.hero-badge-detailed .hbd-desc {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.4;
-}
-@media (max-width: 640px) {
-  .hero-badges-detailed { grid-template-columns: 1fr; }
 }
 
 /* ===== SIMULADOR ===== */
@@ -832,157 +761,6 @@ nav {
 .ext-step-sub { font-size:12px; color:var(--muted2); margin-top:2px; }
 
 .ext-card-body { padding:16px; }
-
-/* [V3.2] Bloco "Como funciona" — inline, compacto, 3 passos. Decisão de
-   produto (jul/2026): painel lateral em split-layout foi descartado por ser
-   mudança estrutural desproporcional pra conteúdo de apoio, e competiria
-   visualmente com os cards de banco e a área de upload. Horizontal no
-   desktop (3 colunas), empilhado no mobile (1 coluna). */
-.ext-how-it-works {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-@media (min-width: 640px) {
-  .ext-how-it-works { grid-template-columns: repeat(3, 1fr); }
-}
-.ext-hiw-step {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-}
-.ext-hiw-num {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(0,217,110,0.1);
-  border: 1px solid rgba(0,217,110,0.22);
-  color: var(--accent);
-  font-family: var(--ff);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-bold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.ext-hiw-text {
-  font-size: var(--font-size-2xs);
-  color: var(--muted2);
-  line-height: 1.35;
-}
-.ext-hiw-text strong { color: var(--text2); font-weight: var(--font-weight-semibold); }
-
-/* [V3.2] Stepper horizontal — 3 estágios (Enviar → Processando → Concluído).
-   Controlado por setExtStepperStage() em app.js, chamado nos pontos onde o
-   fluxo já transiciona de estado (início/fim de eRunAll, falhas, reset) —
-   não introduz uma máquina de estados nova, só visualiza a existente. */
-.ext-stepper {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.ext-stepper-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.ext-stepper-circle {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  font-family: var(--ff);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-bold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-.ext-stepper-label {
-  font-family: var(--ff);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--muted);
-  white-space: nowrap;
-  transition: color 0.2s;
-}
-.ext-stepper-item.active .ext-stepper-circle {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #000;
-}
-.ext-stepper-item.active .ext-stepper-label { color: var(--text); font-weight: var(--font-weight-semibold); }
-.ext-stepper-item.done .ext-stepper-circle {
-  background: rgba(0,217,110,0.12);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.ext-stepper-item.done .ext-stepper-label { color: var(--text2); }
-.ext-stepper-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border2);
-  margin: 0 8px;
-  min-width: 12px;
-}
-
-/* [V3.2] Cards de banco selecionáveis (extStep2) — antes o upload era um
-   drop-zone genérico sem indicar de onde vem o arquivo. As cores por banco
-   batem com BANK_GUIDES (app.js), então o card selecionado usa a mesma
-   identidade visual do guia que aparece abaixo dele. */
-/* [V3.2/auditoria] Grid dos cards de banco — antes definido inline no HTML
-   (dificultava responsividade). 3 colunas ≥421px, 2 colunas abaixo disso —
-   "Banco do Brasil" não fica espremido em telas estreitas. */
-#extBankCards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-}
-@media (max-width: 420px) {
-  #extBankCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-.ext-bank-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 8px;
-  min-height: 44px;
-  font-family: var(--ff);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--muted2);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-.ext-bank-card:hover { border-color: var(--border2); color: var(--text2); }
-.ext-bank-card.selected { color: var(--text); font-weight: var(--font-weight-bold); }
-.ext-bank-card .ext-bank-check { display: none; width: 13px; height: 13px; flex-shrink: 0; }
-.ext-bank-card.selected .ext-bank-check { display: inline-flex; }
-.ext-bank-card.selected[data-banco="nubank"]   { background: rgba(130,80,255,0.1);  border-color: rgba(130,80,255,0.5); }
-.ext-bank-card.selected[data-banco="inter"]    { background: rgba(255,100,0,0.08);  border-color: rgba(255,100,0,0.4); }
-.ext-bank-card.selected[data-banco="bb"]       { background: rgba(0,100,220,0.08);  border-color: rgba(0,100,220,0.4); }
-.ext-bank-card.selected[data-banco="itau"]     { background: rgba(230,150,0,0.08);  border-color: rgba(230,150,0,0.4); }
-.ext-bank-card.selected[data-banco="bradesco"] { background: rgba(220,30,30,0.08);  border-color: rgba(220,30,30,0.4); }
-.ext-bank-card.selected[data-banco="outro"]    { background: var(--surface2); border-color: var(--border2); }
-/* [V3.2/auditoria] min-height evita o conteúdo pular quando o guia troca de
-   banco (guias têm números de passos diferentes por banco). */
-#extBankGuideContent, #extBankGuideGenerico { min-height: 130px; }
 
 /* [FIX-CLS] extStep3: conteúdo renderizado antes de display:block — sem shift */
 #extStep3 { contain: layout; }
@@ -2045,65 +1823,29 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   position: relative;
   z-index: var(--z-base);
 }
-/* [Design V4] A "espinha" — elemento de assinatura visual recorrente (Hero,
-   Resultado, candidata a PDF/Upload). Sutil de propósito: percebida depois de
-   alguns segundos, não decoração imediata. Cor herda do contexto da página —
-   aqui verde (neutro), no Resultado herda a cor do estado de atenção. */
-.split-home::before {
-  content: '';
-  position: absolute;
-  left: clamp(20px,2.5vw,32px);
-  top: clamp(72px,8vw,96px);
-  bottom: clamp(72px,8vw,96px);
-  width: 1px;
-  background: linear-gradient(180deg, rgba(74,222,128,0.35) 0%, rgba(74,222,128,0.06) 45%, transparent 70%);
-}
 
 .split-left {
-  flex: 1.3;
+  flex: 1;
   min-width: 0;
   padding-top: 16px;
-  padding-left: 32px;
-  max-width: 600px;
+  max-width: 540px;
 }
-/* [Design V4] Hero-tag trocou de badge com ícone/borda pro par ponto+mono já
-   usado no "// exemplos de sinais" do liveDetectDemo — reaproveita um
-   vocabulário que já existia em vez de introduzir um terceiro estilo de tag. */
+
 .split-left .hero-tag {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 28px;
-  font-family: var(--ff-mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--muted2);
-  text-transform: uppercase;
-  background: none;
-  border: none;
-  padding: 0;
 }
-.split-left .hero-tag::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-}
-.split-left .hero-tag i { display: none; }
 
 .split-left h1 {
   font-family:var(--ff);
-  font-size: clamp(32px, 3.2vw, 48px);
-  font-weight: 700;
-  line-height: 1.16;
-  letter-spacing: -1.2px;
+  font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -2px;
   margin-bottom: 20px;
   color: var(--text);
-  max-width: 560px;
 }
-.split-left h1 em { font-style: normal; color: var(--muted2); font-weight: 500; }
+.split-left h1 em { font-style: normal; color: var(--green); }
 
 .split-left p {
   font-size: 17px;
@@ -2133,10 +1875,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   padding: 16px 28px;
   background: var(--green);
   border: none;
-  /* [Design V4] Canto cortado discreto — refinamento pediu "menor, passa
-     sensação de linguagem própria, não de experimento". 3px no canto
-     superior-esquerdo em vez do --radius-lg uniforme. */
-  border-radius: 3px var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  border-radius:var(--radius-lg);
   color: #000;
   font-family:var(--ff);
   font-size: 15px;
@@ -2164,130 +1903,23 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 .split-cta-quiz:hover { background: var(--surface2); border-color: var(--green); color: var(--green); }
 
 .split-cta-sec {
-  font-family: var(--ff-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
-  text-align: left;
-  letter-spacing: 0.2px;
+  text-align: center;
 }
 
 /* Dashboard mockup — lado direito */
 .split-right {
   flex: 1;
   min-width: 0;
-  max-width: 460px;
+  max-width: 540px;
   position: relative;
   min-height: 600px;
   contain: layout;
-  border-left: 1px solid var(--border);
-  padding-left: 40px;
 }
 .split-right .sim-wrap {
   max-width: 100%;
   padding: 0 0 48px;
-}
-
-/* [V3.1] Painel vivo do hero — abre como diagrama causal animado (5-8s) e se
-   transforma no simulador já existente, sem trocar de página. Decisão de
-   produto (jul/2026): responde "por que usar" (mecanismo causal) antes de
-   "como usar" (simulador), sem descartar o simulador — só adia sua entrada.
-   É uma camada de apresentação por cima do conteúdo existente (position:
-   absolute cobrindo split-right), não uma mudança de arquitetura: o
-   liveDetectDemo/simPerguntas por baixo continuam intocados. */
-.hero-flow-intro {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 0;
-  cursor: pointer;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.hero-flow-intro.hfi-hide {
-  opacity: 0;
-  transform: scale(0.98);
-  pointer-events: none;
-}
-.hfi-eyebrow {
-  font-family: var(--ff-mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 1px;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 24px;
-  opacity: 0;
-  animation: hfiFadeIn 0.5s ease forwards;
-  animation-delay: 0.1s;
-}
-.hfi-steps {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 320px;
-}
-.hfi-step {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  opacity: 0;
-  transform: translateY(6px);
-  animation: hfiStepIn 0.5s ease forwards;
-  padding-bottom: 20px;
-}
-.hfi-icon {
-  flex-shrink: 0;
-  width: 16px;
-  font-family: var(--ff-mono);
-  font-size: 12px;
-  color: var(--green);
-  background: none;
-  border: none;
-  border-radius: 0;
-  display: block;
-}
-.hfi-icon i { display: none; }
-.hfi-label {
-  font-family: var(--ff);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-.hfi-line {
-  width: 1px;
-  height: 0;
-  margin-left: 7px;
-  background: var(--border2);
-  animation: hfiLineIn 0.6s ease forwards;
-}
-.hfi-cta {
-  margin-top: 20px;
-  opacity: 0;
-  background: transparent;
-  border: none;
-  color: var(--muted2);
-  font-family: var(--ff-mono);
-  font-size: 11px;
-  font-weight: 400;
-  padding: 0;
-  cursor: pointer;
-  transition: color 0.2s;
-  animation: hfiFadeIn 0.5s ease forwards;
-}
-.hero-flow-intro:hover .hfi-cta {
-  color: var(--accent);
-}
-@keyframes hfiFadeIn { to { opacity: 1; } }
-@keyframes hfiStepIn { to { opacity: 1; transform: translateY(0); } }
-@keyframes hfiLineIn { to { height: 20px; } }
-@media (prefers-reduced-motion: reduce) {
-  .hfi-eyebrow, .hfi-step, .hfi-cta { animation: none; opacity: 1; transform: none; }
-  .hfi-line { animation: none; height: 20px; }
 }
 
 .dash-mockup {
@@ -2729,11 +2361,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
   </div>
   <div class="nav-links">
-    <button class="nav-link" data-page="home" onclick="showPage('home')">Início</button>
-    <button class="nav-link" data-page="extrato" onclick="showPage('extrato')">Analisar Extrato</button>
-    <button class="nav-link" id="navHistorico" data-page="historico" onclick="showPage('historico')" style="display:none">Histórico</button>
-    <button class="nav-link" data-page="planos" onclick="showPage('planos')">Planos</button>
-    <button class="nav-link" data-page="institucional" onclick="showPage('institucional')">Como funciona</button>
+    <button class="nav-link" onclick="showPage('home')">Início</button>
+    <button class="nav-link" onclick="showPage('extrato')">Análise de Extrato</button>
+    <button class="nav-link" onclick="showPage('planos')">Planos</button>
+    <button class="nav-link" id="navHistorico" onclick="showPage('historico')" style="display:none">Histórico</button>
+    <button class="nav-link" onclick="showPage('institucional')">Institucional</button>
     <a class="nav-link" href="/blog" style="text-decoration:none">Blog</a>
   </div>
   <!-- Auth area sempre visível — populada pelo JS (setUser) -->
@@ -2749,11 +2381,12 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
   <div class="nav-drawer-panel">
     <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()"><i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Início</button>
-    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Analisar Extrato</button>
-    <button class="nav-drawer-link" id="drawerHistorico" onclick="showPage('historico');closeDrawer()" style="display:none"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Histórico</button>
     <button class="nav-drawer-link" id="drawerPlanos" onclick="showPage('planos');closeDrawer()"><i data-lucide="gem" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Planos</button>
-    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Como funciona</button>
+    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Institucional</button>
     <a class="nav-drawer-link" href="/blog" style="text-decoration:none"><i data-lucide="book" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Blog</a>
+    <div class="nav-drawer-divider"></div>
+    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Análise de Extrato</button>
+    <button class="nav-drawer-link" id="drawerHistorico" onclick="showPage('historico');closeDrawer()" style="display:none"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Histórico de Análises</button>
     <div class="nav-drawer-divider"></div>
     <div class="nav-drawer-auth" id="drawerAuthArea">
       <button class="nav-btn-login" style="width:100%;text-align:center;padding:12px" onclick="openLogin();closeDrawer()">Entrar</button>
@@ -2771,36 +2404,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="split-left">
       <div class="hero-tag" id="heroTagDesktop"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
       <h1 id="heroH1Desktop">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
-      <p id="heroSubDesktop">Despesas médicas e diferenças de rendimentos estão entre os temas que mais geram divergência na malha fina. Descubra em poucos minutos se o seu extrato revela sinais que merecem conferência.</p>
-      <div class="hero-badges-detailed" style="margin-bottom:32px">
-        <div class="hero-badge-detailed">
-          <span class="hbd-icon"><i data-lucide="lock" style="width:15px;height:15px" aria-hidden="true"></i></span>
-          <div>
-            <div class="hbd-title">Processamento local</div>
-            <div class="hbd-desc">Seu extrato não precisa sair do seu dispositivo.</div>
-          </div>
-        </div>
-        <div class="hero-badge-detailed">
-          <span class="hbd-icon"><i data-lucide="bar-chart-3" style="width:15px;height:15px" aria-hidden="true"></i></span>
-          <div>
-            <div class="hbd-title">Baseado na e-Financeira</div>
-            <div class="hbd-desc">Construído sobre os sinais que compõem sua movimentação.</div>
-          </div>
-        </div>
-        <div class="hero-badge-detailed">
-          <span class="hbd-icon"><i data-lucide="zap" style="width:15px;height:15px" aria-hidden="true"></i></span>
-          <div>
-            <div class="hbd-title">Resultado em minutos</div>
-            <div class="hbd-desc">Sem instalação e sem configuração complexa.</div>
-          </div>
-        </div>
-        <div class="hero-badge-detailed">
-          <span class="hbd-icon"><i data-lucide="circle-check" style="width:15px;height:15px" aria-hidden="true"></i></span>
-          <div>
-            <div class="hbd-title">Sem cadastro para começar</div>
-            <div class="hbd-desc">Veja a prévia antes de decidir desbloquear.</div>
-          </div>
-        </div>
+      <p id="heroSubDesktop">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
+      <div class="hero-badges" style="justify-content:flex-start;margin-bottom:32px">
+        <span class="badge"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local</span>
+        <span class="badge"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações automáticas</span>
+        <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
       </div>
       <div class="split-cta">
         <button class="split-cta-primary" onclick="showPage('extrato')">
@@ -2812,92 +2420,68 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       <!-- Mini métricas -->
       <div style="display:flex;gap:32px;margin-top:48px;padding-top:32px;border-top:1px solid var(--border)">
         <div>
-          <div style="font-family:var(--ff-mono);font-size:22px;font-weight:400;color:var(--text)">16</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">verificações fiscais</div>
+          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">16</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">verificações fiscais</div>
         </div>
         <div>
-          <div style="font-family:var(--ff-mono);font-size:22px;font-weight:400;color:var(--text)">25</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">bancos suportados</div>
+          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">25</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">bancos suportados</div>
         </div>
         <div>
-          <div style="font-family:var(--ff-mono);font-size:22px;font-weight:400;color:var(--text)">100%</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">local no dispositivo</div>
+          <div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px">100%</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">local no dispositivo</div>
+        </div>
+      </div>
+
+      <!-- O que cruzamos -->
+      <div style="margin-top:36px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">// cruzamentos realizados</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Pix × renda declarada</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="banknote" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Espécie × e-Financeira</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="refresh-cw" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Padrões recorrentes</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="trending-up" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Anomalia temporal</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="building" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Atividade comercial</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted2)"><i data-lucide="repeat" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Circularidade financeira</div>
         </div>
       </div>
     </div>
 
     <!-- DIREITA: quiz desktop -->
     <div class="split-right">
-      <!-- [V3.1/Design V4] Painel vivo — diagrama causal animado, cobre o
-           conteúdo abaixo por ~7s ou até clique/hover, depois revela
-           liveDetectDemo+simulador (intocados). Ver initHeroFlowIntro() em
-           app.js — a lógica de dispensa/timer não mudou, só a apresentação. -->
-      <div class="hero-flow-intro" id="heroFlowIntro">
-        <div class="hfi-eyebrow">Como o guardião analisa</div>
-        <div class="hfi-steps">
-          <div class="hfi-step" style="animation-delay:0.3s">
-            <span class="hfi-icon">01</span>
-            <div>
-              <div class="hfi-label">Extrato importado</div>
-            </div>
-          </div>
-          <div class="hfi-line" style="animation-delay:0.9s"></div>
-          <div class="hfi-step" style="animation-delay:1.9s">
-            <span class="hfi-icon">02</span>
-            <div>
-              <div class="hfi-label">Sinais identificados</div>
-            </div>
-          </div>
-          <div class="hfi-line" style="animation-delay:2.5s"></div>
-          <div class="hfi-step" style="animation-delay:3.5s">
-            <span class="hfi-icon">03</span>
-            <div>
-              <div class="hfi-label">Mecanismo provável</div>
-            </div>
-          </div>
-          <div class="hfi-line" style="animation-delay:4.1s"></div>
-          <div class="hfi-step" style="animation-delay:5.1s">
-            <span class="hfi-icon">04</span>
-            <div>
-              <div class="hfi-label">Diagnóstico preventivo</div>
-            </div>
-          </div>
-        </div>
-        <button class="hfi-cta" style="animation-delay:5.6s" onclick="heroFlowSkip(event)">começar análise agora →</button>
-      </div>
       <!-- Demo de detecções ao vivo — aparece antes do quiz -->
       <div id="liveDetectDemo" style="margin-bottom:16px">
-        <div style="font-family:var(--ff-mono);font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px">
-          <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
-          exemplos de sinais que o motor identifica
+        <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
+          // exemplos de sinais que o motor identifica
         </div>
-        <div id="detectFeed" style="display:flex;flex-direction:column;max-height:220px;min-height:220px;overflow:hidden">
-          <div style="display:flex;align-items:baseline;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;flex-shrink:0">
-            <i data-lucide="triangle-alert" style="width:15px;height:15px;color:#E2704B;flex-shrink:0" aria-hidden="true"></i>
+        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;min-height:220px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Incompatibilidade de renda</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">+162% acima do declarado</div>
+              <div style="font-size:11px;font-weight:600;color:#f87171;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Incompatibilidade de renda</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">+162% acima do declarado</div>
             </div>
           </div>
-          <div style="display:flex;align-items:baseline;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;flex-shrink:0">
-            <i data-lucide="triangle-alert" style="width:15px;height:15px;color:#7C8699;flex-shrink:0" aria-hidden="true"></i>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Pix recorrentes sem origem</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">R$ 32.880 em 4 meses</div>
+              <div style="font-size:11px;font-weight:600;color:#fbbf24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Pix recorrentes sem origem</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">R$ 32.880 em 4 meses</div>
             </div>
           </div>
-          <div style="display:flex;align-items:baseline;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;flex-shrink:0">
-            <i data-lucide="triangle-alert" style="width:15px;height:15px;color:#E2704B;flex-shrink:0" aria-hidden="true"></i>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Atividade comercial não declarada</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">7 recebimentos mensais</div>
+              <div style="font-size:11px;font-weight:600;color:#f87171;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Atividade comercial não declarada</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">7 recebimentos mensais</div>
             </div>
           </div>
-          <div style="display:flex;align-items:baseline;gap:12px;flex-shrink:0">
-            <i data-lucide="circle-check" style="width:15px;height:15px;color:var(--green);flex-shrink:0" aria-hidden="true"></i>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);border-radius:var(--radius-sm);flex-shrink:0">
+            <span style="font-size:13px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Indicador de compatibilidade fiscal</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">23/100 — perfil compatível</div>
+              <div style="font-size:11px;font-weight:600;color:#34d399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Indicador de compatibilidade fiscal</div>
+              <div style="font-size:10px;color:var(--muted2);margin-top:1px">23/100 — perfil compatível</div>
             </div>
           </div>
         </div>
@@ -2919,14 +2503,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
             <div class="result-box">
               <div class="result-hero" id="resultHero"></div>
               <div class="alerts" id="resultAlerts"></div>
-              <!-- [FIX 2026-07] Container que faltava — referenciado por revealResult() em app.js
-                   (busca por 'desktopInlineUpload') mas nunca existiu aqui, então o painel de
-                   upload inline pós-simulador nunca aparecia no desktop (o botão do CTA caía
-                   no fallback de navegar para a página de Análise via showPage('extrato')).
-                   Reaproveita 100% da lógica já funcional do equivalente mobile
-                   (inlineUploadBlock): renderBankGuide(), inlineUploadClick(), inlineDropHandle(),
-                   inlineGoToExtrato() — nenhuma função nova, só o container que o JS já esperava. -->
-              <div id="desktopInlineUpload" style="display:none;margin-top:16px"></div>
               <div class="result-upgrade">
                 <div class="upgrade-label">// ativar monitoramento real</div>
                 <div class="upgrade-cards">
@@ -2982,36 +2558,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <div class="hero" style="contain:layout">
     <div class="hero-tag" id="heroTagMobile"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
     <h1 id="heroH1Mobile">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
-    <p id="heroSubMobile">Despesas médicas e diferenças de rendimentos estão entre os temas que mais geram divergência na malha fina. Descubra em poucos minutos se o seu extrato revela sinais que merecem conferência.</p>
-    <div class="hero-badges-detailed">
-      <div class="hero-badge-detailed">
-        <span class="hbd-icon"><i data-lucide="lock" style="width:15px;height:15px" aria-hidden="true"></i></span>
-        <div>
-          <div class="hbd-title">Processamento local</div>
-          <div class="hbd-desc">Seu extrato não precisa sair do seu dispositivo.</div>
-        </div>
-      </div>
-      <div class="hero-badge-detailed">
-        <span class="hbd-icon"><i data-lucide="bar-chart-3" style="width:15px;height:15px" aria-hidden="true"></i></span>
-        <div>
-          <div class="hbd-title">Baseado na e-Financeira</div>
-          <div class="hbd-desc">Construído sobre os sinais que compõem sua movimentação.</div>
-        </div>
-      </div>
-      <div class="hero-badge-detailed">
-        <span class="hbd-icon"><i data-lucide="zap" style="width:15px;height:15px" aria-hidden="true"></i></span>
-        <div>
-          <div class="hbd-title">Resultado em minutos</div>
-          <div class="hbd-desc">Sem instalação e sem configuração complexa.</div>
-        </div>
-      </div>
-      <div class="hero-badge-detailed">
-        <span class="hbd-icon"><i data-lucide="circle-check" style="width:15px;height:15px" aria-hidden="true"></i></span>
-        <div>
-          <div class="hbd-title">Sem cadastro para começar</div>
-          <div class="hbd-desc">Veja a prévia antes de decidir desbloquear.</div>
-        </div>
-      </div>
+    <p id="heroSubMobile">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
+    <div class="hero-badges">
+      <span class="badge"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Processamento 100% local</span>
+      <span class="badge"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> 16 verificações automáticas</span>
+      <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
     </div>
     <!-- Mini métricas mobile — iguais ao desktop -->
     <div style="display:flex;gap:0;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);justify-content:space-around">
@@ -3240,7 +2791,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid var(--border)">
-        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Extrato processado no seu dispositivo · Nenhum arquivo enviado a servidores · Análise preventiva, não oficial
+        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Extrato processado no seu dispositivo · Nenhum arquivo enviado a servidores · Baseado nos critérios públicos do e-Financeira
       </div>
     </div>
   </div>
@@ -3258,48 +2809,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <span style="font-size:11px;font-weight:600;color:var(--accent)">100% no seu dispositivo · LGPD</span>
       </div>
     </div>
-
-    <!-- [V3.2/auditoria] Stepper horizontal — estado inicial: estágio 1 ativo. Atualizado via
-         setExtStepperStage() em app.js (não requer JS pra renderizar o estado inicial).
-         Labels ajustados (Arquivo/Analisando/Resultado) para não duplicar a numeração
-         1-2-3 do bloco "Como funciona" logo abaixo — "Arquivo" engloba escolher banco,
-         baixar e enviar; antes "Enviar arquivo" ficava ativo antes mesmo do usuário
-         escolher o banco, o que não fazia sentido. -->
-    <div class="ext-stepper" id="extStepper">
-      <div class="ext-stepper-item active">
-        <span class="ext-stepper-circle">1</span>
-        <span class="ext-stepper-label">Arquivo</span>
-      </div>
-      <div class="ext-stepper-line"></div>
-      <div class="ext-stepper-item">
-        <span class="ext-stepper-circle">2</span>
-        <span class="ext-stepper-label">Analisando</span>
-      </div>
-      <div class="ext-stepper-line"></div>
-      <div class="ext-stepper-item">
-        <span class="ext-stepper-circle">3</span>
-        <span class="ext-stepper-label">Resultado</span>
-      </div>
-    </div>
-
-    <!-- [V3.2/auditoria] Como funciona — ícones, sem numeração própria (o stepper
-         acima já é o elemento numerado da página; numerar os dois ao mesmo tempo
-         dava a impressão de duas sequências concorrentes). -->
-    <div class="ext-how-it-works">
-      <div class="ext-hiw-step">
-        <span class="ext-hiw-num"><i data-lucide="landmark" style="width:13px;height:13px" aria-hidden="true"></i></span>
-        <span class="ext-hiw-text"><strong>Selecione seu banco</strong><br>Veja onde exportar o extrato</span>
-      </div>
-      <div class="ext-hiw-step">
-        <span class="ext-hiw-num"><i data-lucide="download" style="width:13px;height:13px" aria-hidden="true"></i></span>
-        <span class="ext-hiw-text"><strong>Baixe o extrato</strong><br>Seguindo o guia do seu banco</span>
-      </div>
-      <div class="ext-hiw-step">
-        <span class="ext-hiw-num"><i data-lucide="upload" style="width:13px;height:13px" aria-hidden="true"></i></span>
-        <span class="ext-hiw-text"><strong>Envie o arquivo</strong><br>Para análise no seu dispositivo</span>
-      </div>
-    </div>
-
       <!-- extrato flow v3 — multi-extrato -->
   <div id="simExtrato" style="display:block;">
 
@@ -3674,29 +3183,12 @@ function guiaTab(banco) {
              baixado ainda (timing problem, não instruction problem). Esse bloco
              separa a expectativa do clique, sem tocar em nenhum elemento que o
              restante do fluxo (eOnSel, eRunAll, actBar) já depende. -->
-        <!-- [V3.2] Cards de banco — antes o bloco de preparação era genérico
-             (2 bullets fixos, iguais pra qualquer banco). Reaproveita
-             BANK_GUIDES/renderBankGuide() (já existentes, usados no painel
-             vivo do hero) para dar instrução específica do banco escolhido,
-             em vez de instrução genérica — mesma lógica, novo lugar. -->
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px">
-          <div style="font-family:var(--ff);font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px">Antes de continuar, separe seu extrato</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px">Selecione seu banco para ver exatamente onde exportar o arquivo.</div>
-          <div id="extBankCards">
-            <button class="ext-bank-card" data-banco="nubank" aria-pressed="false" onclick="selecionarBancoExtrato('nubank')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Nubank</button>
-            <button class="ext-bank-card" data-banco="inter" aria-pressed="false" onclick="selecionarBancoExtrato('inter')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Inter</button>
-            <button class="ext-bank-card" data-banco="bb" aria-pressed="false" onclick="selecionarBancoExtrato('bb')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Banco do Brasil</button>
-            <button class="ext-bank-card" data-banco="itau" aria-pressed="false" onclick="selecionarBancoExtrato('itau')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Itaú</button>
-            <button class="ext-bank-card" data-banco="bradesco" aria-pressed="false" onclick="selecionarBancoExtrato('bradesco')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Bradesco</button>
-            <button class="ext-bank-card" data-banco="outro" aria-pressed="false" onclick="selecionarBancoExtrato('outro')"><i data-lucide="check" class="ext-bank-check" aria-hidden="true"></i>Outro banco</button>
-          </div>
-          <div id="extBankGuideContent" style="margin-top:10px"></div>
-          <!-- [V3.2/auditoria] Antes vinha pré-preenchido com o texto genérico sem
-               nenhum card marcado como selecionado — parecia não pertencer a nenhuma
-               opção. Agora mostra um convite claro até o usuário escolher; o texto
-               genérico (formato/período) só aparece depois do clique em "Outro banco". -->
-          <div id="extBankGuideGenerico" style="margin-top:10px">
-            <div style="font-size:12px;color:var(--muted);text-align:center;padding:12px 8px">Selecione seu banco acima para ver como exportar.</div>
+          <div style="font-family:var(--ff);font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px">Antes de continuar, separe seu extrato</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:12px">O Guardião compara sua movimentação com os critérios que a Receita já usa. Pra isso funcionar bem, vale ter o arquivo do extrato já baixado antes de abrir o seletor.</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Formato CSV, OFX ou PDF (exportado pelo app do banco)</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2)"><span style="color:var(--accent)"><i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span> Pelo menos 1 mês de movimentação (ideal: 3 ou mais)</div>
           </div>
         </div>
 
@@ -3943,13 +3435,6 @@ function guiaTab(banco) {
             <span style="font-size:11px;color:var(--muted)" id="pDbgTog">▼ ver</span>
           </div>
           <div class="p-dbg-bd" id="pDbgBd" style="display:none"><pre id="pDbgPre"></pre></div>
-
-          <!-- Elementos legados — mantidos para compatibilidade do JS -->
-          <div id="ovEmoji" style="display:none"></div>
-          <div id="ovLevel" style="display:none"></div>
-          <div id="ovSub" style="display:none"></div>
-          <div id="pScoreVal" style="display:none"></div>
-          <div id="pCausasTop" style="display:none"></div>
         </div>
       </div>
     </div>
@@ -3964,7 +3449,7 @@ function guiaTab(banco) {
       <!-- Scanner fiscal — título + descrição -->
       <div style="margin-bottom:28px">
         <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-family:var(--ff)">Scanner fiscal</div>
-        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">Instituições financeiras informam à Receita totais mensais agregados de entradas e saídas quando os valores alcançam os limites de obrigatoriedade da e-Financeira — não uma lista detalhada de cada Pix ou transferência. O Guardião Fiscal analisa seu extrato real e aponta padrões que costumam coincidir com esses limites, antes de você declarar.</p>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita Federal. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
       </div>
 
       <!-- Grid 4 benefícios -->
@@ -4002,14 +3487,14 @@ function guiaTab(banco) {
           <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
           <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
         </div>
-        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">O Guardião Fiscal aplica verificações preventivas inspiradas em informações públicas sobre a e-Financeira e em padrões observáveis no seu extrato — não tem acesso aos critérios internos nem às bases auxiliares usadas pela Receita Federal para seleção de malha fina.</div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">A Receita Federal usa mais de 160 filtros automatizados para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira — antes da sua declaração ser entregue.</div>
       </div>
 
       <!-- LGPD detalhado + Metodologia -->
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)"><i data-lucide="clipboard-list" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Metodologia</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Analisa o extrato real do usuário e identifica padrões que merecem conferência — inspirado em informações públicas sobre a <strong style="color:var(--text)">e-Financeira</strong> (sistema que obriga bancos a informar totais mensais agregados de movimentação à Receita) e em heurísticas próprias. Não acessa a declaração do usuário nem conhece os critérios internos de seleção da Receita Federal.</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Privacidade e LGPD</div>
@@ -4269,7 +3754,7 @@ function guiaTab(banco) {
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
           <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
-          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Você pode solicitar informações claras sobre os critérios utilizados e contestar o resultado apresentado pelo sistema.</div></div>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Direito à explicação das decisões automatizadas garantido. Você pode contestar qualquer resultado.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
           <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
@@ -4535,12 +4020,7 @@ function _loadJsPDF() {
 }
 </script>
 <!-- Lucide Icons — biblioteca oficial de ícones do Guardião Fiscal (Livro II, Cap. 21.3) -->
-<!-- [FIX 2026-07] Era unpkg.com — bloqueado pelo CSP em produção (script-src não inclui
-     unpkg.com), fazendo TODOS os ícones lucide do site falharem silenciosamente (o
-     navegador bloqueia o script antes dele rodar; sem erro visível pro usuário, só no
-     console). Trocado para cdn.jsdelivr.net, que já está na lista de domínios
-     permitidos do CSP (vercel.json) — mesmo pacote npm, mesmo path, mirror oficial. -->
-<script src="https://cdn.jsdelivr.net/npm/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
+<script src="https://unpkg.com/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
 <script>
 /* Renderiza todo <i data-lucide="..."> presente no DOM. Chamado no load inicial
    e, via MutationObserver, sempre que o app.js reescreve innerHTML dinamicamente
@@ -4549,26 +4029,11 @@ function gfRenderIcons(){ if (window.lucide && typeof lucide.createIcons === 'fu
 document.addEventListener('DOMContentLoaded', gfRenderIcons);
 window.addEventListener('load', gfRenderIcons);
 (function(){
-  // [FIX 2026-07] Era 1 chamada de lucide.createIcons() por ANIMATION FRAME durante
-  // rajadas de innerHTML (ex.: montagem do resultado causal, que escreve várias seções
-  // em sequência) — cada chamada varre o documento inteiro, gerando vários
-  // "[Violation] requestAnimationFrame handler took Xms" seguidos no console (não
-  // quebra nada, mas é trabalho repetido à toa). Trocado por debounce: espera as
-  // mutações pararem por DEBOUNCE_MS antes de renderizar, com um teto de MAX_WAIT_MS
-  // para garantir que os ícones não demorem demais a aparecer mesmo em fluxo contínuo.
-  var DEBOUNCE_MS = 120;
-  var MAX_WAIT_MS = 400;
-  var timer = null;
-  var maxWaitTimer = null;
-  function run(){
-    if (timer) { clearTimeout(timer); timer = null; }
-    if (maxWaitTimer) { clearTimeout(maxWaitTimer); maxWaitTimer = null; }
-    gfRenderIcons();
-  }
+  var scheduled = false;
   function schedule(){
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(run, DEBOUNCE_MS);
-    if (!maxWaitTimer) maxWaitTimer = setTimeout(run, MAX_WAIT_MS);
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(function(){ scheduled = false; gfRenderIcons(); });
   }
   var obs = new MutationObserver(schedule);
   document.addEventListener('DOMContentLoaded', function(){
