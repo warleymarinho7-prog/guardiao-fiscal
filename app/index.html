@@ -52,14 +52,14 @@
   "@type": "SoftwareApplication",
   "name": "Guardião Fiscal",
   "url": "https://oguardiaofiscal.com.br",
-  "description": "Ferramenta de análise preventiva de risco fiscal para pessoa física. Identifica incompatibilidades entre movimentação bancária e declaração de Imposto de Renda com base nos mesmos critérios públicos usados pelo e-Financeira.",
+  "description": "Ferramenta de análise preventiva de compatibilidade financeira para pessoa física. Analisa o extrato bancário do usuário e identifica padrões que costumam gerar divergência quando comparados a informações públicas sobre a e-Financeira e critérios observáveis de compatibilidade.",
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Web",
   "inLanguage": "pt-BR",
   "offers": [
     {
       "@type": "Offer",
-      "name": "Análise Gratuita",
+      "name": "Simulação Gratuita",
       "price": "0",
       "priceCurrency": "BRL"
     },
@@ -2729,11 +2729,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     </div>
   </div>
   <div class="nav-links">
-    <button class="nav-link" onclick="showPage('home')">Início</button>
-    <button class="nav-link" onclick="showPage('extrato')">Análise de Extrato</button>
-    <button class="nav-link" onclick="showPage('planos')">Planos</button>
-    <button class="nav-link" id="navHistorico" onclick="showPage('historico')" style="display:none">Histórico</button>
-    <button class="nav-link" onclick="showPage('institucional')">Institucional</button>
+    <button class="nav-link" data-page="home" onclick="showPage('home')">Início</button>
+    <button class="nav-link" data-page="extrato" onclick="showPage('extrato')">Analisar Extrato</button>
+    <button class="nav-link" id="navHistorico" data-page="historico" onclick="showPage('historico')" style="display:none">Histórico</button>
+    <button class="nav-link" data-page="planos" onclick="showPage('planos')">Planos</button>
+    <button class="nav-link" data-page="institucional" onclick="showPage('institucional')">Como funciona</button>
     <a class="nav-link" href="/blog" style="text-decoration:none">Blog</a>
   </div>
   <!-- Auth area sempre visível — populada pelo JS (setUser) -->
@@ -2749,12 +2749,11 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
   <div class="nav-drawer-bg" onclick="closeDrawer()"></div>
   <div class="nav-drawer-panel">
     <button class="nav-drawer-link active" id="drawerHome" onclick="showPage('home');closeDrawer()"><i data-lucide="home" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Início</button>
+    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Analisar Extrato</button>
+    <button class="nav-drawer-link" id="drawerHistorico" onclick="showPage('historico');closeDrawer()" style="display:none"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Histórico</button>
     <button class="nav-drawer-link" id="drawerPlanos" onclick="showPage('planos');closeDrawer()"><i data-lucide="gem" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Planos</button>
-    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Institucional</button>
+    <button class="nav-drawer-link" id="drawerInstitucional" onclick="showPage('institucional');closeDrawer()"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Como funciona</button>
     <a class="nav-drawer-link" href="/blog" style="text-decoration:none"><i data-lucide="book" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Blog</a>
-    <div class="nav-drawer-divider"></div>
-    <button class="nav-drawer-link" id="drawerExtrato" onclick="showPage('extrato');closeDrawer()"><i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Análise de Extrato</button>
-    <button class="nav-drawer-link" id="drawerHistorico" onclick="showPage('historico');closeDrawer()" style="display:none"><i data-lucide="bar-chart-3" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Histórico de Análises</button>
     <div class="nav-drawer-divider"></div>
     <div class="nav-drawer-auth" id="drawerAuthArea">
       <button class="nav-btn-login" style="width:100%;text-align:center;padding:12px" onclick="openLogin();closeDrawer()">Entrar</button>
@@ -2772,7 +2771,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
     <div class="split-left">
       <div class="hero-tag" id="heroTagDesktop"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
       <h1 id="heroH1Desktop">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
-      <p id="heroSubDesktop">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
+      <p id="heroSubDesktop">Despesas médicas e diferenças de rendimentos estão entre os temas que mais geram divergência na malha fina. Descubra em poucos minutos se o seu extrato revela sinais que merecem conferência.</p>
       <div class="hero-badges-detailed" style="margin-bottom:32px">
         <div class="hero-badge-detailed">
           <span class="hbd-icon"><i data-lucide="lock" style="width:15px;height:15px" aria-hidden="true"></i></span>
@@ -2983,7 +2982,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
 <div class="hero" style="contain:layout">
     <div class="hero-tag" id="heroTagMobile"><i data-lucide="shield" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Scanner Preventivo de Malha Fina · e-Financeira · LGPD</div>
     <h1 id="heroH1Mobile">Seu extrato revela o que<br>sua declaração <em>ainda não explica</em></h1>
-    <p id="heroSubMobile">As duas causas mais comuns de malha fina hoje são sinais de divergência ligados ao plano de saúde e ao informe de rendimentos. Descubra em poucos minutos se o seu extrato aponta para algum deles.</p>
+    <p id="heroSubMobile">Despesas médicas e diferenças de rendimentos estão entre os temas que mais geram divergência na malha fina. Descubra em poucos minutos se o seu extrato revela sinais que merecem conferência.</p>
     <div class="hero-badges-detailed">
       <div class="hero-badge-detailed">
         <span class="hbd-icon"><i data-lucide="lock" style="width:15px;height:15px" aria-hidden="true"></i></span>
@@ -3241,7 +3240,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid var(--border)">
-        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Extrato processado no seu dispositivo · Nenhum arquivo enviado a servidores · Baseado nos critérios públicos do e-Financeira
+        <i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Extrato processado no seu dispositivo · Nenhum arquivo enviado a servidores · Análise preventiva, não oficial
       </div>
     </div>
   </div>
@@ -3965,7 +3964,7 @@ function guiaTab(banco) {
       <!-- Scanner fiscal — título + descrição -->
       <div style="margin-bottom:28px">
         <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-family:var(--ff)">Scanner fiscal</div>
-        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">O e-Financeira reporta automaticamente toda movimentação bancária acima de R$5.000 à Receita Federal. O Guardião Fiscal cruza seu extrato com esses critérios e aponta indicadores de compatibilidade — antes de você declarar.</p>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75;margin:0;max-width:500px">Instituições financeiras informam à Receita totais mensais agregados de entradas e saídas quando os valores alcançam os limites de obrigatoriedade da e-Financeira — não uma lista detalhada de cada Pix ou transferência. O Guardião Fiscal analisa seu extrato real e aponta padrões que costumam coincidir com esses limites, antes de você declarar.</p>
       </div>
 
       <!-- Grid 4 benefícios -->
@@ -4003,14 +4002,14 @@ function guiaTab(banco) {
           <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Circularidade financeira</div>
           <div style="font-size:12px;color:var(--muted2);display:flex;gap:6px"><span style="color:var(--green)">▶</span>Padrões recorrentes</div>
         </div>
-        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">A Receita Federal usa mais de 160 filtros automatizados para cruzar extratos com rendimentos declarados. Nossa engine replica os critérios públicos do e-Financeira — antes da sua declaração ser entregue.</div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.6;padding-top:10px;border-top:1px solid var(--border)">O Guardião Fiscal aplica verificações preventivas inspiradas em informações públicas sobre a e-Financeira e em padrões observáveis no seu extrato — não tem acesso aos critérios internos nem às bases auxiliares usadas pela Receita Federal para seleção de malha fina.</div>
       </div>
 
       <!-- LGPD detalhado + Metodologia -->
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)"><i data-lucide="clipboard-list" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Metodologia</div>
-          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Identifica padrões de movimentação que merecem atenção usando os mesmos critérios do sistema <strong style="color:var(--text)">e-Financeira</strong>, que obriga todos os bancos a reportar movimentações de pessoas físicas.</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.75">O Guardião Fiscal é um motor heurístico de análise preventiva de compatibilidade financeira. Analisa o extrato real do usuário e identifica padrões que merecem conferência — inspirado em informações públicas sobre a <strong style="color:var(--text)">e-Financeira</strong> (sistema que obriga bancos a informar totais mensais agregados de movimentação à Receita) e em heurísticas próprias. Não acessa a declaração do usuário nem conhece os critérios internos de seleção da Receita Federal.</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:var(--ff)"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Privacidade e LGPD</div>
@@ -4270,7 +4269,7 @@ function guiaTab(banco) {
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
           <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
-          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Direito à explicação das decisões automatizadas garantido. Você pode contestar qualquer resultado.</div></div>
+          <div><strong style="font-size:14px;font-weight:600;color:var(--text)">Conformidade LGPD — Art. 20</strong><div style="font-size:13px;color:var(--muted2);margin-top:2px">Você pode solicitar informações claras sobre os critérios utilizados e contestar o resultado apresentado pelo sistema.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start">
           <span style="color:var(--green);font-size:16px;flex-shrink:0"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
