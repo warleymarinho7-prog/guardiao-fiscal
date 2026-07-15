@@ -196,7 +196,7 @@ function initProFreeMode() {
     const ucPro = document.getElementById('ucProText');
     if (ucPro) ucPro.textContent = 'Acessar Pro — R$29,90/mês';
     const popular = document.getElementById('planProBadge');
-    if (popular) popular.textContent = '<i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO';
+    if (popular) popular.innerHTML = '<i data-lucide="star" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> MELHOR CUSTO-BENEFÍCIO';
     return;
   }
   const plansWrap = document.querySelector('#page-planos .plans-page');
@@ -1091,8 +1091,17 @@ function setUser(user) {
     autoSkipExtStep1(user.email);
     const nh = document.getElementById('navHistorico');
     const dh = document.getElementById('drawerHistorico');
-    if (nh) nh.style.display = 'inline-block';
-    if (dh) dh.style.display = 'block';
+    // [ENTITLEMENT] Histórico é exclusivo do plano Pro (DEC comercial jul/2026).
+    // Antes: qualquer usuário logado via o link, independente do plano.
+    // Ficam ocultos por padrão até a checagem assíncrona confirmar limites.historico.
+    if (nh) nh.style.display = 'none';
+    if (dh) dh.style.display = 'none';
+    _verifyPlanBeforeUnlock().then(function(ent){
+      if (ent && ent.limites && ent.limites.historico) {
+        if (nh) nh.style.display = 'inline-block';
+        if (dh) dh.style.display = 'block';
+      }
+    });
   } else {
     area.innerHTML = '';
     const btn = document.createElement('button');
@@ -1185,6 +1194,8 @@ async function doLogin() {
 }
 
 async function doCadastro() {
+  // Guardrail: 'err' (cadErr) também recebe traduzErro(error.message) dinamicamente.
+  // innerHTML aqui só com string estática controlada; mensagem variável sempre via textContent.
   const nome  = capAuthInput(document.getElementById('cadNome').value.trim(), 'nome');
   const email = capAuthInput(document.getElementById('cadEmail').value.trim(), 'email');
   const senha = capAuthInput(document.getElementById('cadSenha').value, 'senha');
@@ -1202,7 +1213,7 @@ async function doCadastro() {
   const { error } = await sb.auth.signUp({ email, password: senha, options: { data: { nome } } });
   btn.textContent = 'Criar conta →';
   if (error) { err.textContent = traduzErro(error.message); err.style.display='block'; return; }
-  ok.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
+  ok.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Verifique seu e-mail para confirmar (pode estar no spam).';
   ok.style.display = 'block';
   setTimeout(() => closeLoginDirect(), 2000);
 }
@@ -1231,6 +1242,11 @@ function _authRateOk() {
 }
 
 async function extStep1Done() {
+  // Guardrail: este elemento (extAuthErr) também recebe mensagens dinâmicas
+  // (traduzErro(error.message)). Use innerHTML aqui apenas com strings
+  // estáticas controladas no código. Para qualquer mensagem variável,
+  // prefira textContent — nunca interpole valor dinâmico dentro de innerHTML
+  // neste elemento.
   if (_currentUser) { autoSkipExtStep1(_currentUser.email); return; }
   if (!_authRateOk()) {
     const err = document.getElementById('extAuthErr');
@@ -1260,7 +1276,7 @@ async function extStep1Done() {
       autoSkipExtStep1(email);
     } else {
       err.style.color = 'var(--accent)';
-      err.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Confirme seu e-mail e volte para continuar.';
+      err.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Conta criada! Confirme seu e-mail e volte para continuar.';
       err.style.display = 'block';
     }
   } else {
@@ -2989,8 +3005,8 @@ function eOnSel(e){
 
 function eAddFile(file){
   eShowErr('');
-  if(eFiles.length>=MAX_FILES){
-    eShowErr(`Limite de ${MAX_FILES} extratos atingido.`);
+  if(eFiles.length>=getMaxArquivos()){
+    eShowErr(`Limite de ${getMaxArquivos()} extratos atingido.`);
     _trackUpload('file_rejected', { reason: 'limit_reached' });
     return;
   }
@@ -3083,12 +3099,12 @@ function eRenderFileList(){
   const lb=document.getElementById('limitBar');
   if(eFiles.length>0){
     lb.style.display='flex';
-    document.getElementById('limitTxt').textContent=`${eFiles.length} de ${MAX_FILES}`;
-    document.getElementById('dzIco').textContent=eFiles.length>=MAX_FILES?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
-    document.getElementById('dzTtl').textContent=eFiles.length>=MAX_FILES?`${MAX_FILES} extratos carregados`:'Adicione mais ou clique em Analisar';
-    document.getElementById('limitNote').textContent=eFiles.length>=MAX_FILES?'Limite atingido':'';
-    document.getElementById('ldots').innerHTML=Array.from({length:MAX_FILES},(_,i)=>`<div class="ldot ${i<eFiles.length?i===MAX_FILES-1&&eFiles.length>=MAX_FILES?'full':'used':''}">${i<eFiles.length?'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':''}</div>`).join('');
-  }else{lb.style.display='none';document.getElementById('dzIco').textContent='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
+    document.getElementById('limitTxt').textContent=`${eFiles.length} de ${getMaxArquivos()}`;
+    document.getElementById('dzIco').innerHTML=eFiles.length>=getMaxArquivos()?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    document.getElementById('dzTtl').textContent=eFiles.length>=getMaxArquivos()?`${getMaxArquivos()} extratos carregados`:'Adicione mais ou clique em Analisar';
+    document.getElementById('limitNote').textContent=eFiles.length>=getMaxArquivos()?'Limite atingido':'';
+    document.getElementById('ldots').innerHTML=Array.from({length:getMaxArquivos()},(_,i)=>`<div class="ldot ${i<eFiles.length?i===getMaxArquivos()-1&&eFiles.length>=getMaxArquivos()?'full':'used':''}">${i<eFiles.length?'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':''}</div>`).join('');
+  }else{lb.style.display='none';document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
 
 function eUpdateActionBar(){
@@ -3100,7 +3116,13 @@ function eUpdateActionBar(){
 function eShowErr(msg){const b=document.getElementById('errExt');b.textContent=msg;b.classList.toggle('show',!!msg);}
 function eSetProgress(pct,msg){document.getElementById('pFillExt').style.width=pct+'%';document.getElementById('actMsg').textContent=msg;}
 
-const MAX_FILES=5;
+// [ENTITLEMENT] Antes era `const MAX_FILES=5` fixo pra qualquer plano — Avulso e Pro
+// liberavam o mesmo limite de arquivos por análise. Agora reflete limites.maxArquivos
+// do entitlement (Avulso=1, Pro=5). Sem entitlement resolvido ainda (ex.: analisando
+// antes de logar/pagar), assume o padrão mais restritivo (1) — nunca o mais permissivo.
+function getMaxArquivos(){
+  return (window._entitlement && window._entitlement.limites && window._entitlement.limites.maxArquivos) || 1;
+}
 const SRC_COLORS=['#4ADE80','#4d9fff','#f5a623','#c084fc','#fb7185'];
 
 // ── Funil de upload — tracking centralizado ───────────────────────────────
@@ -3215,7 +3237,7 @@ async function eRunAll(){
     eSetProgress(100,`${consolidated.totalTxns} transações analisadas`);
     document.getElementById('extStep2').style.opacity='0.6';
     document.getElementById('extStep2').style.pointerEvents='none';
-    document.getElementById('s2num').textContent='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    document.getElementById('s2num').innerHTML='<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     document.getElementById('s2num').style.background='var(--green)';
     document.getElementById('s2num').style.color='#000';
     const s3=document.getElementById('extStep3');
@@ -3295,7 +3317,7 @@ function eRenderPreview(c,sources){
   else if(c.score<=45){emoji='<span style="color:var(--risk-atencao)" aria-hidden="true">●</span>';level='ATENÇÃO';color='#f5a623';}
   else if(c.score<=70){emoji='<span style="color:var(--risk-moderado)" aria-hidden="true">●</span>';level='RISCO ELEVADO';color=C_ELEVADO;}
   else{emoji='<span style="color:var(--risk-critico)" aria-hidden="true">●</span>';level='RISCO CRÍTICO';color=C_CRITICO;}
-  document.getElementById('pvEmoji').textContent=emoji;
+  document.getElementById('pvEmoji').innerHTML=emoji;
   document.getElementById('pvLevel').textContent=level;
   document.getElementById('pvLevel').style.color=color;
   document.getElementById('pvScore').textContent=c.score+'/100';
@@ -3435,22 +3457,50 @@ function _renderIndiceSecundarioPreview(c) {
   el.style.display = 'block';
   el.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center">Índice interno de atenção: ' + nivelTexto + '</div>';
 }
+// [ENTITLEMENT] Regras comerciais Avulso × Pro definidas por Warley (jul/2026).
+// Avulso = compra única: 1 arquivo por análise, sem histórico, 1 análise.
+// Pro = assinatura: até 5 arquivos, histórico liberado, análises ilimitadas.
+function _entitlementLimitesPadrao(plano) {
+  if (plano === 'pro')    return { maxArquivos: 5, historico: true,  analisesRestantes: Infinity };
+  if (plano === 'avulso') return { maxArquivos: 1, historico: false, analisesRestantes: 1 };
+  // Sem plano pago (não logado, sem plano, ou expirado) — sem acesso ao resultado completo.
+  return { maxArquivos: 1, historico: false, analisesRestantes: 0 };
+}
+
 // [FIX] _verifyPlanBeforeUnlock estava sendo chamada mas nunca definida
+// [ENTITLEMENT] Antes retornava só true/false ("tem algum plano pago?"), sem diferenciar
+// avulso de pro — por isso ambos os planos liberavam exatamente o mesmo resultado, o
+// mesmo limite de arquivos e o mesmo acesso a histórico. Agora retorna um objeto de
+// permissão explícito; window._entitlement fica cacheado para uso síncrono (ex.: dropzone).
 async function _verifyPlanBeforeUnlock() {
-  if (!_currentUser || !sb) return false;
-  // [FIX-SEC] Removido o atalho que confiava em _currentUser._plano setado no client
-  // (podia ser manipulado via console). Agora sempre revalida contra o Supabase.
+  if (!_currentUser || !sb) {
+    const ent = { permitido: false, plano: null, limites: _entitlementLimitesPadrao(null) };
+    window._entitlement = ent;
+    return ent;
+  }
   try {
     const { data } = await sb.from('profiles').select('plano, expires_at').eq('id', _currentUser.id).single();
-    if (!data) return false;
+    if (!data) {
+      const ent = { permitido: false, plano: null, limites: _entitlementLimitesPadrao(null) };
+      window._entitlement = ent;
+      return ent;
+    }
     const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
     const isExpired = expiresAt && expiresAt < new Date();
     if ((data.plano === 'pro' || data.plano === 'avulso') && !isExpired) {
       _currentUser._plano = data.plano;
-      return true;
+      const ent = { permitido: true, plano: data.plano, limites: _entitlementLimitesPadrao(data.plano) };
+      window._entitlement = ent;
+      return ent;
     }
-    return false;
-  } catch(e) { return false; }
+    const ent = { permitido: false, plano: data.plano || null, limites: _entitlementLimitesPadrao(null) };
+    window._entitlement = ent;
+    return ent;
+  } catch(e) {
+    const ent = { permitido: false, plano: null, limites: _entitlementLimitesPadrao(null) };
+    window._entitlement = ent;
+    return ent;
+  }
 }
 
 // ==================== UI — PILAR 1 (sinais do extrato) + PILAR 2 (verificação guiada) ====================
@@ -4376,8 +4426,8 @@ function renderPonteIndiceManifestacao(vmPonte) {
 }
 
 async function eUnlockResult(){
-  const allowed=await _verifyPlanBeforeUnlock();
-  if(!allowed){document.getElementById('paywallBlock').style.display='block';return;}
+  const entitlement=await _verifyPlanBeforeUnlock();
+  if(!entitlement.permitido){document.getElementById('paywallBlock').style.display='block';return;}
   document.getElementById('paywallBlock').style.display='none';
   // [FIX-CLS] Renderiza conteúdo com visibility:hidden antes de revelar
   // Evita dezenas de shifts causados por innerHTML sequencial em elemento visível
@@ -4442,7 +4492,7 @@ function eResetAll(){
   document.getElementById('actBar').style.display='none';
   document.getElementById('extStep3').style.display='none';
   document.getElementById('pFillExt').style.width='0%';
-  document.getElementById('dzIco').textContent='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+  document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
   document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';
   document.getElementById('paywallBlock').style.display='block';
   const _tinhaAcesso=document.getElementById('realResultBlock').style.display!=='none';
@@ -4533,6 +4583,15 @@ async function eCarregarHistorico(){
   const el=document.getElementById('historicoList');if(!el)return;
   if(!_currentUser||!sb){el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Faça login para ver seu histórico.</div>';return;}
   el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted2);font-size:13px">Carregando...</div>';
+  // [ENTITLEMENT] Histórico é exclusivo do plano Pro. Checagem aqui é defesa em
+  // profundidade — além de esconder o link do menu, a própria página nunca deve
+  // entregar dados de histórico pra quem não tem limites.historico (ex.: acesso
+  // direto via #historico, sem passar pela navegação).
+  const ent = window._entitlement || await _verifyPlanBeforeUnlock();
+  if (!ent.limites.historico) {
+    el.innerHTML='<div style="text-align:center;padding:48px 16px"><div style="font-size:32px;margin-bottom:12px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Histórico é exclusivo do plano Pro</div><div style="font-size:13px;color:var(--muted2);margin-bottom:20px">Assine o Pro para acompanhar sua evolução fiscal ao longo do tempo.</div><button onclick="openCheckout(\'pro\')" style="padding:11px 24px;background:var(--green);border:none;border-radius:var(--radius-md);color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">Assinar Pro — R$29,90/mês</button></div>';
+    return;
+  }
   try{
     // [DEC-018-B] 'result_payload' NÃO está no select ainda — a coluna não existe
     // no schema atual (migração pendente de aprovação). Quando for aprovada, basta
