@@ -982,6 +982,11 @@ const SUPA_URL  = 'https://nnhbxyuggmcemqwzdxbg.supabase.co';
 const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uaGJ4eXVnZ21jZW1xd3pkeGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NTc1NDQsImV4cCI6MjA5NDMzMzU0NH0.0KMETdyHYs0NR8qQKp2KZeSnp5Al58JVDrSGDJEG_WQ';
 
 let sb = null;
+// [ENTITLEMENT] Estado de resolução do entitlement — 'carregando' até a primeira
+// checagem de plano terminar. Evita que um usuário Pro que abre a página e
+// seleciona arquivos rapidamente veja o limite do Avulso (1) só porque a
+// checagem assíncrona de plano ainda não voltou do Supabase.
+window._entitlementStatus = 'carregando';
 let _currentUser = null;
 
 function _initSupabase() {
@@ -3102,7 +3107,7 @@ function eRenderFileList(){
     document.getElementById('limitTxt').textContent=`${eFiles.length} de ${getMaxArquivos()}`;
     document.getElementById('dzIco').innerHTML=eFiles.length>=getMaxArquivos()?'<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':'<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     document.getElementById('dzTtl').textContent=eFiles.length>=getMaxArquivos()?`${getMaxArquivos()} extratos carregados`:'Adicione mais ou clique em Analisar';
-    document.getElementById('limitNote').textContent=eFiles.length>=getMaxArquivos()?'Limite atingido':'';
+    document.getElementById('limitNote').textContent=eFiles.length>=getMaxArquivos()?(window._entitlementStatus==='carregando'?'Verificando seu plano…':'Limite atingido'):'';
     document.getElementById('ldots').innerHTML=Array.from({length:getMaxArquivos()},(_,i)=>`<div class="ldot ${i<eFiles.length?i===getMaxArquivos()-1&&eFiles.length>=getMaxArquivos()?'full':'used':''}">${i<eFiles.length?'<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>':''}</div>`).join('');
   }else{lb.style.display='none';document.getElementById('dzIco').innerHTML='<i data-lucide="upload" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';document.getElementById('dzTtl').textContent='Arraste os extratos ou clique para selecionar';}
 }
@@ -3259,7 +3264,10 @@ async function eRunAll(){
       // Reaproveita o contrato já construído acima — não recria. Ainda não grava
       // `result_payload` (schema pendente de aprovação), só alimenta o adaptador legado.
       const _payload={user_id:_currentUser.id,...montarRegistroAnaliseLegado(window._modeloResultado,consolidated,results)};
-      await sb.from('analyses').insert(_payload);
+      const {data:_analiseSalva}=await sb.from('analyses').insert(_payload).select('id').single();
+      // [ENTITLEMENT-AVULSO] id necessário pra iniciar_janela_avulso() — sem ele,
+      // eUnlockResult não consegue vincular a janela de 30min a esta análise.
+      if(_analiseSalva&&_analiseSalva.id) window._currentAnalysisId=_analiseSalva.id;
     }catch(e){}})();}
     // [FIX-CLS] Popula conteúdo com s3 ainda oculto, depois mostra e scrolla num único frame
     eRenderPreview(consolidated,results);
@@ -3458,13 +3466,15 @@ function _renderIndiceSecundarioPreview(c) {
   el.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center">Índice interno de atenção: ' + nivelTexto + '</div>';
 }
 // [ENTITLEMENT] Regras comerciais Avulso × Pro definidas por Warley (jul/2026).
-// Avulso = compra única: 1 arquivo por análise, sem histórico, 1 análise.
-// Pro = assinatura: até 5 arquivos, histórico liberado, análises ilimitadas.
+// Avulso = compra única: 1 arquivo por análise, sem histórico, janela de 30min
+// vinculada à compra (não crédito travado num analysis_id único — ver
+// iniciar_janela_avulso() no Supabase e a nota de desenho na migração SQL).
+// Pro = assinatura: até 5 arquivos, histórico liberado, sem janela (ilimitado).
 function _entitlementLimitesPadrao(plano) {
-  if (plano === 'pro')    return { maxArquivos: 5, historico: true,  analisesRestantes: Infinity };
-  if (plano === 'avulso') return { maxArquivos: 1, historico: false, analisesRestantes: 1 };
+  if (plano === 'pro')    return { maxArquivos: 5, historico: true,  janelaMinutos: null };
+  if (plano === 'avulso') return { maxArquivos: 1, historico: false, janelaMinutos: 30 };
   // Sem plano pago (não logado, sem plano, ou expirado) — sem acesso ao resultado completo.
-  return { maxArquivos: 1, historico: false, analisesRestantes: 0 };
+  return { maxArquivos: 1, historico: false, janelaMinutos: null };
 }
 
 // [FIX] _verifyPlanBeforeUnlock estava sendo chamada mas nunca definida
@@ -3473,9 +3483,11 @@ function _entitlementLimitesPadrao(plano) {
 // mesmo limite de arquivos e o mesmo acesso a histórico. Agora retorna um objeto de
 // permissão explícito; window._entitlement fica cacheado para uso síncrono (ex.: dropzone).
 async function _verifyPlanBeforeUnlock() {
+  window._entitlementStatus = 'carregando';
   if (!_currentUser || !sb) {
     const ent = { permitido: false, plano: null, limites: _entitlementLimitesPadrao(null) };
     window._entitlement = ent;
+    window._entitlementStatus = 'resolvido';
     return ent;
   }
   try {
@@ -3483,23 +3495,55 @@ async function _verifyPlanBeforeUnlock() {
     if (!data) {
       const ent = { permitido: false, plano: null, limites: _entitlementLimitesPadrao(null) };
       window._entitlement = ent;
+      window._entitlementStatus = 'resolvido';
       return ent;
     }
     const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
-    const isExpired = expiresAt && expiresAt < new Date();
+    // [FIX-CONFLITO] Antes, expires_at expirava TANTO pro quanto avulso — e o
+    // webhook setava expires_at=agora+30min pro avulso na hora da COMPRA, não
+    // do primeiro uso. Isso fazia a janela de uso (avulso_started_at/expires_at,
+    // controlada por iniciar_janela_avulso) competir com essa janela antiga
+    // baseada na compra, e a mais restritiva sempre vencia — na prática anulando
+    // o modelo "expira no primeiro uso, não na compra" (decisão de Warley, jul/2026).
+    // expires_at agora só governa a ASSINATURA Pro. Avulso nunca "expira" por
+    // aqui — a única fonte de verdade da janela de uso é avulso_started_at/
+    // avulso_expires_at, checados só depois, em iniciarJanelaAvulso().
+    const isExpired = data.plano === 'pro' && expiresAt && expiresAt < new Date();
     if ((data.plano === 'pro' || data.plano === 'avulso') && !isExpired) {
       _currentUser._plano = data.plano;
       const ent = { permitido: true, plano: data.plano, limites: _entitlementLimitesPadrao(data.plano) };
       window._entitlement = ent;
+      window._entitlementStatus = 'resolvido';
       return ent;
     }
     const ent = { permitido: false, plano: data.plano || null, limites: _entitlementLimitesPadrao(null) };
     window._entitlement = ent;
+    window._entitlementStatus = 'resolvido';
     return ent;
   } catch(e) {
     const ent = { permitido: false, plano: null, limites: _entitlementLimitesPadrao(null) };
     window._entitlement = ent;
+    window._entitlementStatus = 'erro';
     return ent;
+  }
+}
+
+// [ENTITLEMENT-AVULSO] Chama a RPC atômica iniciar_janela_avulso() no Supabase
+// (ver migracao-janela-avulso.sql). Só relevante pra plano='avulso' — Pro não
+// tem janela. Se a RPC ainda não existir no banco (migração não rodada), erro
+// é tratado como bloqueado — nunca libera por falha de rede/deploy fora de ordem.
+async function iniciarJanelaAvulso(analysisId) {
+  if (!sb) return { permitido: false, motivo: 'sem_sb' };
+  if (!analysisId) return { permitido: false, motivo: 'sem_analysis_id' };
+  try {
+    const { data, error } = await sb.rpc('iniciar_janela_avulso', { p_analysis_id: analysisId });
+    if (error) { console.error('[iniciarJanelaAvulso] erro RPC:', error); return { permitido: false, motivo: 'erro_rpc' }; }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return { permitido: false, motivo: 'resposta_vazia' };
+    return { permitido: !!row.permitido, expiraEm: row.expira_em || null, motivo: row.motivo || null };
+  } catch(e) {
+    console.error('[iniciarJanelaAvulso] exceção:', e);
+    return { permitido: false, motivo: 'excecao' };
   }
 }
 
@@ -4428,6 +4472,23 @@ function renderPonteIndiceManifestacao(vmPonte) {
 async function eUnlockResult(){
   const entitlement=await _verifyPlanBeforeUnlock();
   if(!entitlement.permitido){document.getElementById('paywallBlock').style.display='block';return;}
+  // [ENTITLEMENT-AVULSO] Pro não tem janela — só avulso precisa validar contra
+  // iniciar_janela_avulso() antes de liberar. Se a janela já expirou (ou não
+  // havia analysisId, ex.: insert em analyses falhou por rede), bloqueia com
+  // mensagem específica em vez do texto genérico de "análise completa bloqueada".
+  if(entitlement.plano==='avulso'){
+    const janela=await iniciarJanelaAvulso(window._currentAnalysisId);
+    if(!janela.permitido){
+      const badge=document.getElementById('paywallDynamicBadge');
+      const sub=document.getElementById('paywallDynamicSub');
+      if(badge) badge.innerHTML='<i data-lucide="clock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Janela de acesso encerrada';
+      if(sub) sub.textContent = janela.motivo==='janela_expirada'
+        ? 'Sua análise avulsa tinha 30 minutos de acesso a partir do primeiro uso e esse prazo já passou. Compre uma nova análise avulsa ou assine o Pro para acesso sem prazo.'
+        : 'Não foi possível confirmar sua análise avulsa agora. Tente novamente em instantes.';
+      document.getElementById('paywallBlock').style.display='block';
+      return;
+    }
+  }
   document.getElementById('paywallBlock').style.display='none';
   // [FIX-CLS] Renderiza conteúdo com visibility:hidden antes de revelar
   // Evita dezenas de shifts causados por innerHTML sequencial em elemento visível
