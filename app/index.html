@@ -4020,7 +4020,7 @@ function _loadJsPDF() {
 }
 </script>
 <!-- Lucide Icons — biblioteca oficial de ícones do Guardião Fiscal (Livro II, Cap. 21.3) -->
-<script src="https://unpkg.com/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@1.24.0/dist/umd/lucide.min.js" defer></script>
 <script>
 /* Renderiza todo <i data-lucide="..."> presente no DOM. Chamado no load inicial
    e, via MutationObserver, sempre que o app.js reescreve innerHTML dinamicamente
@@ -4297,10 +4297,10 @@ async function sendFeedback() {
         fatores: { pagina: window.location.href, email: _currentUser?.email || null },
       });
     }
-    msg.textContent = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Enviado! Obrigado pelo feedback.';
+    msg.innerHTML = '<i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Enviado! Obrigado pelo feedback.';
     msg.style.color = '#34d399';
     msg.style.display = 'block';
-    btn.textContent = 'Enviado <i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
+    btn.innerHTML = 'Enviado <i data-lucide="check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i>';
     setTimeout(() => closeFeedback(), 1800);
   } catch(e) {
     msg.textContent = 'Erro ao enviar. Tente novamente.';
