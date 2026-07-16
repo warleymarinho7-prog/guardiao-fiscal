@@ -3851,33 +3851,8 @@ function guiaTab(banco) {
       <div class="modal-title" id="checkoutTitle">Pagamento seguro</div>
       <div class="modal-sub" id="checkoutSub">Pague com cartão direto aqui — sem sair do site.</div>
 
-      <!-- Tabs: Cartão | Pix/Boleto -->
-      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius-md);padding:4px;margin:12px 0 16px">
-        <button id="tabCartao" onclick="switchPayTab('cartao')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--text);transition:all 0.2s"><i data-lucide="credit-card" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Cartão</button>
-        <button id="tabOutros" onclick="switchPayTab('outros')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.2s"><span style="color:var(--risk-baixo)" aria-hidden="true">●</span> Pix / Boleto</button>
-      </div>
-
-      <!-- Cartão: MP Brick -->
-      <div id="payPaneCartao">
-        <div id="mpBrickContainer" style="min-height:320px"></div>
-        <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin:10px 0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:10px"></div>
-      </div>
-
-      <!-- Pix / Boleto: redirect -->
-      <div id="payPaneOutros" style="display:none">
-        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:22px 20px;text-align:center">
-          <div style="font-size:13px;color:var(--muted2);line-height:1.9;margin-bottom:18px">
-            <span style="color:var(--risk-baixo)" aria-hidden="true">●</span> <strong style="color:var(--text)">Pix</strong> — aprovação imediata · qualquer banco<br>
-            <i data-lucide="file" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> <strong style="color:var(--text)">Boleto</strong> — vence em 1 dia útil · qualquer banco<br>
-            <span style="font-size:11px;color:var(--muted)">Não é necessário ter conta no Mercado Pago</span>
-          </div>
-          <div id="mpPayErrOutros" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:10px"></div>
-          <button class="btn-pay" id="btnMpPay" onclick="goToMercadoPago()" style="margin-bottom:0">
-            <span id="btnMpTxt">Gerar Pix ou Boleto →</span>
-          </button>
-          <div style="font-size:11px;color:var(--muted);margin-top:10px"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Você será redirecionado para gerar o código de pagamento</div>
-        </div>
-      </div>
+      <div id="mpBrickContainer" style="min-height:120px;margin-top:12px"></div>
+      <div id="mpPayErr" style="display:none;color:var(--red);font-size:12px;margin:10px 0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:10px"></div>
 
       <button class="btn-plan btn-plan-free" style="width:100%;padding:11px;border-radius:var(--radius-md);font-family:var(--ff);font-size:12px;margin-top:12px" onclick="goToAccount()">← Voltar</button>
       <div class="security-note" style="margin-top:12px"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Pagamento processado diretamente pelo Mercado Pago · PCI DSS</div>
