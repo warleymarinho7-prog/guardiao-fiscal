@@ -275,153 +275,12 @@ async function openCheckout(plan) {
 }
 
 // ── MERCADO PAGO ─────────────────────────────────────────────
-const MP_PUBLIC_KEY = 'APP_USR-60e9c4f7-757b-48da-a367-8b3785a4cf72';
-let _mpInstance = null;
-let _mpBrick    = null;
 // [FIX-TIMEOUT] Referência do setTimeout do checkout para cancelamento
 let _checkoutStepTimer = null;
-
-function getMpInstance() {
-  if (!_mpInstance) _mpInstance = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
-  return _mpInstance;
-}
-
-function switchPayTab(tab) {
-  const paneCartao = document.getElementById('payPaneCartao');
-  const paneOutros = document.getElementById('payPaneOutros');
-  const tabC = document.getElementById('tabCartao');
-  const tabO = document.getElementById('tabOutros');
-
-  if (tab === 'cartao') {
-    paneCartao.style.display = 'block';
-    paneOutros.style.display = 'none';
-    tabC.style.background = 'var(--surface)';
-    tabC.style.color      = 'var(--text)';
-    tabO.style.background = 'transparent';
-    tabO.style.color      = 'var(--muted)';
-    // Checkout Pro: não inicializa Brick aqui
-  } else {
-    paneCartao.style.display = 'none';
-    paneOutros.style.display = 'block';
-    tabC.style.background = 'transparent';
-    tabC.style.color      = 'var(--muted)';
-    tabO.style.background = 'var(--surface)';
-    tabO.style.color      = 'var(--text)';
-  }
-}
-
-async function initMpBrick() {
-  const container = document.getElementById('mpBrickContainer');
-  if (!container) return;
-
-  const isProd = window.location.hostname === 'oguardiaofiscal.com.br' ||
-                 window.location.hostname === 'www.oguardiaofiscal.com.br';
-
-  if (!isProd) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:24px 16px">
-        <div style="font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6">
-          O formulário de cartão está disponível apenas no site oficial.<br>
-          <strong style="color:var(--text)">oguardiaofiscal.com.br</strong>
-        </div>
-        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:var(--radius-sm);color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">Carregando formulário de pagamento...</div>';
-
-  if (typeof MercadoPago === 'undefined') {
-    if (window._mpSDKPreloading) {
-      await new Promise((resolve) => {
-        const poll = setInterval(() => {
-          if (typeof MercadoPago !== 'undefined' || !window._mpSDKPreloading) {
-            clearInterval(poll);
-            resolve();
-          }
-        }, 100);
-        setTimeout(() => { clearInterval(poll); resolve(); }, 5000);
-      });
-    }
-
-    if (typeof MercadoPago === 'undefined') {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://sdk.mercadopago.com/js/v2';
-        script.onload  = () => resolve();
-        script.onerror = (e) => { reject(new Error('Não foi possível carregar o SDK do Mercado Pago. Tente desativar extensões do navegador (ex: ad blocker) e recarregue a página.')); };
-        document.head.appendChild(script);
-      }).catch(err => {
-        showBrickFallback(container, err.message);
-        return null;
-      });
-    }
-
-    if (typeof MercadoPago === 'undefined') {
-      showBrickFallback(container, 'SDK bloqueado. Desative extensões como ad blocker e tente novamente, ou use Pix/Boleto.');
-      return;
-    }
-  }
-
-  try {
-    const mp = getMpInstance();
-    const bricksBuilder = mp.bricks();
-    const amountVal = PRICES[currentPlan]?.value ?? PRICES.avulso.value;
-
-    const brickTimeout = setTimeout(() => {
-      if (container && container.innerHTML.includes('Carregando')) {
-        showBrickFallback(container, 'Tempo limite excedido ao carregar o formulário.');
-      }
-    }, 15000);
-
-    _mpBrick = await bricksBuilder.create('cardPayment', 'mpBrickContainer', {
-      initialization: {
-        amount: amountVal,
-        payer: { email: _currentUser?.email || '' },
-      },
-      customization: {
-        visual: { style: { theme: 'dark' }, hideFormTitle: true, hidePaymentButton: false },
-        paymentMethods: { maxInstallments: currentPlan === 'pro' ? 1 : 3 },
-      },
-      callbacks: {
-        onReady: () => { clearTimeout(brickTimeout); },
-        onSubmit: async (cardData) => { clearTimeout(brickTimeout); await processCardPayment(cardData); },
-        onError: (err) => {
-          clearTimeout(brickTimeout);
-          // [FIX 2026-07] O fallback antigo caía em JSON.stringify(err) — literalmente um objeto
-          // JS serializado aparecendo na tela do usuário. Trocado por mensagem fixa amigável;
-          // o objeto original continua indo pro console para debug.
-          console.error('[Guardião] erro no formulário de pagamento (Mercado Pago Brick):', err);
-          const causaConhecida = err?.cause?.[0]?.description;
-          const cause = (causaConhecida && /[.!?]$/.test(causaConhecida.trim()) && causaConhecida.length < 140)
-            ? causaConhecida
-            : 'Não foi possível carregar o formulário de pagamento. Verifique os dados ou tente Pix/Boleto.';
-          showBrickFallback(container, cause);
-        },
-      },
-    });
-  } catch (e) {
-    showBrickFallback(container, eSafeErrorMsg(e, 'Não foi possível carregar o formulário de pagamento. Tente novamente ou use Pix/Boleto.'));
-  }
-}
-
-function showBrickFallback(container, msg) {
-  if (!container) return;
-  container.innerHTML = `
-    <div style="text-align:center;padding:20px;font-size:13px">
-      <div style="color:var(--red);margin-bottom:8px;font-weight:600">Não foi possível carregar o formulário de cartão.</div>
-      <div style="color:var(--muted);font-size:11px;margin-bottom:16px;line-height:1.5">${msg || 'Erro desconhecido'}</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button onclick="_mpBrick=null;initMpBrick()" style="padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer"><i data-lucide="refresh-cw" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Tentar novamente</button>
-        <button onclick="switchPayTab('outros')" style="padding:10px 20px;background:var(--green);border:none;border-radius:var(--radius-sm);color:#000;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer">Usar Pix ou Boleto →</button>
-      </div>
-    </div>`;
-}
 
 function _initProSubscriptionUI() {
   const container = document.getElementById('mpBrickContainer');
   if (!container) return;
-  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
 
   container.innerHTML = `
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:22px 20px;text-align:center">
@@ -440,7 +299,6 @@ function _initProSubscriptionUI() {
 function _initAvulsoCheckoutProUI() {
   const container = document.getElementById('mpBrickContainer');
   if (!container) return;
-  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
 
   container.innerHTML = `
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:22px 20px;text-align:center">
@@ -589,71 +447,9 @@ async function startProSubscription() {
   }
 }
 
-async function processCardPayment(cardData) {
-  const errEl = document.getElementById('mpPayErr');
-  if (errEl) errEl.style.display = 'none';
-
-  try {
-    if (!sb) throw new Error('Serviço de autenticação indisponível.');
-    const { data: { session }, error: sessErr } = await sb.auth.getSession();
-    if (sessErr || !session) throw new Error('Sessão expirada. Faça login novamente.');
-
-    const res = await fetch(`${SUPA_URL}/functions/v1/create-mp-preference`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ plan: currentPlan, paymentMethod: 'card', cardData }),
-    });
-
-    if (!res.ok) {
-      let errMsg = `Erro ${res.status}`;
-      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
-      throw new Error(errMsg);
-    }
-
-    const data = await res.json();
-
-    if (data.status === 'approved') {
-      if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
-      showCheckoutSuccess();
-    } else if (data.status === 'in_process' || data.status === 'pending') {
-      if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
-      document.getElementById('stepPay').querySelector('.modal-title').textContent = 'Pagamento em análise';
-      document.getElementById('stepPay').querySelector('.modal-sub').textContent = 'Seu pagamento está sendo processado. Assim que aprovado você receberá acesso por e-mail.';
-    } else if (data.init_point) {
-      window.location.href = data.init_point;
-    } else {
-      throw new Error(data.error || 'Pagamento não aprovado. Verifique os dados do cartão.');
-    }
-  } catch (e) {
-    if (errEl) {
-      errEl.textContent = eSafeErrorMsg(e, 'Erro ao processar pagamento. Tente novamente.');
-      errEl.style.display = 'block';
-    }
-  }
-}
-
-function showCheckoutSuccess() {
-  setCheckoutStep(3);
-  const plan = plans[currentPlan];
-  document.getElementById('successMsg').textContent =
-    `Seu acesso ao ${plan.name} foi ativado. Pode fechar este painel e usar a análise.`;
-  if(typeof fbq==='function' && window.PIXEL_ATIVO) {
-    const valor = currentPlan==='pro' ? 29.90 : (PRICES?.avulso?.value ?? 19.90);
-    trackFbWithEmail('track', 'Purchase', {
-      value: valor,
-      currency: 'BRL',
-      content_name: 'plano_' + currentPlan,
-      content_type: 'product',
-      content_ids: ['plano_' + currentPlan]
-    }, { eventID: 'purchase_' + Date.now().toString() });
-  }
-  if (_eConsolidated) setTimeout(() => { closeCheckoutDirect(); eUnlockResult(); }, 2000);
-}
-
 function closeCheckoutDirect() {
   // [FIX-TIMEOUT] Cancela o timer do setCheckoutStep para evitar init do Brick em modal fechado
   if (_checkoutStepTimer) { clearTimeout(_checkoutStepTimer); _checkoutStepTimer = null; }
-  if (_mpBrick) { try { _mpBrick.unmount(); } catch(e) {} _mpBrick = null; }
   const el = document.getElementById('checkoutOverlay');
   if (el) el.classList.remove('show');
   document.body.style.overflow = '';
@@ -672,75 +468,12 @@ function setCheckoutStep(n) {
     // [FIX-TIMEOUT] Guarda referência para cancelamento em closeCheckoutDirect
     _checkoutStepTimer = setTimeout(() => {
       _checkoutStepTimer = null;
-      switchPayTab('cartao');
-      const tabOutros = document.getElementById('tabOutros');
-      const payPaneOutros = document.getElementById('payPaneOutros');
       if (currentPlan === 'pro') {
-        if (tabOutros) tabOutros.style.display = 'none';
-        if (payPaneOutros) payPaneOutros.style.display = 'none';
         _initProSubscriptionUI();
       } else {
-        if (tabOutros) tabOutros.style.display = 'none';
-        if (payPaneOutros) payPaneOutros.style.display = 'none';
         _initAvulsoCheckoutProUI();
       }
     }, 100);
-  }
-}
-
-async function goToMercadoPago() {
-  const btn = document.getElementById('btnMpTxt');
-  const errEl = document.getElementById('mpPayErrOutros');
-  if (errEl) errEl.style.display = 'none';
-  if (btn) btn.textContent = 'Gerando link de pagamento...';
-  document.getElementById('btnMpPay').disabled = true;
-
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const newWin = (!isMobile) ? window.open('', '_blank') : null;
-
-  try {
-    if (!sb) throw new Error('Serviço de autenticação indisponível. Recarregue a página.');
-    const { data: { session }, error: sessErr } = await sb.auth.getSession();
-    if (sessErr) throw new Error('Erro de autenticação. Faça login novamente.');
-    if (!session) throw new Error('Sessão expirada. Faça login novamente.');
-
-    let res;
-    try {
-      res = await fetch(`${SUPA_URL}/functions/v1/create-mp-preference`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body: JSON.stringify({ plan: currentPlan }),
-      });
-    } catch (networkErr) {
-      throw new Error('Não foi possível conectar ao servidor de pagamento. Verifique sua conexão e tente novamente.');
-    }
-
-    if (!res.ok) {
-      let errMsg = `Erro ${res.status}`;
-      try { const j = await res.json(); errMsg = j.error || errMsg; } catch(_) {}
-      throw new Error(errMsg);
-    }
-
-    const data = await res.json();
-    const url = data.init_point || data.sandbox_url;
-    const _urlOk = url && (url.startsWith('https://www.mercadopago.com') || url.startsWith('https://mercadopago.com') || url.startsWith('https://sandbox.mercadopago.com'));
-    if (!_urlOk) throw new Error('Link de pagamento inválido. Tente novamente.');
-
-    if (newWin) newWin.close();
-    if (btn) btn.textContent = 'Prosseguir no Mercado Pago →';
-    const btnEl = document.getElementById('btnMpPay');
-    btnEl.disabled = false;
-    btnEl.onclick = function() { window.open(url, '_blank') || (window.location.href = url); };
-    if (errEl) {
-      errEl.style.cssText = 'display:block;background:rgba(255,77,79,0.08);border:1px solid rgba(255,77,79,0.2);border-radius:var(--radius-sm);padding:10px;font-size:12px;color:var(--muted2);margin-bottom:12px';
-      errEl.innerHTML = '<i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Link gerado! Clique em <strong>Prosseguir no Mercado Pago</strong> para continuar.';
-    }
-
-  } catch (e) {
-    if (newWin) newWin.close();
-    if (errEl) { errEl.textContent = eSafeErrorMsg(e, 'Não conseguimos gerar o link de pagamento agora. Pode ter sido uma instabilidade momentânea — tente novamente em alguns segundos.'); errEl.style.display = 'block'; }
-    if (btn) btn.textContent = 'Ir para o pagamento →';
-    document.getElementById('btnMpPay').disabled = false;
   }
 }
 
