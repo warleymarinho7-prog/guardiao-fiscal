@@ -4658,6 +4658,93 @@ window.gFeedbackCheckChange=function(el){const outroWrap=document.getElementById
 window.gFeedbackSubmit=function(tipo){const r=window._gFeedback.sessao;const payload={tipo,score:r?.score,ts:new Date().toISOString(),motivos:[],texto:''};window._gFeedback.historico.push(payload);if(typeof fbq==='function'&&window.PIXEL_ATIVO)fbq('trackCustom','FeedbackOk',{score:r?.score},{eventID:Date.now().toString()});const det=document.getElementById('gFbDetalhes');const suc=document.getElementById('gFbSucesso');const btnsRow=document.querySelector('#gFeedbackCard > div[style*="flex"]');if(btnsRow)btnsRow.style.display='none';if(det)det.style.display='none';if(suc)suc.style.display='block';gFeedbackPersistir(payload).catch(()=>{});};
 window.gFeedbackEnviar=function(){const checkboxes=document.querySelectorAll('#gFbDetalhes input[type=checkbox]:checked');const motivos=Array.from(checkboxes).map(c=>c.value);const texto=document.getElementById('gFbOutroText')?.value?.trim()||'';if(!motivos.length&&!texto){alert('Selecione ao menos um motivo antes de enviar.');return;}const r=window._gFeedback.sessao;const payload={tipo:'discordo',score:r?.score,motivos,texto:texto.slice(0,500),ts:new Date().toISOString()};window._gFeedback.historico.push(payload);const det=document.getElementById('gFbDetalhes');const suc=document.getElementById('gFbSucesso');const btnsRow=document.querySelector('#gFeedbackCard > div[style*="flex"]');if(btnsRow)btnsRow.style.display='none';if(det)det.style.display='none';if(suc)suc.style.display='block';gFeedbackPersistir(payload).catch(()=>{});};
 async function gFeedbackPersistir(payload){if(!sb)return;const userId=_currentUser?.id||null;const{error}=await sb.from('guardiao_feedback').insert([{user_id:userId,tipo:payload.tipo,score:payload.score,motivos:payload.motivos||[],texto:payload.texto||'',fatores:payload.fatores||[],ts:payload.ts}]);if(error){try{console.error('[gFeedbackPersistir] falha ao gravar feedback:',error);}catch(e){}}}
+
+// ═══════════════════════════════
+// [Bloco 2 — Simplificação Home, jul/2026] Captura de e-mail para
+// "não tenho o extrato agora". Peça mínima e isolada: só e-mail, origem e
+// consentimento. NÃO cria conta, NÃO usa/mistura com o fluxo de auth de
+// extEmail/extSenha (extStep1), NÃO dispara automação de e-mail — isso fica
+// para uma decisão futura, separada. Tabela: leads_lembrete (RLS: insert-only
+// para anon — ver docs/migracao-leads-lembrete.sql, aplicar manualmente no
+// Supabase antes de ativar este formulário em produção).
+// ═══════════════════════════════
+// [Bloco 2] Valores de origem espelham o CHECK da tabela leads_lembrete no
+// Supabase (docs/migracao-leads-lembrete.sql) — mudar aqui sem mudar lá (ou
+// vice-versa) quebra o insert.
+const LEAD_ORIGINS = Object.freeze({
+  HERO_DESKTOP: 'home_hero_desktop',
+  HERO_MOBILE: 'home_hero_mobile',
+});
+
+function toggleLembreteForm(formId) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  const isHidden = form.hasAttribute('hidden');
+  if (isHidden) { form.removeAttribute('hidden'); form.style.display = 'block'; }
+  else { form.setAttribute('hidden', ''); form.style.display = 'none'; }
+}
+
+async function enviarLembreteEmail(emailId, consentId, msgId, btnId, origem, honeypotId) {
+  const emailEl = document.getElementById(emailId);
+  const consentEl = document.getElementById(consentId);
+  const msgEl = document.getElementById(msgId);
+  const btnEl = document.getElementById(btnId);
+  const honeypotEl = honeypotId ? document.getElementById(honeypotId) : null;
+  const email = (emailEl?.value || '').trim().toLowerCase();
+
+  if (msgEl) { msgEl.style.color = ''; msgEl.textContent = ''; }
+
+  // Honeypot: campo invisível para humano, visível para bot que preenche
+  // tudo automaticamente. Se veio preenchido, finge sucesso e não grava —
+  // não avisa o bot de que foi barrado.
+  if (honeypotEl && honeypotEl.value) {
+    if (emailEl) emailEl.value = '';
+    if (consentEl) consentEl.checked = false;
+    if (msgEl) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'E-mail registrado.'; }
+    return;
+  }
+
+  if (!email || !email.includes('@') || email.length > 254) {
+    if (msgEl) { msgEl.style.color = 'var(--red)'; msgEl.textContent = 'Digite um e-mail válido.'; }
+    return;
+  }
+  if (!consentEl?.checked) {
+    if (msgEl) { msgEl.style.color = 'var(--red)'; msgEl.textContent = 'Marque a caixa de consentimento para continuar.'; }
+    return;
+  }
+  if (!sb) {
+    if (msgEl) { msgEl.style.color = 'var(--red)'; msgEl.textContent = 'Não foi possível registrar agora. Tente novamente em instantes.'; }
+    return;
+  }
+
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Enviando…'; }
+
+  const { error } = await sb.from('leads_lembrete').insert([{
+    email: email,
+    origem: origem || LEAD_ORIGINS.HERO_DESKTOP,
+    consentimento: true
+  }]);
+
+  if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Registrar e-mail'; }
+
+  if (error) {
+    try { console.error('[enviarLembreteEmail] falha ao gravar lead:', error); } catch(e) {}
+    // 23505 = unique_violation (email já registrado nessa origem)
+    if (error.code === '23505') {
+      if (msgEl) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Esse e-mail já está registrado.'; }
+    } else {
+      if (msgEl) { msgEl.style.color = 'var(--red)'; msgEl.textContent = 'Não foi possível registrar agora. Tente novamente em instantes.'; }
+    }
+    return;
+  }
+
+  if (emailEl) emailEl.value = '';
+  if (consentEl) consentEl.checked = false;
+  // [Copy honesta, jul/2026] Nenhum e-mail é enviado hoje — só gravamos o
+  // endereço. Não prometer "você vai receber um lembrete" até existir envio
+  // de fato (decisão separada, ver observação no relatório do Bloco 2).
+  if (msgEl) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'E-mail registrado. Você pode voltar quando estiver com o extrato em mãos.'; }
+}
 window.gFeedbackHistorico=function(){return window._gFeedback.historico;};
 
 // Diagnóstico (dev only)
