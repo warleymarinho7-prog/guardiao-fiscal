@@ -4063,12 +4063,24 @@ document.addEventListener('DOMContentLoaded', gfRenderIcons);
 window.addEventListener('load', gfRenderIcons);
 (function(){
   var scheduled = false;
+  var obs;
   function schedule(){
     if (scheduled) return;
     scheduled = true;
-    requestAnimationFrame(function(){ scheduled = false; gfRenderIcons(); });
+    requestAnimationFrame(function(){
+      scheduled = false;
+      // [FIX — loop infinito, jul/2026] gfRenderIcons() também muda o DOM
+      // (troca <i data-lucide> por <svg>), e essa mudança disparava o
+      // próprio observer de novo, indefinidamente (visto no Console como
+      // dezenas de "[Violation] requestAnimationFrame handler took Nms"
+      // repetindo sem parar, ~100% de CPU sustentado). Desconecta antes de
+      // redesenhar, reconecta depois — só reage a mudanças externas reais.
+      if (obs) obs.disconnect();
+      gfRenderIcons();
+      if (obs) obs.observe(document.body, { childList: true, subtree: true });
+    });
   }
-  var obs = new MutationObserver(schedule);
+  obs = new MutationObserver(schedule);
   document.addEventListener('DOMContentLoaded', function(){
     obs.observe(document.body, { childList: true, subtree: true });
     schedule();
