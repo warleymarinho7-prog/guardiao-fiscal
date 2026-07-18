@@ -2411,7 +2411,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
         <span class="badge"><i data-lucide="circle-check" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Grátis para começar</span>
       </div>
       <div class="split-cta">
-        <button class="split-cta-primary" onclick="showPage('extrato')">
+        <button class="split-cta-primary" onclick="heroSelecionarExtrato('home_hero_left')">
           Analisar meu extrato →
         </button>
         <div class="split-cta-sec"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados processados localmente · Nenhum arquivo enviado a servidores</div>
@@ -2493,7 +2493,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
            classe nova. Aciona showPage('extrato'), função já existente e
            testada; nenhuma lógica nova foi criada. -->
       <div class="split-cta" id="heroUploadEntry" style="max-width:100%;margin-top:0">
-        <button class="split-cta-primary" onclick="showPage('extrato')">
+        <button class="split-cta-primary" onclick="heroSelecionarExtrato('home_hero_right_desktop')">
           Selecionar meu extrato →
         </button>
         <div class="split-cta-sec"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados processados localmente · Nenhum arquivo enviado a servidores</div>
@@ -2615,7 +2615,7 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
          data-legacy-surface acima para o quiz mobile desativado. Reaproveita
          split-cta / split-cta-primary / split-cta-sec. -->
     <div class="split-cta" id="heroUploadEntryMobile" style="max-width:100%;margin:0 20px 24px">
-      <button class="split-cta-primary" onclick="showPage('extrato')">
+      <button class="split-cta-primary" onclick="heroSelecionarExtrato('home_hero_mobile')">
         Selecionar meu extrato →
       </button>
       <div class="split-cta-sec"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados processados localmente · Nenhum arquivo enviado a servidores</div>
@@ -3598,7 +3598,7 @@ function guiaTab(banco) {
           <div class="plan-feat"><span class="feat-icon">—</span> Relatório PDF exportável</div>
           <div class="plan-feat"><span class="feat-icon">—</span> Histórico de análises</div>
         </div>
-        <button class="btn-plan btn-plan-free" onclick="openQuiz()">Usar grátis →</button>
+        <button class="btn-plan btn-plan-free" onclick="heroSelecionarExtrato('planos_usar_gratis')">Usar grátis →</button>
       </div>
 
       <!-- Avulso -->
