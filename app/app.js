@@ -1535,7 +1535,12 @@ function openQuiz() {
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof fbq === 'function' && window.PIXEL_ATIVO) fbq('trackCustom', 'QuizStarted', { origem: 'site_principal' }, { eventID: 'qs_' + Date.now() });
+  // [Bloco 3 — Instrumentação, jul/2026] QuizStarted removido daqui. Antes
+  // disparava em TODO carregamento de página, mesmo sem o usuário nunca ter
+  // visto ou clicado em nada relacionado a quiz — quiz está desativado desde
+  // o Bloco 1 (data-legacy-surface="profile-quiz-*"), então o evento parou
+  // de representar qualquer coisa real. openQuiz() ficou órfã (nenhum
+  // chamador restante) — não apagada, só documentada.
   initProFreeMode();
   setTimeout(() => {
     const bar = document.getElementById('mockBar');
@@ -2866,6 +2871,7 @@ const SRC_COLORS=['#4ADE80','#4d9fff','#f5a623','#c084fc','#fb7185'];
 // ── Funil de upload — tracking centralizado ───────────────────────────────
 // Eventos: dz_clicked | file_selected | file_rejected | file_ready
 //          analysis_started | analysis_completed | analysis_failed
+// [Bloco 3, jul/2026] hero_cta_click | preview_shown | lead_captured
 // Destinos: Meta Pixel (fbq) + Microsoft Clarity (clarity)
 function _trackUpload(event, props) {
   try {
@@ -3053,6 +3059,7 @@ function eRenderPreview(c,sources){
   if(!Array.isArray(c.alerts))c.alerts=[];
   document.getElementById('previewReal').style.display='block';
   document.getElementById('previewPlaceholder').style.display='none';
+  _trackUpload('preview_shown', { sources: Array.isArray(sources) ? sources.length : undefined, alerts: c.alerts.length });
   let emoji,level,color;
   if(c.score<=20){emoji='<span style="color:var(--risk-baixo)" aria-hidden="true">●</span>';level='BAIXO RISCO';color='#4ADE80';}
   else if(c.score<=45){emoji='<span style="color:var(--risk-atencao)" aria-hidden="true">●</span>';level='ATENÇÃO';color='#f5a623';}
@@ -4676,6 +4683,15 @@ const LEAD_ORIGINS = Object.freeze({
   HERO_MOBILE: 'home_hero_mobile',
 });
 
+// [Bloco 3 — Instrumentação, jul/2026] Clique no CTA real do hero
+// (promovido no Bloco 1). Reaproveita o _trackUpload já existente — mesmo
+// funil, mesmo destino (Meta Pixel + Clarity), evento novo só documentando
+// esse ponto de entrada específico.
+function heroSelecionarExtrato(origem) {
+  _trackUpload('hero_cta_click', { origem: origem || 'home_hero_desktop' });
+  showPage('extrato');
+}
+
 function toggleLembreteForm(formId) {
   const form = document.getElementById(formId);
   if (!form) return;
@@ -4740,6 +4756,9 @@ async function enviarLembreteEmail(emailId, consentId, msgId, btnId, origem, hon
 
   if (emailEl) emailEl.value = '';
   if (consentEl) consentEl.checked = false;
+  // [Bloco 3] Só dispara em captura real — o retorno "fake" do honeypot
+  // (acima) não passa por aqui, de propósito, pra não contar bot como lead.
+  _trackUpload('lead_captured', { origem: origem || LEAD_ORIGINS.HERO_DESKTOP });
   // [Copy honesta, jul/2026] Nenhum e-mail é enviado hoje — só gravamos o
   // endereço. Não prometer "você vai receber um lembrete" até existir envio
   // de fato (decisão separada, ver observação no relatório do Bloco 2).
