@@ -2477,7 +2477,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
           // exemplos de sinais que o motor identifica
         </div>
-        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:220px;min-height:220px;overflow:hidden">
+        <div id="detectFeed" style="display:flex;flex-direction:column;gap:6px;max-height:264px;min-height:264px;overflow:hidden">
+          <!-- [FIX, jul/2026] altura fixa era 220px, insuficiente pros 4 itens
+               reais — cortava o texto do último no meio. Bug pré-existente,
+               nunca visível antes porque esse bloco ficava escondido atrás
+               do quiz. Aumentado com margem de sobra (264px), mantendo o
+               overflow:hidden como estava (reserva de espaço fixa, evita
+               CLS). -->
           <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,77,79,0.07);border:1px solid rgba(255,77,79,0.18);border-radius:var(--radius-sm);flex-shrink:0">
             <span style="font-size:13px;flex-shrink:0"><i data-lucide="triangle-alert" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i></span>
             <div style="flex:1;min-width:0">
