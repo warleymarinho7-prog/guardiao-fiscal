@@ -2415,6 +2415,25 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
           Analisar meu extrato →
         </button>
         <div class="split-cta-sec"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados processados localmente · Nenhum arquivo enviado a servidores</div>
+
+        <!-- [Bloco 2] Caminho secundário — texto discreto, não compete com o CTA principal.
+             Realocado aqui em [Fase 1 — decisão CTA único, jul/2026]: antes vivia no
+             CTA duplicado da direita, que foi removido. -->
+        <button type="button" id="heroLembreteToggle" onclick="toggleLembreteForm('heroLembreteForm')" style="background:none;border:none;padding:6px 0 0;margin-top:4px;font-family:var(--ff);font-size:12px;color:var(--muted2);text-decoration:underline;cursor:pointer;text-align:left;align-self:flex-start">Está sem o extrato? Registre seu interesse para continuar em outro momento.</button>
+        <div id="heroLembreteForm" hidden style="display:none;margin-top:8px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md)">
+          <div class="form-group">
+            <label class="form-label" for="heroLembreteEmail">E-mail</label>
+            <input class="form-input" type="email" id="heroLembreteEmail" placeholder="seu@email.com" autocomplete="email">
+          </div>
+          <!-- Honeypot anti-bot — invisível para humano, sem tabindex/autocomplete -->
+          <input type="text" id="heroLembreteHoneypot" name="heroLembreteWebsite" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin:8px 0;font-size:11px;color:var(--muted2);line-height:1.5">
+            <input type="checkbox" id="heroLembreteConsent" style="margin-top:2px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
+            Concordo em receber por e-mail informações necessárias para concluir esta análise, conforme a <a href="/privacidade" target="_blank" style="color:var(--green)">Política de Privacidade</a>.
+          </label>
+          <button type="button" id="heroLembreteBtn" onclick="enviarLembreteEmail('heroLembreteEmail','heroLembreteConsent','heroLembreteMsg','heroLembreteBtn',LEAD_ORIGINS.HERO_DESKTOP,'heroLembreteHoneypot')" style="width:100%;padding:9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer">Registrar e-mail</button>
+          <div id="heroLembreteMsg" style="font-size:11px;margin-top:6px;min-height:14px"></div>
+        </div>
       </div>
 
       <!-- Mini métricas -->
@@ -2447,10 +2466,13 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
       </div>
     </div>
 
-    <!-- DIREITA: quiz desktop -->
+    <!-- DIREITA: demonstração do motor (quiz removido definitivamente na Fase 1) -->
     <div class="split-right">
-      <!-- Demo de detecções ao vivo — aparece antes do quiz -->
-      <div id="liveDetectDemo" style="margin-bottom:16px;display:none" hidden data-legacy-surface="profile-quiz-desktop" data-legacy-since="2026-07-16" data-review-by="2026-09-15">
+      <!-- Demo de detecções ao vivo — [Fase 1, jul/2026] restaurada como
+           demonstração ilustrativa do motor, no lugar do CTA duplicado que
+           tinha sido colocado aqui no Bloco 1. Nunca teve o problema de
+           promessa fictícia do quiz — só o quiz foi removido em definitivo. -->
+      <div id="liveDetectDemo" style="margin-bottom:16px">
         <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span>
           // exemplos de sinais que o motor identifica
@@ -2484,35 +2506,6 @@ pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);backgroun
               <div style="font-size:10px;color:var(--muted2);margin-top:1px">23/100 — perfil compatível</div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- [SIMPLIFICAÇÃO HOME, jul/2026] Entrada real do fluxo de análise,
-           promovida para o topo do hero no lugar do quiz de perfil fictício.
-           Reaproveita split-cta / split-cta-primary / split-cta-sec — nenhuma
-           classe nova. Aciona showPage('extrato'), função já existente e
-           testada; nenhuma lógica nova foi criada. -->
-      <div class="split-cta" id="heroUploadEntry" style="max-width:100%;margin-top:0">
-        <button class="split-cta-primary" onclick="heroSelecionarExtrato('home_hero_right_desktop')">
-          Selecionar meu extrato →
-        </button>
-        <div class="split-cta-sec"><i data-lucide="lock" style="width:1em;height:1em;vertical-align:-0.15em" aria-hidden="true"></i> Dados processados localmente · Nenhum arquivo enviado a servidores</div>
-
-        <!-- [Bloco 2] Caminho secundário — texto discreto, não compete com o CTA principal -->
-        <button type="button" id="heroLembreteToggle" onclick="toggleLembreteForm('heroLembreteForm')" style="background:none;border:none;padding:6px 0 0;margin-top:4px;font-family:var(--ff);font-size:12px;color:var(--muted2);text-decoration:underline;cursor:pointer;text-align:left;align-self:flex-start">Está sem o extrato? Registre seu interesse para continuar em outro momento.</button>
-        <div id="heroLembreteForm" hidden style="display:none;margin-top:8px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md)">
-          <div class="form-group">
-            <label class="form-label" for="heroLembreteEmail">E-mail</label>
-            <input class="form-input" type="email" id="heroLembreteEmail" placeholder="seu@email.com" autocomplete="email">
-          </div>
-          <!-- Honeypot anti-bot — invisível para humano, sem tabindex/autocomplete -->
-          <input type="text" id="heroLembreteHoneypot" name="heroLembreteWebsite" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true">
-          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin:8px 0;font-size:11px;color:var(--muted2);line-height:1.5">
-            <input type="checkbox" id="heroLembreteConsent" style="margin-top:2px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
-            Concordo em receber por e-mail informações necessárias para concluir esta análise, conforme a <a href="/privacidade" target="_blank" style="color:var(--green)">Política de Privacidade</a>.
-          </label>
-          <button type="button" id="heroLembreteBtn" onclick="enviarLembreteEmail('heroLembreteEmail','heroLembreteConsent','heroLembreteMsg','heroLembreteBtn',LEAD_ORIGINS.HERO_DESKTOP,'heroLembreteHoneypot')" style="width:100%;padding:9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer">Registrar e-mail</button>
-          <div id="heroLembreteMsg" style="font-size:11px;margin-top:6px;min-height:14px"></div>
         </div>
       </div>
 
